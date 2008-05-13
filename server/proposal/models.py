@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, tzinfo
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
+from django.contrib.postgres import fields, indexes
 from django.core.validators import MinValueValidator
 from django.dispatch import receiver
 from django.db.models import Q
@@ -79,7 +80,7 @@ def make_property_map():
         return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
 
 
-    return [("address", lambda d: d["all_addresses"][0]),
+    return [("address", lambda d: d["location"].get("formatted", d["all_addresses"][0])),
             ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["location"]["long"], d["location"]["lat"])),
             ("summary", lambda d: d["summary"][0:1024] if "summary" in d else UNSET),
@@ -99,6 +100,9 @@ class Proposal(models.Model):
         max_length=64,
         unique=True,
         help_text=("The unique case number assigned by the city"))
+    case_numbers = fields.ArrayField(
+        base_field=models.CharField(max_length=64),
+    )
     address = models.CharField(max_length=128, help_text="Street address")
     other_addresses = models.CharField(
         max_length=250,
@@ -132,6 +136,11 @@ class Proposal(models.Model):
 
     objects = ProposalManager()
 
+    class Meta:
+        indexes = [
+            indexes.GinIndex(fields=["case_numbers"], name="case_numbers_idx")
+        ]
+
     def __str__(self):
         return f"{self.address} [{self.case_number}]"
 
@@ -151,6 +160,7 @@ class Proposal(models.Model):
             proposal = cls(case_number=p_dict["case_number"])
             created = True
 
+        proposal.case_numbers = p_dict.get("case_numbers", [])
         proposal.update_from_dict(p_dict, not created, tz)
 
         return (created, proposal)
