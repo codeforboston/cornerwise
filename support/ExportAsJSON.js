@@ -17,6 +17,14 @@ var FOLDER_ID = "1ZGnMcp8EeVDwpP2kVjWG3Vu317Ujdc6yXht8K2_QSf0";
 var GEO_BOUNDS = [42.371861543730496, -71.13338470458984,
                   42.40393908425197, -71.0679817199707];
 
+// Function mapping <name in spreadsheet> to <name in JSON>
+var JSON_COLUMN = function(name) {
+    if (name == "Case")
+        return "caseNumber";
+
+    return name.toLowerCase();
+};
+
 /**
  * Scans the contents of the given folder and returns the most recently
  * added spreadsheet document.
@@ -60,7 +68,8 @@ function getData(sheet, namesRow, startRow, columns, rows) {
     rows = rows || sheet.getLastRow()-startRow+1;
 
     var namesRange = sheet.getRange(namesRow, 1, 1, columns),
-        names = namesRange.getValues()[0].map(function(s) { return s.trim(); });
+        docNames = namesRange.getValues()[0].map(function(s) { return s.trim(); }),
+        names = docNames.map(JSON_COLUMN);
     dataRange = sheet.getRange(startRow, 1, rows, columns),
     data = dataRange.getValues();
 
@@ -154,7 +163,7 @@ function extractData() {
         docFile = DriveApp.getFileById(id),
         lastModified = docFile.getLastUpdated().valueOf().toString(),
         cacheKey = "data-" + lastModified,
-        found = cache.get(cacheKey);
+        found = cache.get(cacheKey)
 
     if (found)
         return found;
