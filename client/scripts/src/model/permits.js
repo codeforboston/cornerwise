@@ -1,11 +1,11 @@
-define(["backbone", "permit"], function(B, Permit) {
+define(["backbone", "permit", "config"], function(B, Permit, config) {
     console.log("Creating Permits collection.");
 
     return B.Collection.extend({
         model: Permit,
 
-        sync: function() {
-            // Do nothing
-        }
+        url: config.pzURL,
+
+        comparator: false
     });
 });

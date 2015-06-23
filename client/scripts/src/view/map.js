@@ -1,42 +1,25 @@
-define(["backbone", "config", "leaflet", "zoning-layer"], function(B, config, L, ZoningLayer) {
+define(["backbone", "config", "leaflet"], function(B, config, L) {
+
+    function styleMarkerForState(marker, isHovered, isSelected) {
+
+    }
+
+    function styleMarker(marker, permit) {
+        // Apply the appropriate styles for the marker's current hovered
+        // and selection state.
+        var isHovered = permit.get("hovered"),
+            isSelected = permit.get("selected");
+
+        styleMarkerForState(marker, isHovered, isSelected);
+    }
 
     return B.View.extend({
-        // Callbacks:
-        permitAdded: function(permit) {
-            // What is the actual signature for callbacks??
-            var marker = L.marker(permit.location);
-
-            marker.addTo(this.zoningLayer);
-
-            this.caseMarker[permit.caseNumber] = marker;
-
-            marker.permit = permit;
-            marker.on("mouseover", function(e) {
-                permit.set({hovered: true});
-            });
-            marker.on("mouseout", function(e) {
-                permit.set({hovered: false});
-            });
-        },
-
-        permitRemoved: function(permit) {
-            var marker = this.getMarkerForPermit(permit);
-
-            marker.permit = null;
-            marker.removeFrom(this.zoningLayer);
-
-            delete this.caseMarker[permit.caseNumber];
-        },
-
-        /* Getting information about the markers. */
-        getMarkerForPermit: function(permit) {
-            return this.caseMarker[permit.caseNumber];
-        },
-
         initialize: function() {
             var map = L.map(this.el),
-                layer = new L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
-                zoningLayer = new ZoningLayer();
+                layer = L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
+                zoningLayer = L.layerGroup();
+
+            map.fitBounds(config.bounds);
 
             map.addLayer(layer);
             map.addLayer(zoningLayer);
@@ -51,6 +34,53 @@ define(["backbone", "config", "leaflet", "zoning-layer"], function(B, config, L,
             this.listenTo(this.collection, "remove", this.permitRemoved);
 
             return this;
+        },
+
+        el: function() {
+            return document.getElementById(config.mapId);
+        },
+
+        // Callbacks:
+        permitAdded: function(permit) {
+            // What is the actual signature for callbacks??
+            var loc = permit.get("location");
+
+            if (!loc)
+                return;
+
+            var marker = L.marker(loc);
+
+            marker.addTo(this.zoningLayer);
+
+            this.caseMarker[permit.caseNumber] = marker;
+
+            marker.on("mouseover", function(e) {
+                permit.set({hovered: true});
+                styleMarker(marker, permit);
+            });
+            marker.on("mouseout", function(e) {
+                permit.set({hovered: false});
+                styleMarker(marker, permit);
+            });
+
+            this.listenTo(permit, "change", this.permitChangd);
+        },
+
+        permitChanged: function(permit) {
+            styleMarker(this.caseMarker[permit.get("caseNumber")], permit);
+        },
+
+        permitRemoved: function(permit) {
+            var marker = this.getMarkerForPermit(permit);
+
+            marker.removeFrom(this.zoningLayer);
+
+            delete this.caseMarker[permit.get("caseNumber")];
+        },
+
+        /* Getting information about the markers. */
+        getMarkerForPermit: function(permit) {
+            return this.caseMarker[permit.get("caseNumber")];
         }
     });
 });

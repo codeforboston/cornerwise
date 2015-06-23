@@ -12,6 +12,12 @@ define([], function() {
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
-        pzURL: "https://script.googleusercontent.com/macros/echo?user_content_key=6Z3f1XSpWyYssGr5idEfe4-lQ1f2d7k5hM0NqxpXTJjJB8x-haXW2QX4KlK11p7xhIY2wfQr8tCbRrpAdsXNdN6VVNpyexbgm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnL1ZZYoa9JwTHPBTepzpS2C5x6v6YAclnWRtW82fAGBtP4tsS0dXuD1ahV_8UnQdEcE07ZagFwwH&lib=MmfdTzokCuniRZzbLnSp5WJLnyY9KPRk1"
+        pzURL: "https://script.google.com/macros/s/AKfycbwkWDB5YX_MnFTMwC1Et476CmeOQvTbbIADVmZXaKlXXL08y_CJ/exec",
+
+        mapId: "zoning-map",
+
+        // Lat/long for the southwest
+        bounds: [[42.371861543730496, -71.13338470458984],
+                 [42.40393908425197, -71.0679817199707]]
     };
 });
