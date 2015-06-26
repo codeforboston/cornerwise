@@ -12,7 +12,9 @@ define(["permits", "permits-view", "map-view"], function(Permits, PermitsView, M
                 collection: permitsCollection
             });
 
-            permitsCollection.fetch();
+            permitsCollection.fetch({dataType: "jsonp"});
+
+            window.permits = permitsCollection;
 
             return {
                 permits: permitsView,

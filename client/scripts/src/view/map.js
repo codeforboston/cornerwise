@@ -1,5 +1,4 @@
 define(["backbone", "config", "leaflet"], function(B, config, L) {
-
     function styleMarkerForState(marker, isHovered, isSelected) {
 
     }
@@ -32,6 +31,7 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
 
             this.listenTo(this.collection, "add", this.permitAdded);
             this.listenTo(this.collection, "remove", this.permitRemoved);
+            this.listenTo(this.collection, "change", this.changed);
 
             return this;
         },
@@ -52,7 +52,7 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
 
             marker.addTo(this.zoningLayer);
 
-            this.caseMarker[permit.caseNumber] = marker;
+            this.caseMarker[permit.get("caseNumber")] = marker;
 
             marker.on("mouseover", function(e) {
                 permit.set({hovered: true});
@@ -73,9 +73,23 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
         permitRemoved: function(permit) {
             var marker = this.getMarkerForPermit(permit);
 
-            marker.removeFrom(this.zoningLayer);
+            if (marker)
+                this.zoningLayer.removeLayer(marker);
 
             delete this.caseMarker[permit.get("caseNumber")];
+        },
+
+        // Triggered when a child permit changes
+        changed: function(change) {
+            var marker = this.caseMarker[change.get("caseNumber")];
+
+            if (marker) {
+                if (change.get("excluded")) {
+                    this.zoningLayer.removeLayer(marker);
+                } else {
+                    marker.addTo(this.zoningLayer);
+                }
+            }
         },
 
         /* Getting information about the markers. */

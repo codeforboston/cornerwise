@@ -5,9 +5,10 @@ require.config({
         "underscore": "lib/underscore-min",
         "backbone": "lib/backbone",
         "leaflet": "http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet",
-
-        // I don't really want to use jQuery
         "jquery": "http://code.jquery.com/jquery-1.11.3.min",
+
+        // Utilities:
+        "utils": "src/utils",
 
         // Application: //
         "config": "src/config",
@@ -35,4 +36,6 @@ require.config({
 
 require(["setup"], function(setup) {
     setup.start();
+
+    console.log("Setup complete.");
 });
