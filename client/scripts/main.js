@@ -22,6 +22,8 @@ require.config({
 
         // Backbone Views:
         "permits-view": "src/view/permits",
+        "permit-view": "src/view/permit",
+        "filters-view": "src/view/filters",
         "map-view": "src/view/map",
 
         "setup": "src/setup"

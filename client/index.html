@@ -10,18 +10,32 @@
   </head>
   <body>
     <div class="body">
-      <div id="list">
-        <div id="permit-list" class="permit-list">
+      <div id="permit-filters">
+        <div class="filter-group">
+          <div class="filter-name">
+            Granting Authority:
+          </div>
 
+          <input type="checkbox" id="pb-filter" checked>
+          <label for="pb-filter">Planning Board</label>
+
+          <input type="checkbox" id="zba-filter" checked>
+          <label for="zba-filter">Zoning Board of Appeals</label>
         </div>
-        <div id="permit-filters">
-
+        <div class="filter-group">
+          <div class="filter-name">
+            Description:
+          </div>
+          <input type="text" id="desc-filter" placeholder="Search"/>
         </div>
       </div>
       <div id="viewer">
         <div id="zoning-map">
           <!-- The Leaflet map will appear here. -->
         </div>
+        <ul id="permit-list" class="permit-list">
+
+        </ul>
         <div id="details">
           <!-- Display details about the selected permit -->
         </div>

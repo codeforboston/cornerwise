@@ -67,7 +67,7 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
         },
 
         permitChanged: function(permit) {
-            styleMarker(this.caseMarker[permit.get("caseNumber")], permit);
+            styleMarker(this.getMarkerForPermit(permit), permit);
         },
 
         permitRemoved: function(permit) {
@@ -81,7 +81,7 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
 
         // Triggered when a child permit changes
         changed: function(change) {
-            var marker = this.caseMarker[change.get("caseNumber")];
+            var marker = this.getMarkerForPermit(change);
 
             if (marker) {
                 if (change.get("excluded")) {

@@ -1,25 +1,33 @@
-define(["permits", "permits-view", "map-view"], function(Permits, PermitsView, MapView) {
-    return {
-        start: function() {
-            var permitsCollection = new Permits();
+define(
+    ["permits", "permits-view", "map-view", "filters-view", "config"],
+    function(Permits, PermitsView, MapView, FiltersView, config) {
+        return {
+            start: function() {
+                var permitsCollection = new Permits();
 
-            // The views
-            var permitsView = new PermitsView({
-                collection: permitsCollection
-            });
+                // The views
+                var permitsView = new PermitsView({
+                    collection: permitsCollection
+                });
 
-            var mapView = new MapView({
-                collection: permitsCollection
-            });
+                var mapView = new MapView({
+                    collection: permitsCollection
+                });
 
-            permitsCollection.fetch({dataType: "jsonp"});
+                var filtersView = new FiltersView({
+                    collection: permitsCollection
+                });
 
-            window.permits = permitsCollection;
+                permitsCollection.fetch({dataType: "jsonp"});
 
-            return {
-                permits: permitsView,
-                mapView: mapView
-            };
-        }
-    };
-});
+                // For testing:
+                window.permits = permitsCollection;
+
+                return {
+                    permits: permitsView,
+                    mapView: mapView,
+                    filtersView: filtersView
+                };
+            }
+        };
+    });

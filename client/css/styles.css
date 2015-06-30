@@ -1,5 +1,56 @@
+body {
+    font-family: Helvetica, sans-serif;
+}
+
 #zoning-map {
     border: 2px solid black;
-    width: 400px;
+    width: 500px;
     height: 400px;
+}
+
+.viewer {
+
+}
+
+#permit-list {
+    border: 1px solid navy;
+    height: 200px;
+    list-style-type: none;
+    margin: 0;
+    overflow-y: auto;
+    padding: 0;
+    width: 500px;
+}
+
+#permit-list li {
+    padding: 2px;
+}
+
+#permit-list li:nth-child(2n) {
+    background-color: lightsteelblue;
+}
+
+
+.permit-name {
+    font-weight: bold;
+}
+
+.permit-desc {
+    font-size: smaller;
+}
+
+.permit-details {
+    padding: 2px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+li.permit-info {
+    position: relative;
+    transition: height 0.2s;
+}
+
+li.permit-info.excluded {
+    display: none;
 }

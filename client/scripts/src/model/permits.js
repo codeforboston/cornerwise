@@ -56,6 +56,11 @@ define(
                 }
             },
 
+            filterByDescriptionString: function(s) {
+                var r = s && new RegExp(s.replace(/([?.*\\()[])/g, "\\$1"), "i");
+                this.filterByDescription(r);
+            },
+
             filterByRadius: function(refPoint, radius) {
                 if (refPoint && radius) {
                     this.addFilter("radius", function(permit) {
@@ -69,10 +74,13 @@ define(
                 }
             },
 
+            /*
+             * @param {Array} spga
+             */
             filterByAuthority: function(spga) {
                 if (spga) {
                     this.addFilter("spga", function(permit) {
-                        return permit.get("spga") === spga;
+                        return _.contains(spga, permit.get("spga"));
                     });
                 } else {
                     this.removeFilter("spga");
