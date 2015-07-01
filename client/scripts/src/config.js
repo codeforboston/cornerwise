@@ -12,8 +12,7 @@ define([], function() {
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
-        pzURL: "https://script.google.com/macros/s/AKfycbwkWDB5YX_MnFTMwC1Et476CmeOQvTbbIADVmZXaKlXXL08y_CJ/exec",
-
+        pzURL: "https://script.google.com/macros/s/AKfycbxdNiXwOYTAxEZE4LuGcCFsOW-JpQr9bQl6hx3NZIF4oc19UoBT/exec",
         mapId: "zoning-map",
 
         // Lat/long for the southwest

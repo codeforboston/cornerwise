@@ -2,7 +2,6 @@
  * A Google Apps Script for converting the contents of a spreadsheet to
  * JSON.
  *
- *
  * Deploy on Google Drive. From the menu, select Publish > Deploy as web
  * app.
  */
@@ -11,7 +10,7 @@
 // Some stuff we'll want to configure later:
 
 // The Google Drive ID for the folder where spreadsheets are copied:
-var FOLDER_ID = "1ZGnMcp8EeVDwpP2kVjWG3Vu317Ujdc6yXht8K2_QSf0";
+var FOLDER_ID = "0BxbaygscqZcVfmlFU1pvNXQzWkxvVWZvdGZ3QkNPREpFRmVnN3FxVnRGaC1qVURRZ3YxQU0";
 
 // Confine the geocoding to a specified region.
 var GEO_BOUNDS = [42.371861543730496, -71.13338470458984,
@@ -30,7 +29,7 @@ var JSON_COLUMN = function(name) {
  * added spreadsheet document.
  *
  * @param {Folder} folder
- * @return {File}
+ * @return {File} The file containing the most recently created spreadsheet
  */
 function findLatestSpreadsheet(folder) {
     var files = folder.getFilesByType(MimeType.GOOGLE_SHEETS),
@@ -46,7 +45,7 @@ function findLatestSpreadsheet(folder) {
         }
     }
 
-    return SpreadsheetApp.open(latestFile);
+    return latestFile;
 }
 
 function isEmpty(cellVal) {
@@ -124,10 +123,13 @@ function transformRows(data, transFns) {
 
 
 /**
+ * Modifies the members of the data array in place.
+ *
  * @param {Array|Object} data
  * @param {Function} addressFn A function that will be called on each
  * rowMap to retrieve its address string.
  * @param {Geocoder} coder
+ * @return
  */
 function addLatLong(data, addressFn, coder) {
     coder = coder || Maps.newGeocoder();
@@ -143,32 +145,35 @@ function addLatLong(data, addressFn, coder) {
 
 
 /**
+ * @nosideeffects
  * @param {Object} rowMap Object representing the data in a row.
  * @return {String} The string address
  */
 function getAddress(rowMap) {
-    return rowMap["Number"] + " " + rowMap["Street"];
+    return rowMap["number"] + " " + rowMap["street"];
 }
 
 /**
+ * Extracts data from the spreadsheet contained in the specified file. Stores the response in cache, keyed by
+ * the last updated date for the spreadsheet.
+ *
+ * @param {File} docFile The Google Drive file containing the spreadsheet
+ * @param {Boolean} noCache  Ignore the stored response
  * @return {String} JSON representing the extracted data
  */
-function extractData() {
-    var id = "1ZGnMcp8EeVDwpP2kVjWG3Vu317Ujdc6yXht8K2_QSf0";
-
+function extractData(docFile, noCache) {
     // Check the cache first to avoid geocoding again.
     // The data is keyed by the string "data-" + the timestamp of the last
     // document modification and stored as JSON.
     var cache = CacheService.getScriptCache(),
-        docFile = DriveApp.getFileById(id),
         lastModified = docFile.getLastUpdated().valueOf().toString(),
-        cacheKey = "data-" + lastModified,
-        found = cache.get(cacheKey)
+        cacheKey = "json-data-" + lastModified,
+        found = !noCache && cache.get(cacheKey);
 
     if (found)
         return found;
 
-    var doc = SpreadsheetApp.openById(id),
+    var doc = SpreadsheetApp.open(docFile),
         sheet = doc.getSheets()[0];
 
     var data = getData(sheet, 3, 4),
@@ -183,6 +188,22 @@ function extractData() {
     return json;
 }
 
+function getLatestFile() {
+    return findLatestSpreadsheet(DriveApp.getFolderById(FOLDER_ID));
+}
+
+/**
+ * Function called on a timed trigger. Calls extractData() in order to update the stored results.
+ */
+function runPeriodic() {
+    var latestFile = getLatestFile();
+
+    if (!latestFile)
+        return;
+
+    // Rely on extract
+    extractData(latestFile, true);
+}
 
 /**
  * Function called when the script is executed as a web service.
@@ -190,11 +211,26 @@ function extractData() {
  */
 function doGet(req) {
     var output = ContentService.createTextOutput(),
-        data = extractData();
+        latestFile = getLatestFile();
 
-    output.setMimeType(ContentService.MimeType.JSON);
+    if (!latestFile)
+        return output;
+
+    var data = extractData(latestFile),
+        cb = req.parameter.callback;
+
+    output.setMimeType(cb ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
+
+    if (cb) {
+        output.append(cb);
+        output.append("(");
+    }
 
     output.append(data);
+
+    if (cb) {
+        output.append(")");
+    }
 
     return output;
 }

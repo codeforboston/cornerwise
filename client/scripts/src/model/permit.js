@@ -7,7 +7,11 @@ define(["backbone"], function(B) {
         defaults: function() {
             return {
                 hovered: false,
-                selected: false
+                selected: false,
+
+                // excluded will change to true when the permit fails
+                // the currently applied filter(s).
+                excluded: false
             };
         }
     });
