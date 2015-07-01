@@ -10,7 +10,7 @@ define(["backbone", "permits", "permit-view"], function(B, Permits, PermitView) 
             return document.getElementById("permit-list");
         },
 
-        tagName: "ul",
+        tagName: "table",
 
         render: function() {
             return this;

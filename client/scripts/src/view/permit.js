@@ -7,11 +7,11 @@ define(["backbone", "underscore"], function(B, _) {
             this.listenTo(this.model, "change", this.changed);
         },
 
-        tagName: "li",
+        tagName: "tr",
 
-        template: _.template('<div class="permit-name"><%= number %> <%= street %></div>' +
-                             '<div class="permit-desc"><%= description %></div>' +
-                             '<div class="permit-details"><%= caseNumber %></div>'),
+        template: _.template('<td><%= number %> <%= street %></td>' +
+                             '<td><%= description %></td>' +
+                             '<td><%= caseNumber %></td>'),
 
         render: function() {
             var permit = this.model;
