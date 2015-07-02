@@ -1,4 +1,5 @@
-define(["backbone", "config", "leaflet"], function(B, config, L) {
+define(["backbone", "config", "leaflet", "ref-location"],
+       function(B, config, L, refLocation) {
     function styleMarkerForState(marker, isHovered, isSelected) {
 
     }
@@ -32,6 +33,11 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
             this.listenTo(this.collection, "add", this.permitAdded);
             this.listenTo(this.collection, "remove", this.permitRemoved);
             this.listenTo(this.collection, "change", this.changed);
+
+            // Place the reference location marker:
+            this.placeReferenceMarker();
+            // ... and subscribe to updates:
+            this.listenTo(refLocation, "change", this.placeReferenceMarker);
 
             return this;
         },
@@ -95,6 +101,28 @@ define(["backbone", "config", "leaflet"], function(B, config, L) {
         /* Getting information about the markers. */
         getMarkerForPermit: function(permit) {
             return this.caseMarker[permit.get("caseNumber")];
+        },
+
+        // Store a reference to the reference marker
+        _refMarker: null,
+        _hideRefMarker: false,
+        placeReferenceMarker: function() {
+            var loc = [refLocation.get("lat"),
+                       refLocation.get("lng")];
+            if (!this._hideRefMarker) {
+                if (!this._refMarker) {
+                    this._refMarker = L.circle(loc, config.refMarkerRadius,
+                                               {
+                                                   stroke: true,
+                                                   color: config.refMarkerColor
+                                               }).addTo(this.zoningLayer);
+                } else {
+                    this._refMarker.setLatLng(loc);
+                }
+
+                // Recenter
+                this.map.setView(loc, this.map.getZoom(), {animate: true});
+            }
         }
     });
 });

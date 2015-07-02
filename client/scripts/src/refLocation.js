@@ -1,4 +1,4 @@
-define(["backbone", "config"], function(B, config) {
+define(["backbone", "config", "arcgis", "utils"], function(B, config, arcgis, $u) {
     /*
      * The primary purpose of this model is to set up the observation
      * machinery for a location.
@@ -13,13 +13,25 @@ define(["backbone", "config"], function(B, config) {
          *
          */
         setFromBrowser: function() {
-            if (navigator.geolocation) {
-                var self = this;
-                navigator.geolocation.getCurrentPosition(function(pos) {
-                    self.set("lat", pos.coords.latitutde);
-                    self.set("lng", pos.coords.longitude);
+            var self = this;
+            return $u.promiseLocation().then(function(loc) {
+                self.set({
+                    lat: loc[0],
+                    lng: loc[1],
+                    altitude: loc[2]
                 });
-            }
+            });
+        },
+
+        setFromAddress: function(addr) {
+            var self = this;
+            return arcgis.geocode(addr).then(arcgis.getLatLngForFirstAddress).done(function(loc) {
+                self.set({
+                    lat: loc[0],
+                    lng: loc[1],
+                    altitude: null
+                });
+            });
         }
     });
 

@@ -1,6 +1,6 @@
 define(
-    ["backbone", "underscore", "leaflet", "permit", "config", "utils"],
-    function(B, _, L, Permit, config, $u) {
+    ["backbone", "underscore", "leaflet", "permit", "ref-location", "config", "utils"],
+    function(B, _, L, Permit, refLocation, config, $u) {
         console.log("Creating Permits collection.");
 
         return B.Collection.extend({

@@ -22,7 +22,7 @@ define([], function() {
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,
                           lng: -71.09950304031372},
-        refMarkerRadius: 20,
+        refMarkerRadius: 30,
         refMarkerColor: "red",
 
         clientId: "jYLY7AeA1U9xDiWu",
