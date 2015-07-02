@@ -17,6 +17,15 @@ define([], function() {
 
         // Lat/long for the southwest
         bounds: [[42.371861543730496, -71.13338470458984],
-                 [42.40393908425197, -71.0679817199707]]
+                 [42.40393908425197, -71.0679817199707]],
+
+        // Default reference location:
+        refPointDefault: {lat: 42.387545768736246,
+                          lng: -71.09950304031372},
+        refMarkerRadius: 20,
+        refMarkerColor: "red",
+
+        clientId: "jYLY7AeA1U9xDiWu",
+        clientSecret: "64a66909ff724a0a9928838ef4462909"
     };
 });

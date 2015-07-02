@@ -10,9 +10,14 @@ require.config({
         // Utilities:
         "utils": "src/utils",
 
+        // APIs:
+        "arcgis": "src/api/arcgis",
+
         // Application: //
         "config": "src/config",
+        "local-config": "src/localConfig",
         "routes": "src/routes",
+        //"ref-location": "src/refLocation",
 
         // Backbone Models:
         "permit": "src/model/permit",
