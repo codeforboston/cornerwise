@@ -76,10 +76,7 @@ define(["jquery", "config"], function($, config) {
             return this.getAuthToken().then(function(token) {
                 return $.getJSON("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode",
                       {
-                          location: JSON.stringify({
-                              x: lat,
-                              y: long
-                          }),
+                          location: (long + "," + lat),
                           token: token,
                           f: "pjson"
                       });

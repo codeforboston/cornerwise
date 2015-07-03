@@ -13,7 +13,9 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
             "change #pb-filter": "refreshSPGAFilter",
             "change #zba-filter": "refreshSPGAFilter",
 
-            "submit #ref-address-form": "submitAddress"
+            "submit #ref-address-form": "submitAddress",
+            "focus #ref-address-form": "removeGuessClass",
+            "click #geolocate": "geolocate"
         },
 
         refreshDescriptionFilter: function() {
@@ -51,12 +53,30 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
 
         /**
          * Given a [lat, long] array, attempt to retrieve an address and
-         * set the value of the address input.
+         * set the value of the address input. If reverse geocoding is
+         * successful, the address input will have a 'guess' class
+         * added.
          */
         reverseGeocodeAddress: function(loc) {
-            arcgis.reverseGeocode(loc[0], loc[1]).done(function(json) {
-                $("#ref-address-form input").val(json.address.ADdress);
+            return arcgis.reverseGeocode(loc[0], loc[1]).done(function(json) {
+                $("#ref-address-form input")
+                    .val(json.address.Address)
+                    .addClass("guess");
             });
+        },
+
+        removeGuessClass: function(e) {
+            $(e.target).removeClass("guess");
+        },
+
+        /**
+         * When the geolocate button is clicked, set the reference
+         * location to the user's current location and update the
+         * address input with the reverse-geocoded address for that
+         * location.
+         */
+        geolocate: function(e) {
+            return refLocation.setFromBrowser().then(this.reverseGeocodeAddress);
         }
     });
 });

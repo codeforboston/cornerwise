@@ -20,6 +20,7 @@ define(["backbone", "config", "arcgis", "utils"], function(B, config, arcgis, $u
                     lng: loc[1],
                     altitude: loc[2]
                 });
+                return loc;
             });
         },
 
