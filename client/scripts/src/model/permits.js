@@ -15,7 +15,7 @@ define(
 
             fetch: function(opts) {
                 this.trigger("fetching", this, opts);
-                returh B.Collection.prototype.fetch.call(this, opts);
+                return B.Collection.prototype.fetch.call(this, opts);
             },
 
             /*
