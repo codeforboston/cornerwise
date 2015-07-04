@@ -82,10 +82,17 @@ function getData(sheet, namesRow, startRow, columns, rows) {
             break;
         }
 
-        rowMaps.push(rowVals.reduce(function(result, cellVal, i) {
+        var rowMap = rowVals.reduce(function(result, cellVal, i) {
             result[names[i]] = cellVal;
             return result;
-        }, {}));
+        }, {});
+
+        // Get the row background color, since it might contain useful
+        // information:
+        rowMap["numberColor"] = sheet.getRange(startRow+i, 1, 1, 1).getBackground();
+        rowMap["rowColor"] = sheet.getRange(startRow+i, 2, 1, 1).getBackground();
+
+        rowMaps.push(rowMap);
     }
 
     return rowMaps;
@@ -198,11 +205,13 @@ function getLatestFile() {
 function runPeriodic() {
     var latestFile = getLatestFile();
 
-    if (!latestFile)
-        return;
+    // Rely on extractData()'s side-effects to update the cache. Ignore its return value
+    if (latestFile)
+        extractData(latestFile, true);
+}
 
-    // Rely on extract
-    extractData(latestFile, true);
+function testGeneration() {
+    Logger.log(extractData(getLatestFile(), true));
 }
 
 /**
