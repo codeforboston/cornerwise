@@ -1,3 +1,6 @@
+/*
+ * PermitsCollection
+ */
 define(
     ["backbone", "underscore", "leaflet", "permit", "ref-location", "config", "utils"],
     function(B, _, L, Permit, refLocation, config, $u) {
@@ -9,6 +12,11 @@ define(
             url: config.pzURL,
 
             comparator: false,
+
+            fetch: function(opts) {
+                this.trigger("fetching", this, opts);
+                returh B.Collection.prototype.fetch.call(this, opts);
+            },
 
             /*
              * Applies each of the functions in the array fs to the
