@@ -54,7 +54,8 @@ define(["backbone", "config", "leaflet", "ref-location"],
             if (!loc)
                 return;
 
-            var marker = L.marker(loc);
+            var normalIcon = L.icon({iconUrl: "images/marker-normal.png"})
+            var marker = L.marker(loc, {icon: normalIcon});
 
             marker.addTo(this.zoningLayer);
 
@@ -73,6 +74,7 @@ define(["backbone", "config", "leaflet", "ref-location"],
         },
 
         permitChanged: function(permit) {
+            console.log("changed")
             styleMarker(this.getMarkerForPermit(permit), permit);
         },
 
