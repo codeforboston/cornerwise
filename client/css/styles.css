@@ -31,6 +31,9 @@ body {
     background-color: lightsteelblue;
 }
 
+.permit-hovered {
+    background-color: #add8e6;
+}
 
 .permit-name {
     font-weight: bold;

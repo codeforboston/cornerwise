@@ -24,7 +24,6 @@ define(["backbone", "permits", "permit-view"], function(B, Permits, PermitView) 
         },
 
         permitChanged: function(change) {
-
         },
 
         fetchingBegan: function() {
