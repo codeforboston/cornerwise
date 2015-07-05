@@ -1,16 +1,24 @@
 define(["backbone", "config", "leaflet", "ref-location"],
        function(B, config, L, refLocation) {
-    function styleMarkerForState(marker, isHovered, isSelected) {
+    function getMarkerPng(isHovered, isSelected) {
+        if(isSelected){
+            return "images/marker-active.png"
+        } else if(isHovered){
+            return "images/marker-hover.png"
+        } else {
+            return "images/marker-normal.png"
+        }
 
     }
 
-    function styleMarker(marker, permit) {
-        // Apply the appropriate styles for the marker's current hovered
-        // and selection state.
+    function getIcon(permit) {
+        // Generate an L.icon for a given permit's parameters
         var isHovered = permit.get("hovered"),
             isSelected = permit.get("selected");
 
-        styleMarkerForState(marker, isHovered, isSelected);
+        png = getMarkerPng(isHovered, isSelected)
+
+        return L.icon({iconUrl: png})        
     }
 
     return B.View.extend({
@@ -63,20 +71,17 @@ define(["backbone", "config", "leaflet", "ref-location"],
 
             marker.on("mouseover", function(e) {
                 permit.set({hovered: true});
-                styleMarker(marker, permit);
             });
             marker.on("mouseout", function(e) {
                 permit.set({hovered: false});
-                styleMarker(marker, permit);
             });
 
             this.listenTo(permit, "change", this.permitChangd);
         },
 
-        permitChanged: function(permit) {
-            console.log("changed")
-            styleMarker(this.getMarkerForPermit(permit), permit);
-        },
+        // permitChanged: function(permit) {
+        //     styleMarker(this.getMarkerForPermit(permit), permit);
+        // },
 
         permitRemoved: function(permit) {
             var marker = this.getMarkerForPermit(permit);
@@ -89,12 +94,14 @@ define(["backbone", "config", "leaflet", "ref-location"],
 
         // Triggered when a child permit changes
         changed: function(change) {
+
             var marker = this.getMarkerForPermit(change);
 
             if (marker) {
                 if (change.get("excluded")) {
                     this.zoningLayer.removeLayer(marker);
                 } else {
+                    marker.setIcon(getIcon(change));
                     marker.addTo(this.zoningLayer);
                 }
             }
