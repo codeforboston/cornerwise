@@ -1,26 +1,32 @@
-body {
-    font-family: Helvetica, sans-serif;
-    padding: 10px;
+.maps {
+    height: 100%;
+    /* width: 90%; */
+    padding-top: 60px;
+}
+
+.col-sm-4 {
+    width: 20%;
+    height: 100%;
+}
+
+.col-sm-8 {
+    width: 80%;
+    height: 100%;
 }
 
 #zoning-map {
     border: 2px solid black;
-    width: 500px;
+    width: 100%;
     height: 400px;
-}
-
-.viewer {
-
 }
 
 #permit-list {
     border: 1px solid navy;
-    height: 200px;
-    list-style-type: none;
     margin: 0;
     overflow-y: auto;
     padding: 0;
-    width: 500px;
+    width: 100%;
+    height: 20%;
 }
 
 #permit-list li {
@@ -28,7 +34,7 @@ body {
 }
 
 #permit-list li:nth-child(2n) {
-    background-color: lightsteelblue;
+    background-color: #B0C4DE;
 }
 
 .permit-hovered {
