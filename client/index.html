@@ -1,56 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>City Dash</title>
-    <script data-main="scripts/main" src="scripts/require.js"></script>
-    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body>
-    <div class="body">
-      <div id="permit-filters">
-        <div class="filter-group">
-          <div class="filter-name">
-            Granting Authority:
-          </div>
-
-          <input type="checkbox" id="pb-filter" checked>
-          <label for="pb-filter">Planning Board</label>
-
-          <input type="checkbox" id="zba-filter" checked>
-          <label for="zba-filter">Zoning Board of Appeals</label>
-        </div>
-        <div class="filter-group">
-          <div class="filter-name">
-            Address:
-          </div>
-          <form id="ref-address-form">
-            <input type="text" name="address" placeholder="Address">
-            <button id="geolocate">
-              My Location
-            </button>
-          </form>
-        </div>
-        <div class="filter-group">
-          <div class="filter-name">
-            Description:
-          </div>
-          <input type="text" id="desc-filter" placeholder="Search"/>
-        </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Find zoning information of City of Sommerville">
+  <title>City Dash</title>
+  <script data-main="scripts/main" src="scripts/require.js"></script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">CityDash</a>
       </div>
-      <div id="viewer">
-        <div id="zoning-map">
-          <!-- The Leaflet map will appear here. -->
-        </div>
-        <table id="permit-list">
-
-        </table>
-        <div id="details">
-          <!-- Display details about the selected permit -->
-        </div>
+      <div>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
       </div>
     </div>
-  </body>
+  </nav>
+  <div class="maps">
+    <div id="permit-filters" class="col-sm-4">
+      <div class="filter-group">
+        <div class="filter-name">
+          Granting Authority:
+        </div>
+        <input type="checkbox" id="pb-filter" checked>
+        <label for="pb-filter">Planning Board</label>
+        <input type="checkbox" id="zba-filter" checked>
+        <label for="zba-filter">Zoning Board of Appeals</label>
+      </div>
+      <div class="filter-group">
+        <div class="filter-name">
+          Address:
+        </div>
+        <form id="ref-address-form">
+          <input type="text" name="address" placeholder="Address">
+          <button id="geolocate">
+            My Location
+          </button>
+        </form>
+      </div>
+      <div class="filter-group">
+        <div class="filter-name">
+          Description:
+        </div>
+        <input type="text" id="desc-filter" placeholder="Search"/>
+      </div>
+    </div>
+    <div class="col-sm-8">
+      <div id="zoning-map">
+        <!-- The Leaflet map will appear here. -->
+      </div>
+      <table id="permit-list">
+
+      </table>
+      <div id="details">
+        <!-- Display details about the selected permit -->
+      </div>
+    </div>
+  </div>
+</body>
 </html>
