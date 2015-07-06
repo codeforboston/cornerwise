@@ -13,6 +13,10 @@ define(
 
             comparator: false,
 
+            initialize: function() {
+                this.listenTo(refLocation, "change", this.updateRadiusFilter);
+            },
+
             fetch: function(opts) {
                 this.trigger("fetching", this, opts);
                 return B.Collection.prototype.fetch.call(this, opts);
@@ -102,6 +106,13 @@ define(
                     });
                 } else {
                     this.removeFilter("type");
+                }
+            },
+
+            updateRadiusFilter: function(loc) {
+                var r = loc.getRadiusMeters();
+                if (r) {
+                    this.filterByRadius(loc.getPoint(), r);
                 }
             }
         });

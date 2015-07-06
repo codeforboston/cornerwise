@@ -7,6 +7,10 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
             return document.getElementById("permit-filters");
         },
 
+        initialize: function() {
+            this.listenTo(refLocation, "change:radius", this.updateRadius);
+        },
+
         events: {
             "change #desc-filter": "refreshDescriptionFilter",
             "keyup #desc-filter": "descFilterChanged",
@@ -15,7 +19,8 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
 
             "submit #ref-address-form": "submitAddress",
             "focus #ref-address-form": "removeGuessClass",
-            "click #geolocate": "geolocate"
+            "click #geolocate": "geolocate",
+            "change #radius-filter": "updateRadiusFilter"
         },
 
         refreshDescriptionFilter: function() {
@@ -77,6 +82,20 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
          */
         geolocate: function(e) {
             return refLocation.setFromBrowser().then(this.reverseGeocodeAddress);
+        },
+
+        updateRadiusFilter: function(e) {
+            // Parse the input and convert from feet to meters:
+            var val = parseFloat(e.target.value);
+
+            // Verify that the value is sensible:
+            if (!isNaN(val) && val > 0) {
+                refLocation.set("radius", val);
+            }
+        },
+
+        updateRadius: function(loc, newRadius) {
+            $("#radius-filter").val(newRadius);
         }
     });
 });

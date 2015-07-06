@@ -2,11 +2,11 @@ define(["backbone", "config", "leaflet", "ref-location"],
        function(B, config, L, refLocation) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
-            return "images/marker-active.png"
+            return "images/marker-active";
         } else if(isHovered){
-            return "images/marker-hover.png"
+            return "images/marker-hover";
         } else {
-            return "images/marker-normal.png"
+            return "images/marker-normal";
         }
 
     }
@@ -16,9 +16,10 @@ define(["backbone", "config", "leaflet", "ref-location"],
         var isHovered = permit.get("hovered"),
             isSelected = permit.get("selected");
 
-        png = getMarkerPng(isHovered, isSelected)
+        png = getMarkerPng(isHovered, isSelected);
 
-        return L.icon({iconUrl: png})        
+        return L.icon({iconUrl: png + "@1x.png",
+                       iconRetinaUrl: png + "@2x.png"});
     }
 
     return B.View.extend({
@@ -62,8 +63,9 @@ define(["backbone", "config", "leaflet", "ref-location"],
             if (!loc)
                 return;
 
-            var normalIcon = L.icon({iconUrl: "images/marker-normal.png"})
-            var marker = L.marker(loc, {icon: normalIcon});
+            var normalIcon = getIcon(permit);
+            var marker = L.marker(loc, {icon: normalIcon,
+                                        riseOnHover: true});
 
             marker.addTo(this.zoningLayer);
 
@@ -116,17 +118,18 @@ define(["backbone", "config", "leaflet", "ref-location"],
         _refMarker: null,
         _hideRefMarker: false,
         placeReferenceMarker: function() {
-            var loc = [refLocation.get("lat"),
-                       refLocation.get("lng")];
+            var loc = refLocation.getPoint();
+
             if (!this._hideRefMarker) {
                 if (!this._refMarker) {
-                    this._refMarker = L.circle(loc, config.refMarkerRadius,
+                    this._refMarker = L.circle(loc, refLocation.getRadiusMeters(),
                                                {
                                                    stroke: true,
                                                    color: config.refMarkerColor
                                                }).addTo(this.zoningLayer);
                 } else {
                     this._refMarker.setLatLng(loc);
+                    this._refMarker.setRadius(refLocation.getRadiusMeters());
                 }
 
                 // Recenter
