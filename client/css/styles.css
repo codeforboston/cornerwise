@@ -56,11 +56,6 @@
     top: 5px;
 }
 
-li.permit-info {
-    position: relative;
-    transition: height 0.2s;
-}
-
-li.permit-info.excluded {
+.permit-info.excluded {
     display: none;
 }

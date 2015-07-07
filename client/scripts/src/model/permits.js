@@ -22,6 +22,15 @@ define(
                 return B.Collection.prototype.fetch.call(this, opts);
             },
 
+            sortByField: function(name) {
+                if (!name) {
+                    this.comparator = false;
+                } else {
+                    this.comparator = function(p) { return p.get(name); };
+                    this.sort();
+                }
+            },
+
             /*
              * Applies each of the functions in the array fs to the
              * permits in the collection. If any of the functions
