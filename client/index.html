@@ -31,16 +31,15 @@
       </div>
     </nav>
     <div class="maps">
-      <div id="address-map" class="col-sm-8">
+      <div id="permit-filters" class="col-sm-8">
         <div class="filter-group">
           <form id="ref-address-form">
-            <input type="text" name="address" placeholder="Enter Your Address">
+            <input type="text" name="address" placeholder="Type the Address">
             <button id="geolocate">
               My Location
             </button>
           </form>
         </div>
-
         <div id="zoning-map">
           <!-- The Leaflet map will appear here. -->
         </div>
@@ -48,19 +47,19 @@
       <div class="col-sm-4">
         <div class="filter-group">
           <div class="filter-name">
+            Granting Authority:
+          </div>
+          <input type="checkbox" id="pb-filter" checked>
+          <label for="pb-filter">Planning Board</label>
+          <input type="checkbox" id="zba-filter" checked>
+          <label for="zba-filter">Zoning Board of Appeals</label>
+        </div>
+        <div class="filter-group">
+          <div class="filter-name">
             Radius (ft):
           </div>
           <input type="text" id="radius-filter" placeholder="Search">
           <button id="reset">reset</button>
-        </div>
-        <div class="filter-group">
-            <div class="filter-name">
-              Granting Authority:
-            </div>
-            <input type="checkbox" id="pb-filter" checked>
-            <label for="pb-filter">Planning Board</label>
-            <input type="checkbox" id="zba-filter" checked>
-            <label for="zba-filter">Zoning Board of Appeals</label>
         </div>
         <table id="permit-list">
 
