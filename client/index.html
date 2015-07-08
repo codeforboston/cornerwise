@@ -11,57 +11,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="#">CityDash</a>
-      </div>
-      <div>
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-  <div class="maps">
-    <div id="permit-filters" class="col-sm-4">
-      <div class="filter-group">
-        <div class="filter-name">
-          Granting Authority:
+  <div>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">CityDash</a>
         </div>
-        <input type="checkbox" id="pb-filter" checked>
-        <label for="pb-filter">Planning Board</label>
-        <input type="checkbox" id="zba-filter" checked>
-        <label for="zba-filter">Zoning Board of Appeals</label>
-      </div>
-      <div class="filter-group">
-        <div class="filter-name">
-          Address:
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Petition Lists</a></li>
+              <li><a href="#">Zoning Info</a></li>
+              <li><a href="#">Capital Projects</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
         </div>
-        <form id="ref-address-form">
-          <input type="text" name="address" placeholder="Address">
-          <button id="geolocate">
-            My Location
-          </button>
-        </form>
       </div>
-      <div class="filter-group">
-        <div class="filter-name">
-          Description:
+    </nav>
+    <div class="maps">
+      <div id="address-map" class="col-sm-8">
+        <div class="filter-group">
+          <form id="ref-address-form">
+            <input type="text" name="address" placeholder="Enter Your Address">
+            <button id="geolocate">
+              My Location
+            </button>
+          </form>
         </div>
-        <input type="text" id="desc-filter" placeholder="Search"/>
+        <div id="zoning-map">
+          <!-- The Leaflet map will appear here. -->
+        </div>
       </div>
-    </div>
-    <div class="col-sm-8">
-      <div id="zoning-map">
-        <!-- The Leaflet map will appear here. -->
-      </div>
-      <table id="permit-list">
+      <div class="col-sm-4">
+        <div class="filter-group">
+            <div class="filter-name">
+              Granting Authority:
+            </div>
+            <input type="checkbox" id="pb-filter" checked>
+            <label for="pb-filter">Planning Board</label>
+            <input type="checkbox" id="zba-filter" checked>
+            <label for="zba-filter">Zoning Board of Appeals</label>
+        </div>
+        <table id="permit-list">
 
-      </table>
-      <div id="details">
-        <!-- Display details about the selected permit -->
+        </table>
+        <div id="details">
+          <!-- Display details about the selected permit -->
+        </div>
       </div>
     </div>
   </div>
