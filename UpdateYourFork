@@ -1,0 +1,4 @@
+Open a Terminal (Git shell)
+cd to your project directory
+git remote add upstream https://github.com/cityofsomerville/citydash
+git pull --rebase upstream master
