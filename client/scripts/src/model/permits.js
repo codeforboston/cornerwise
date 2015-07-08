@@ -13,9 +13,22 @@ define(
 
             comparator: false,
 
+            initialize: function() {
+                this.listenTo(refLocation, "change", this.updateRadiusFilter);
+            },
+
             fetch: function(opts) {
                 this.trigger("fetching", this, opts);
                 return B.Collection.prototype.fetch.call(this, opts);
+            },
+
+            sortByField: function(name) {
+                if (!name) {
+                    this.comparator = false;
+                } else {
+                    this.comparator = function(p) { return p.get(name); };
+                    this.sort();
+                }
             },
 
             /*
@@ -102,6 +115,13 @@ define(
                     });
                 } else {
                     this.removeFilter("type");
+                }
+            },
+
+            updateRadiusFilter: function(loc) {
+                var r = loc.getRadiusMeters();
+                if (r) {
+                    this.filterByRadius(loc.getPoint(), r);
                 }
             }
         });

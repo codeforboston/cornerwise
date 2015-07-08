@@ -13,6 +13,11 @@ define(["backbone"], function(B) {
                 // the currently applied filter(s).
                 excluded: false
             };
+        },
+
+        parse: function(attrs) {
+            attrs.submitted = new Date(attrs.submitted);
+            return attrs;
         }
     });
 });

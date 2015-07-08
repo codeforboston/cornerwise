@@ -4,7 +4,7 @@
 define(["backbone", "underscore"], function(B, _) {
     return B.View.extend({
         initialize: function() {
-            this.listenTo(this.model, "change", this.changed);
+            this.listenTo(this.model, "change:excluded", this.excludedChanged);
         },
 
         tagName: "tr",
@@ -22,7 +22,7 @@ define(["backbone", "underscore"], function(B, _) {
         render: function() {
             var permit = this.model;
             this.$el.html(this.template(permit.toJSON()));
-            
+
             if (permit.get("excluded")) {
                 this.$el.addClass("excluded");
             }
@@ -30,13 +30,11 @@ define(["backbone", "underscore"], function(B, _) {
             return this;
         },
 
-        changed: function(permit) {
-            if (permit.changed.hasOwnProperty("excluded")) {
-                if (permit.changed.excluded) {
-                    this.$el.addClass("excluded");
-                } else {
-                    this.$el.removeClass("excluded");
-                }
+        excludedChanged: function(permit, shouldExclude) {
+            if (shouldExclude) {
+                this.$el.addClass("excluded");
+            } else {
+                this.$el.removeClass("excluded");
             }
         },
 
@@ -49,7 +47,7 @@ define(["backbone", "underscore"], function(B, _) {
         endHover: function(){
             this.model.set({"hovered": false});
             this.$el.removeClass("permit-hovered");
-            this.$el.addClass("permit-info")
+            this.$el.addClass("permit-info");
         }
     });
 });
