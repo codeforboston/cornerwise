@@ -13,8 +13,11 @@ define(
 
             comparator: false,
 
+            selection: null,
+
             initialize: function() {
                 this.listenTo(refLocation, "change", this.updateRadiusFilter);
+                this.on("change:selected", this.permitSelected);
             },
 
             fetch: function(opts) {
@@ -38,6 +41,7 @@ define(
              * attribute will be set to true.
              */
             applyFilters: function(fs) {
+                var count = this.length;
                 this.each(function(permit) {
                     var excluded = permit.get("excluded"),
                         shouldExclude = !$u.everyPred(fs, permit);
@@ -46,7 +50,10 @@ define(
                     if (excluded !== shouldExclude) {
                         permit.set("excluded", shouldExclude);
                     }
+                    if (shouldExclude) --count;
                 });
+
+                this.trigger("filtered", count);
             },
 
             // A map of string filter names to functions
@@ -95,6 +102,10 @@ define(
                 }
             },
 
+            clearRadiusFilter: function() {
+                this.removeFilter("radius");
+            },
+
             /*
              * @param {Array} spga
              */
@@ -122,7 +133,17 @@ define(
                 var r = loc.getRadiusMeters();
                 if (r) {
                     this.filterByRadius(loc.getPoint(), r);
+                } else {
+                    this.clearRadiusFilter();
                 }
+            },
+
+            permitSelected: function(permit, selected) {
+                if (this.selected)
+                    this.selected.set("selected", false);
+
+                if (selected)
+                    this.selected = permit;
             }
         });
     });

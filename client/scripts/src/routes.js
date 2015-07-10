@@ -1,6 +1,10 @@
 define(["backbone"], function(B) {
     var AppRouter = B.Router.extend({
         routes: {
+            "": ""
+        },
+
+        showModal: function(pageName) {
 
         }
     });

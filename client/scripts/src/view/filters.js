@@ -4,7 +4,7 @@
 define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation, $u, arcgis) {
     return B.View.extend({
         el: function() {
-            return document.getElementById("permit-filters");
+            return document.body;
         },
 
         initialize: function() {
@@ -96,17 +96,17 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
         },
         clearinputs: function(e) {
             // Parse the input and convert from feet to meters:
-        $(e.target).val("") 
         // this.collection.filterByRadius()
 
             // Verify that the value is sensible:
-        
+
                 refLocation.set("radius", null);
-        
+
         },
 
         updateRadius: function(loc, newRadius) {
-            $("#radius-filter").val(newRadius);
+            $("#radius-filter")
+                .val(newRadius)[newRadius ? "removeClass" : "addClass"]("inactive");
         }
     });
 });

@@ -35,27 +35,28 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
 
         tagName: "table",
 
-        render: function() {
-            return this;
-        },
-
         permitAdded: function(permit) {
             var view = new PermitView({model: permit});
             this.$("tbody").append(view.render().el);
         },
 
         permitChanged: function(change) {
+
         },
 
         fetchingBegan: function() {
             // TODO: Display a loading indicator
+            this.$el.addClass("loading");
         },
 
         fetchingComplete: function() {
-            // TODO: Hide loading indicator
+
         },
 
+        sortField: null,
+
         sorted: function(change) {
+            this.$el.removeClass("loading");
             this.$el.find("tbody").html("");
             var self = this;
             _.each(change.models, function(p) {
@@ -64,7 +65,12 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
         },
 
         onClickSort: function(e) {
-            this.collection.sortByField($(e.target).data("sortField"));
+            var th = $(e.target),
+                sortField = th.data("sortField");
+            this.collection.sortByField(sortField);
+            this.$("th").removeClass("sort-field");
+            this.sortField = sortField;
+            th.addClass("sort-field");
         }
     });
 });

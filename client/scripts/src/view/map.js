@@ -1,5 +1,5 @@
-define(["backbone", "config", "leaflet", "ref-location"],
-       function(B, config, L, refLocation) {
+define(["backbone", "config", "leaflet", "jquery", "ref-location"],
+       function(B, config, L, $, refLocation) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "images/marker-active";
@@ -71,12 +71,16 @@ define(["backbone", "config", "leaflet", "ref-location"],
 
             this.caseMarker[permit.get("caseNumber")] = marker;
 
-            marker.on("mouseover", function(e) {
-                permit.set({hovered: true});
-            });
-            marker.on("mouseout", function(e) {
-                permit.set({hovered: false});
-            });
+            marker
+                .on("mouseover", function(e) {
+                    permit.set({hovered: true});
+                })
+                .on("mouseout", function(e) {
+                    permit.set({hovered: false});
+                })
+                .on("click", function(e) {
+                    permit.set("selected", true);
+                });
 
             this.listenTo(permit, "change", this.permitChangd);
         },
@@ -86,32 +90,40 @@ define(["backbone", "config", "leaflet", "ref-location"],
         // },
 
         permitRemoved: function(permit) {
-            var marker = this.getMarkerForPermit(permit);
-
-            if (marker)
-                this.zoningLayer.removeLayer(marker);
+            this.getMarkerForPermit(permit)
+                .done(function(marker) {
+                    this.zoningLayer.removeLayer(marker);
+                });
 
             delete this.caseMarker[permit.get("caseNumber")];
         },
 
         // Triggered when a child permit changes
         changed: function(change) {
+            var self = this,
+                excluded = change.get("excluded");
 
-            var marker = this.getMarkerForPermit(change);
+            this.getMarkerForPermit(change)
+                .done(function(marker) {
+                    if (excluded) {
+                        self.zoningLayer.removeLayer(marker);
+                    } else {
+                        marker.setIcon(getIcon(change));
+                        marker.addTo(self.zoningLayer);
+                    }
 
-            if (marker) {
-                if (change.get("excluded")) {
-                    this.zoningLayer.removeLayer(marker);
-                } else {
-                    marker.setIcon(getIcon(change));
-                    marker.addTo(this.zoningLayer);
-                }
-            }
+                    if (change.changed.selected) {
+                        self.map.setView(marker.getLatLng());
+                    }
+                });
         },
 
         /* Getting information about the markers. */
         getMarkerForPermit: function(permit) {
-            return this.caseMarker[permit.get("caseNumber")];
+            var marker = this.caseMarker[permit.get("caseNumber")],
+                promise = $.Deferred();
+
+            return marker ? promise.resolve(marker) : promise.fail();
         },
 
         // Store a reference to the reference marker

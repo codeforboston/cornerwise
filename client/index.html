@@ -30,18 +30,18 @@
         </div>
       </div>
     </nav>
-    <div class="maps">
-      <div id="permit-filters" class="col-sm-8">
-        <div class="filter-group">
-          <form id="ref-address-form">
-            <input type="text" name="address" placeholder="Type the Address">
-            <button id="geolocate">
-              My Location
-            </button>
-          </form>
-        </div>
+    <div class="maps container-fluid">
+      <div class="col-sm-8" id="map-container">
         <div id="zoning-map">
           <!-- The Leaflet map will appear here. -->
+        </div>
+        <div class="filter-group" id="ref-address">
+          <form id="ref-address-form">
+            <input type="text" name="address" placeholder="Type the Address">
+          </form>
+          <button id="geolocate">
+              ⊙
+          </button>
         </div>
       </div>
       <div class="col-sm-4">
@@ -58,11 +58,13 @@
           <div class="filter-name">
             Radius (ft):
           </div>
-          <input type="text" id="radius-filter" placeholder="Search">
+          <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100">
           <button id="reset">reset</button>
         </div>
-        <table id="permit-list">
-
+        <table id="permit-list" class="table table-condensed">
+          <tfoot>
+            <tr><td colspan="2">Loading...</td></tr>
+          </tfoot>
         </table>
         <div id="details">
           <!-- Display details about the selected permit -->

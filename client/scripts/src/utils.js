@@ -1,4 +1,22 @@
 define(["underscore", "jquery"], function(_, $) {
+
+    $.fn.transition = function(klFrom, klActive, klFinal) {
+        var self = this;
+        this.addClass(klFrom);
+        this.one("animationend", function(e) {
+            console.log(this);
+            self.removeClass(klFrom).removeClass(klActive);
+            if (klFinal)
+                self.addClass(klFinal);
+        });
+        this.addClass(klActive);
+    };
+
+    $.fn.animateAddClass = function(klBase) {
+        this.classTransition(klBase + "-enter",
+                             klBase + "-active");
+    };
+
     return {
         everyPred: function(fs, arg) {
             return _.every(fs, function(f) {
