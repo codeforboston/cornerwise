@@ -1,7 +1,7 @@
 /*
  * View representing a permit in the permits list.
  */
-define(["backbone", "underscore"], function(B, _) {
+define(["backbone", "underscore", "utils"], function(B, _, $u) {
     return B.View.extend({
         initialize: function() {
             this.listenTo(this.model, "change:excluded", this.excludedChanged)
@@ -19,7 +19,9 @@ define(["backbone", "underscore"], function(B, _) {
             "click": "onClick"
         },
 
-        template: _.template('<td><b><%= description %></b><br><%= number %> <%= street %></td>' +
+        template: _.template('<td><b><%= description %></b>' +
+                             '<br><%= number %> <%= street %>' +
+                             '<br><span class="distance"><%= refDistance %> feet</span></td>' +
                              '<td><%= caseNumber %></td>'),
 
         render: function() {

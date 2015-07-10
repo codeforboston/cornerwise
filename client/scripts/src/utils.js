@@ -43,6 +43,18 @@ define(["underscore", "jquery"], function(_, $) {
             }
 
             return promise;
+        },
+
+        mToFeet: function(m) {
+            return m*3.281;
+        },
+
+        feetToM: function(ft) {
+            return ft/3.281;
+        },
+
+        mToMiles: function(m) {
+            return m*3.281/5280;
         }
     };
 });

@@ -1,5 +1,5 @@
-define(["backbone", "config", "leaflet", "jquery", "ref-location"],
-       function(B, config, L, $, refLocation) {
+define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location"],
+       function(B, config, L, $, _, refLocation) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "images/marker-active";
@@ -50,6 +50,12 @@ define(["backbone", "config", "leaflet", "jquery", "ref-location"],
 
             return this;
         },
+
+        // The Layer Group containing permit markers
+        zoningLayer: null,
+
+        // The layer group containing
+        uiLayer: null,
 
         el: function() {
             return document.getElementById(config.mapId);
@@ -129,7 +135,7 @@ define(["backbone", "config", "leaflet", "jquery", "ref-location"],
         // Store a reference to the reference marker
         _refMarker: null,
         _hideRefMarker: false,
-        placeReferenceMarker: function() {
+        placeReferenceMarker: function(change) {
             var loc = refLocation.getPoint();
 
             if (!this._hideRefMarker) {
@@ -144,9 +150,27 @@ define(["backbone", "config", "leaflet", "jquery", "ref-location"],
                     this._refMarker.setRadius(refLocation.getRadiusMeters());
                 }
 
-                // Recenter
-                this.map.setView(loc, this.map.getZoom(), {animate: true});
+                // If the radius has changed, fit the map bounds to the
+                // filtered area.
+                if (change && change.changed.hasOwnProperty("radius")) {
+                    if (change.get("radius")) {
+                        this.zoomToRefLocation();
+                    } else {
+                        // If the radius has been cleared, fit the map
+                        // bounds to the feature group:
+                        this.map.fitBounds(this.collection.getBounds(),
+                                           {padding: [5, 5]});
+                    }
+                } else {
+                    // Recenter
+                    this.map.setView(loc, this.map.getZoom(), {animate: true});
+                }
             }
+        },
+
+        zoomToRefLocation: function() {
+            var bounds = this._refMarker.getBounds();
+            this.map.fitBounds(bounds, {padding: [5, 5]});
         }
     });
 });

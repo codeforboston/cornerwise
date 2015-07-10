@@ -34,6 +34,14 @@ define(
                 }
             },
 
+            sortByDistanceFrom: function(latLng, asc) {
+                var order = asc ? 1 : -1,
+                    ll = L.latLng(latLng);
+                this.comparator = function(p) {
+                    return order * ll.distanceTo(p.get("location"));
+                };
+            },
+
             /*
              * Applies each of the functions in the array fs to the
              * permits in the collection. If any of the functions
@@ -138,12 +146,22 @@ define(
                 }
             },
 
+            // Returns a LatLngBounds object for the permits that are
+            // not excluded.
+            getBounds: function() {
+                return L.latLngBounds(_.map(this.where({excluded: false}),
+                                            function(p) {
+                                                return p.get("location");
+                                            }));
+            },
+
+            // Called when a child permit has its "selected" attribute
+            // set. Clears the existing selection.
             permitSelected: function(permit, selected) {
-                if (this.selected)
+                if (this.selected && this.selected != permit)
                     this.selected.set("selected", false);
 
-                if (selected)
-                    this.selected = permit;
+                this.selected = permit;
             }
         });
     });

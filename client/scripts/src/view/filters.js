@@ -8,7 +8,8 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
         },
 
         initialize: function() {
-            this.listenTo(refLocation, "change:radius", this.updateRadius);
+            this.listenTo(refLocation, "change:radius", this.updateRadius)
+                .listenTo(refLocation, "change:geolocating", this.toggleGeolocating);
         },
 
         events: {
@@ -21,7 +22,8 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
             "focus #ref-address-form": "removeGuessClass",
             "click #geolocate": "geolocate",
             "change #radius-filter": "updateRadiusFilter",
-            "click #reset": "clearinputs"
+            "input #radius-filter": "updateRadiusLabel",
+            "click #reset": "clearInputs"
         },
 
         refreshDescriptionFilter: function() {
@@ -94,19 +96,27 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
                 refLocation.set("radius", val);
             }
         },
-        clearinputs: function(e) {
-            // Parse the input and convert from feet to meters:
-        // this.collection.filterByRadius()
 
+        updateRadiusLabel: function(e) {
+            var val = e.target.value;
+            $("#radius-value").html("" + val + " ft");
+        },
+
+        clearInputs: function(e) {
+            // Parse the input and convert from feet to meters:
             // Verify that the value is sensible:
 
-                refLocation.set("radius", null);
+            refLocation.set("radius", null);
+        },
 
+        toggleGeolocating: function(loc, isGeolocating) {
+            $("#ref-address").toggleClass("geolocating", isGeolocating);
         },
 
         updateRadius: function(loc, newRadius) {
             $("#radius-filter")
                 .val(newRadius)[newRadius ? "removeClass" : "addClass"]("inactive");
+            $("#radius-value").html(newRadius ? ("" + newRadius + " ft") : "");
         }
     });
 });

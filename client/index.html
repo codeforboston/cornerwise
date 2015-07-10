@@ -42,6 +42,9 @@
           <button id="geolocate">
               ⊙
           </button>
+          <div id="geolocating-indicator">
+            <img src="/images/geolocating-lightgreen.gif" width="10" height="10"/>
+          </div>
         </div>
       </div>
       <div class="col-sm-4">
@@ -59,6 +62,7 @@
             Radius (ft):
           </div>
           <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100">
+          <span id="radius-value"></span>
           <button id="reset">reset</button>
         </div>
         <table id="permit-list" class="table table-condensed">
