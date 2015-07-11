@@ -6,7 +6,8 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         initialize: function() {
             this.listenTo(this.model, "change:excluded", this.excludedChanged)
                 .listenTo(this.model, "change:selected", this.selectedChanged)
-                .listenTo(this.model, "change:hovered", this.hoveredChanged);
+                .listenTo(this.model, "change:hovered", this.hoveredChanged)
+                .listenTo(this.model, "change:refDistance", this.distanceChanged);
         },
 
         tagName: "tr",
@@ -53,6 +54,10 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
 
         selectedChanged: function(permit, selected) {
             this.$el.toggleClass("permit-selected", selected);
+        },
+
+        distanceChanged: function(permit, refDistance) {
+            this.$(".distance").html(refDistance + " feet");
         },
 
         beginHover: function(){

@@ -50,6 +50,9 @@ define(["backbone", "ref-location", "utils", "arcgis"], function(B, refLocation,
         },
 
         submitAddress: function(e) {
+            if (refLocation.get("geolocating"))
+                return false;
+
             var addr = e.target.elements["address"].value;
 
             refLocation.setFromAddress(addr).fail(function(err) {

@@ -5,7 +5,7 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
             this.listenTo(this.collection, "change", this.permitChanged)
                 .listenTo(this.collection, "fetching", this.fetchingBegan)
                 .listenTo(this.collection, "reset", this.fetchingComplete)
-                .listenTo(this.collection, "sort", this.sorted);
+                .listenTo(this.collection, "sort", this.render);
 
             this.$el.append("<thead><tr></tr></thead>");
             this.$el.append("<tbody/>");
@@ -55,7 +55,7 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
 
         sortField: null,
 
-        sorted: function(change) {
+        render: function(change) {
             this.$el.removeClass("loading");
             this.$el.find("tbody").html("");
             var self = this;

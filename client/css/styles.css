@@ -19,7 +19,7 @@
 #ref-address {
     position: absolute;
     top: 20px;
-    left: 60px;
+    left: 65px;
     right: 30px;
     height: 40px;
 }
@@ -40,10 +40,16 @@
     top: 0;
     width: 10%;
     height: 100%;
+    display: block;
 }
 
 .geolocating #geolocate, #geolocating-indicator {
     display: none;
+}
+
+.geolocating #geolocating-indicator {
+    display: block;
+    text-align: center;
 }
 
 
@@ -108,17 +114,16 @@
 th, th {
     padding: 3px;
 }
-
+*/
 th {
-    background-color: forestgreen;
-    color: white;
     cursor: pointer;
 }
 
 th.sort-field {
-    background-color: darkgreen;
+    background-color: lightgray;
 }
 
+/*
 th.sort-field ::after {
     content: "▲";
 }
