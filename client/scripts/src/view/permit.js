@@ -23,7 +23,9 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         template: _.template('<td><b><%= description %></b>' +
                              '<br><%= number %> <%= street %>' +
                              '<br><span class="distance"><%= refDistance %> feet</span></td>' +
-                             '<td><%= caseNumber %></td>'),
+                             '<td><%= caseNumber %></td>' +
+                           '<td><%= submitted %></td>'
+                           ),
 
         render: function() {
             var permit = this.model;
