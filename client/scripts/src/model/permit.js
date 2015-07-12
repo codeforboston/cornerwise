@@ -21,11 +21,10 @@ define(["backbone", "leaflet", "ref-location"], function(B, L, refLocation) {
 
         parse: function(attrs) {
             attrs.submitted = new Date(attrs.submitted);
-            if (attrs.location) {
-                attrs.refDistance = refLocation.getLatLng()
-                    .distanceTo(attrs.location)
-                    .toFixed(0);
-            }
+            attrs.refDistance =
+                attrs.location && (refLocation.getLatLng()
+                                   .distanceTo(attrs.location)
+                                   .toFixed(0));
             return attrs;
         },
 

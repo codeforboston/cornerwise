@@ -56,6 +56,18 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
 
         selectedChanged: function(permit, selected) {
             this.$el.toggleClass("permit-selected", selected);
+
+            var parent = this.$el.parent(),
+                topOffset = parent.scrollTop(),
+                botOffset = topOffset + parent.height(),
+                eltTop = this.el.offsetTop,
+                eltBottom = eltTop + this.$el.height();
+
+            if (eltTop > botOffset || eltBottom < topOffset) {
+                parent.animate({
+                    scrollTop: eltTop - 30
+                }, 200);
+            }
         },
 
         distanceChanged: function(permit, refDistance) {

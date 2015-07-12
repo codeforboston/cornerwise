@@ -1,9 +1,7 @@
 define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, PermitView, $) {
     return B.View.extend({
         initialize: function() {
-            //this.listenTo(this.model, "change", this.render);
-            this.listenTo(this.collection, "change", this.permitChanged)
-                .listenTo(this.collection, "fetching", this.fetchingBegan)
+            this.listenTo(this.collection, "fetching", this.fetchingBegan)
                 .listenTo(this.collection, "reset", this.fetchingComplete)
                 .listenTo(this.collection, "sort", this.render);
 
@@ -39,10 +37,6 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
         permitAdded: function(permit) {
             var view = new PermitView({model: permit});
             this.$("tbody").append(view.render().el);
-        },
-
-        permitChanged: function(change) {
-
         },
 
         fetchingBegan: function() {
