@@ -30,6 +30,7 @@ require.config({
         "permit-view": "src/view/permit",
         "filters-view": "src/view/filters",
         "map-view": "src/view/map",
+        "popup-view": "src/view/popup",
 
         "setup": "src/setup"
     },

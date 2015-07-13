@@ -1,5 +1,5 @@
-define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location"],
-       function(B, config, L, $, _, refLocation) {
+define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location", "popup-view"],
+       function(B, config, L, $, _, refLocation, PopupView) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "images/marker-active";
@@ -39,14 +39,17 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location"]
             // Map from case numbers to L.Markers
             this.caseMarker = {};
 
-            this.listenTo(this.collection, "add", this.permitAdded);
-            this.listenTo(this.collection, "remove", this.permitRemoved);
-            this.listenTo(this.collection, "change", this.changed);
+            this.listenTo(this.collection, "add", this.permitAdded)
+                .listenTo(this.collection, "remove", this.permitRemoved)
+                .listenTo(this.collection, "change", this.changed);
 
             // Place the reference location marker:
             this.placeReferenceMarker();
             // ... and subscribe to updates:
             this.listenTo(refLocation, "change", this.placeReferenceMarker);
+
+            map.on("popupopen", _.bind(this.popupOpened, this))
+                .on("popupclose", _.bind(this.popupClosed, this));
 
             return this;
         },
@@ -59,6 +62,24 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location"]
 
         el: function() {
             return document.getElementById(config.mapId);
+        },
+
+        popupOpened: function(e) {
+            var view = new PopupView({popup: e.popup,
+                                      model: this.collection.selected});
+            e.popup._view = view;
+
+            view.render();
+        },
+
+        popupClosed: function(e) {
+            var view = e.popup._view;
+
+            if (view) {
+                e.popup._view = null;
+                view.destroy();
+                console.log("View destroyed!");
+            }
         },
 
         // Callbacks:
@@ -86,7 +107,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location"]
                 })
                 .on("click", function(e) {
                     permit.set("selected", true);
-                });
+                })
+                .bindPopup("");
 
             this.listenTo(permit, "change", this.permitChangd);
         },
