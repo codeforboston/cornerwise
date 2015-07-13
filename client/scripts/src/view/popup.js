@@ -7,7 +7,6 @@ define(["backbone", "underscore"], function(B, _) {
                              '<%= description %></div>'),
 
         initialize: function(options) {
-            console.log(options);
             this.popup = options.popup;
 
             this.listenTo(this.model, "change", this.render);

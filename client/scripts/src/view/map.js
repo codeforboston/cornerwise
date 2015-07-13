@@ -78,7 +78,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location",
             if (view) {
                 e.popup._view = null;
                 view.destroy();
-                console.log("View destroyed!");
             }
         },
 
