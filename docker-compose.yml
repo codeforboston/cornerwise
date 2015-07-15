@@ -1,0 +1,29 @@
+data:
+  build: docker/data
+  hostname: data
+  domainname: localdomain
+
+postgres:
+  build: docker/postgres
+  hostname: postgres
+  ports:
+    - "5432:5432"
+  volumes_from:
+    - data
+
+citydash:
+  build: .
+  ports:
+    - "8080:80"
+  links:
+    - postgres:postgres
+  volumes_from:
+    - data
+  volumes:
+    - ./server:/app
+
+nginx:
+  build: docker/nginx
+  hostname: nginx
+  ports:
+    - "5432:5432"
