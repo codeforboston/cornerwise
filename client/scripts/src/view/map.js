@@ -19,7 +19,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location",
         png = getMarkerPng(isHovered, isSelected);
 
         return L.icon({iconUrl: png + "@1x.png",
-                       iconRetinaUrl: png + "@2x.png"});
+                       iconRetinaUrl: png + "@2x.png",
+                       iconSize: [48, 55]});
     }
 
     return B.View.extend({
@@ -161,6 +162,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location",
 
             if (!this._hideRefMarker) {
                 if (!this._refMarker) {
+
                     this._refMarker = L.circle(loc, refLocation.getRadiusMeters(),
                                                {
                                                    stroke: true,
