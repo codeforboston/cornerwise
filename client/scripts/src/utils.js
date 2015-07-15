@@ -17,6 +17,14 @@ define(["underscore", "jquery"], function(_, $) {
                              klBase + "-active");
     };
 
+    var defaultHelpers = {
+        formatDate: function(d) {
+            return (d.toLocaleDateString) ?
+                d.toLocaleDateString() :
+                d.toString().slice(0, 15);
+        }
+    };
+
     return {
         everyPred: function(fs, arg) {
             return _.every(fs, function(f) {
@@ -55,6 +63,20 @@ define(["underscore", "jquery"], function(_, $) {
 
         mToMiles: function(m) {
             return m*3.281/5280;
+        },
+
+        /**
+         * Like _.template, except that it adds helper functions to the
+         * data passed to the resulting template function.
+         */
+        template: function(templateString, helpers) {
+            helpers = helpers || defaultHelpers;
+
+            var temp = _.template(templateString);
+
+            return function(data) {
+                return temp(_.extend(data, helpers));
+            };
         }
     };
 });

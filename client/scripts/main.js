@@ -31,6 +31,7 @@ require.config({
         "filters-view": "src/view/filters",
         "map-view": "src/view/map",
         "popup-view": "src/view/popup",
+        "ref-marker": "src/leaflet/refMarker",
 
         "setup": "src/setup"
     },

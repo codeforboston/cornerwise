@@ -1,5 +1,5 @@
-define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location", "popup-view"],
-       function(B, config, L, $, _, refLocation, PopupView) {
+define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location", "popup-view", "ref-marker"],
+       function(B, config, L, $, _, refLocation, PopupView, RefMarker) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "images/marker-active";
@@ -162,15 +162,11 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location",
 
             if (!this._hideRefMarker) {
                 if (!this._refMarker) {
-
-                    this._refMarker = L.circle(loc, refLocation.getRadiusMeters(),
-                                               {
-                                                   stroke: true,
-                                                   color: config.refMarkerColor
-                                               }).addTo(this.zoningLayer);
+                    this._refMarker =
+                        (new RefMarker(loc, refLocation.getRadiusMeters()))
+                        .addTo(this.zoningLayer);
                 } else {
-                    this._refMarker.setLatLng(loc);
-                    this._refMarker.setRadius(refLocation.getRadiusMeters());
+                    this._refMarker.setRadius(loc, refLocation.getRadiusMeters());
                 }
 
                 // If the radius has changed, fit the map bounds to the
