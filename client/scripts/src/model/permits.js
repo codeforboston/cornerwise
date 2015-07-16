@@ -34,14 +34,6 @@ define(
                 }
             },
 
-            sortByDistanceFrom: function(latLng, asc) {
-                var order = asc ? 1 : -1,
-                    ll = L.latLng(latLng);
-                this.comparator = function(p) {
-                    return order * ll.distanceTo(p.get("location"));
-                };
-            },
-
             /*
              * Applies each of the functions in the array fs to the
              * permits in the collection. If any of the functions

@@ -14,7 +14,7 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
         buildHeader: function() {
             var tr = this.$("thead tr");
             _.each([["Description", "description"],
-                    ["Case Number", "caseNumber"],
+                    ["Distance", "refDistance"],
                     ["Submitted", "submitted"]],
                    function(p) {
                        $("<th>").text(p[0])

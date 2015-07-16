@@ -22,27 +22,25 @@ define(["backbone", "leaflet", "ref-location"], function(B, L, refLocation) {
         parse: function(attrs) {
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
-                attrs.location && (refLocation.getLatLng()
-                                   .distanceTo(attrs.location)
-                                   .toFixed(0));
+                this.getDistance(attrs.location, refLocation.getLatLng());
             return attrs;
         },
 
-        getDistance: function(latLng) {
+        getDistance: function(fromLoc, toLoc) {
             try {
-                return L.latLng(latLng).distanceTo(this.get("location")).toFixed(0);
+                return Math.round(L.latLng(fromLoc).distanceTo(toLoc), 0);
             } catch(err) {
-                console.log(err);
                 return NaN;
             }
         },
 
         getDistanceToRef: function() {
-            return this.getDistance(refLocation.getLatLng());
+            return this.getDistance(this.get("location"), refLocation.getLatLng());
         },
 
         recalculateDistance: function() {
-            this.set("refDistance", this.getDistanceToRef());
+            var dist = this.set("refDistance", this.getDistanceToRef());
+            console.log(dist);
         }
     });
 });
