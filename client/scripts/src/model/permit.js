@@ -40,7 +40,6 @@ define(["backbone", "leaflet", "ref-location"], function(B, L, refLocation) {
 
         recalculateDistance: function() {
             var dist = this.set("refDistance", this.getDistanceToRef());
-            console.log(dist);
         }
     });
 });

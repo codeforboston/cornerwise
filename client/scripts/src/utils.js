@@ -1,10 +1,8 @@
 define(["underscore", "jquery"], function(_, $) {
-
     $.fn.transition = function(klFrom, klActive, klFinal) {
         var self = this;
         this.addClass(klFrom);
         this.one("animationend", function(e) {
-            console.log(this);
             self.removeClass(klFrom).removeClass(klActive);
             if (klFinal)
                 self.addClass(klFinal);
