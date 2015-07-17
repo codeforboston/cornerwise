@@ -1,0 +1,241 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "Washington Street Station",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    -71.088387,
+                    42.381007
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "Union Square Station",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    -71.095291,
+                    42.377584
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "Union Square Line",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        -71.095318,
+                        42.377584
+                    ],
+                    [
+                        -71.094471,
+                        42.377132
+                    ],
+                    [
+                        -71.093301,
+                        42.376672
+                    ],
+                    [
+                        -71.09211,
+                        42.3763
+                    ],
+                    [
+                        -71.091188,
+                        42.376125
+                    ],
+                    [
+                        -71.089525,
+                        42.375919
+                    ],
+                    [
+                        -71.087036,
+                        42.375618
+                    ],
+                    [
+                        -71.084868,
+                        42.375269
+                    ],
+                    [
+                        -71.08195,
+                        42.374794
+                    ],
+                    [
+                        -71.080722,
+                        42.373783
+                    ],
+                    [
+                        -71.079386,
+                        42.372994
+                    ],
+                    [
+                        -71.07753,
+                        42.372031
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "Lechmere Station",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    -71.077455,
+                    42.371889
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "Gilman Square Station",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    -71.096252,
+                    42.387684
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "Ball Square Station",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    -71.1111,
+                    42.39972
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "College Avenue Square",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    -71.11698,
+                    42.407868
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "College Ave Line",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        -71.077444,
+                        42.371917
+                    ],
+                    [
+                        -71.080749,
+                        42.373803
+                    ],
+                    [
+                        -71.081929,
+                        42.374802
+                    ],
+                    [
+                        -71.08821,
+                        42.381039
+                    ],
+                    [
+                        -71.089981,
+                        42.382838
+                    ],
+                    [
+                        -71.091692,
+                        42.384692
+                    ],
+                    [
+                        -71.092668,
+                        42.385683
+                    ],
+                    [
+                        -71.093269,
+                        42.386166
+                    ],
+                    [
+                        -71.09402,
+                        42.386634
+                    ],
+                    [
+                        -71.094943,
+                        42.387141
+                    ],
+                    [
+                        -71.096338,
+                        42.387751
+                    ],
+                    [
+                        -71.100028,
+                        42.389431
+                    ],
+                    [
+                        -71.102603,
+                        42.390588
+                    ],
+                    [
+                        -71.104009,
+                        42.391388
+                    ],
+                    [
+                        -71.105382,
+                        42.392514
+                    ],
+                    [
+                        -71.106884,
+                        42.394368
+                    ],
+                    [
+                        -71.110918,
+                        42.399763
+                    ],
+                    [
+                        -71.113622,
+                        42.403392
+                    ],
+                    [
+                        -71.11536,
+                        42.405713
+                    ],
+                    [
+                        -71.116958,
+                        42.4079
+                    ]
+                ],
+                "type": "LineString"
+            }
+        }
+    ]
+}
