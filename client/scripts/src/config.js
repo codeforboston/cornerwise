@@ -26,7 +26,16 @@ define([], function() {
 
         // Map of { "permit abbreviation": "human readable permit name" }
         permitTypes: {
-
+            "SP": "Special Permit",
+            "Ext.": "Extension",
+            "SP/V": "Special Permit with Variance",
+            "AA": "Administrative Appeal",
+            "SPSR": "Special Permit with Site Plan Review",
+            "SPD": "Special Permit with Design Review",
+            "V": "Variance",
+            "R": "Revision",
+            "Sub/SP": "Subdivision",
+            "SPSR/V": "Special Permit with Site Plan Review"
         },
 
         // Esri:

@@ -44,9 +44,10 @@ define(["backbone", "underscore", "config", "utils"], function(B, _, config, $u)
                 names = config.permitTypes;
             this.types = this.collection.reduce(function(m, p) {
                 var t = p.get("permit");
-                m[t] = old[t] || { on: true,
-                                   name: names[t] || t,
-                                   type: t };
+                if (!m[t])
+                    m[t] = old[t] || { on: true,
+                                       name: names[t] || t,
+                                       type: t };
                 return m;
             }, {});
         },
