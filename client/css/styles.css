@@ -141,8 +141,28 @@ th.sort-field {
     background-color: lightgray;
 }
 
-/*
-th.sort-field ::after {
-    content: "▲";
+th.sort-field::after {
+    content: " ▲";
 }
-*/
+
+/* Collapsible View */
+a.toggle::after {
+    content: " ▸";
+}
+
+.shown a.toggle::after {
+    content: " ▾";
+}
+
+
+.collapsible {
+    overflow: hidden;
+}
+
+.collapsible .collapse-body {
+    display: none;
+}
+
+.collapsible.shown .collapse-body {
+    display: block;
+}

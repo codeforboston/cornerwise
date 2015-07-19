@@ -19,6 +19,9 @@ require.config({
         "routes": "src/routes",
         "ref-location": "src/refLocation",
 
+        // Map Layers:
+        "layers": "src/layerdata/layers",
+
         // Backbone Models:
         "permit": "src/model/permit",
 
@@ -32,6 +35,9 @@ require.config({
         "map-view": "src/view/map",
         "popup-view": "src/view/popup",
         "ref-marker": "src/leaflet/refMarker",
+
+        "collapsible-view": "src/view/collapsible",
+        "spga-filter-view": "src/view/spgaFilter",
 
         "setup": "src/setup"
     },
