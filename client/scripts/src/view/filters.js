@@ -2,9 +2,12 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "ref-location", "utils", "arcgis", "collapsible-view", "spga-filter-view"],
+    ["backbone", "underscore", "ref-location", "utils",
+     "arcgis", "collapsible-view", "spga-filter-view",
+     "type-filter-view"],
 
-    function(B, _, refLocation, $u, arcgis, CollapsibleView, SPGAFilterView) {
+    function(B, _, refLocation, $u, arcgis, CollapsibleView, SPGAFilterView,
+             TypeFilterView) {
         return B.View.extend({
             el: function() {
                 return document.body;
@@ -12,17 +15,18 @@ define(
 
             filterViews: {
                 "#spga-filters": { view: SPGAFilterView,
-                                   title: "Granting Authority" }
+                                   title: "Granting Authority" },
+                "#type-filters": { view: TypeFilterView,
+                                   title: "Permit Types" }
             },
 
             initialize: function() {
                 this.listenTo(refLocation, "change:radius", this.updateRadius)
                     .listenTo(refLocation, "change:geolocating", this.toggleGeolocating);
 
-                var self = this;
                 // Construct subview:
                 this.subviews = _.map(this.filterViews, function(view, sel) {
-                    var subview = new view.view({collection: self.collection});
+                    var subview = new view.view({collection: this.collection});
                     var collapseView =
                             new CollapsibleView({
                                 el: self.$(sel)[0],
@@ -30,7 +34,7 @@ define(
                                 view: subview
                             });
                     return collapseView.render();
-                });
+                }, this);
             },
 
             events: {
@@ -113,7 +117,7 @@ define(
 
             updateRadiusLabel: function(e) {
                 var val = e.target.value;
-                $("#radius-value").html("" + val + " ft");
+                $("#radius-value").html("" + $u.commas(val) + " ft");
             },
 
             clearInputs: function(e) {
@@ -130,7 +134,7 @@ define(
             updateRadius: function(loc, newRadius) {
                 $("#radius-filter")
                     .val(newRadius)[newRadius ? "removeClass" : "addClass"]("inactive");
-                $("#radius-value").html(newRadius ? ("" + newRadius + " ft") : "");
+                $("#radius-value").html(newRadius ? ("" + $u.commas(newRadius) + " ft") : "");
             }
         });
     });

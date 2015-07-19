@@ -70,7 +70,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         distanceChanged: function(permit, refDistance) {
-            this.$(".distance").html($u.commas(refDistance)< + " feet");
+            this.$(".distance").html($u.commas(refDistance) + " feet");
         },
 
         beginHover: function(){

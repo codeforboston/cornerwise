@@ -32,7 +32,6 @@ define(["backbone", "utils"], function(B, $u) {
         },
 
         toggleVisible: function(e) {
-            console.log(e);
             this.$(".collapsible").toggleClass("shown");
 
             return false;

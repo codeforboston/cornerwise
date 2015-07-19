@@ -24,6 +24,12 @@ define([], function() {
                           lng: -71.09950304031372},
         refMarkerColor: "red",
 
+        // Map of { "permit abbreviation": "human readable permit name" }
+        permitTypes: {
+
+        },
+
+        // Esri:
         clientId: "jYLY7AeA1U9xDiWu",
         clientSecret: "64a66909ff724a0a9928838ef4462909"
     };

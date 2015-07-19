@@ -154,15 +154,31 @@ a.toggle::after {
     content: " ▾";
 }
 
+.collapse-title {
+    background-color: #397f34;
+    font-weight: bold;
+    padding: 5px;
+    text-shadow: 1px 1px black;
+}
+
+.collapse-title a {
+    color: white;
+    text-decoration: none;
+}
 
 .collapsible {
+    border: 1px solid gray;
+    margin-bottom: 5px;
     overflow: hidden;
 }
 
 .collapsible .collapse-body {
-    display: none;
+    max-height: 0;
+    padding-left: 5px;
+
+    transition: max-height 0.2s ease-in;
 }
 
 .collapsible.shown .collapse-body {
-    display: block;
+    max-height: 1000px;
 }

@@ -38,6 +38,7 @@ require.config({
 
         "collapsible-view": "src/view/collapsible",
         "spga-filter-view": "src/view/spgaFilter",
+        "type-filter-view": "src/view/typeFilter",
 
         "setup": "src/setup"
     },

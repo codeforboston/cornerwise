@@ -119,13 +119,13 @@ define(
                 }
             },
 
-            filterByType: function(type) {
-                if (type) {
-                    this.addFilter("type", function(permit) {
-                        return permit.get("type") == type;
+            filterByTypes: function(types) {
+                if (types) {
+                    this.addFilter("types", function(permit) {
+                        return _.contains(types, permit.get("permit"));
                     });
                 } else {
-                    this.removeFilter("type");
+                    this.removeFilter("types");
                 }
             },
 
