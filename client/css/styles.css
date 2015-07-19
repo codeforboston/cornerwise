@@ -145,6 +145,11 @@ th.sort-field::after {
     content: " ▲";
 }
 
+th.sort-field.desc::after {
+    content: " ▼";
+}
+
+
 /* Collapsible View */
 a.toggle::after {
     content: " ▸";

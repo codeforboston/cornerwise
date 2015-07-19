@@ -25,11 +25,24 @@ define(
                 return B.Collection.prototype.fetch.call(this, opts);
             },
 
-            sortByField: function(name) {
+            /**
+             * @param {String} name
+             * @param {Boolean} desc true to sort descending
+             */
+            sortByField: function(name, desc) {
+                var order = desc ? -1 : 1;
+                this.sortField = name;
+                this.order = order;
+
                 if (!name) {
                     this.comparator = false;
                 } else {
-                    this.comparator = function(p) { return p.get(name); };
+                    this.comparator = function(p1, p2) {
+                        var v1 = p1.get(name),
+                            v2 = p2.get(name);
+
+                        return order * ((v1 > v2) ? 1 : (v2 > v1) ? -1 : 0);
+                    };
                     this.sort();
                 }
             },

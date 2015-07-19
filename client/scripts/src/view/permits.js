@@ -61,11 +61,19 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
 
         onClickSort: function(e) {
             var th = $(e.target),
-                sortField = th.data("sortField");
-            this.collection.sortByField(sortField);
-            this.$("th").removeClass("sort-field");
+                sortField = th.data("sortField"),
+                descending = th.hasClass("sort-field") &&
+                    !th.hasClass("desc");;
+
+            this.collection.sortByField(sortField, descending);
+            // Remove 'sort-field' and 'desc' from all th
+            this.$("th").removeClass("sort-field desc");
+
             this.sortField = sortField;
-            th.addClass("sort-field");
+            th.addClass("sort-field")
+                .toggleClass("desc", descending);
+
+            return false;
         }
     });
 });
