@@ -22,6 +22,7 @@ Notifications :
 Technologies used: 
 ----------------------------------------------------------------------------------------------------------------------------
 - Python - To fetch the data from the google spreadsheet to json format for the consumption of the dashboard
+- GeoDjango - To store spatial data and user preferences
 - HTML/CSS - For display purpose 
 - Backbone.js , require - for MVC 
 - Bootstrap - for responsive design 
