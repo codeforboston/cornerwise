@@ -199,22 +199,34 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         _infoLayers: {},
         layersChanged: function(infoLayer) {
             var id = infoLayer.get("id"),
-                color = infoLayer.get("color");
+                color = infoLayer.get("color"),
+                layer = this._infoLayers[id];
 
             if (infoLayer.changed.shown) {
-                var self = this;
-                infoLayer.getFeatures()
-                    .done(function(features) {
-                        var layer = L.featureGroup(),
-                            geoj = L.geoJson(features,
-                                             {style: {color: color}});
-                        geoj.addTo(layer);
-                        self._infoLayers[id] = layer;
-                        self.map.addLayer(layer);
-                    });
+                if (layer) {
+                    this.map.addLayer(layer);
+                } else {
+                    var self = this;
+                    infoLayer.getFeatures()
+                        .done(function(features) {
+                            var layer = L.geoJson(features,
+                                                  {style: {color: color}});
+                            self._infoLayers[id] = layer;
+                            self.map.addLayer(layer);
+                        });
+                }
 
                 return;
             }
+
+            if (!layer) return;
+
+            if (infoLayer.changed.color)
+                layer.style({color: color});
+
+
+            if (infoLayer.changed.hasOwnProperty("shown"))
+                this.map.removeLayer(layer);
         }
     });
 });
