@@ -9,6 +9,7 @@ define(["backbone", "utils"], function(B, $u) {
         initialize: function(options) {
             this.subview = options.view;
             this.title = options.title;
+            this.shown = options.shown || false;
         },
 
         events: {
@@ -21,18 +22,28 @@ define(["backbone", "utils"], function(B, $u) {
 
         render: function() {
             this.$el.html(this.template);
-
             this.renderTitle(this.title);
 
-            // Render the inner view
-            this.subview.setElement(this.$(".collapse-body"));
-            this.subview.render();
+            if (this.subview) {
+                // Render the inner view
+                this.subview.setElement(this.$(".collapse-body"));
+                this.subview.render();
+                this.toggle(this.shown);
+            }
 
             return this;
         },
 
+        toggle: function(show) {
+            if (typeof show === "undefined")
+                show = !this.shown;
+
+            this.$(".collapsible").toggleClass("shown", show);
+            this.shown = show;
+        },
+
         toggleVisible: function(e) {
-            this.$(".collapsible").toggleClass("shown");
+            this.toggle();
 
             return false;
         }

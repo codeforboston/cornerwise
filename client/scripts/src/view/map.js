@@ -1,5 +1,7 @@
-define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location", "popup-view", "ref-marker"],
-       function(B, config, L, $, _, refLocation, PopupView, RefMarker) {
+define(["backbone", "config", "leaflet", "jquery", "underscore",
+        "ref-location", "popup-view", "ref-marker", "layers"],
+       function(B, config, L, $, _, refLocation, PopupView, RefMarker,
+                infoLayers) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "images/marker-active";
@@ -48,6 +50,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location",
             this.placeReferenceMarker();
             // ... and subscribe to updates:
             this.listenTo(refLocation, "change", this.placeReferenceMarker);
+
+            this.listenTo(infoLayers, "change", this.layersChanged);
 
             map.on("popupopen", _.bind(this.popupOpened, this))
                 .on("popupclose", _.bind(this.popupClosed, this));
@@ -190,6 +194,27 @@ define(["backbone", "config", "leaflet", "jquery", "underscore", "ref-location",
         zoomToRefLocation: function() {
             var bounds = this._refMarker.getBounds();
             this.map.fitBounds(bounds, {padding: [5, 5]});
+        },
+
+        _infoLayers: {},
+        layersChanged: function(infoLayer) {
+            var id = infoLayer.get("id"),
+                color = infoLayer.get("color");
+
+            if (infoLayer.changed.shown) {
+                var self = this;
+                infoLayer.getFeatures()
+                    .done(function(features) {
+                        var layer = L.featureGroup(),
+                            geoj = L.geoJson(features,
+                                             {style: {color: color}});
+                        geoj.addTo(layer);
+                        self._infoLayers[id] = layer;
+                        self.map.addLayer(layer);
+                    });
+
+                return;
+            }
         }
     });
 });

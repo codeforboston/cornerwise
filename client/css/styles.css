@@ -187,3 +187,27 @@ a.toggle::after {
 .collapsible.shown .collapse-body {
     max-height: 1000px;
 }
+
+/* Layers Menu */
+ul.layer-list {
+    list-style: none;
+    padding: 0;
+}
+
+li.layer {
+    position: relative;
+}
+
+li.layer .title {
+    display: inline-block;
+    padding-left: 10px;
+}
+
+li.layer .color {
+    border: 1px solid black;
+    height: 15px;
+    margin: 2px;
+    position: absolute;
+    right: 10px;
+    width: 15px;
+}

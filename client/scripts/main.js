@@ -19,14 +19,13 @@ require.config({
         "routes": "src/routes",
         "ref-location": "src/refLocation",
 
-        // Map Layers:
-        "layers": "src/layerdata/layers",
-
         // Backbone Models:
         "permit": "src/model/permit",
+        "layer": "src/model/layer",
 
         // Backbone Collections:
         "permits": "src/model/permits",
+        "layers": "src/model/layers",
 
         // Backbone Views:
         "permits-view": "src/view/permits",
@@ -34,6 +33,7 @@ require.config({
         "filters-view": "src/view/filters",
         "map-view": "src/view/map",
         "popup-view": "src/view/popup",
+        "layers-view": "src/view/layers",
         "ref-marker": "src/leaflet/refMarker",
 
         "collapsible-view": "src/view/collapsible",
