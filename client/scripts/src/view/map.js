@@ -112,14 +112,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 .on("click", function(e) {
                     permit.set("selected", true);
                 })
-                .bindPopup("");
 
             this.listenTo(permit, "change", this.permitChangd);
         },
-
-        // permitChanged: function(permit) {
-        //     styleMarker(this.getMarkerForPermit(permit), permit);
-        // },
 
         permitRemoved: function(permit) {
             this.getMarkerForPermit(permit)
@@ -146,6 +141,15 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                     if (change.changed.selected) {
                         self.map.setView(marker.getLatLng());
+                        
+                        //open popup
+
+                        marker.unbindPopup().bindPopup("").openPopup();
+                        
+                    }
+
+                    if (change.changed.selected === false){
+                        //close popup
                     }
                 });
         },
