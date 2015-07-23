@@ -6,17 +6,25 @@ LAST_PAGE = 31
 URL_FORMAT = "http://www.somervillema.gov/planningandzoning/reports?page={:1}"
 TITLES = {}
 
+
+def make_url(page=1):
+    "Returns a string URL for the given page."
+    return URL_FORMAT.format(page)
+
+# Utility:
 def to_camel(s):
     "Converts a string s to camelCase."
     return re.sub(r"[\s\-_](\w)", lambda m: m.group(1).upper(), s.lower())
 
 def attribute_for_title(title):
+    """
+    Convert the title (e.g., in a <th></th>) to its corresponding
+    attribute in the output maps.
+    """
     return TITLES.get(title, to_camel(title))
 
-def make_url(page=1):
-    return URL_FORMAT.format(page)
-
 def get_page(page=1):
+    "Returns the HTML content of the given Reports and Decisions page."
     f = urllib2.urlopen(make_url(page))
     html = f.read()
     f.close()
@@ -25,12 +33,35 @@ def get_page(page=1):
 def find_table(doc):
     return doc.select_one("table.views-table")
 
+def link_info(a):
+    return {
+        "title": a.get_text().strip(),
+        "url": a["href"]
+    }
+
+def get_links(elt):
+    "Return information about the <a> element descendants of elt."
+    return [link_info(a) for a in elt.find_all("a") if a["href"]]
+
+def links_field(td):
+    return {"links": get_links(td)}
+
+def default_field(td):
+    return td.get_text().strip()
+
+field_processors = {
+    "reports": links_field,
+    "decisions": links_field,
+    "other": links_field
+}
+
 def col_names(table):
     tr = table.select_one("thead > tr")
     return [th.get_text().strip() for th in tr.find_all("th")]
 
 def get_td_val(td, attr=None):
-    return td.get_text().strip()
+    processor = field_processors.get(attr, default_field)
+    return processor(td)
 
 def get_row_vals(attrs, tr):
     return {attr: get_td_val(td, attr) for attr, td in zip(attrs, tr.find_all("td"))}
@@ -44,17 +75,22 @@ def find_cases(doc):
     trs = tbody.find_all("tr")
     return [get_row_vals(attributes, tr) for tr in trs]
 
+def index_by(l, keyfn):
+    if isinstance(keyfn, str):
+        s = keyfn
+        keyfn = lambda o: o[s]
+
+    return {keyfn(o): o for o in l}
+
 def main(pages):
     # Indexed by case number:
-    cases = {}
+    all_cases = []
     for i in pages:
         doc = BeautifulSoup(get_page(i))
         case_list = find_cases(doc)
-        for case in case_list:
-            cases[case["caseNumber"]]
+        all_cases += case_list
 
-    return cases
-    #BeautifulSoup()
+    return all_cases
 
 if __name__ == "__main__":
     print(main(range(1, LAST_PAGE+1)))
