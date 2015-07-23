@@ -16,6 +16,8 @@ var FOLDER_ID = "0BxbaygscqZcVfmlFU1pvNXQzWkxvVWZvdGZ3QkNPREpFRmVnN3FxVnRGaC1qVU
 var GEO_BOUNDS = [42.371861543730496, -71.13338470458984,
                   42.40393908425197, -71.0679817199707];
 
+var GEO_SEARCH_SUFFIX = "Somerville, MA";
+
 // Function mapping <name in spreadsheet> to <name in JSON>
 var JSON_COLUMN = function(name) {
     if (name == "Case")
@@ -157,7 +159,7 @@ function addLatLong(data, addressFn, coder) {
  * @return {String} The string address
  */
 function getAddress(rowMap) {
-    return rowMap["number"] + " " + rowMap["street"];
+    return rowMap["number"] + " " + rowMap["street"] + " " + GEO_SEARCH_SUFFIX;
 }
 
 /**
