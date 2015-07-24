@@ -1,4 +1,6 @@
 from bs4 import BeautifulSoup
+import arcgis
+import json
 import re
 import urllib2
 
@@ -66,6 +68,23 @@ def get_td_val(td, attr=None):
 def get_row_vals(attrs, tr):
     return {attr: get_td_val(td, attr) for attr, td in zip(attrs, tr.find_all("td"))}
 
+def add_geocode(permits):
+    """
+    Modifies each permit in the list (in place), adding 'lat' and 'long'
+    matching the permit address.
+    """
+    addrs = ["{0[number]} {0[street]}".format(permit) for permit in permits]
+    response = arcgis.geocode(addrs)
+    locations = response["locations"]
+
+    # Assumes the locations are returned in the same order
+    for permit, location in zip(permits, locations):
+        loc = location["location"]
+        permit["lat"] = loc["y"]
+        permit["long"] = loc["x"]
+        permit["score"] = location["score"]
+
+
 def find_cases(doc):
     table = find_table(doc)
     titles = col_names(table)
@@ -82,15 +101,17 @@ def index_by(l, keyfn):
 
     return {keyfn(o): o for o in l}
 
-def main(pages):
+def get_permits(pages):
     # Indexed by case number:
     all_cases = []
     for i in pages:
-        doc = BeautifulSoup(get_page(i))
+        doc = BeautifulSoup(get_page(i), "html.parser")
         case_list = find_cases(doc)
         all_cases += case_list
 
+    add_geocode(case_list)
+
     return all_cases
 
-if __name__ == "__main__":
-    print(main(range(1, LAST_PAGE+1)))
+#if __name__ == "__main__":
+    #print(main(range(1, LAST_PAGE+1)))
