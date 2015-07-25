@@ -5,7 +5,10 @@
             "type": "Feature",
             "properties": {
                 "title": "Washington Street Station",
-                "description": ""
+                "monthEstimate": "12",
+                "yearEstimate": "2017",
+                "description": "",
+                "factSheet": "http://greenlineextension.eot.state.ma.us/documents/about/FactSheets/Station_Washington_St.pdf"
             },
             "geometry": {
                 "coordinates": [
@@ -19,7 +22,10 @@
             "type": "Feature",
             "properties": {
                 "title": "Union Square Station",
-                "description": ""
+                "description": "",
+                "monthEstimate": "12",
+                "yearEstimate": "2017",
+                "factSheet": "http://greenlineextension.eot.state.ma.us/documents/about/FactSheets/Station_UnionSquare.pdf"
             },
             "geometry": {
                 "coordinates": [
@@ -93,7 +99,10 @@
             "type": "Feature",
             "properties": {
                 "title": "Lechmere Station",
-                "description": ""
+                "description": "",
+                "factSheet": "http://greenlineextension.eot.state.ma.us/documents/about/FactSheets/Station_Lechmere.pdf",
+                "monthEstimate": "12",
+                "yearEstimate": "2017"
             },
             "geometry": {
                 "coordinates": [
@@ -107,7 +116,10 @@
             "type": "Feature",
             "properties": {
                 "title": "Gilman Square Station",
-                "description": ""
+                "description": "",
+                "factSheet": "http://greenlineextension.eot.state.ma.us/documents/about/FactSheets/Station_Gilman_Square.pdf",
+                "monthEstimate": "6",
+                "yearEstimate": "2019"
             },
             "geometry": {
                 "coordinates": [
@@ -121,7 +133,10 @@
             "type": "Feature",
             "properties": {
                 "title": "Ball Square Station",
-                "description": ""
+                "description": "",
+                "factSheet": "http://greenlineextension.eot.state.ma.us/documents/about/FactSheets/Station_Ball_Square.pdf",
+                "monthEstimate": "6",
+                "yearEstimate": "2019"
             },
             "geometry": {
                 "coordinates": [
@@ -135,7 +150,10 @@
             "type": "Feature",
             "properties": {
                 "title": "College Avenue Square",
-                "description": ""
+                "description": "",
+                "factSheet": "http://greenlineextension.eot.state.ma.us/documents/about/FactSheets/Station_College_Ave.pdf",
+                "monthEstimate": "6",
+                "yearEstimate": "2019"
             },
             "geometry": {
                 "coordinates": [

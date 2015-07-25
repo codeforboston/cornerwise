@@ -1,26 +1,6 @@
-define(["backbone", "layer", "underscore"], function(B, Layer, _) {
-    var layers = [
-        {
-            id: "glx",
-            title: "Green Line Extension",
-            source: "/scripts/src/layerdata/glx.geojson",
-            color: "green",
-            shown: false,
-            features: null
-        },
-        {
-            id: "cp",
-            title: "Community Path",
-            source: "/scripts/src/layerdata/community_path.geojson",
-            color: "orange",
-            shown: false,
-            features: null
-        }
-    ];
-
-
+define(["backbone", "layer", "config", "underscore"], function(B, Layer, config, _) {
     // Construct a Backbone model for each of the layers:
-    var layerModels = _.map(layers, function(info) {
+    var layerModels = _.map(config.layers, function(info) {
         return new Layer(info);
     });
 

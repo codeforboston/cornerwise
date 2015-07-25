@@ -14,8 +14,8 @@ define(
             },
 
             filterViews: {
-                "#spga-filters": { view: SPGAFilterView,
-                                   title: "Granting Authority" },
+                // "#spga-filters": { view: SPGAFilterView,
+                //                    title: "Granting Authority" },
                 "#type-filters": { view: TypeFilterView,
                                    title: "Permit Types" }
             },

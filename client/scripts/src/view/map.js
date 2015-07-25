@@ -1,7 +1,8 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
-        "ref-location", "popup-view", "ref-marker", "layers"],
+        "ref-location", "popup-view", "ref-marker", "layers",
+        "info-layer-helper"],
        function(B, config, L, $, _, refLocation, PopupView, RefMarker,
-                infoLayers) {
+                infoLayers, info) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "images/marker-active";
@@ -29,7 +30,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         initialize: function() {
             var map = L.map(this.el),
                 layer = L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
-                zoningLayer = L.layerGroup();
+                zoningLayer = L.featureGroup();
 
             map.fitBounds(config.bounds);
 
@@ -37,6 +38,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             map.addLayer(zoningLayer);
 
             this.map = map;
+            this.addBaseLayers(config.baseLayers);
             this.zoningLayer = zoningLayer;
 
             // Map from case numbers to L.Markers
@@ -53,7 +55,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             this.listenTo(infoLayers, "change", this.layersChanged);
 
-            map.on("popupopen", _.bind(this.popupOpened, this))
+            zoningLayer.on("popupopen", _.bind(this.popupOpened, this))
                 .on("popupclose", _.bind(this.popupClosed, this));
 
             return this;
@@ -141,11 +143,11 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                     if (change.changed.selected) {
                         self.map.setView(marker.getLatLng());
-                        
+
                         //open popup
 
                         marker.unbindPopup().bindPopup("").openPopup();
-                        
+
                     }
 
                     if (change.changed.selected === false){
@@ -213,10 +215,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     var self = this;
                     infoLayer.getFeatures()
                         .done(function(features) {
-                            var layer = L.geoJson(features,
-                                                  {style: {color: color}});
+                            var layer = info.makeInfoLayer(infoLayer, features);
                             self._infoLayers[id] = layer;
                             self.map.addLayer(layer);
+
                         });
                 }
 
@@ -228,9 +230,19 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             if (infoLayer.changed.color)
                 layer.style({color: color});
 
-
-            if (infoLayer.changed.hasOwnProperty("shown"))
+            if (infoLayer.changed.shown === false)
                 this.map.removeLayer(layer);
+        },
+
+        addBaseLayers: function(layers) {
+            var self = this;
+            _.each(layers, function(layer) {
+                $.getJSON(layer.source)
+                    .done(function(features) {
+                        self.map.addLayer(L.geoJson(features,
+                                                    {style: layer.style}));
+                    });
+            });
         }
     });
 });

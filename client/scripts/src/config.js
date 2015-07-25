@@ -38,6 +38,41 @@ define([], function() {
             "SPSR/V": "Special Permit with Site Plan Review"
         },
 
+        // Layers that are always shown
+        baseLayers: [
+            {
+                source: "/scripts/src/layerdata/somerville.geojson",
+                style: {
+                    stroke: 0,
+                    fillColor: "green",
+                    fillOpacity: 0.2
+                }
+            }
+        ],
+
+        layers: [
+            {
+                id: "glx",
+                title: "Green Line Extension",
+                template:
+                ('<%= title %><br>Scheduled Opening: ' +
+                 '<%= monthEstimate + "/" + yearEstimate %>' +
+                 '<br><a href="<%= factSheet %>" target="_blank">Fact Sheet</a>'),
+                source: "/scripts/src/layerdata/glx.geojson",
+                color: "green",
+                shown: false,
+                features: null
+            },
+            {
+                id: "cp",
+                title: "Community Path",
+                source: "/scripts/src/layerdata/community_path.geojson",
+                color: "orange",
+                shown: false,
+                features: null
+            }
+        ],
+
         // Esri:
         clientId: "jYLY7AeA1U9xDiWu",
         clientSecret: "64a66909ff724a0a9928838ef4462909"
