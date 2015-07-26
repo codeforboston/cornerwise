@@ -44,7 +44,7 @@ define([], function() {
                 source: "/scripts/src/layerdata/somerville.geojson",
                 style: {
                     stroke: 0,
-                    fillColor: "green",
+                    fillColor: "#ee6c43",
                     fillOpacity: 0.2
                 }
             }
@@ -55,12 +55,20 @@ define([], function() {
                 id: "glx",
                 title: "Green Line Extension",
                 template:
-                ('<%= title %><br>Scheduled Opening: ' +
+                ('<strong><%= title %></strong>' +
+                 '<br>Scheduled Opening: ' +
                  '<%= monthEstimate + "/" + yearEstimate %>' +
                  '<br><a href="<%= factSheet %>" target="_blank">Fact Sheet</a>'),
                 source: "/scripts/src/layerdata/glx.geojson",
                 color: "green",
                 shown: false,
+                marker: {
+                    type: "circle",
+                    color: "green",
+                    fillColor: "white",
+                    radius: 5,
+                    fillOpacity: 1
+                },
                 features: null
             },
             {

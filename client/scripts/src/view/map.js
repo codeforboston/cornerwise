@@ -187,12 +187,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     } else {
                         // If the radius has been cleared, fit the map
                         // bounds to the feature group:
-                        this.map.fitBounds(this.collection.getBounds(),
+                        this.map.fitBounds(this.zoningLayer.getBounds(),
                                            {padding: [5, 5]});
                     }
                 } else {
                     // Recenter
-                    this.map.setView(loc, this.map.getZoom(), {animate: true});
+                    this.map.panTo(loc);
                 }
             }
         },
