@@ -44,7 +44,8 @@ define([], function() {
             {
                 source: "/scripts/src/layerdata/somerville.geojson",
                 style: {
-                    stroke: 0,
+                    stroke: 0.1,
+                    color: "#397f34",
                     fillColor: "#397f34",
                     fillOpacity: 0.2
                 }
