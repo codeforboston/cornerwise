@@ -29,7 +29,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
     return B.View.extend({
         initialize: function() {
             var map = L.map(this.el),
-                layer = L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
+                layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup();
 
             map.fitBounds(config.bounds);

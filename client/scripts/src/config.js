@@ -8,7 +8,8 @@ define([], function() {
     return {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
-        tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+        //tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
