@@ -1,0 +1,77 @@
+#+TITLE: CityDash: Server Setup
+#+AUTHOR: Code for Boston
+#+OPTIONS: toc:nil
+
+* Running the Server
+
+  We're using Docker (and eventually docker-compose), because it ensures
+  that we're all working with the same environment. In essence, Docker
+  is a tool for managing lightweight Linux machines.
+
+  If you follow the instructions below, you will have the necessary
+  dependencies, including Postgres w/GIS extensions and Django 1.8.
+
+** Docker Installation
+
+   You'll only need to run this once.
+
+   - (OS X/Windows) [[http://virtualbox.org/][Install VirtualBox]]
+   - [[https://docs.docker.com/][Install Docker]]
+     - (OS X/Windows) Use Boot2Docker
+
+** Create
+
+   *You'll only need to run this when the image changes*--when, for
+   example, the Dockerfile changes. (There are other situations where
+   you might need to rebuild.) I'll let everyone know on Slack if you
+   need to rebuild. The process should remain the same.
+
+   - (OS X/Windows) Launch Boot2Docker (the easy way is to run the
+     application wrapper)
+   - ~cd path/to/citydash~
+   - ~docker build -t citydash .~ [fn:1]
+
+     This step creates a new image and applies the tag 'citydash'.
+
+     *Note:* This step and the following may take a long time. Run on a
+     fast connection.
+
+** Run
+
+   Most of the time, you can skip right to this step.
+
+   - (OS X/Windows) In Boot2Docker
+   - ~docker run -it -v $PWD/server:/app -p "3000:3000" citydash /bin/bash~
+
+     Creates a new /container/ from the 'citydash' /image/. Exposes the
+     'server' directory as /app inside the container. Maps the
+     container's port 3000 to port 3000 on the host (or the VM, if
+     you're using Boot2Docker). Runs ~/bin/bash~ within the new
+     container.
+
+   - *You should see a bash prompt.*
+
+   - ~sh /app/start.sh~
+
+     Bash script to start the server. It starts Postgres and then
+     Django.
+
+** Opening in Browser
+   - *Determine IP address:* If you're using Boot2Docker, the port is
+     exposed on the VM and not localhost. At the terminal, type
+     ~boot2docker ip~ to determine the VM's IP address.
+   - In a browser, navigate to http:// **ip address** :3000
+
+   - (OS X) Quick way: ~open http://$(boot2docker ip):3000~
+
+* Additional Notes
+
+  - An image creates a snapshot of a machine. When you start a container
+    from an image, you're starting clean. Changes you make to unshared
+    folders (including--for now--Postgres data) will not be persisted on
+    the image. When you stop the container, the data will be lost. This
+    is acceptable for us while we stabilize the models, etc.
+
+* Footnotes
+
+[fn:1] Remember to include the period (.)!
