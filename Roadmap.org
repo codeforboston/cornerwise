@@ -1,0 +1,60 @@
+* Client Side
+
+** Show map of open 'permits'
+
+** Draw Parcels
+   1. Option: *Always show parcels*
+
+      Probably not advisable. Unless we rasterize the parcel layer, this will mean sending a lot of data to the client. It also means that the client has to manipulate that data. There are 13,541 shapes in the Somerville parcel data
+
+   2. Option: *Only show parcels at a high zoom level, a la the ArcGIS web viewer*
+
+   3. Option: *Only show parcels for the 'relevant' properties*
+
+      The definition of 'relevant will vary by the active view type. If we want to show historical zoning data, this would mean showing only parcels for which data is available. Other views and filters would work as expected.
+
+   4. Option: *Hybrid*
+
+      Show all parcel shapes, but only enable interaction with relevant properties. We could achieve this by serving the parcels as a raster image.
+
+** Allow users to register to receive updates
+
+** Temporal Views
+
+   - View the history of a parcel
+   - View an 'activity overlay' of the city. Divide the city into smaller regions (need a strategy for doing this), group markers by region,
+
+** Detailed Plan Information
+
+   Eventually, it would be great to show site plans directly on the site. They could be presented as popups, or if we can massage the data into a machine-readable format, as overlaps.
+
+* Server Side
+
+** Expose data to client
+
+*** Permits data
+
+*** Parcel data
+
+*** User preferences
+
+** Periodic Scraper
+
+   1. Set up the server to periodically scrape the Reports and Decisions page for permits
+   2. Determine which permits are "stale" (where "stale" has some reasonable definition)
+   3. Record the observation (raw data?)
+   4. Save updates to the relevant cases
+
+** User registration
+
+   1. Record user notification preferences and contact information.
+   2. Create an interface for users to access and change their preferences
+
+** Periodic Notifications
+
+   1. Get the latest changes
+   2. Send email/SMS/push notifications
+
+** RSS Feed
+
+   This is an option for users who do not want to provide us with registration details. The RSS feed URL endpoint should accept all the same filters we use elsewhere.

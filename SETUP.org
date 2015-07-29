@@ -2,6 +2,23 @@
 #+AUTHOR: Code for Boston
 #+OPTIONS: toc:nil
 
+* Running the Client
+
+  The current version of the client is fully decoupled from the server,
+  so running it is quite easy. At the terminal (assuming you have python
+  installed):
+
+  - ~cd path/to/citydash/client~
+  - ~python -m SimpleHTTTPServer~
+
+    Optionally, you can supply an extra numeric argument to run the
+    server on that port.
+
+  - Open your browser to localhost:8000
+    - On OS X, you can type ~open http://localhost:8000~.
+
+  - These instructions are likely to change
+
 * Running the Server
 
   We're using Docker (and eventually docker-compose), because it ensures
@@ -17,39 +34,42 @@
 
    - (OS X/Windows) [[http://virtualbox.org/][Install VirtualBox]]
    - [[https://docs.docker.com/][Install Docker]]
-     - (OS X/Windows) Use Boot2Docker
+     - (OS X/Windows) Use Boot2Docker (instructions on the same page)
 
 ** Create
 
    *You'll only need to run this when the image changes*--when, for
-   example, the Dockerfile changes. (There are other situations where
-   you might need to rebuild.) I'll let everyone know on Slack if you
-   need to rebuild. The process should remain the same.
+   example, the Dockerfile changes.  I'll let everyone know on Slack if
+   you need to rebuild. The process should remain the same.
 
    - (OS X/Windows) Launch Boot2Docker (the easy way is to run the
      application wrapper)
    - ~cd path/to/citydash~
-   - ~docker build -t citydash .~ [fn:1]
+   - ~docker build -t citydash .~
 
      This step creates a new image and applies the tag 'citydash'.
 
-     *Note:* This step and the following may take a long time. Run on a
-     fast connection.
+     *Note:* This step and the following may take a little while. Run on
+     a fast connection.
 
 ** Run
 
    Most of the time, you can skip right to this step.
 
-   - (OS X/Windows) In Boot2Docker
+   - (OS X/Windows) In Boot2Docker:
    - ~docker run -it -v $PWD/server:/app -p "3000:3000" citydash /bin/bash~
 
-     Creates a new /container/ from the 'citydash' /image/. Exposes the
-     'server' directory as /app inside the container. Maps the
-     container's port 3000 to port 3000 on the host (or the VM, if
-     you're using Boot2Docker). Runs ~/bin/bash~ within the new
-     container.
+     Creates a new /container/ from the 'citydash' /image/. Exposes the 'server' directory as /app inside the container. Maps the container's port 3000 to port 3000 on the host (or the VM, if you're using Boot2Docker). Runs ~/bin/bash~ within the new container.
 
    - *You should see a bash prompt.*
+
+     If you see an error that says something like:
+
+        ~Are you trying to connect to a TLS-enabled daemon without TLS?~
+
+     be sure you are running inside Boot2Docker's terminal window. Alternatively, you can copy and paste the three lines beginning with ~export DOCKER_HOST=...~.
+
+     /Details/: When you use Boot2Docker, you're running a VM, and the Docker daemon runs inside that. Setting the ~DOCKER_HOST~, ~DOCKER_CERT_PATH~, and ~DOCKER_TLS_VERIFY~ environment variables allows the Docker client to communicate with the daemon.
 
    - ~sh /app/start.sh~
 
@@ -57,21 +77,10 @@
      Django.
 
 ** Opening in Browser
-   - *Determine IP address:* If you're using Boot2Docker, the port is
-     exposed on the VM and not localhost. At the terminal, type
-     ~boot2docker ip~ to determine the VM's IP address.
-   - In a browser, navigate to http:// **ip address** :3000
-
    - (OS X) Quick way: ~open http://$(boot2docker ip):3000~
+   - *Determine IP address:* If you're using Boot2Docker, the port is exposed on the VM and not localhost. At the terminal, type ~boot2docker ip~ to determine the VM's IP address. If you're running Docker directly on Linux, use ~localhost~.
+   - In a browser, navigate to http:// **ip address** :3000
 
 * Additional Notes
 
-  - An image creates a snapshot of a machine. When you start a container
-    from an image, you're starting clean. Changes you make to unshared
-    folders (including--for now--Postgres data) will not be persisted on
-    the image. When you stop the container, the data will be lost. This
-    is acceptable for us while we stabilize the models, etc.
-
-* Footnotes
-
-[fn:1] Remember to include the period (.)!
+  - An image creates a snapshot of a machine. When you start a container from an image, you're starting clean. Changes you make to unshared folders (including--for now--Postgres data) will not be persisted on the image. When you stop the container, the data will be lost. This is acceptable for us while we stabilize the models, etc.
