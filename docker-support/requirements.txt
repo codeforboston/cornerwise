@@ -1,6 +1,13 @@
 Django==1.8.3
+amqp==1.4.6
+anyjson==0.3.3
 argparse==1.2.1
 beautifulsoup4==4.4.0
+billiard==3.3.0.20
+celery==3.1.18
+kombu==3.0.26
 psycopg2==2.6.1
+pytz==2015.4
+redis==2.10.3
 virtualenv==1.11.6
 wsgiref==0.1.2
