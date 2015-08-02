@@ -17,6 +17,12 @@ function open_browser {
     fi;
 }
 
+function report_changes {
+    echo "$1 has changed since the image was created."
+    echo "Rerun ${BASH_SOURCE[0]} with -b flag to rebuild, -B to ignore changes"
+    exit 2
+}
+
 function print_help {
     echo "
 Quickly build and launch the CityDash container.
@@ -100,51 +106,48 @@ fi;
 
 IMAGE_CREATED=$(docker inspect citydash | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
 
-# Determine if the image should be rebuilt.
-if [ "$SHOULD_BUILD" -ne 1 ]; then
-    SHOULD_BUILD=1
+if ((!$IGNORE_CHANGES)); then
+    # Determine if the image should be rebuilt.
+    if ((!$SHOULD_BUILD)); then
+        SHOULD_BUILD=1
 
-    if [ $? -eq 0 ]; then
-        echo "Found existing citydash image (created: $IMAGE_CREATED)"
-        SHOULD_BUILD=0
+        if [ $? -eq 0 ]; then
+            echo "Found existing citydash image (created: $IMAGE_CREATED)"
+            SHOULD_BUILD=0
 
-        # Convert edit date to a timestamp
-        CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$IMAGE_CREATED" "+%s")
-        DOCKERFILE_MODIFIED=$(stat -f %m $CITYDASH_DIR/Dockerfile)
+            # Convert edit date to a timestamp
+            CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$IMAGE_CREATED" "+%s")
+            DOCKERFILE_MODIFIED=$(stat -f %m $CITYDASH_DIR/Dockerfile)
 
-        if [ $DOCKERFILE_MODIFIED -gt $CREATED_STAMP ]; then
-            echo "Dockerfile has changed, so the image should be rebuilt."
-            echo "Rerun as: ${BASH_SOURCE[0]} -b"
-            exit 1
-            SHOULD_BUILD=1
-        else
-            for path in $CITYDASH_DIR/docker-support/*; do
-                if [ $(stat -f %m $path) -gt $CREATED_STAMP ]; then
-                    echo "$path has changed, so the image should be rebuilt."
-                    echo "Rerun as: ${BASH_SOURCE[0]} -b"
-                    exit 1
-                    SHOULD_BUILD=1
-                    break
-                fi
-            done
+            if [ $DOCKERFILE_MODIFIED -gt $CREATED_STAMP ]; then
+                report_changes "Dockerfile"
+                SHOULD_BUILD=1
+            else
+                for path in $CITYDASH_DIR/docker-support/*; do
+                    if [ $(stat -f %m $path) -gt $CREATED_STAMP ]; then
+                        report_changes $path
+                        SHOULD_BUILD=1
+                        break
+                    fi
+                done
+            fi
         fi
+    fi
+fi
 
-    fi;
-fi;
-
-if [ "$SHOULD_BUILD" -eq 1 ]; then
+if (($SHOULD_BUILD)); then
     echo "Building citydash image."
     docker build -t citydash $CITYDASH_DIR
 fi;
 
-if [ $FORCE_RUN -ne 1 ]; then
+if ((!$FORCE_RUN)); then
     # Determine if the container is already running:
     CONTAINER_ID=$(docker ps | awk '/citydash/ { if (match($2, /^citydash/)) print $1 }')
 else
     CONTAINER_ID=""
 fi;
 
-if [ $CONTAINER_ID ]; then
+if [ -n "$CONTAINER_ID" ]; then
     # Found a container. Attach to it:
     echo "Attaching to running container with id: $CONTAINER_ID"
     docker exec -it $CONTAINER_ID $RUN_COMMAND
