@@ -2,7 +2,7 @@
 service postgresql start
 service redis-server start # Required for celery
 
-pid_file=/app/_citydash_django.pid
+pid_file=/var/run/_citydash_django.pid
 server_out=/app/django.log
 server_err=/app/error.log
 
