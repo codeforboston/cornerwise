@@ -1,13 +1,14 @@
 from bs4 import BeautifulSoup
 import arcgis
+from datetime import datetime
 import json
 import re
 import urllib2
 
 LAST_PAGE = 31
-URL_FORMAT = "http://www.somervillema.gov/planningandzoning/reports?page={:1}"
+URL_FORMAT = "http://www.somervillema.gov/planningandzoning/reports?order=field_rnd_submission_date_value&sort=desc&page={:1}"
 TITLES = {}
-
+DATE_FORMAT = "%b %d, %Y"
 
 def make_url(page=1):
     "Returns a string URL for the given page."
@@ -48,13 +49,16 @@ def get_links(elt):
 def links_field(td):
     return {"links": get_links(td)}
 
+def
+
 def default_field(td):
     return td.get_text().strip()
 
 field_processors = {
     "reports": links_field,
     "decisions": links_field,
-    "other": links_field
+    "other": links_field,
+    "submissionDate": date_field
 }
 
 def col_names(table):
