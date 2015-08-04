@@ -20,7 +20,8 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             "click": "onClick"
         },
 
-        template: $u.template('<td><b><%= description %></b>' +
+        template: $u.template( '<td><%= caseNumber %></td>' +
+                              '<td><b><%= description %></b>' +
                               '<br><%= number %> <%= street %></td>' +
                               '<td><span class="distance"><%= commas(refDistance) %> feet</span></td>' +
                               '<td><%= formatDate(submitted) %></td>'
