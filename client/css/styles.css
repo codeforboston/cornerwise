@@ -8183,13 +8183,20 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 }
 
 #geolocate, #geolocating-indicator {
-    font-size: larger;
-    position: absolute;
-    right: 10px;
-    top: 0;
-    width: 10%;
-    height: 100%;
-    display: block;
+	font-size: larger;
+	position: absolute;
+	right: 10px;
+	top: 0;
+	width: 15%;
+	height: 32px;
+	display: block;
+	background-color: #2A749B;
+	background-image: none;
+	margin: auto;
+}
+
+.geolocateArrow {
+	margin: auto;
 }
 
 .geolocating #geolocate, #geolocating-indicator {
