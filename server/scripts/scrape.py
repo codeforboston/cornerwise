@@ -42,14 +42,18 @@ def link_info(a):
         "url": a["href"]
     }
 
+def get_date(d):
+    return datetime.strptime(d, '%b %d, %Y')
+
 def get_links(elt):
     "Return information about the <a> element descendants of elt."
     return [link_info(a) for a in elt.find_all("a") if a["href"]]
 
+def dates_field(td):
+    return get_date(default_field(td))
+
 def links_field(td):
     return {"links": get_links(td)}
-
-def
 
 def default_field(td):
     return td.get_text().strip()
@@ -58,7 +62,7 @@ field_processors = {
     "reports": links_field,
     "decisions": links_field,
     "other": links_field,
-    "submissionDate": date_field
+    "submissionDate": dates_field
 }
 
 def col_names(table):
@@ -118,4 +122,4 @@ def get_permits(pages):
     return all_cases
 
 #if __name__ == "__main__":
-    #print(main(range(1, LAST_PAGE+1)))
+#    print(main(range(1, LAST_PAGE+1)))
