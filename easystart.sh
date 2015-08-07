@@ -90,6 +90,8 @@ while getopts ":rbBfpshx" opt; do
     esac
 done
 
+shift $((OPTIND-1))
+
 if [ -z "$RUN_COMMAND" ]; then
     if [ -n "$1" ]; then
         RUN_COMMAND="$*"
