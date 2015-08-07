@@ -12,7 +12,7 @@ pip install -r requirements.txt
 service postgresql start
 su postgres -- <<EOF
 createdb citydash
-psql citydash -c "create extension postgis; create extension postgis_topology"
+psql citydash -q -f pg_setup.sql
 psql citydash -q -f import_parcels.sql
 EOF
 
