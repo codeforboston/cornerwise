@@ -8149,8 +8149,7 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 #zoning-map {
     border: 2px solid black;
     width: 100%;
-    height: 500px;
-
+    height:75vh;
 }
 /* This moves the map*/
 #map-container {

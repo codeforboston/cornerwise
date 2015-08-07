@@ -2,7 +2,7 @@ define(["leaflet", "config"], function(L, config) {
     return L.FeatureGroup.extend({
         initialize: function(loc, radius) {
             var fg = L.FeatureGroup.prototype.initialize.call(this, []);
-
+            this.trackResize = true;
             this.circle = L.circle(loc, radius,
                                   {
                                       stroke: true,
