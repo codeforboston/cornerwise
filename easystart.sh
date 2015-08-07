@@ -110,6 +110,10 @@ fi;
 # Using Boot2Docker?
 if (which boot2docker >/dev/null); then
     USE_B2D=1
+
+    # Download the ISO, if necesary:
+    boot2docker init >/dev/null
+
     # Is it up?
     if [ $(boot2docker status) != "running" ] ; then
         echo "Starting up Boot2Docker."
@@ -127,6 +131,7 @@ else
         # OS X
         echo "You're running OS X, so you should install Boot2Docker."
         open_browser "http://boot2docker.io"
+
         exit 1
     fi
     USE_B2D=0
