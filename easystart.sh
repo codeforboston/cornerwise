@@ -133,13 +133,14 @@ else
 fi;
 
 IMAGE_CREATED=$(docker inspect citydash | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
+NO_EXISTING=$?
 
 if ((!IGNORE_CHANGES)); then
     # Determine if the image should be rebuilt.
     if ((!$SHOULD_BUILD)); then
         SHOULD_BUILD=1
 
-        if [ $? -eq 0 ]; then
+        if [ "$NO_EXISTING" -eq 0 ]; then
             echo "Found existing citydash image (created: $IMAGE_CREATED)"
             SHOULD_BUILD=0
 
@@ -164,7 +165,7 @@ if ((!IGNORE_CHANGES)); then
 fi
 
 if ((SHOULD_BUILD)); then
-    echo "Building citydash image."
+    echo "Building citydash image. This may take a few moments."
     docker build -t citydash $CITYDASH_DIR
 fi;
 
