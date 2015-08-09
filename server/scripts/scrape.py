@@ -130,9 +130,15 @@ def get_permits_since(dt, date_column="submissionDate"):
     Returns an array of dicts representing scraped cases.
     """
     all_cases = []
-    i = 1
+    i = 0
     while True:
-        html = get_page(i)
+        try:
+            # There's currently a bug in the Reports and Decisions page
+            # that causes nonexistent pages to load page 1. They should
+            # return a 404 error instead!
+            html = get_page(i)
+        except urllib2.HTTPError as err:
+            break
 
         if not html:
             break
@@ -143,6 +149,8 @@ def get_permits_since(dt, date_column="submissionDate"):
 
         if cases[-1][date_column] <= dt:
             break
+
+        i += 1
 
     return all_cases
 
