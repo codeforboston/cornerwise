@@ -1,0 +1,4 @@
+# Run when bash starts up in the container
+# Copied to /root/.bashrc when the Docker image starts
+service postgresql start
+service redis-server start

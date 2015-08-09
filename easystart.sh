@@ -193,7 +193,7 @@ if [ -n "$CONTAINER_ID" ]; then
     docker exec -it $CONTAINER_ID $RUN_COMMAND
 else
     echo "Starting container..."
-    docker run -it -v $CITYDASH_DIR/server:/app -v $CITYDASH_DIR/client:/client -v $CITYDASH_DIR/data:/data -p "$HOST_PORT:3000" citydash $RUN_COMMAND
+    docker run -it -v $CITYDASH_DIR/server:/app -v $CITYDASH_DIR/client:/client -v $CITYDASH_DIR/data:/data -v $CITYDASH_DIR/docker-runtime/bashrc:/root/.bashrc -p "$HOST_PORT:3000" citydash $RUN_COMMAND
 fi;
 
 if [ $? -eq 1 ]; then

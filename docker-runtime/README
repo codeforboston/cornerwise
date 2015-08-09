@@ -1,0 +1,5 @@
+This directory is intended for individual files that will be shared with
+the container at runtime.
+
+Note: the sharing does not happen automatically. You must edit the call
+to docker run in easystart.sh
