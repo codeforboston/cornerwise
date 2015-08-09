@@ -26,6 +26,7 @@ def attribute_for_title(title):
     """
     return TITLES.get(title, to_camel(title))
 
+# TODO: Return None or error if the response is not successful
 def get_page(page=1):
     "Returns the HTML content of the given Reports and Decisions page."
     f = urllib2.urlopen(make_url(page))
@@ -118,6 +119,30 @@ def get_permits(pages):
         all_cases += case_list
 
     add_geocode(case_list)
+
+    return all_cases
+
+def get_permits_since(dt, date_column="submissionDate"):
+    """
+    Continually scrape the permits until the submission date is
+    less than or equal to the given date.
+
+    Returns an array of dicts representing scraped cases.
+    """
+    all_cases = []
+    i = 1
+    while True:
+        html = get_page(i)
+
+        if not html:
+            break
+
+        doc = BeautifulSoup(html, "html.parser")
+        cases = find_cases(doc)
+        all_cases += [case for case in cases if case[date_column] > dt]
+
+        if cases[-1][date_column] <= dt:
+            break
 
     return all_cases
 
