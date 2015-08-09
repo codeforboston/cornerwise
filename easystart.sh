@@ -197,7 +197,9 @@ else
 fi;
 
 if [ $? -eq 1 ]; then
-    echo "Failed to start the container."
+    # TODO: Is it possible to distinguish between a failure to start the
+    # container and a timeout? Both apparently return exit code 1.
+    echo "Exited abnormally."
     exit 1
 fi;
 
