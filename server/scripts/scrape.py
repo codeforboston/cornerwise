@@ -37,6 +37,16 @@ def get_page(page=1):
 def find_table(doc):
     return doc.select_one("table.views-table")
 
+def detect_last_page(doc):
+    anchor = doc.select_one("li.pager-last a")
+    m = re.search(r"[?&]page=(\d+)", anchor["href"])
+
+    if m:
+        return int(m.group(1))
+
+    return 0
+
+## Field helpers:
 def link_info(a):
     return {
         "title": a.get_text().strip(),
@@ -131,6 +141,7 @@ def get_permits_since(dt, date_column="submissionDate"):
     """
     all_cases = []
     i = 0
+    last_page = None
     while True:
         try:
             # There's currently a bug in the Reports and Decisions page
@@ -150,7 +161,13 @@ def get_permits_since(dt, date_column="submissionDate"):
         if cases[-1][date_column] <= dt:
             break
 
+        if last_page is None:
+            last_page = detect_last_page(doc)
+
         i += 1
+
+        if i > last_page:
+            break
 
     return all_cases
 
