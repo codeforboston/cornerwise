@@ -54,19 +54,21 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             this.$el.toggleClass("permit-hovered", hovered);
         },
 
-        selectedChanged: function(permit, selected) {
+        selectedChanged: function (permit, selected) {
+
             this.$el.toggleClass("permit-selected", selected);
+            if (selected) {
+                var parent = this.$el.parent(),
+                    topOffset = parent.scrollTop(),
+                    botOffset = topOffset + parent.height(),
+                    eltTop = this.el.offsetTop,
+                    eltBottom = eltTop + this.$el.height();
 
-            var parent = this.$el.parent(),
-                topOffset = parent.scrollTop(),
-                botOffset = topOffset + parent.height(),
-                eltTop = this.el.offsetTop,
-                eltBottom = eltTop + this.$el.height();
-
-            if (eltTop > botOffset || eltBottom < topOffset) {
-                parent.animate({
-                    scrollTop: eltTop - 30
-                }, 200);
+                if (eltTop > botOffset || eltBottom < topOffset) {
+                    parent.animate({
+                        scrollTop: eltTop - 30
+                    }, 200);
+                }
             }
         },
 
