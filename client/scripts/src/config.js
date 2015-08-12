@@ -11,6 +11,8 @@ define([], function() {
         tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
         //tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
 
+        backendURL: "http://localhost:3000",
+
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
         pzURL: "https://script.google.com/macros/s/AKfycbxdNiXwOYTAxEZE4LuGcCFsOW-JpQr9bQl6hx3NZIF4oc19UoBT/exec",
@@ -82,6 +84,14 @@ define([], function() {
                 features: null
             }
         ],
+
+        // TODO: Respect this value
+        showParcelsAboveZoomLevel: 15,
+
+        parcelStyle: {
+            stroke: 0.5,
+            color: "orange"
+        },
 
         // Esri:
         clientId: "jYLY7AeA1U9xDiWu",

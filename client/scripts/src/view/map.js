@@ -11,7 +11,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         } else {
             return "images/marker-normal";
         }
-
     }
 
     function getIcon(permit) {
@@ -30,15 +29,18 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         initialize: function() {
             var map = L.map(this.el),
                 layer = L.tileLayer(config.tilesURL),
-                zoningLayer = L.featureGroup();
+                zoningLayer = L.featureGroup(),
+                parcelLayer = L.geoJson();
 
             map.fitBounds(config.bounds);
 
             map.addLayer(layer);
+            map.addLayer(parcelLayer);
             map.addLayer(zoningLayer);
 
             this.map = map;
             this.addBaseLayers(config.baseLayers);
+            this.parcelLayer = parcelLayer;
             this.zoningLayer = zoningLayer;
 
             // Map from case numbers to L.Markers
@@ -61,11 +63,15 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             return this;
         },
 
-        // The Layer Group containing permit markers
+        // Layer ordering (bottom -> top):
+        // tiles, base layers, parcel layer, permits layer
+
+        // The Layer Group containing permit markers, set during
+        // initialization.
         zoningLayer: null,
 
-        // The layer group containing
-        uiLayer: null,
+        // GeoJSON layer group containing parcel shapes
+        parcelLayer: null,
 
         el: function() {
             return document.getElementById(config.mapId);
@@ -113,7 +119,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 })
                 .on("click", function(e) {
                     permit.set("selected", true);
-                })
+                });
 
             this.listenTo(permit, "change", this.permitChangd);
         },
@@ -126,6 +132,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             delete this.caseMarker[permit.get("caseNumber")];
         },
+
+        // Map of case # -> ILayer objects
+        parcelLayers: {},
 
         // Triggered when a child permit changes
         changed: function(change) {
@@ -147,13 +156,32 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                         //open popup
 
                         marker.unbindPopup().bindPopup("").openPopup();
-
                     }
 
                     if (change.changed.selected === false){
                         //close popup
                     }
                 });
+
+            // Hide or show parcel outlines:
+            var parcelLayer = this.parcelLayers[change.get("caseNumber")];
+            if (change.get("selected") || change.get("hovered")) {
+                if (!parcelLayer) {
+                    var parcel = change.get("parcel");
+
+                    if (!parcel) return;
+
+                    parcelLayer = L.GeoJSON.geometryToLayer(parcel);
+                    parcelLayer.setStyle(config.parcelStyle);
+                    this.parcelLayers[change.get("caseNumber")] = parcelLayer;
+                }
+
+                this.parcelLayer.addLayer(parcelLayer);
+            } else if (parcelLayer &&
+                       (change.changed.selected === false ||
+                        change.changed.hovered === false)) {
+                this.parcelLayer.removeLayer(parcelLayer);
+            }
         },
 
         /* Getting information about the markers. */

@@ -1,11 +1,11 @@
-define(["backbone", "leaflet", "ref-location"], function(B, L, refLocation) {
-    console.log("Creating Permit model.");
-
+define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLocation, config) {
     return B.Model.extend({
         idAttribute: "case",
 
         initialize: function() {
-            this.listenTo(refLocation, "change", this.recalculateDistance);
+                 this.listenTo(refLocation, "change", this.recalculateDistance)
+                .listenTo(this, "change:hovered", this.loadParcel)
+                .listenTo(this, "change:selected", this.loadParcel);
         },
 
         defaults: function() {
@@ -15,7 +15,10 @@ define(["backbone", "leaflet", "ref-location"], function(B, L, refLocation) {
 
                 // excluded will change to true when the permit fails
                 // the currently applied filter(s).
-                excluded: false
+                excluded: false,
+                // GeoJSON representing the shape of the corresponding
+                // tax parcel, if one is found.
+                parcel: null
             };
         },
 
@@ -24,6 +27,27 @@ define(["backbone", "leaflet", "ref-location"], function(B, L, refLocation) {
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
             return attrs;
+        },
+
+        loadParcel: function(permit) {
+            if (this._parcelLoadAttempted)
+                return;
+
+            var loc = this.get("location"),
+                self = this;
+
+            this._parcelLoadAttempted = true;
+
+            $.getJSON(config.backendURL + "/parcel/at_point",
+                      {lat: loc.lat,
+                       lng: loc.lng})
+                .done(function(parcel) {
+                    console.log(parcel);
+                    self.set("parcel", parcel);
+                })
+                .fail(function(error) {
+                    console.log(error);
+                });
         },
 
         getDistance: function(fromLoc, toLoc) {
