@@ -13,5 +13,8 @@ if [ -f $pid_file ]; then
     rm -f $pid_file
 fi;
 
-nohup python /app/manage.py runserver 0.0.0.0:3000 >$server_out 2>$server_err&
+# Prefer Python 3:
+PYTHON_BIN=$(which python3 || which python)
+echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
+nohup $PYTHON_BIN /app/manage.py runserver 0.0.0.0:3000 >$server_out 2>$server_err&
 echo $! >$pid_file

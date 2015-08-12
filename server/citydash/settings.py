@@ -37,7 +37,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis'
+    'django.contrib.gis',
+    'parcel',
+    'shared'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -78,9 +80,9 @@ WSGI_APPLICATION = 'citydash.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'HOST': '',
         'NAME': 'citydash',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres'
+        'USER': 'citydash'
     }
 }
 

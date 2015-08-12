@@ -11,34 +11,7 @@ from __future__ import unicode_literals
 
 from django.contrib.gis.db import models
 
-
-class DjangoMigrations(models.Model):
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_migrations'
-
-
-class Layer(models.Model):
-    topology = models.ForeignKey('Topology')
-    layer_id = models.IntegerField()
-    schema_name = models.CharField(max_length=128)
-    table_name = models.CharField(max_length=128)
-    feature_column = models.CharField(max_length=128)
-    feature_type = models.IntegerField()
-    level = models.IntegerField()
-    child_id = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'layer'
-        unique_together = (('topology', 'layer_id'), ('schema_name', 'table_name', 'feature_column'),)
-
-
-class Parcels(models.Model):
+class Parcel(models.Model):
     gid = models.AutoField(primary_key=True)
     shape_leng = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True)
     shape_area = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True)
@@ -52,20 +25,9 @@ class Parcels(models.Model):
     bnd_chk = models.CharField(max_length=2, blank=True, null=True)
     no_match = models.CharField(max_length=1, blank=True, null=True)
     town_id = models.SmallIntegerField(blank=True, null=True)
-    geog = models.MultiPolygonField(srid=0, blank=True, null=True)
+    shape = models.MultiPolygonField(srid=97406, blank=True, null=True)
     objects = models.GeoManager()
 
     class Meta:
         managed = False
-        db_table = 'parcels'
-
-
-class Topology(models.Model):
-    name = models.CharField(unique=True, max_length=128)
-    srid = models.IntegerField()
-    precision = models.FloatField()
-    hasz = models.BooleanField()
-
-    class Meta:
-        managed = False
-        db_table = 'topology'
+        db_table = 'parcel'
