@@ -1,0 +1,14 @@
+* Somerville Planning Board
+  - [[http://www.somervillema.gov/departments/planning-board/reports-and-decisions][Reports and Decisions]]
+    Cases considered by the planning board (PB) or zoning board of appeals (ZBA), including links to plans, staff memos, and decisions, dating from April 2011 to present.
+  - [[http://www.somervillema.gov/government/public-minutes][Public Minutes]]
+    Minutes and agenda of public meetings.
+
+* Other Resources
+  - [[http://maps.bostonredevelopmentauthority.org/zoningviewer/][Boston Redevelopment Authority]]
+    Possible source of inspiration for later versions of this project.
+  - [[http://massgis.maps.arcgis.com/apps/OnePane/basicviewer/index.html?appid=47689963e7bb4007961676ad9fc56ae9][Massachusetts Property Information Viewer]]
+    Viewer for tax parcels
+  - [[http://www.cambridgema.gov/CDD/cddlocatormap][Cambridge Community Development Department Map]]
+  - [[http://www.mass.gov/anf/research-and-tech/it-serv-and-support/application-serv/office-of-geographic-information-massgis/datalayers/download-level3-parcels.html][MassGIS Level 3 Assessor's Parcels]]
+    This is the source we're using for the geometry of tax parcels.
