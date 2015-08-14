@@ -9,14 +9,15 @@ export C_INCLUDE_PATH=/usr/include/gdal
 pip3 install -r /support/requirements.txt
 
 # Postgres setup
+# Allow local connections to 'postgres' and 'citydash' roles.
+sed -i '75 a\
+local postgres all trust\
+local citydash all trust' /etc/postgresql/*/main/pg_hba.conf
+
 service postgresql start
-createuser -l citydash
-createdb -O citydash citydash
+createuser -U postgres -l citydash
+createdb -U postgres -O citydash citydash
 psql -U postgres -q -f /support/pg_setup.sql citydash
 
 sh /support/export_parcels.sh
 rm -r /shapefiles
-
-# Allow connections
-sed -i '75 a\
-local citydash all trust' /etc/postgresql/9.3/main/pg_hba.conf

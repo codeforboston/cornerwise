@@ -9,3 +9,4 @@ kombu==3.0.26
 psycopg2==2.6.1
 pytz==2015.4
 redis==2.10.3
+django-redis-cache==1.6.0
