@@ -32,9 +32,9 @@
 
    You'll only need to run this once.
 
-   - (OS X/Windows) [[http://virtualbox.org/][Install VirtualBox]]
-   - [[https://docs.docker.com/][Install Docker]]
-     - (OS X/Windows) Use Boot2Docker (instructions on the same page)
+   - *OS X/Windows:* [[https://www.docker.com/toolbox][Install Docker Toolbox]]
+     - The Toolbox includes VirtualBox and Docker Machine.
+   - *Linux:* [[https://docs.docker.com/][Install Docker]]
 
 ** Create
 
@@ -57,7 +57,7 @@
    Most of the time, you can skip right to this step.
 
    - (OS X/Windows) In Boot2Docker:
-   - ~docker run -it -v $PWD/server:/app -p "3000:3000" citydash /bin/bash~
+   - ~docker run -it -v $PWD/server:/app -v $PWD/client:/client -v $PWD/data:/data -p "3000:3000" citydash /bin/bash~
 
      Creates a new /container/ from the 'citydash' /image/. Exposes the 'server' directory as /app inside the container. Maps the container's port 3000 to port 3000 on the host (or the VM, if you're using Boot2Docker). Runs ~/bin/bash~ within the new container.
 
