@@ -19,11 +19,6 @@ function open_browser {
     fi;
 }
 
-function report_changes {
-    echo "$1 has changed since the image was created."
-    echo "Rerun ${BASH_SOURCE[0]} with -b flag to rebuild, -B to ignore changes"
-}
-
 function print_help {
     echo "
 Usage: ${BASH_SOURCE[0]} [options] [command]
@@ -37,8 +32,7 @@ Options:
           to build a new image. Only build if there is no
           existing image
   -F      Prevents the script's default behavior of setting up the
-          Boot2Docker VM to forward traffic on the host port to
-          localhost.
+          VM to forward traffic on the host port to localhost.
   -p <port> Run on a port other than 3000
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
@@ -179,21 +173,42 @@ if ((!IGNORE_CHANGES)); then
             echo "Found existing citydash image (created: $IMAGE_CREATED)"
             SHOULD_BUILD=0
 
-            # Convert edit date to a timestamp
-            CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$IMAGE_CREATED" "+%s")
-            DOCKERFILE_MODIFIED=$(stat -f %m $CITYDASH_DIR/Dockerfile)
+            if ((!skip_build_prompt)); then
+                # Convert edit date to a timestamp
+                CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$IMAGE_CREATED" "+%s")
+                DOCKERFILE_MODIFIED=$(stat -f %m $CITYDASH_DIR/Dockerfile)
+                changed_file=""
 
-            if [ $DOCKERFILE_MODIFIED -gt $CREATED_STAMP ]; then
-                report_changes "Dockerfile"
-                SHOULD_BUILD=1
-            else
-                for path in $CITYDASH_DIR/docker-support/*; do
-                    if [ $(stat -f %m $path) -gt $CREATED_STAMP ]; then
-                        report_changes $path
-                        SHOULD_BUILD=1
-                        break
+                if [ $DOCKERFILE_MODIFIED -gt $CREATED_STAMP ]; then
+                    changed_file="Dockerfile"
+
+                else
+                    for path in $CITYDASH_DIR/docker-support/*; do
+                        if [ $(stat -f %m $path) -gt $CREATED_STAMP ]; then
+                            changed_file="$path"
+
+                            break
+                        fi
+                    done
+                fi
+
+                if [ -n "$changed_file" ]; then
+                    echo "$changed_file has changed since the image was created."
+
+                    echo "Rebuild citydash image? (y/N)"
+                    read -t 10 response
+                    if ((response)); then
+                        # Request timed out
+                        SHOULD_BUILD=0
+                    else
+                        if [[ "$response" =~ $yes_pattern ]]; then
+                            SHOULD_BUILD=1
+                        else
+                            SHOULD_BUILD=0
+                        fi
+
                     fi
-                done
+                fi
             fi
         fi
     fi
@@ -239,7 +254,7 @@ if ((AUTOSTART)); then
     wait_count=0
     is_running=1
     if ((use_machine)); then
-        HOSTNAME=$(boot2docker ip)
+        HOSTNAME=$(docker-machine ip "$vm_name")
     else
         HOSTNAME="localhost"
     fi
