@@ -15,8 +15,6 @@ local postgres all trust\
 local citydash all trust' /etc/postgresql/*/main/pg_hba.conf
 
 service postgresql start
-createuser -U postgres -l citydash
-createdb -U postgres -O citydash citydash
 psql -U postgres -q -f /support/pg_setup.sql citydash
 
 sh /support/export_parcels.sh
