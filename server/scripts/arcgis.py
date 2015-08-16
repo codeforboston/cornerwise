@@ -1,6 +1,6 @@
 import json
-from urllib import urlencode
-from urllib2 import urlopen
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 ADDRESS_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses"
 CLIENT_ID = "jYLY7AeA1U9xDiWu"

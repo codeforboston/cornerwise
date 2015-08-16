@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
-import arcgis
+from . import arcgis
 from datetime import datetime
 import json
 import re
-import urllib2
+from urllib.request import urlopen
+from urllib.error import HTTPError
 
 LAST_PAGE = 31
 URL_FORMAT = "http://www.somervillema.gov/planningandzoning/reports?order=field_rnd_submission_date_value&sort=desc&page={:1}"
@@ -29,7 +30,7 @@ def attribute_for_title(title):
 # TODO: Return None or error if the response is not successful
 def get_page(page=1):
     "Returns the HTML content of the given Reports and Decisions page."
-    f = urllib2.urlopen(make_url(page))
+    f = urlopen(make_url(page))
     html = f.read()
     f.close()
     return html
@@ -148,7 +149,7 @@ def get_permits_since(dt, date_column="submissionDate"):
             # that causes nonexistent pages to load page 1. They should
             # return a 404 error instead!
             html = get_page(i)
-        except urllib2.HTTPError as err:
+        except HTTPError as err:
             break
 
         if not html:
