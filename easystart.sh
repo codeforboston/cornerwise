@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 HOST_PORT=3000
 CITYDASH_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 yes_pattern='^[yY]'
