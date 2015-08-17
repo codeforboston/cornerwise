@@ -15,6 +15,10 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Determine if the app is in production mode by examining
+APP_MODE=os.environ.get("DJANGO_MODE", "development").lower()
+IS_PRODUCTION=(APP_MODE == "production")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -39,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'parcel',
+    'proposal',
     'shared'
 )
 
@@ -104,8 +109,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/client/'
 
+if not IS_PRODUCTION:
+    STATIC_ROOT = '/client'
 
 # Celery
 BROKER_URL = "redis://"
