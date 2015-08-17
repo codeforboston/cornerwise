@@ -2,13 +2,10 @@
 HOST_PORT=3000
 CITYDASH_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 yes_pattern='^[yY]'
+docker_environment=""
 
 function find_vm_name {
     echo $(docker-machine ls | awk '/virtualbox/ { print $1 }' | head -n 1)
-}
-
-function setup_environment {
-    eval $(docker-machine env $1)
 }
 
 function open_browser {
@@ -17,6 +14,19 @@ function open_browser {
     elif ( which open >/dev/null ); then
         open $1
     fi;
+}
+
+function download_docker_toolbox {
+    # Determine the latest version of Docker Toolbox and download it.
+    release_tag=$(curl -s https://api.github.com/repos/docker/toolbox/releases/latest | grep "tag_name" | perl -n -e '/"tag_name": "v([^"]+)"/ && print $1')
+
+    if [ -n "$release_tag" ]; then
+        echo "Downloading latest version of Docker Toolbox ($release_tag)."
+        open "https://github.com/docker/toolbox/releases/download/v$release_tag/DockerToolbox-$release_tag.pkg"
+    else
+        echo "Failed to determine the latest version of Docker Toolbox"
+        open_browser "https://www.docker.com/toolbox"
+    fi
 }
 
 function print_help {
@@ -33,6 +43,7 @@ Options:
           existing image
   -F      Prevents the script's default behavior of setting up the
           VM to forward traffic on the host port to localhost.
+  -m <name> Specify a docker-machine machine to use
   -p <port> Run on a port other than 3000
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
@@ -49,7 +60,7 @@ AUTOSTART=0
 STOP_RUNNING=0
 skip_build_prompt=0
 
-while getopts ":rbBFpshx" opt; do
+while getopts ":bBFmprshx" opt; do
     case $opt in
         b)
             SHOULD_BUILD=1
@@ -67,6 +78,9 @@ while getopts ":rbBFpshx" opt; do
             ;;
         F)
             VM_PORT_FORWARDING=0
+            ;;
+        m)
+            vm_name="$OPTARG"
             ;;
         p)
             check_re='^[0-9]{4,}$'
@@ -105,13 +119,18 @@ if [ -z "$RUN_COMMAND" ]; then
     fi
 fi
 
+##################
+
 if (! (which docker >/dev/null)); then
     # Docker is not installed
     echo "Docker is not installed."
+
     if [ $(uname) == "Darwin" ]; then
-        open_browser "https://www.docker.com/toolbox"
+        download_docker_toolbox
+        echo "Please re-run this script after you've installed Docker Toolbox."
     else
         open_browser "http://docs.docker.com/installation/"
+        echo "Please re-run this script after you've installed Docker."
     fi
 
     exit 1
@@ -122,7 +141,9 @@ use_machine=0
 if (which docker-machine >/dev/null); then
     use_machine=1
 
-    vm_name=$(find_vm_name)
+    if [ -z "$vm_name" ]; then
+        vm_name=$(find_vm_name)
+    fi
 
     if [ -z "$vm_name" ]; then
         vm_name=dev
@@ -134,7 +155,9 @@ if (which docker-machine >/dev/null); then
         docker-machine start $vm_name
     fi;
 
-    setup_environment $vm_name
+    # Set up the environment variables so that the Docker client can
+    # connect to the VM.
+    eval $(docker-machine env $vm_name)
 
     # Forward the VM port to localhost
     if ((VM_PORT_FORWARDING)); then
@@ -145,37 +168,30 @@ if (which docker-machine >/dev/null); then
 elif [ $(uname) == "Darwin" ]; then
     # In case the user installed Docker separately
 
-    # OS X
-    echo "You're running OS X, so you should install Docker Machine."
-
-    # Determine the latest version of Docker Toolbox
-    release_tag=$(curl -s https://api.github.com/repos/docker/toolbox/releases/latest | grep "tag_name" | perl -n -e '/"tag_name": "v([^"]+)"/ && print $1')
-
-    if [ -n "$release_tag" ]; then
-        echo "Downloading latest version of Docker Toolbox ($release_tag)"
-        open "https://github.com/docker/toolbox/releases/download/v$release_tag/DockerToolbox-$release_tag.pkg"
-    else
-        echo "Failed to determine the latest version of Docker Toolbox"
-        open_browser "https://www.docker.com/toolbox"
-    fi
+    echo "You're running OS X, so you should install Docker Machine (part of Docker Toolbox)."
+    download_docker_toolbox
+    echo "Please re-run this script once you've installed Docker Toolbox."
     exit 1
 fi
 
-IMAGE_CREATED=$(docker inspect citydash | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
-NO_EXISTING=$?
-
 if ((!IGNORE_CHANGES)); then
     # Determine if the image should be rebuilt.
+
+    # Some jiggery-pokery to determine the date that the existing
+    # citydash image was created.
+    image_created=$(docker inspect citydash | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
+    NO_EXISTING=$?
+
     if ((!$SHOULD_BUILD)); then
         SHOULD_BUILD=1
 
-        if [ -n "$IMAGE_CREATED" ]; then
-            echo "Found existing citydash image (created: $IMAGE_CREATED)"
+        if [ -n "$image_created" ]; then
+            echo "Found existing citydash image (created: $image_created)"
             SHOULD_BUILD=0
 
             if ((!skip_build_prompt)); then
                 # Convert edit date to a timestamp
-                CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$IMAGE_CREATED" "+%s")
+                CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$image_created" "+%s")
                 DOCKERFILE_MODIFIED=$(stat -f %m $CITYDASH_DIR/Dockerfile)
                 changed_file=""
 
@@ -226,10 +242,25 @@ else
     CONTAINER_ID=""
 fi;
 
-if [ -n $CONTAINER_ID ] && ((STOP_RUNNING)); then
-    echo "Stopping container: $CONTAINER_ID"
-    docker stop $CONTAINER_ID
-    CONTAINER_ID=""
+if [ -n $CONTAINER_ID ]; then
+    if ((STOP_RUNNING)); then
+        echo "Stopping container: $CONTAINER_ID"
+        docker stop $CONTAINER_ID
+        CONTAINER_ID=""
+    else
+        echo "There's a citydash container already running with id $CONTAINER_ID."
+        echo "Do you want to (a)ttach to it, (s)top it, or (r)un a new container? (A/s/r)"
+        read -t 10 response
+        stop_re='^[sS]'
+        run_re='^[Rr]'
+
+        if [[ "$response" =~ $stop_re ]]; then
+            docker stop "$CONTAINER_ID"
+            CONTAINER_ID=""
+        elif [[ "$response" =~ $run_re ]]; then
+            CONTAINER_ID=""
+        fi
+    fi
 fi
 
 if [ -n "$CONTAINER_ID" ]; then
@@ -238,7 +269,19 @@ if [ -n "$CONTAINER_ID" ]; then
     docker exec -it $CONTAINER_ID $RUN_COMMAND
 else
     echo "Starting container..."
-    docker run -it -v $CITYDASH_DIR/server:/app -v $CITYDASH_DIR/client:/client -v $CITYDASH_DIR/data:/data -v $CITYDASH_DIR/docker-runtime/bashrc:/root/.bashrc -p "$HOST_PORT:3000" citydash $RUN_COMMAND
+
+    env_opts=""
+    # Build the environment options:
+    for setting in $docker_environment; do
+        env_opts="$env_opts -e $setting"
+    done
+
+    env_file=$CITYDASH_DIR/docker-support/env
+    if [ -f $env_file ]; then
+        env_opts="$env_opts --env-file=$env_file"
+    fi
+
+    docker run -it -v $CITYDASH_DIR/server:/app -v $CITYDASH_DIR/client:/client -v $CITYDASH_DIR/data:/data -v $CITYDASH_DIR/docker-runtime/bashrc:/root/.bashrc -p "$HOST_PORT:3000" $env_opts citydash $RUN_COMMAND
 fi;
 
 if [ $? -eq 1 ]; then
