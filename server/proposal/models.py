@@ -8,6 +8,8 @@ class Proposal(models.Model):
                                help_text="Street address")
     location = models.PointField(help_text="The latitude and longitude")
     region_name = models.CharField(max_length=128,
+                                   # Hardcode this for now
+                                   default="Somerville, MA",
                                    null=True,
                                    help_text="")
     modified = models.DateTimeField(auto_now=True)
@@ -18,22 +20,34 @@ class Proposal(models.Model):
                              help_text="The data source for the proposal.")
     status = models.CharField(max_length=64)
 
-class ProposalEvent(models.Model):
+    # To enable geo queries
+    objects = models.GeoManager()
+
+
+class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
     """
-    title = models.CharField(max_length=256)
+    title = models.CharField(max_length=256, related_name=)
     date = models.DateTimeField()
     duration = models.DurationField(null=True)
     description = models.TextField()
     proposal = models.ForeignKey(Proposal)
 
-
-class ProposalDocument(models.Model):
+class Document(models.Model):
     """
     A document associated with a proposal.
     """
     proposal = models.ForeignKey(Proposal)
-    event = models.ForeignKey(ProposalEvent, null=True)
+    event = models.ForeignKey(ProposalEvent, null=True,
+                              help_text="Event associated with this document")
     url = models.URLField()
+    title = models.CharField(max_length=256,
+                             help_text="The name of the document")
+    field = models.CharField(max_length=256,
+                             help_text="The field in which the document was found")
     document = models.FileField(null=True)
+
+    class Meta:
+        # Ensure at the DB level that documents are not duplicated:
+        unique_together = (("proposal", "url"))
