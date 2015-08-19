@@ -251,23 +251,25 @@ if [ -n $CONTAINER_ID ]; then
         CONTAINER_ID=""
     else
         echo "There's a citydash container already running with id $CONTAINER_ID."
-        echo "Do you want to (a)ttach to it, (s)top it, or (r)un a new container? (A/s/r)"
-        read -t 10 response
-        stop_re='^[sS]'
-        run_re='^[Rr]'
+        echo "If you want to start a new container, re-run ${BASH_SOURCE[0]} -r."
 
-        if [[ "$response" =~ $stop_re ]]; then
-            docker stop "$CONTAINER_ID"
-            CONTAINER_ID=""
-        elif [[ "$response" =~ $run_re ]]; then
-            CONTAINER_ID=""
-        fi
+        # echo "Do you want to (a)ttach to it, (s)top it, or (r)un a new container? (A/s/r)"
+        # read -t 10 response
+        # stop_re='^[sS]'
+        # run_re='^[Rr]'
+
+        # if [[ "$response" =~ $stop_re ]]; then
+        #     docker stop "$CONTAINER_ID"
+        #     CONTAINER_ID=""
+        # elif [[ "$response" =~ $run_re ]]; then
+        #     CONTAINER_ID=""
+        # fi
     fi
 fi
 
 if [ -n "$CONTAINER_ID" ]; then
     # Found a container. Attach to it:
-    echo "Attaching to running container with id: $CONTAINER_ID"
+    echo "Attaching to running container ($CONTAINER_ID)."
     docker exec -it $CONTAINER_ID $RUN_COMMAND
 else
     echo "Starting container..."
