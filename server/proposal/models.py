@@ -28,7 +28,7 @@ class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
     """
-    title = models.CharField(max_length=256, related_name=)
+    title = models.CharField(max_length=256)
     date = models.DateTimeField()
     duration = models.DurationField(null=True)
     description = models.TextField()
@@ -39,7 +39,7 @@ class Document(models.Model):
     A document associated with a proposal.
     """
     proposal = models.ForeignKey(Proposal)
-    event = models.ForeignKey(ProposalEvent, null=True,
+    event = models.ForeignKey(Event, null=True,
                               help_text="Event associated with this document")
     url = models.URLField()
     title = models.CharField(max_length=256,

@@ -165,4 +165,3 @@ def get_proposals_since(dt, date_column="submissionDate",
 
 # Deprecate the old name:
 get_permits_since = get_proposals_since
-get_permits = get_proposals
