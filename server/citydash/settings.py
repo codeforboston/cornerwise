@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'djcelery',
     'parcel',
     'proposal',
     'shared'
@@ -114,5 +115,18 @@ STATIC_URL = '/client/'
 if not IS_PRODUCTION:
     STATIC_ROOT = '/client'
 
-# Celery
+# Celery configuration
+
+## Use Redis as the store for ongoing tasks
 BROKER_URL = "redis://"
+
+## Persist task results to the database
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+
+from datetime import timedelta
+CELERYBEAT_SCHEDULE = {
+    "scrape-permits": {
+        "task": "",
+        "schedule": timedelta(days=1),
+    }
+}

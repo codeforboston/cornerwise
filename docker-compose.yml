@@ -1,8 +1,3 @@
-data:
-  build: docker/data
-  hostname: data
-  domainname: localdomain
-
 postgres:
   build: docker/postgres
   hostname: postgres
@@ -14,16 +9,21 @@ postgres:
 citydash:
   build: .
   ports:
-    - "8080:80"
+    - "3000:3000"
   links:
-    - postgres:postgres
+    - postgres
+    - redis
+  environment:
+    - PYTHONUNBUFFERED=1
+    - REDIS_HOST=redis
+    - POSTGRES_HOST=postgres
   volumes_from:
     - data
   volumes:
     - ./server:/app
+    - ./client:/client
+    - ./data:/data
+    - ./docker-runtime
 
-nginx:
-  build: docker/nginx
-  hostname: nginx
-  ports:
-    - "5432:5432"
+redis:
+  image: redis:latest

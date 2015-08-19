@@ -104,7 +104,6 @@ def add_geocode(permits):
         permit["long"] = loc["x"]
         permit["score"] = location["score"]
 
-
 def find_cases(doc):
     table = find_table(doc)
     titles = col_names(table)
@@ -121,21 +120,10 @@ def index_by(l, keyfn):
 
     return {keyfn(o): o for o in l}
 
-def get_permits(pages):
-    # Indexed by case number:
-    all_cases = []
-    for i in pages:
-        doc = BeautifulSoup(get_page(i), "html.parser")
-        case_list = find_cases(doc)
-        all_cases += case_list
-
-    add_geocode(case_list)
-
-    return all_cases
-
-def get_permits_since(dt, date_column="submissionDate"):
+def get_proposals_since(dt, date_column="submissionDate",
+                        geocode=True):
     """
-    Continually scrape the permits until the submission date is
+    Continually scrape the proposals until the submission date is
     less than or equal to the given date.
 
     Returns an array of dicts representing scraped cases.
@@ -170,7 +158,11 @@ def get_permits_since(dt, date_column="submissionDate"):
         if i > last_page:
             break
 
+    if geocode:
+        add_geocode(all_cases)
+
     return all_cases
 
-#if __name__ == "__main__":
-#    print(main(range(1, LAST_PAGE+1)))
+# Deprecate the old name:
+get_permits_since = get_proposals_since
+get_permits = get_proposals

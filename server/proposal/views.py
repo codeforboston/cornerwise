@@ -1,3 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+from shared.request import make_response
+
+#@make_response()
+#def
