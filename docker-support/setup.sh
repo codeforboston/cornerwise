@@ -15,7 +15,7 @@ local postgres all trust\
 local citydash all trust' /etc/postgresql/*/main/pg_hba.conf
 
 service postgresql start
-psql -U postgres -q -f /support/pg_setup.sql citydash
+psql -U postgres -q -f /support/pg_setup.sql
 
 sh /support/export_parcels.sh
 rm -r /shapefiles

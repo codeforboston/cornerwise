@@ -1,6 +1,6 @@
 #reset {
   position: relative;
-  left: 150px;
+  left: 105px;
 }
 /*!
  * Materialize v0.97.0 (http://materializecss.com)
@@ -5767,10 +5767,10 @@ small {
   border: none;
   border-radius: 2px;
   display: inline-block;
-  height: 36px;
-  line-height: 36px;
+  /*height: 36px;*/
+  /*line-height: 36px;*/
   outline: 0;
-  padding: 0 2rem;
+  /*padding: 0 2rem;*/
   text-transform: uppercase;
   vertical-align: middle;
   -webkit-tap-highlight-color: transparent; }
@@ -5801,6 +5801,8 @@ small {
   -o-transition: .2s ease-out;
   -ms-transition: .2s ease-out;
   transition: .2s ease-out;
+  font-size: 10px;
+  padding: 2px 3px;
   cursor: pointer; }
   .btn:hover, .btn-large:hover {
     background-color: #2bbbad; }
