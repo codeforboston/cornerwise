@@ -2,7 +2,9 @@
 HOST_PORT=3000
 CITYDASH_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 yes_pattern='^[yY]'
-docker_environment=""
+
+# space-delimited list of environment variables, to be set in the container
+docker_environment="APP_PORT=$HOST_PORT"
 
 function find_vm_name {
     echo $(docker-machine ls | awk '/virtualbox/ { print $1 }' | head -n 1)
