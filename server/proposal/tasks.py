@@ -1,6 +1,12 @@
+import os
+import shutil
+from urllib import parse, request
+
 from djcelery.models import PeriodicTask
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db import transaction
+from django.db.utils import IntegrityError
 
 from .models import Proposal, Event, Document
 from citydash import celery_app
@@ -19,9 +25,9 @@ def create_proposal_from_json(p_dict):
     try:
         proposal = Proposal.objects.get(case_number=["caseNumber"])
 
-            # TODO: We should track changes to a proposal's status over
-            # time. This may mean full version-control, with something
-            # like django-reversion or with a hand-rolled alternative.
+        # TODO: We should track changes to a proposal's status over
+        # time. This may mean full version-control, with something
+        # like django-reversion or with a hand-rolled alternative.
     except Proposal.DoesNotExist:
         proposal = Proposal(case_number=p_dict["caseNumber"])
 
@@ -39,24 +45,51 @@ def create_proposal_from_json(p_dict):
         # approved!
         is_complete = bool(p_dict["decisions"]["links"])
 
+        proposal.save()
+
         # Create associated documents:
         for field, val in p_dict.items():
             if not isinstance(val, dict) or not val.get("links"):
                 continue
 
             for link in val["links"]:
-                doc = ProposalDocument(url=link["url"],
-                                       title=link["title"],
-                                       field=field)
-                proposal.document_set.add(doc)
+                try:
+                    doc = proposal.document_set.get(url=link["url"])
+                except Document.DoesNotExist:
+                    doc = Document(proposal=proposal)
+
+                doc.url = link["url"]
+                doc.title = link["title"]
+                doc.field = field
+
+                doc.save()
 
         return proposal
+
+@celery_app.task
+def fetch_document(doc):
+    url = doc.url
+    url_components = parse.urlsplit(url)
+    filename = os.path.basename(url_components.path)
+    path = os.path.join(settings.STATIC_ROOT, "doc",
+                        str(doc.proposal.pk),
+                        filename)
+
+    # Ensure that the intermediate directories exist:
+    pathdir = os.path.dirname(path)
+    os.mkdirs(pathdir, exist_ok=True)
+
+    with request.urlopen(url) as resp, open(path, "wb") as out:
+        shutil.copyfileobj(resp, out)
+
 
 
 @celery_app.task
 @transaction.atomic
 def scrape_reports_and_decisions(since=None):
     if not since:
+        # If there was no last run, the scraper will fetch all
+        # proposals.
         since = last_run()
 
     # Array of dicts:

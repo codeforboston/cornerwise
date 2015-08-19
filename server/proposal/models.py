@@ -46,6 +46,8 @@ class Document(models.Model):
                              help_text="The name of the document")
     field = models.CharField(max_length=256,
                              help_text="The field in which the document was found")
+    # Record when the document was first observed:
+    created = models.DateTimeField(auto_now_add=True)
     document = models.FileField(null=True)
 
     class Meta:

@@ -24,11 +24,11 @@ def make_response(template=None, error_template="error.html"):
     dict. If the request wants JSON, renders the dict as JSON data.
     """
     def constructor_fn(view):
-        def wrapped_view(req):
+        def wrapped_view(req, *args, **kwargs):
             use_template = template
             status = 200
             try:
-                data = view(req)
+                data = view(req, *args, **kwargs)
             except ErrorResponse as err:
                 data = err.data
                 use_template = error_template

@@ -19,10 +19,12 @@ from django.conf import settings
 from django.contrib import admin
 
 import parcel.urls as parcel_urls
+import proposal.urls as proposal_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^parcel/', include(parcel_urls)),
+    url(r'^proposal/', include(proposal_urls)),
 ]
 
 # if settings.APP_MODE == "development":

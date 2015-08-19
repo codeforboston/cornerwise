@@ -43,6 +43,6 @@ def geocode(addrs):
         "token": get_access_token(),
         "f": "json"
     }
-    #return urlencode(data)
+
     f = urlopen(ADDRESS_URL, urlencode(data).encode("ISO-8859-1"))
     return json.loads(f.read().decode("utf-8"))
