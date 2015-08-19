@@ -2,9 +2,12 @@ from bs4 import BeautifulSoup
 from . import arcgis
 from datetime import datetime
 import json
+import logging
 import re
 from urllib.request import urlopen
 from urllib.error import HTTPError
+
+logger = logging.getLogger(__name__)
 
 LAST_PAGE = 31
 URL_FORMAT = "http://www.somervillema.gov/planningandzoning/reports?order=field_rnd_submission_date_value&sort=desc&page={:1}"
@@ -31,6 +34,7 @@ def attribute_for_title(title):
 def get_page(page=1):
     "Returns the HTML content of the given Reports and Decisions page."
     f = urlopen(make_url(page))
+    logger.info("Fetching page {}".format(page))
     html = f.read()
     f.close()
     return html
@@ -63,6 +67,7 @@ def get_links(elt):
 
 def dates_field(td):
     return get_date(default_field(td))
+
 
 def links_field(td):
     return {"links": get_links(td)}
@@ -111,7 +116,16 @@ def find_cases(doc):
 
     tbody = table.find("tbody")
     trs = tbody.find_all("tr")
-    return [get_row_vals(attributes, tr) for tr in trs]
+
+    cases = []
+
+    # This is ugly, but there's some baaad data out there:
+    for tr in trs:
+        try:
+            cases.append(get_row_vals(attributes, tr))
+        except:
+            continue
+    return cases
 
 def index_by(l, keyfn):
     if isinstance(keyfn, str):
@@ -120,7 +134,8 @@ def index_by(l, keyfn):
 
     return {keyfn(o): o for o in l}
 
-def get_proposals_since(dt, date_column="submissionDate",
+def get_proposals_since(dt=None,
+                        date_column="submissionDate",
                         geocode=True):
     """
     Continually scrape the proposals until the submission date is
@@ -145,10 +160,13 @@ def get_proposals_since(dt, date_column="submissionDate",
 
         doc = BeautifulSoup(html, "html.parser")
         cases = find_cases(doc)
-        all_cases += [case for case in cases if case[date_column] > dt]
+        if dt:
+            all_cases += [case for case in cases if case[date_column] > dt]
 
-        if cases[-1][date_column] <= dt:
-            break
+            if cases[-1][date_column] <= dt:
+                break
+        else:
+            all_cases += cases
 
         if last_page is None:
             last_page = detect_last_page(doc)

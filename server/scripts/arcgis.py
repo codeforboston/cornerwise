@@ -12,12 +12,13 @@ def get_access_token():
 
     if ACCESS_TOKEN:
         return ACCESS_TOKEN
-
+    data = urlencode([("grant_type", "client_credentials"),
+                      ("client_id", CLIENT_ID),
+                      ("client_secret", CLIENT_SECRET)]).\
+                      encode("ISO-8859-1")
     f = urlopen("https://www.arcgis.com/sharing/oauth2/token",
-                urlencode([("grant_type", "client_credentials"),
-                           ("client_id", CLIENT_ID),
-                           ("client_secret", CLIENT_SECRET)]))
-    json_response = json.loads(f.read())
+                data)
+    json_response = json.loads(f.read().decode("utf-8"))
 
     ACCESS_TOKEN = json_response["access_token"]
     return ACCESS_TOKEN
@@ -43,5 +44,5 @@ def geocode(addrs):
         "f": "json"
     }
     #return urlencode(data)
-    f = urlopen(ADDRESS_URL, urlencode(data))
-    return json.loads(f.read())
+    f = urlopen(ADDRESS_URL, urlencode(data).encode("ISO-8859-1"))
+    return json.loads(f.read().decode("utf-8"))

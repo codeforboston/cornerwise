@@ -1,14 +1,18 @@
 from djcelery.models import PeriodicTask
 from django.contrib.gis.geos import Point
+from django.db import transaction
 
-from .models import Proposal, Event, Document, DoesNotExist
+from .models import Proposal, Event, Document
 from citydash import celery_app
 from scripts import scrape
 
 def last_run():
     "Determine the date and time of the last run of the task."
-    scrape_task = PeriodicTask.objects.find(name="scrape-permits")
-    return scrape_task.last_run_at
+    try:
+        scrape_task = PeriodicTask.objects.get(name="scrape-permits")
+        return scrape_task.last_run_at
+    except PeriodicTask.DoesNotExist:
+        return None
 
 def create_proposal_from_json(p_dict):
     "Constructs a Proposal from a dictionary."
@@ -18,7 +22,7 @@ def create_proposal_from_json(p_dict):
             # TODO: We should track changes to a proposal's status over
             # time. This may mean full version-control, with something
             # like django-reversion or with a hand-rolled alternative.
-    except DoesNotExist:
+    except Proposal.DoesNotExist:
         proposal = Proposal(case_number=p_dict["caseNumber"])
 
         proposal.address = "{} {}".format(p_dict["number"],
@@ -50,6 +54,7 @@ def create_proposal_from_json(p_dict):
 
 
 @celery_app.task
+@transaction.atomic
 def scrape_reports_and_decisions(since=None):
     if not since:
         since = last_run()

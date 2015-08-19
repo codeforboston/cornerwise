@@ -2,6 +2,9 @@
 service postgresql start
 service redis-server start # Required for celery and caching
 
+# Force Celery to run as root:
+export C_FORCE_ROOT=1
+
 pid_file=/var/run/_citydash_django.pid
 server_out=/app/django.log
 server_err=/app/error.log
