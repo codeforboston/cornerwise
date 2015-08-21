@@ -52,7 +52,7 @@ Options:
   -m <name> Specify a docker-machine machine to use
   -O      Do not automatically open the Django application in
           browser.
-  -p <port> Run on a port other than $HOST_PORT
+  -p <port> Run on a port other than $host_port
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
   -S      Do not automatically run the server start script
