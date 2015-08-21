@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.core.urlresolvers import reverse
 
 class Proposal(models.Model):
     case_number = models.CharField(max_length=64,
@@ -22,6 +23,10 @@ class Proposal(models.Model):
 
     # To enable geo queries
     objects = models.GeoManager()
+
+    def get_absolute_url(self):
+        return reverse("view-proposal",
+                       kwargs={"pk": self.pk})
 
 
 class Event(models.Model):

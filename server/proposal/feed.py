@@ -25,10 +25,6 @@ class ReportsAndDecisionsFeed(Feed):
     def item_updateddate(self, item):
         return item.modified
 
-    def item_link(self, item):
-        return reverse("view-proposal",
-                       kwargs={"pk": item.pk})
-
     # Attached documents:
 
     # Note: RSS feeders are evidently not required to support multiple
