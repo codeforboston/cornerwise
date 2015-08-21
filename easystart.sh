@@ -1,10 +1,14 @@
 #!/bin/bash
-HOST_PORT=3000
-CITYDASH_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-yes_pattern='^[yY]'
+host_port=3000
+project_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+docker_opts=""
+
+# Don't hardcode the image name. We want to be able to change our
+# project name every week. Iterate!
+image_name="citydash"
 
 # space-delimited list of environment variables, to be set in the container
-docker_environment="APP_PORT=$HOST_PORT"
+docker_environment="APP_PORT=$host_port"
 
 function find_vm_name {
     echo $(docker-machine ls | awk '/virtualbox/ { print $1 }' | head -n 1)
@@ -35,7 +39,7 @@ function print_help {
     echo "
 Usage: ${BASH_SOURCE[0]} [options] [command]
 
-Quickly build and launch the CityDash container. If a command is
+Quickly build and launch the $image_name container. If a command is
 specified, run that command in the container and exit.
 
 Options:
@@ -46,26 +50,33 @@ Options:
   -F      Prevents the script's default behavior of setting up the
           VM to forward traffic on the host port to localhost.
   -m <name> Specify a docker-machine machine to use
-  -p <port> Run on a port other than 3000
+  -O      Do not automatically open the Django application in
+          browser.
+  -p <port> Run on a port other than $HOST_PORT
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
+  -S      Do not automatically run the server start script
   -x      If a running container is found, stop it
 "
 }
 
-
-SHOULD_BUILD=0
+# Indicates whether the image should be rebuild:
+should_build=0
+# If true, do not attach to a running container (if applicable):
 FORCE_RUN=0
-VM_PORT_FORWARDING=1
+vm_port_forwarding=1
+open_in_browser=1
+# How long should the script wait for the application to launch?
+open_timeout=30
 IGNORE_CHANGES=0
-AUTOSTART=0
+AUTOSTART=1
 STOP_RUNNING=0
 skip_build_prompt=0
 
-while getopts ":bBFmprshx" opt; do
+while getopts ":bBFmOprSthx" opt; do
     case $opt in
         b)
-            SHOULD_BUILD=1
+            should_build=1
             skip_build_prompt=1
             ;;
         B)
@@ -75,14 +86,17 @@ while getopts ":bBFmprshx" opt; do
         r)
             FORCE_RUN=1
             ;;
-        s)
-            AUTOSTART=1
+        S)
+            AUTOSTART=0
             ;;
         F)
-            VM_PORT_FORWARDING=0
+            vm_port_forwarding=0
             ;;
         m)
             vm_name="$OPTARG"
+            ;;
+        O)
+            open_in_browser=0
             ;;
         p)
             check_re='^[0-9]{4,}$'
@@ -90,7 +104,14 @@ while getopts ":bBFmprshx" opt; do
                 echo "Port must be an integer >=1000."
                 exit 1
             fi
-            HOST_PORT=$OPTARG
+            host_port=$OPTARG
+            ;;
+        t)
+            if ! [[ $OPTARG =~ ^[0-9]+$ ]]; then
+                echo "Invalid timeout argument: $OPTARG"
+                exit 1
+            fi
+            open_timeout=$OPTARG
             ;;
         x)
             STOP_RUNNING=1
@@ -106,10 +127,6 @@ while getopts ":bBFmprshx" opt; do
             ;;
     esac
 done
-
-if ((AUTOSTART)); then
-    RUN_COMMAND="/bin/sh /app/start.sh \"$HOST_PORT\""
-fi
 
 shift $((OPTIND-1))
 
@@ -162,10 +179,10 @@ if (which docker-machine >/dev/null); then
     eval $(docker-machine env $vm_name)
 
     # Forward the VM port to localhost
-    if ((VM_PORT_FORWARDING)); then
+    if ((vm_port_forwarding)); then
         VBoxManage controlvm $vm_name natpf1 delete django
         # Only using VirtualBox... for now
-        VBoxManage controlvm $vm_name natpf1 "django,tcp,127.0.0.1,$HOST_PORT,,$HOST_PORT"
+        VBoxManage controlvm $vm_name natpf1 "django,tcp,127.0.0.1,$host_port,,$host_port"
     fi;
 elif [ $(uname) == "Darwin" ]; then
     # In case the user installed Docker separately
@@ -181,27 +198,27 @@ if ((!IGNORE_CHANGES)); then
 
     # Some jiggery-pokery to determine the date that the existing
     # citydash image was created.
-    image_created=$(docker inspect citydash | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
+    image_created=$(docker inspect $image_name | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
     NO_EXISTING=$?
 
-    if ((!$SHOULD_BUILD)); then
-        SHOULD_BUILD=1
+    if ((!$should_build)); then
+        should_build=1
 
         if [ -n "$image_created" ]; then
-            echo "Found existing citydash image (created: $image_created)"
-            SHOULD_BUILD=0
+            echo "Found existing $image_name image (created: $image_created)"
+            should_build=0
 
             if ((!skip_build_prompt)); then
                 # Convert edit date to a timestamp
                 CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$image_created" "+%s")
-                DOCKERFILE_MODIFIED=$(stat -f %m $CITYDASH_DIR/Dockerfile)
+                DOCKERFILE_MODIFIED=$(stat -f %m $project_dir/Dockerfile)
                 changed_file=""
 
                 if [ $DOCKERFILE_MODIFIED -gt $CREATED_STAMP ]; then
                     changed_file="Dockerfile"
 
                 else
-                    for path in $CITYDASH_DIR/docker-support/*; do
+                    for path in $project_dir/docker-support/*; do
                         if [ $(stat -f %m $path) -gt $CREATED_STAMP ]; then
                             changed_file="$path"
 
@@ -213,16 +230,16 @@ if ((!IGNORE_CHANGES)); then
                 if [ -n "$changed_file" ]; then
                     echo "$changed_file has changed since the image was created."
 
-                    echo "Rebuild citydash image? (y/N)"
+                    echo "Rebuild $image_name image? (y/N)"
                     read -t 10 response
                     if ((response)); then
                         # Request timed out
-                        SHOULD_BUILD=0
+                        should_build=0
                     else
-                        if [[ "$response" =~ $yes_pattern ]]; then
-                            SHOULD_BUILD=1
+                        if [[ "$response" =~ ^[yY] ]]; then
+                            should_build=1
                         else
-                            SHOULD_BUILD=0
+                            should_build=0
                         fi
 
                     fi
@@ -232,14 +249,14 @@ if ((!IGNORE_CHANGES)); then
     fi
 fi
 
-if ((SHOULD_BUILD)); then
-    echo "Building citydash image. This may take a few moments."
-    docker build -t citydash $CITYDASH_DIR
+if ((should_build)); then
+    echo "Building $image_name image. This may take a few moments."
+    docker build -t $image_name $project_dir
 fi;
 
 if ((!FORCE_RUN || STOP_RUNNING)); then
     # Determine if the container is already running:
-    CONTAINER_ID=$(docker ps | awk '/citydash/ { if (match($2, /^citydash/)) print $1 }')
+    CONTAINER_ID=$(docker ps | awk "/$image_name/ { if (match(\$2, /^$image_name/)) print \$1 }" | head -n 1)
 else
     CONTAINER_ID=""
 fi;
@@ -250,20 +267,8 @@ if [ -n $CONTAINER_ID ]; then
         docker stop $CONTAINER_ID
         CONTAINER_ID=""
     else
-        echo "There's a citydash container already running with id $CONTAINER_ID."
+        echo "There's a $image_name container already running with id $CONTAINER_ID."
         echo "If you want to start a new container, re-run ${BASH_SOURCE[0]} -r."
-
-        # echo "Do you want to (a)ttach to it, (s)top it, or (r)un a new container? (A/s/r)"
-        # read -t 10 response
-        # stop_re='^[sS]'
-        # run_re='^[Rr]'
-
-        # if [[ "$response" =~ $stop_re ]]; then
-        #     docker stop "$CONTAINER_ID"
-        #     CONTAINER_ID=""
-        # elif [[ "$response" =~ $run_re ]]; then
-        #     CONTAINER_ID=""
-        # fi
     fi
 fi
 
@@ -280,12 +285,47 @@ else
         env_opts="$env_opts -e $setting"
     done
 
-    env_file=$CITYDASH_DIR/docker-support/env
+    env_file=$project_dir/docker-support/env
     if [ -f $env_file ]; then
         env_opts="$env_opts --env-file=$env_file"
     fi
 
-    docker run -it -v $CITYDASH_DIR/server:/app -v $CITYDASH_DIR/client:/client -v $CITYDASH_DIR/data:/data -v $CITYDASH_DIR/docker-runtime/bashrc:/root/.bashrc -p "$HOST_PORT:3000" $env_opts citydash $RUN_COMMAND
+    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -p $host_port:$host_port $env_opts $image_name"
+
+    if ((! AUTOSTART)); then
+        docker run $docker_opts $RUN_COMMAND
+    else
+        # Start the server:
+        CONTAINER_ID=$(docker run -d $docker_opts /app/start.sh)
+        echo "Container started with id $CONTAINER_ID."
+
+        if ((open_in_browser)); then
+            ps_count=0
+            wait_time=$open_timeout
+            while ((ps_count==0)); do
+                if ((wait_count <= 0)); then
+                    break
+                fi
+
+                sleep 2
+                wait_count -= 2
+                ps_count=$((docker ps | grep runserver | wc -l))
+            done
+
+            if ((ps_count > 0)); then
+                # The server is running in the container.
+                if ((vm_port_forwarding || !use_machine)); then
+                    vm_host="localhost"
+                else
+                    vm_host=$(docker-machine ip "$vm_name")
+                fi
+                open_browser "http://$vm_host:$host_port/index.html"
+            fi
+        fi
+
+        # Attach to the container, and we're done
+        docker exec -it $CONTAINER_ID $RUN_COMMAND
+    fi
 fi;
 
 if [ $? -eq 1 ]; then
@@ -293,39 +333,3 @@ if [ $? -eq 1 ]; then
     # container and a timeout? Both apparently return exit code 1.
     exit
 fi;
-
-
-if ((AUTOSTART)); then
-    # Do a busy wait for the Django server to start up
-    wait_count=0
-    is_running=1
-    if ((use_machine)); then
-        HOSTNAME=$(docker-machine ip "$vm_name")
-    else
-        HOSTNAME="localhost"
-    fi
-    # Wait for the port to open
-    until (lsof -i @$HOSTNAME:$HOST_PORT >/dev/null); do
-        ((wait_count++))
-
-        if ((wait_count > 30)); then
-            is_running=0
-            break
-        fi
-
-        sleep 1
-    done
-
-    if ((is_running)); then
-        echo "Django started successfully on port $HOST_PORT."
-
-        if ((VM_PORT_FORWARDING || !use_machine)); then
-            open_browser "http://localhost:$HOST_PORT"
-        else
-            open_browser "http://$HOSTNAME:$HOST_PORT"
-        fi
-    else
-        echo "The Django server did not start within 30 seconds."
-        exit 3
-    fi
-fi
