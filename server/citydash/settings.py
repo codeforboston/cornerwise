@@ -15,9 +15,15 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Determine if the app is in production mode by examining
-APP_MODE=os.environ.get("DJANGO_MODE", "development").lower()
-IS_PRODUCTION=(APP_MODE == "production")
+# Determine if the app is in production mode by examining the
+# environment variable set by Docker:
+APP_MODE = os.environ.get("DJANGO_MODE", "development").lower()
+
+#IS_PRODUCTION=(APP_MODE == "production")
+
+# For now...
+APP_MODE = "development"
+IS_PRODUCTION = False
 
 
 # Quick-start development settings - unsuitable for production
@@ -83,16 +89,17 @@ WSGI_APPLICATION = 'citydash.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "")
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': '',
+        'HOST': POSTGRES_HOST,
         'NAME': 'citydash',
         'USER': 'citydash'
     },
     'migrate': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': '',
+        'HOST': POSTGRES_HOST,
         'NAME': 'postgres',
         'USER': 'postgres'
     }
@@ -121,8 +128,9 @@ STATIC_URL = '/client/'
 if not IS_PRODUCTION:
     STATIC_ROOT = '/client'
 
+
 # Celery configuration
-BROKER_URL = "redis://"
+BROKER_URL = os.environ.get("REDIS_HOST", "redis://")
 
 ## Persist task results to the database
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
