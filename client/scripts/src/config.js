@@ -100,7 +100,6 @@ define(["optional!local-config"], function(localConfig) {
 
     if (localConfig) {
         _.extend(config, localConfig);
-        console.log(config);
     }
 
     return config;
