@@ -4,8 +4,8 @@
  * Application configuration options
  */
 
-define([], function() {
-    return {
+define(["optional!local-config"], function(localConfig) {
+    var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
         tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
@@ -97,4 +97,11 @@ define([], function() {
         clientId: "jYLY7AeA1U9xDiWu",
         clientSecret: "64a66909ff724a0a9928838ef4462909"
     };
+
+    if (localConfig) {
+        _.extend(config, localConfig);
+        console.log(config);
+    }
+
+    return config;
 });
