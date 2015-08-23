@@ -17,6 +17,11 @@
     easystart script. It may take a while, especially if this is the
     first time you've used Docker.
 
+  - Once you're running 'inside' the container (you should see a prompt
+    beginning with root@[some id]), you can start the server by typing:
+
+    ~sh /app/start.sh/~
+
 ** Additional Features
 
      For full usage details of the easy start script, type
