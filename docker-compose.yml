@@ -6,7 +6,7 @@ postgres:
   volumes_from:
     - data
 
-citydash:
+cornerwise:
   build: .
   ports:
     - "3000:3000"

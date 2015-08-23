@@ -7,7 +7,7 @@ elif [ -d /shapefiles ]; then
 fi
 
 if [ -n "$SHAPEFILE_DIR" ]; then
-    shp2pgsql -c -s 97406 -g shape $SHAPEFILE_DIR/M274TaxPar.shp parcel | psql -q -U citydash -d citydash
+    shp2pgsql -c -s 97406 -g shape $SHAPEFILE_DIR/M274TaxPar.shp parcel | psql -q -U cornerwise -d cornerwise
 else
     echo "No shapefiles found."
     exit 1

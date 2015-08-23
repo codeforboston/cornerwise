@@ -1,4 +1,4 @@
-"""citydash URL Configuration
+"""cornerwise URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.8/topics/http/urls/
@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib import admin
+from django.http import HttpResponse
 
 import parcel.urls as parcel_urls
 import proposal.urls as proposal_urls
@@ -24,12 +25,13 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^parcel/', include(parcel_urls)),
     url(r'^proposal/', include(proposal_urls)),
-#    url(r'^(?P<path>)',
+
+    url(r'^ping', (lambda req: HttpResponse("running"))),
 ]
 
 if settings.DEBUG:
     urlpatterns += [
         url(r'(?P<path>.*)$', "django.views.static.serve", {
-            "document_root": "/client"
+            "document_root": settings.STATIC_ROOT
         })
     ]

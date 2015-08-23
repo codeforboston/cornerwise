@@ -2,10 +2,9 @@
  * PermitsCollection
  */
 define(
-    ["backbone", "underscore", "leaflet", "permit", "ref-location", "config", "utils"],
+    ["backbone", "underscore", "leaflet", "permit",
+     "ref-location", "config", "utils"],
     function(B, _, L, Permit, refLocation, config, $u) {
-        console.log("Creating Permits collection.");
-
         return B.Collection.extend({
             model: Permit,
 
@@ -47,11 +46,13 @@ define(
                 }
             },
 
-            /*
+            /**
              * Applies each of the functions in the array fs to the
              * permits in the collection. If any of the functions
              * returns false, the Permit will be updated: its "excluded"
              * attribute will be set to true.
+             *
+             * @param {Array} fs
              */
             applyFilters: function(fs) {
                 var count = this.length;

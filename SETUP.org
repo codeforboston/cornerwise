@@ -1,85 +1,106 @@
-#+TITLE: CityDash: Server Setup
+#+TITLE: Cornerwise: Server Setup
 #+AUTHOR: Code for Boston
 #+OPTIONS: toc:nil
 
-* Running the Client
+* Easy Start (OS X or Linux)
 
-  The current version of the client is fully decoupled from the server,
-  so running it is quite easy. At the terminal (assuming you have python
-  installed):
+  *Note:* This will eventually be the preferred method for getting
+  started, but right now it is _experimental_.
 
-  - ~cd path/to/citydash/client~
-  - ~python -m SimpleHTTTPServer~
+  - ~cd path/to/cornerwise/client~
+  - ~./easystart.sh~
 
-    Optionally, you can supply an extra numeric argument to run the
-    server on that port.
+    The script will detect if you have Docker Toolbox installed. If you
+    do not, it will find the latest version and download it. Toolbox
+    includes Docker, VirtualBox, and other required utilities. Once you
+    have completed the installation process for Toolbox, rerun the
+    easystart script. It may take a while, especially if this is the
+    first time you've used Docker.
 
-  - Open your browser to localhost:8000
-    - On OS X, you can type ~open http://localhost:8000~.
+** Additional Features
 
-  - These instructions are likely to change
+     For full usage details of the easy start script, type
+     ~./easystart.sh -h~
 
-* Running the Server
+* Full Instructions
+** Running the Client
 
-  We're using Docker (and eventually docker-compose), because it ensures
-  that we're all working with the same environment. In essence, Docker
-  is a tool for managing lightweight Linux machines.
+   The current version of the client is fully decoupled from the server,
+   so running it is quite easy. At the terminal (assuming you have python
+   installed):
 
-  If you follow the instructions below, you will have the necessary
-  dependencies, including Postgres w/GIS extensions and Django 1.8.
+   - ~cd path/to/cornerwise/client~
+   - ~python -m SimpleHTTTPServer~
 
-** Docker Installation
+     Optionally, you can supply a numeric argument after
+     ~SimpleHTTPServer~ to run the server on that port.
 
-   You'll only need to run this once.
+   - Open your browser to localhost:8000
+     - On OS X, you can type ~open http://localhost:8000~.
 
-   - *OS X/Windows:* [[https://www.docker.com/toolbox][Install Docker Toolbox]]
-     - The Toolbox includes VirtualBox and Docker Machine.
-   - *Linux:* [[https://docs.docker.com/][Install Docker]]
+   - These instructions are likely to change
 
-** Create
+** Running the Server
 
-   *You'll only need to run this when the image changes*--when, for
-   example, the Dockerfile changes.  I'll let everyone know on Slack if
-   you need to rebuild. The process should remain the same.
+   We're using Docker (and eventually docker-compose), because it ensures
+   that we're all working with the same environment. In essence, Docker
+   is a tool for managing lightweight Linux machines.
 
-   - (OS X/Windows) Launch Boot2Docker (the easy way is to run the
-     application wrapper)
-   - ~cd path/to/citydash~
-   - ~docker build -t citydash .~
+   If you follow the instructions below, you will have the necessary
+   dependencies, including Postgres w/GIS extensions and Django 1.8.
 
-     This step creates a new image and applies the tag 'citydash'.
+*** Docker Installation
 
-     *Note:* This step and the following may take a little while. Run on
-     a fast connection.
+    You'll only need to run this once.
 
-** Run
+    - *OS X/Windows:* [[https://www.docker.com/toolbox][Install Docker Toolbox]]
+      - The Toolbox includes VirtualBox and Docker Machine.
+    - *Linux:* [[https://docs.docker.com/][Install Docker]]
 
-   Most of the time, you can skip right to this step.
+*** Create
 
-   - (OS X/Windows) In Boot2Docker:
-   - ~docker run -it -v $PWD/server:/app -v $PWD/client:/client -v $PWD/data:/data -p "3000:3000" citydash /bin/bash~
+    *You'll only need to run this when the image changes*--when, for
+    example, the Dockerfile changes.  I'll let everyone know on Slack if
+    you need to rebuild. The process should remain the same.
 
-     Creates a new /container/ from the 'citydash' /image/. Exposes the 'server' directory as /app inside the container. Maps the container's port 3000 to port 3000 on the host (or the VM, if you're using Boot2Docker). Runs ~/bin/bash~ within the new container.
+    - (OS X/Windows) Launch Boot2Docker (the easy way is to run the
+      application wrapper)
+    - ~cd path/to/cornerwise~
+    - ~docker build -t cornerwise .~
 
-   - *You should see a bash prompt.*
+      This step creates a new image and applies the tag 'cornerwise'.
 
-     If you see an error that says something like:
+      *Note:* This step and the following may take a little while. Run on
+      a fast connection.
 
-        ~Are you trying to connect to a TLS-enabled daemon without TLS?~
+*** Run
 
-     be sure you are running inside Boot2Docker's terminal window. Alternatively, you can copy and paste the three lines beginning with ~export DOCKER_HOST=...~.
+    Most of the time, you can skip right to this step.
 
-     /Details/: When you use Boot2Docker, you're running a VM, and the Docker daemon runs inside that. Setting the ~DOCKER_HOST~, ~DOCKER_CERT_PATH~, and ~DOCKER_TLS_VERIFY~ environment variables allows the Docker client to communicate with the daemon.
+    - (OS X/Windows) In Boot2Docker:
+    - ~docker run -it -v $PWD/server:/app -v $PWD/client:/client -v $PWD/data:/data -p "3000:3000" cornerwise /bin/bash~
 
-   - ~sh /app/start.sh~
+      Creates a new /container/ from the 'cornerwise' /image/. Exposes the 'server' directory as /app inside the container. Maps the container's port 3000 to port 3000 on the host (or the VM, if you're using Boot2Docker). Runs ~/bin/bash~ within the new container.
 
-     Bash script to start the server. It starts Postgres and then
-     Django.
+    - *You should see a bash prompt.*
 
-** Opening in Browser
-   - (OS X) Quick way: ~open http://$(boot2docker ip):3000~
-   - *Determine IP address:* If you're using Boot2Docker, the port is exposed on the VM and not localhost. At the terminal, type ~boot2docker ip~ to determine the VM's IP address. If you're running Docker directly on Linux, use ~localhost~.
-   - In a browser, navigate to http:// **ip address** :3000
+      If you see an error that says something like:
+
+         ~Are you trying to connect to a TLS-enabled daemon without TLS?~
+
+      be sure you are running inside Boot2Docker's terminal window. Alternatively, you can copy and paste the three lines beginning with ~export DOCKER_HOST=...~.
+
+      /Details/: When you use Boot2Docker, you're running a VM, and the Docker daemon runs inside that. Setting the ~DOCKER_HOST~, ~DOCKER_CERT_PATH~, and ~DOCKER_TLS_VERIFY~ environment variables allows the Docker client to communicate with the daemon.
+
+    - ~sh /app/start.sh~
+
+      Bash script to start the server. It starts Postgres and then
+      Django.
+
+*** Opening in Browser
+    - (OS X) Quick way: ~open http://$(boot2docker ip):3000~
+    - *Determine IP address:* If you're using Boot2Docker, the port is exposed on the VM and not localhost. At the terminal, type ~boot2docker ip~ to determine the VM's IP address. If you're running Docker directly on Linux, use ~localhost~.
+    - In a browser, navigate to http:// **ip address** :3000
 
 * Additional Notes
 

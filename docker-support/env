@@ -1,1 +1,2 @@
 DJANGO_MODE=development
+APP_ROOT=/app

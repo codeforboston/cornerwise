@@ -5,9 +5,9 @@ from celery import Celery
 from scripts import scrape
 
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'citydash.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cornerwise.settings')
 from django.conf import settings
 
-app = Celery("citydash")
+app = Celery("cornerwise")
 app.config_from_object("django.conf:settings")
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)

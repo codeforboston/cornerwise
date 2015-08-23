@@ -9,12 +9,13 @@ export C_INCLUDE_PATH=/usr/include/gdal
 pip3 install -r /support/requirements.txt
 
 # Postgres setup
-# Allow local connections to 'postgres' and 'citydash' roles.
+# Allow local connections to 'postgres' and 'cornerwise' roles.
 sed -i '75 a\
 local postgres all trust\
-local citydash all trust' /etc/postgresql/*/main/pg_hba.conf
+local cornerwise all trust' /etc/postgresql/*/main/pg_hba.conf
 
 service postgresql start
+createdb -U postgres cornerwise
 psql -U postgres -q -f /support/pg_setup.sql
 
 sh /support/export_parcels.sh

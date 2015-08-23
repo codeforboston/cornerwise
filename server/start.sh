@@ -43,8 +43,10 @@ PYTHON_BIN=$(which python3 || which python)
 echo "Applying any outstanding migrations"
 $PYTHON_BIN $APP_ROOT/manage.py migrate --database=migrate
 echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
-nohup $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >$server_out 2>$server_err&
-echo $! >$pid_file
+
+$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>$server_err &
+django_pid=$!
+echo $django_pid >$pid_file
 
 sleep 1
 server_ping=$(curl -s "http://0.0.0.0:3000/ping")
@@ -58,4 +60,12 @@ else
     else
         echo "The server is running, but there may be a configuration error."
     fi
+fi
+
+wait $django_pid
+django_exit_code=$?
+if ((!django_exit_code)); then
+    echo "Django exited normally."
+else
+    echo "Django exited with code $django_exit_code."
 fi

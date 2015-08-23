@@ -9,7 +9,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 
 from .models import Proposal, Event, Document
-from citydash import celery_app
+from cornerwise import celery_app
 from scripts import scrape
 
 def last_run():

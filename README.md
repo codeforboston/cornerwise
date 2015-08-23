@@ -1,9 +1,9 @@
-# citydash
-CityDash/CodeForBoston
+# cornerwise
+Cornerwise/CodeForBoston
 
 Purpose : 
 ----------------------------------------------------------------------------------------------------------------------------
-This project is used to give updates about the zoning changes to the users/subscribers of the CityDash(Dashboard). 
+This project is used to give updates about the zoning changes to the users/subscribers of Cornerwise. 
 
 Features : 
 ----------------------------------------------------------------------------------------------------------------------------
@@ -17,13 +17,12 @@ Notifications :
 ----------------------------------------------------------------------------------------------------------------------------
 - Via Text Messages 
 - Via E-mail 
-- Via RSS-Feed
+- Via RSS Feed
 
 Technologies used: 
 ----------------------------------------------------------------------------------------------------------------------------
-- Python - To fetch the data from the google spreadsheet to json format for the consumption of the dashboard
-- GeoDjango - To store spatial data and user preferences
+- Python/GeoDjango - Webserver
+- PostGIS
 - HTML/CSS - For display purpose 
 - Backbone.js , require - for MVC 
-- Bootstrap - for responsive design 
 - Leaflet - for the interactive map view 

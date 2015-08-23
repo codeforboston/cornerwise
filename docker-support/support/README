@@ -1,6 +1,0 @@
-This directory is for files that the citydash Docker image will have
-available at build time. It is an appropriate place to put scripts that
-will construct the initial state of a container. Since this directory is
-copied during initialization and not shared with the host, changes you
-make to this directory will not be shared between the host (i.e., your
-computer) and the container.
