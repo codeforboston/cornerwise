@@ -5,10 +5,14 @@ docker_opts=""
 
 # Don't hardcode the image name. We want to be able to change our
 # project name every week. Iterate!
-image_name="citydash"
+# This should not contain any spaces.
+image_name="cornerwise"
 
 # space-delimited list of environment variables, to be set in the container
-docker_environment="APP_PORT=$host_port"
+docker_environment="APP_PORT=$host_port APP_NAME=$image_name"
+
+# Optionally specify a file containing environment settings
+env_file=$project_dir/docker-support/env
 
 function find_vm_name {
     echo $(docker-machine ls | awk '/virtualbox/ { print $1 }' | head -n 1)
@@ -47,6 +51,7 @@ Options:
   -B      Ignore changes to dependencies when determining whether
           to build a new image. Only build if there is no
           existing image
+  -c      Clean up old containers (those where status =~ /Exited/)
   -F      Prevents the script's default behavior of setting up the
           VM to forward traffic on the host port to localhost.
   -m <name> Specify a docker-machine machine to use
@@ -55,7 +60,6 @@ Options:
   -p <port> Run on a port other than $host_port
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
-  -S      Do not automatically run the server start script
   -x      If a running container is found, stop it
 "
 }
@@ -69,11 +73,11 @@ open_in_browser=1
 # How long should the script wait for the application to launch?
 open_timeout=30
 IGNORE_CHANGES=0
-AUTOSTART=1
+AUTOSTART=0
 STOP_RUNNING=0
 skip_build_prompt=0
 
-while getopts ":bBFmOprSthx" opt; do
+while getopts ":bBcFmOprSthx" opt; do
     case $opt in
         b)
             should_build=1
@@ -82,6 +86,9 @@ while getopts ":bBFmOprSthx" opt; do
         B)
             IGNORE_CHANGES=1
             skip_build_prompt=1
+            ;;
+        b)
+            cleanup_old=1
             ;;
         r)
             FORCE_RUN=1
@@ -193,11 +200,16 @@ elif [ $(uname) == "Darwin" ]; then
     exit 1
 fi
 
+if ((cleanup_old)); then
+    echo "Are you sure you want to permanently delete all exited $image_name containers? (y/N)"
+    read response
+fi
+
 if ((!IGNORE_CHANGES)); then
     # Determine if the image should be rebuilt.
 
     # Some jiggery-pokery to determine the date that the existing
-    # citydash image was created.
+    # cornerwise image was created.
     image_created=$(docker inspect $image_name | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
     NO_EXISTING=$?
 
@@ -261,7 +273,7 @@ else
     CONTAINER_ID=""
 fi;
 
-if [ -n $CONTAINER_ID ]; then
+if [ -n "$CONTAINER_ID" ]; then
     if ((STOP_RUNNING)); then
         echo "Stopping container: $CONTAINER_ID"
         docker stop $CONTAINER_ID
@@ -285,12 +297,11 @@ else
         env_opts="$env_opts -e $setting"
     done
 
-    env_file=$project_dir/docker-support/env
     if [ -f $env_file ]; then
         env_opts="$env_opts --env-file=$env_file"
     fi
 
-    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -p $host_port:$host_port $env_opts $image_name"
+    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -p $host_port:$host_port $env_opts -e APP_DAEMONIZED=1 $image_name"
 
     if ((! AUTOSTART)); then
         docker run $docker_opts $RUN_COMMAND
