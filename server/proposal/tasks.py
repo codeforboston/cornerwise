@@ -82,10 +82,12 @@ def fetch_document(doc):
 
     # Ensure that the intermediate directories exist:
     pathdir = os.path.dirname(path)
-    os.mkdirs(pathdir, exist_ok=True)
+    os.makedirs(pathdir, exist_ok=True)
 
     with request.urlopen(url) as resp, open(path, "wb") as out:
         shutil.copyfileobj(resp, out)
+        doc.document = path
+        doc.save()
 
 
 @celery_app.task
