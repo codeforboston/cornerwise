@@ -31,6 +31,10 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += [
+        url(r'^$', "django.views.static.serve", {
+            "document_root": settings.STATIC_ROOT,
+            "path": "index.html"
+        }),
         url(r'(?P<path>.*)$', "django.views.static.serve", {
             "document_root": settings.STATIC_ROOT
         })
