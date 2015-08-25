@@ -26,6 +26,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
+            attrs.caseNumber = attrs.caseNumber || attrs.case_number;
             return attrs;
         },
 

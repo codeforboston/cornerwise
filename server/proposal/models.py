@@ -15,6 +15,8 @@ class Proposal(models.Model):
                                    help_text="")
     modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+#    closed = models.DateTimeField(null=True,
+                                  #help_text="The time when this proposal was closed.")
     summary = models.CharField(max_length=256)
     description = models.TextField()
     source = models.URLField(null=True,

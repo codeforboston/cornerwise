@@ -20,6 +20,7 @@ def last_run():
     except PeriodicTask.DoesNotExist:
         return None
 
+
 def create_proposal_from_json(p_dict):
     "Constructs a Proposal from a dictionary."
     try:
@@ -66,8 +67,12 @@ def create_proposal_from_json(p_dict):
 
         return proposal
 
+
 @celery_app.task
 def fetch_document(doc):
+    """Copy the given document (proposal.models.Document) to a local
+    directory.
+    """
     url = doc.url
     url_components = parse.urlsplit(url)
     filename = os.path.basename(url_components.path)
@@ -81,7 +86,6 @@ def fetch_document(doc):
 
     with request.urlopen(url) as resp, open(path, "wb") as out:
         shutil.copyfileobj(resp, out)
-
 
 
 @celery_app.task

@@ -24,6 +24,10 @@ define(
                 return B.Collection.prototype.fetch.call(this, opts);
             },
 
+            parse: function(results) {
+                return _.isArray(results) ? results : results.proposals;
+            },
+
             /**
              * @param {String} name
              * @param {Boolean} desc true to sort descending
