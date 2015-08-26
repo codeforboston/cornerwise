@@ -1,4 +1,16 @@
-CREATE USER IF NOT EXISTS cornerwise WITH LOGIN;
+DO
+$body$
+BEGIN
+   IF NOT EXISTS (
+      SELECT *
+      FROM   pg_catalog.pg_user
+      WHERE  usename = 'cornerwise') THEN
+
+      CREATE USER cornerwise WITH LOGIN;
+   END IF;
+END
+$body$;
+
 GRANT ALL PRIVILEGES ON DATABASE cornerwise TO cornerwise;
 
 CREATE EXTENSION IF NOT EXISTS postgis;
