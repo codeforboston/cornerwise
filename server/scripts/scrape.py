@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-from . import arcgis
 from datetime import datetime
 import json
 import logging
@@ -93,13 +92,13 @@ def get_td_val(td, attr=None):
 def get_row_vals(attrs, tr):
     return {attr: get_td_val(td, attr) for attr, td in zip(attrs, tr.find_all("td"))}
 
-def add_geocode(permits):
+def add_geocode(geocoder, permits):
     """
     Modifies each permit in the list (in place), adding 'lat' and 'long'
     matching the permit address.
     """
     addrs = ["{0[number]} {0[street]}".format(permit) for permit in permits]
-    response = arcgis.geocode(addrs)
+    response = geocoder.geocode(addrs)
     locations = response["locations"]
 
     # Assumes the locations are returned in the same order
@@ -136,7 +135,7 @@ def index_by(l, keyfn):
 
 def get_proposals_since(dt=None,
                         date_column="submissionDate",
-                        geocode=True):
+                        geocoder=None):
     """
     Continually scrape the proposals until the submission date is
     less than or equal to the given date.
@@ -176,8 +175,8 @@ def get_proposals_since(dt=None,
         if i > last_page:
             break
 
-    if geocode:
-        add_geocode(all_cases)
+    if geocoder:
+        add_geocode(geocoder, all_cases)
 
     return all_cases
 

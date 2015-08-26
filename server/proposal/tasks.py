@@ -10,7 +10,7 @@ from django.db.utils import IntegrityError
 
 from .models import Proposal, Event, Document
 from cornerwise import celery_app
-from scripts import scrape
+from scripts import scrape, arcgis
 
 def last_run():
     "Determine the date and time of the last run of the task."
@@ -98,8 +98,11 @@ def scrape_reports_and_decisions(since=None):
         # proposals.
         since = last_run()
 
+    geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
+                                  settings.ARCGIS_CLIENT_SECRET)
+
     # Array of dicts:
-    proposals_json = scrape.get_proposals_since(since)
+    proposals_json = scrape.get_proposals_since(geocoder, since)
     proposals = []
 
     for p_dict in proposals_json:

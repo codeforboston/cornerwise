@@ -142,3 +142,12 @@ CELERYBEAT_SCHEDULE = {
         "schedule": timedelta(days=1),
     }
 }
+
+ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
+ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
+
+try:
+    # Allow user's local settings to shadow shared settings:
+    from local_settings import *
+except ImportError:
+    pass
