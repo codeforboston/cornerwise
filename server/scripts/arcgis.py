@@ -2,8 +2,6 @@ import json
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-from django.conf import settings
-
 ADDRESS_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses"
 
 class ArcGISCoder(object):

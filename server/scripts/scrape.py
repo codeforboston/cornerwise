@@ -9,13 +9,8 @@ from urllib.error import HTTPError
 logger = logging.getLogger(__name__)
 
 LAST_PAGE = 31
-URL_FORMAT = "http://www.somervillema.gov/planningandzoning/reports?order=field_rnd_submission_date_value&sort=desc&page={:1}"
+URL_FORMAT = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots?order=page={:1}"
 TITLES = {}
-DATE_FORMAT = "%b %d, %Y"
-
-def make_url(page=1):
-    "Returns a string URL for the given page."
-    return URL_FORMAT.format(page)
 
 # Utility:
 def to_camel(s):
@@ -30,9 +25,9 @@ def attribute_for_title(title):
     return TITLES.get(title, to_camel(title))
 
 # TODO: Return None or error if the response is not successful
-def get_page(page=1):
+def get_page(page=1, url=URL_FORMAT):
     "Returns the HTML content of the given Reports and Decisions page."
-    f = urlopen(make_url(page))
+    f = urlopen(url.format(page))
     logger.info("Fetching page {}".format(page))
     html = f.read()
     f.close()
@@ -67,6 +62,9 @@ def get_links(elt):
 def dates_field(td):
     return get_date(default_field(td))
 
+def datetime_field(td):
+    return datetime.strptime(default_field(td),
+                             "%b %d, %Y - %I:%M%p")
 
 def links_field(td):
     return {"links": get_links(td)}
@@ -78,7 +76,8 @@ field_processors = {
     "reports": links_field,
     "decisions": links_field,
     "other": links_field,
-    "submissionDate": dates_field
+    "submissionDate": dates_field,
+    "updatedDate": datetime_field
 }
 
 def col_names(table):
@@ -126,12 +125,7 @@ def find_cases(doc):
             continue
     return cases
 
-def index_by(l, keyfn):
-    if isinstance(keyfn, str):
-        s = keyfn
-        keyfn = lambda o: o[s]
-
-    return {keyfn(o): o for o in l}
+def cases_for_page()
 
 def get_proposals_since(dt=None,
                         date_column="submissionDate",

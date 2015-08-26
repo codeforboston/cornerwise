@@ -41,7 +41,7 @@ fi;
 # Prefer Python 3:
 PYTHON_BIN=$(which python3 || which python)
 echo "Applying any outstanding migrations"
-$PYTHON_BIN $APP_ROOT/manage.py migrate --database=migrate
+$PYTHON_BIN $APP_ROOT/manage.py migrate
 echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
 
 $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>$server_err &
