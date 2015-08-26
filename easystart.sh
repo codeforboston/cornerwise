@@ -51,7 +51,6 @@ Options:
   -B      Ignore changes to dependencies when determining whether
           to build a new image. Only build if there is no
           existing image
-  -c      Clean up old containers (those where status =~ /Exited/)
   -F      Prevents the script's default behavior of setting up the
           VM to forward traffic on the host port to localhost.
   -m <name> Specify a docker-machine machine to use
@@ -60,41 +59,49 @@ Options:
   -p <port> Run on a port other than $host_port
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
+  -R      Do NOT remove the container after it has exited
   -x      If a running container is found, stop it
 "
 }
 
+if [ -z "$image_name" ]; then
+    image_name=$(basename $(git rev-parse --show-toplevel))
+fi
+
 # Indicates whether the image should be rebuild:
 should_build=0
 # If true, do not attach to a running container (if applicable):
-FORCE_RUN=0
+force_run=0
 vm_port_forwarding=1
 open_in_browser=1
 # How long should the script wait for the application to launch?
 open_timeout=30
-IGNORE_CHANGES=0
-AUTOSTART=0
-STOP_RUNNING=0
+# Do not rebuild the image if support files have changed
+ignore_changes=0
+autostart=0
+# If a running container is found, should we stop it?
+stop_running=0
 skip_build_prompt=0
+remove_after=1
 
-while getopts ":bBcFmOprSthx" opt; do
+while getopts ":bBFmOprRSthx" opt; do
     case $opt in
         b)
             should_build=1
             skip_build_prompt=1
             ;;
         B)
-            IGNORE_CHANGES=1
+            ignore_changes=1
             skip_build_prompt=1
             ;;
-        b)
-            cleanup_old=1
-            ;;
         r)
-            FORCE_RUN=1
+            force_run=1
+            ;;
+        R)
+            remove_after=0
             ;;
         S)
-            AUTOSTART=0
+            autostart=0
             ;;
         F)
             vm_port_forwarding=0
@@ -121,7 +128,7 @@ while getopts ":bBcFmOprSthx" opt; do
             open_timeout=$OPTARG
             ;;
         x)
-            STOP_RUNNING=1
+            stop_running=1
             ;;
         h)
             print_help
@@ -137,11 +144,11 @@ done
 
 shift $((OPTIND-1))
 
-if [ -z "$RUN_COMMAND" ]; then
+if [ -z "$run_command" ]; then
     if [ -n "$1" ]; then
-        RUN_COMMAND="$*"
+        run_command="$*"
     else
-        RUN_COMMAND=/bin/bash
+        run_command=/bin/bash
     fi
 fi
 
@@ -200,20 +207,14 @@ elif [ $(uname) == "Darwin" ]; then
     exit 1
 fi
 
-if ((cleanup_old)); then
-    echo "Are you sure you want to permanently delete all exited $image_name containers? (y/N)"
-    read response
-fi
-
-if ((!IGNORE_CHANGES)); then
+if ((!ignore_changes)); then
     # Determine if the image should be rebuilt.
 
     # Some jiggery-pokery to determine the date that the existing
     # cornerwise image was created.
     image_created=$(docker inspect $image_name | grep "Created" | perl -n -e'/"Created": "(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)\.\d+Z"/ && print $1')
-    NO_EXISTING=$?
 
-    if ((!$should_build)); then
+    if ((!should_build)); then
         should_build=1
 
         if [ -n "$image_created" ]; then
@@ -222,16 +223,16 @@ if ((!IGNORE_CHANGES)); then
 
             if ((!skip_build_prompt)); then
                 # Convert edit date to a timestamp
-                CREATED_STAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$image_created" "+%s")
-                DOCKERFILE_MODIFIED=$(stat -f %m $project_dir/Dockerfile)
+                created_stamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$image_created" "+%s")
+                dockerfile_modified=$(stat -f %m $project_dir/Dockerfile)
                 changed_file=""
 
-                if [ $DOCKERFILE_MODIFIED -gt $CREATED_STAMP ]; then
+                if [ $dockerfile_modified -gt $created_stamp ]; then
                     changed_file="Dockerfile"
 
                 else
                     for path in $project_dir/docker-support/*; do
-                        if [ $(stat -f %m $path) -gt $CREATED_STAMP ]; then
+                        if [ $(stat -f %m $path) -gt $created_stamp ]; then
                             changed_file="$path"
 
                             break
@@ -266,28 +267,28 @@ if ((should_build)); then
     docker build -t $image_name $project_dir
 fi;
 
-if ((!FORCE_RUN || STOP_RUNNING)); then
+if ((!force_run || stop_running)); then
     # Determine if the container is already running:
-    CONTAINER_ID=$(docker ps | awk "/$image_name/ { if (match(\$2, /^$image_name/)) print \$1 }" | head -n 1)
+    container_id=$(docker ps | awk "/$image_name/ { if (match(\$2, /^$image_name/)) print \$1 }" | head -n 1)
 else
-    CONTAINER_ID=""
+    container_id=""
 fi;
 
-if [ -n "$CONTAINER_ID" ]; then
-    if ((STOP_RUNNING)); then
-        echo "Stopping container: $CONTAINER_ID"
-        docker stop $CONTAINER_ID
-        CONTAINER_ID=""
+if [ -n "$container_id" ]; then
+    if ((stop_running)); then
+        echo "Stopping container: $container_id"
+        docker stop $container_id
+        container_id=""
     else
-        echo "There's a $image_name container already running with id $CONTAINER_ID."
+        echo "There's a $image_name container already running with id $container_id."
         echo "If you want to start a new container, re-run ${BASH_SOURCE[0]} -r."
     fi
 fi
 
-if [ -n "$CONTAINER_ID" ]; then
+if [ -n "$container_id" ]; then
     # Found a container. Attach to it:
-    echo "Attaching to running container ($CONTAINER_ID)."
-    docker exec -it $CONTAINER_ID $RUN_COMMAND
+    echo "Attaching to running container ($container_id)."
+    docker exec -it $container_id $run_command
 else
     echo "Starting container..."
 
@@ -301,14 +302,18 @@ else
         env_opts="$env_opts --env-file=$env_file"
     fi
 
+    if ((remove_after)); then
+        docker_opts="$docker_opts --rm"
+    fi
+
     docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -p $host_port:$host_port $env_opts -e APP_DAEMONIZED=1 $image_name"
 
-    if ((! AUTOSTART)); then
-        docker run $docker_opts $RUN_COMMAND
+    if ((!autostart)); then
+        docker run $docker_opts $run_command
     else
         # Start the server:
-        CONTAINER_ID=$(docker run -d $docker_opts /app/start.sh)
-        echo "Container started with id $CONTAINER_ID."
+        container_id=$(docker run -d $docker_opts /app/start.sh)
+        echo "Container started with id $container_id."
 
         if ((open_in_browser)); then
             ps_count=0
@@ -335,7 +340,7 @@ else
         fi
 
         # Attach to the container, and we're done
-        docker exec -it $CONTAINER_ID $RUN_COMMAND
+        docker exec -it $container_id $run_command
     fi
 fi;
 
