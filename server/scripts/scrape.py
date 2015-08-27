@@ -125,7 +125,8 @@ def find_cases(doc):
             continue
     return cases
 
-def cases_for_page()
+def cases_for_page():
+    pass
 
 def get_proposals_since(dt=None,
                         date_column="submissionDate",
