@@ -9,7 +9,7 @@ from urllib.error import HTTPError
 logger = logging.getLogger(__name__)
 
 LAST_PAGE = 31
-URL_FORMAT = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots?order=page={:1}"
+URL_FORMAT = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots?page={:1}"
 TITLES = {}
 
 # Utility:
@@ -64,7 +64,7 @@ def dates_field(td):
 
 def datetime_field(td):
     return datetime.strptime(default_field(td),
-                             "%b %d, %Y - %I:%M%p")
+                             "%m/%d/%Y - %I:%M%p")
 
 def links_field(td):
     return {"links": get_links(td)}
@@ -97,15 +97,14 @@ def add_geocode(geocoder, permits):
     matching the permit address.
     """
     addrs = ["{0[number]} {0[street]}".format(permit) for permit in permits]
-    response = geocoder.geocode(addrs)
-    locations = response["locations"]
+    locations = geocoder.geocode(addrs)
 
     # Assumes the locations are returned in the same order
     for permit, location in zip(permits, locations):
         loc = location["location"]
         permit["lat"] = loc["y"]
         permit["long"] = loc["x"]
-        permit["score"] = location["score"]
+        permit["score"] = location["properties"].get("score")
 
 def find_cases(doc):
     table = find_table(doc)
@@ -118,10 +117,13 @@ def find_cases(doc):
     cases = []
 
     # This is ugly, but there's some baaad data out there:
-    for tr in trs:
+    for i, tr in enumerate(trs):
         try:
             cases.append(get_row_vals(attributes, tr))
-        except:
+        except Exception as err:
+            logger.error("Failed to scrape row {num}: {err}"\
+                         .format(num=i,
+                                 err=err))
             continue
     return cases
 
