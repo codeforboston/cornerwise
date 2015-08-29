@@ -1,8 +1,31 @@
 import json
+import re
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
 ADDRESS_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses"
+
+def camel_to_under(s):
+    if not s:
+        return ""
+    return re.sub(r"(?!^)[A-Z]",
+                  lambda r: ("_"+r.group(0).lower()),
+                  s).lower()
+
+def simplify(result):
+    loc = result["location"]
+    attrs = result["attributes"]
+    return {
+        "location": {
+            "lng": loc["x"],
+            "lat": loc["y"]
+        },
+        "formatted_name": attrs["Match_addr"],
+        "properties": {
+            "types": [camel_to_under(attrs["Addr_type"])],
+            "score": result["score"]
+        }
+    }
 
 class ArcGISCoder(object):
     def __init__(self, client_id, client_secret, url=ADDRESS_URL):
@@ -29,9 +52,6 @@ class ArcGISCoder(object):
         self.access_token = json_response["access_token"]
         return self.access_token
 
-    def format_response(self, response):
-        pass
-
     def geocode(self, addrs):
         if isinstance(addrs, str):
             addrs = [addrs]
@@ -49,9 +69,11 @@ class ArcGISCoder(object):
             })
         data = {
             "addresses": addresses,
-            "token": get_access_token(),
+            "token": self.get_access_token(),
             "f": "json"
         }
 
         f = urlopen(self.url, urlencode(data).encode("ISO-8859-1"))
-        return json.loads(f.read().decode("utf-8"))
+        result = json.loads(f.read().decode("utf-8"))
+        return result["locations"]
+        return [simplify(l) for l in result["locations"]]

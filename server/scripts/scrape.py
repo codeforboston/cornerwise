@@ -101,9 +101,13 @@ def add_geocode(geocoder, permits):
 
     # Assumes the locations are returned in the same order
     for permit, location in zip(permits, locations):
-        loc = location["location"]
-        permit["lat"] = loc["y"]
-        permit["long"] = loc["x"]
+        loc = location and location.get("location")
+        if not loc:
+            logger.error("Skipping permit {id}; geolocation failed.".\
+                         format(id=permit["caseNumber"]))
+            continue
+        permit["lat"] = loc["lat"]
+        permit["long"] = loc["lng"]
         permit["score"] = location["properties"].get("score")
 
 def find_cases(doc):
@@ -131,7 +135,7 @@ def cases_for_page():
     pass
 
 def get_proposals_since(dt=None,
-                        date_column="submissionDate",
+                        date_column="updatedDate",
                         geocoder=None):
     """
     Continually scrape the proposals until the submission date is

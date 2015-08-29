@@ -2,8 +2,12 @@ import json
 import threading
 from queue import Queue
 
+import logging
+
 from urllib.parse import urlencode
 from urllib.request import urlopen
+
+logger = logging.getLogger(__name__)
 
 def geocode(api_key, address):
     data = (
@@ -18,19 +22,23 @@ def geocode(api_key, address):
 
     if json_response["status"] == "OK":
         return json_response["results"][0]
+    else:
+        logger.error("Error encountered while geocoding address: {address}\n{error}"\
+                     .format(address=address, error=json_response))
 
 def simplify(result):
     """Takes a dictionary as returned from the Google Maps geocoder API and
 returns a flattened dict conforming to the generic geocoder expectations.
     """
-    return {
-        "location": result["geometry"]["location"],
-        "formatted_name": result["formatted_address"],
-        "properties": {
-            "place_id": result["place_id"],
-            "types": result["types"]
+    if result:
+        return {
+            "location": result["geometry"]["location"],
+            "formatted_name": result["formatted_address"],
+            "properties": {
+                "place_id": result["place_id"],
+                "types": result["types"]
+            }
         }
-    }
 
 class GeocoderThread(threading.Thread):
     def __init__(self, addr_q, out, geocoder):
@@ -49,7 +57,8 @@ class GeocoderThread(threading.Thread):
             try:
                 print("Geocoding address:", address)
                 result = geocode(self.geocoder.api_key, address)
-                self.out.append((address, simplify(result)))
+                # Could return None
+                self.out.append((address, result and simplify(result)))
             except Exception as err:
                 print("Error in thread", self, err)
             finally:
