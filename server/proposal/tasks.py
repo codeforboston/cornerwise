@@ -40,9 +40,12 @@ def create_proposal_from_json(p_dict):
     try:
         proposal.location = Point(p_dict["long"], p_dict["lat"])
     except KeyError:
+        # If the dictionary does not have an associated location, do not
+        # create a Proposal.
         return
-    proposal.summary = "No summary available"
-    proposal.description = ""
+
+    proposal.summary = p_dict.get("summary")
+    proposal.description = p_dict.get("description")
     # This should not be hardcoded
     proposal.source = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions"
 
