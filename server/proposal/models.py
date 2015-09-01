@@ -1,5 +1,30 @@
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
+from django.db.models import Q
+
+class ProposalManager(models.GeoManager):
+    def between(self, start=None, end=None):
+        q = None
+
+        if start:
+            q = Q(created__gte=start)
+
+        if end:
+            endQ = Q(closed_lte=end)
+
+            if q:
+                q = Q & endQ
+            else:
+                q = endQ
+
+        return self.objects.filter(q)
+
+    def build_query(self, params):
+        "Construct a query from parameters passed in "
+        pass
+
+    def for_parcel(self, parcel):
+        return self.filter(location__within=parcel.shape)
 
 class Proposal(models.Model):
     case_number = models.CharField(max_length=64,
@@ -24,7 +49,7 @@ class Proposal(models.Model):
     status = models.CharField(max_length=64)
 
     # To enable geo queries
-    objects = models.GeoManager()
+    objects = ProposalManager()
 
     def get_absolute_url(self):
         return reverse("view-proposal",
