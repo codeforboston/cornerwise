@@ -26,6 +26,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
+            attrs.address = [attrs.number, attrs.street].join(" ");
             attrs.caseNumber = attrs.caseNumber || attrs.case_number;
             return attrs;
         },
@@ -43,7 +44,6 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                       {lat: loc.lat,
                        lng: loc.lng})
                 .done(function(parcel) {
-                    console.log(parcel);
                     self.set("parcel", parcel);
                 })
                 .fail(function(error) {

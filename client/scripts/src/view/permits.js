@@ -13,10 +13,11 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
 
         buildHeader: function() {
             var tr = this.$("thead tr");
-            _.each([["Case","case"],
+            _.each([["Address","address"],
                     ["Description", "description"],
                     ["Distance", "refDistance"],
-                    ["Submitted", "submitted"]],
+                   // ["Submitted", "submitted"]
+                   ],
                    function(p) {
                        $("<th>").text(p[0])
                            .data("sortField", p[1])
