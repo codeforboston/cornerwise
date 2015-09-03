@@ -57,15 +57,16 @@
         <div id="spga-filters"></div>
         <div id="type-filters"></div>
 
-        <div class="filter-group">
+        <div class="filter-group inactive" id="radius-filter-group">
           <div class="filter-name">
             Radius (ft):
             <span id="radius-value"></span>
             <button id="reset" class="waves-effect waves-light btn"  name="action">Reset</button>
+
           </div>
-          <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100">
-          <button id="reset" class="waves-effect waves-light btn"  name="action">Reset </button>
+          <input type="range" id="radius-filter" min="1000" max="20000" step="100">
         </div>
+
         <table id="permit-list" class="table table-condensed">
           <tfoot>
             <tr><td colspan="3">Loading...</td></tr>
