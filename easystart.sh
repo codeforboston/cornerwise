@@ -84,7 +84,7 @@ stop_running=0
 skip_build_prompt=0
 remove_after=1
 
-while getopts ":bBFmOprRSthx" opt; do
+while getopts ":bBFm:Op:rRSthx" opt; do
     case $opt in
         b)
             should_build=1
@@ -113,8 +113,7 @@ while getopts ":bBFmOprRSthx" opt; do
             open_in_browser=0
             ;;
         p)
-            check_re='^[0-9]{4,}$'
-            if ! [[ $OPTARG =~ $check_re ]]; then
+            if ! [[ $OPTARG =~ ^[0-9]{4,}$ ]]; then
                 echo "Port must be an integer >=1000."
                 exit 1
             fi
