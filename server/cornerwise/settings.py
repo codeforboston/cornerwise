@@ -95,7 +95,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': POSTGRES_HOST,
         'NAME': 'cornerwise',
-        'USER': 'cornerwise'
+        'USER': 'postgres'
     },
     'migrate': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
