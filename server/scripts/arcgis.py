@@ -52,7 +52,7 @@ class ArcGISCoder(object):
         self.access_token = json_response["access_token"]
         return self.access_token
 
-    def geocode(self, addrs):
+    def geocode(self, addrs, **kwargs):
         if isinstance(addrs, str):
             addrs = [addrs]
 

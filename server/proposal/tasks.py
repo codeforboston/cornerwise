@@ -109,6 +109,8 @@ def scrape_reports_and_decisions(since=None, coder_type="google"):
 
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
+        geocoder.bounds = settings.GEO_BOUNDS
+        geocoder.region = settings.GEO_REGION
     else:
         geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
                                       settings.ARCGIS_CLIENT_SECRET)

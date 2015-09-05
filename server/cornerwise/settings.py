@@ -146,8 +146,11 @@ CELERYBEAT_SCHEDULE = {
 ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
 ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
 
-GEO_BOUNDS = [42.371861543730496, -71.13338470458984,
-              42.40393908425197, -71.0679817199707];
+GEO_BOUNDS = [42.371861543730496, -71.13338470458984, # northwest
+              42.40393908425197, -71.0679817199707];  # southeast
+
+# String appended to addresses to assist geocoder:
+GEO_REGION = "Somerville, MA"
 
 try:
     # Allow user's local settings to shadow shared settings:
