@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import subprocess
 from urllib import parse, request
 
 from djcelery.models import PeriodicTask
@@ -9,7 +10,7 @@ from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.utils import IntegrityError
 
-from .models import Proposal, Event, Document
+from .models import Proposal, Event, Document, Image
 from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps
 
@@ -86,7 +87,7 @@ def fetch_document(doc):
     url_components = parse.urlsplit(url)
     filename = os.path.basename(url_components.path)
     path = os.path.join(settings.STATIC_ROOT, "doc",
-                        str(doc.proposal.pk),
+                        str(doc.pk),
                         filename)
 
     # Ensure that the intermediate directories exist:
@@ -97,6 +98,59 @@ def fetch_document(doc):
         shutil.copyfileobj(resp, out)
         doc.document = path
         doc.save()
+
+@celery_app.task
+def extract_content(doc):
+    """If the given document (proposal.models.Document) has been copied to
+    the local filesystem, extract its images to a subdirectory of the
+    document's directory (docs/<doc id>/images). Extracts the text
+    content to docs/<doc id>/content.txt.
+
+    """
+
+    docfile = doc.document
+
+    if not docfile:
+        logger.warn("Document has not been copied to the local filesystem:")
+
+    try:
+        path = docfile.path
+    except:
+        path = docfile.name
+
+    if not os.path.exists(path):
+        logger.warn("Document %s is not where it says it is: %s",
+                    doc.pk, path)
+        return
+
+    images_dir = os.path.join(os.path.dirname(path), "images")
+    os.makedirs(images_dir, exist_ok=True)
+
+    images_pattern = os.path.join(images_dir, "image")
+
+    logger.info("Extracting images to '%s'", images_dir)
+    status = subprocess.call(["pdfimages", "-all", path, images_pattern])
+
+    if status:
+        logger.warn("pdfimages failed with exit code %i", status)
+    else:
+        # Do stuff with the images in the directory
+        for image_path in os.listdir(images_dir):
+            image = Image(image=image_path)
+            image.document = doc
+            image.save()
+
+    # Could consider storing the full extracted text of the document in
+    # the database and indexing it, rather than extracting it to a file.
+    status = subprocess.call(["pdftotext", path])
+
+    if status:
+        logger.error("Failed to extract text from {doc}".\
+                     format(doc=path))
+    else:
+        # Do stuff with the contents of the file.
+        # Possibly perform some rudimentary scraping?
+        pass
 
 
 @celery_app.task
