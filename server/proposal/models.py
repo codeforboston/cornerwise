@@ -85,3 +85,13 @@ class Document(models.Model):
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
         unique_together = (("proposal", "url"))
+
+class Image(models.Model):
+    """An image associated with a document. In the future, it may be
+    worthwhile to alter this to allow images associated directly with a
+    proposal.
+
+    """
+    document = models.ForeignKey(Document)
+    image = models.FileField()
+    created = models.DateTimeField(auto_now_add=True)
