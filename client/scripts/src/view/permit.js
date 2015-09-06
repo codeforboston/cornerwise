@@ -21,7 +21,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         template: $u.template('<td><%= address %></td>'
-                              + '<td><b><%= description %></b>'
+                              + '<td><b><%= summary %></b>'
                               + '<br>Case: <%= caseNumber %></td>'
                               + '<td><span class="distance"><%= commas(refDistance) %> feet</span></td>'
                               // + '<td><%= formatDate(submitted) %></td>'
