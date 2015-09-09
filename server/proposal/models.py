@@ -55,6 +55,15 @@ class Proposal(models.Model):
         return reverse("view-proposal",
                        kwargs={"pk": self.pk})
 
+class Attribute(models.Model):
+    """
+    Arbitrary attributes associated with a particular proposal.
+    """
+    proposal = models.ForeignKey(Proposal, related_name="attributes")
+    name = models.CharField(max_length=128)
+    string_value = models.CharField(null=True, max_length=256)
+    text_value = models.TextField(null=True)
+    date_value = models.DateTimeField(null=True)
 
 class Event(models.Model):
     """
