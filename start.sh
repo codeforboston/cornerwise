@@ -208,7 +208,7 @@ docker pull $image_name
 
 if ((!force_run || stop_running)); then
     # Determine if the container is already running:
-    image_name_esc=$(echo "$image_name" | sed -n 's/\([\/.?]\)/\\\//pg')
+    image_name_esc=$(echo "$image_name" | sed -n 's/\([\/.?]\)/\\\1/pg')
     container_id=$(docker ps | awk "/$image_name_esc/ { if (match(\$2, /^$image_name_esc/)) print \$1 }" | head -n 1)
 else
     container_id=""
@@ -246,7 +246,7 @@ else
         docker_opts="$docker_opts --rm"
     fi
 
-    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -p $host_port:$host_port $env_opts -e APP_DAEMONIZED=1 $image_name"
+    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -v $project_dir/docker-runtime:/scripts -p $host_port:$host_port $env_opts -e APP_DAEMONIZED=1 $image_name"
 
     if ((!autostart)); then
         docker run $docker_opts $run_command
