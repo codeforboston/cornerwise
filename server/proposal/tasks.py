@@ -100,6 +100,17 @@ def fetch_document(doc):
         doc.save()
 
 @celery_app.task
+def fetch_all_documents():
+    """Fetches all documents that have not been copied to the local
+    filesystem."""
+    #docs = Document.objects.filter(document__isnull=True)
+    docs = Document.objects.all()
+
+    for doc in docs:
+        #fetch_document.delay(doc)
+        fetch_document(doc)
+
+@celery_app.task
 def extract_content(doc):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
@@ -142,7 +153,8 @@ def extract_content(doc):
 
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
-    status = subprocess.call(["pdftotext", path])
+    text_path = os.path.join(os.path.dirname(path), "text.txt")
+    status = subprocess.call(["pdftotext", path, text_path])
 
     if status:
         logger.error("Failed to extract text from {doc}".\
@@ -151,6 +163,14 @@ def extract_content(doc):
         # Do stuff with the contents of the file.
         # Possibly perform some rudimentary scraping?
         pass
+
+@celery_app.task
+def extract_all_content():
+    "Extract the contents of all documents."
+    docs = Document.objects.all()
+
+    for doc in docs:
+        extract_content(doc)
 
 
 @celery_app.task
