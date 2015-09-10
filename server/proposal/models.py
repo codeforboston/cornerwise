@@ -101,6 +101,10 @@ class Image(models.Model):
     proposal.
 
     """
-    document = models.ForeignKey(Document)
+    proposal = models.ForeignKey(Proposal)
+    document = models.ForeignKey(Document, null=True)
     image = models.FileField()
     created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (("proposal", "image"))

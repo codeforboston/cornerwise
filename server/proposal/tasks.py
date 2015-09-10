@@ -12,7 +12,7 @@ from django.db.utils import IntegrityError
 
 from .models import Proposal, Event, Document, Image
 from cornerwise import celery_app
-from scripts import scrape, arcgis, gmaps
+from scripts import scrape, arcgis, gmaps, images
 
 logger = logging.getLogger(__name__)
 
@@ -146,10 +146,22 @@ def extract_content(doc):
         logger.warn("pdfimages failed with exit code %i", status)
     else:
         # Do stuff with the images in the directory
-        for image_path in os.listdir(images_dir):
+        for image_name in os.listdir(images_dir):
+            image_path = os.path.join(images_dir, image_name)
+
+            if not images.is_interesting(image_path):
+                continue
+
             image = Image(image=image_path)
+            image.proposal = doc.proposal
             image.document = doc
-            image.save()
+
+            try:
+                image.save()
+            except IntegrityError:
+                # This can occur if the image has already been fetched
+                # and associated with the Proposal.
+                pass
 
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
