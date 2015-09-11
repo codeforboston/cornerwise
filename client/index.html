@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="description" content="Find zoning information of City of Sommerville">
   <title>Cornerwise</title>
-  <script data-main="scripts/main" src="scripts/require.js"></script>
-  <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+  <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+  <!-- <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/> -->
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
-  <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" />
   set
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -20,7 +20,7 @@
 
           <a class="navbar-brand" rel="home" href="#" title="Buy Sell Rent Everyting">
             <img style="max-width:100px; margin-top: -7px;"
-                 src="/images/cornerwise-logo.png">
+                 src="/static/images/cornerwise-logo.png">
           </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
@@ -46,16 +46,17 @@
             <input type="text" name="address" placeholder="Type the Address">
           </form>
           <button name="geolocate" id="geolocate">
-          <div class="geolocateArrow"><img src="images/geolocate-button.png" alt="Find my location" width="24" height="24"></div>
+          <div class="geolocateArrow"><img src="/static/images/geolocate-button.png" alt="Find my location" width="24" height="24"></div>
           </button>
           <div id="geolocating-indicator">
-            <img src="/images/geolocating.gif"/>
+            <img src="/static/images/geolocating.gif"/>
           </div>
         </div>
       </div>
       <div class="col-sm-4" id="data-container">
-        <div id="spga-filters"></div>
-        <div id="type-filters"></div>
+
+        <!-- <div id="spga-filters"></div> -->
+        <!-- <div id="type-filters"></div> -->
 
         <div class="filter-group inactive" id="radius-filter-group">
           <div class="filter-name">

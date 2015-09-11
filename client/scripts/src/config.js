@@ -44,7 +44,7 @@ define(["optional!local-config"], function(localConfig) {
         // Layers that are always shown
         baseLayers: [
             {
-                source: "/scripts/src/layerdata/somerville.geojson",
+                source: "/static/scripts/src/layerdata/somerville.geojson",
                 style: {
                     stroke: 0.1,
                     color: "#397f34",
@@ -56,7 +56,7 @@ define(["optional!local-config"], function(localConfig) {
 
         layers: [
             {
-                source: "/scripts/src/layerdata/glx.geojson",
+                source: "/static/scripts/src/layerdata/glx.geojson",
                 id: "glx",
                 title: "Green Line Extension",
                 template:
@@ -76,7 +76,7 @@ define(["optional!local-config"], function(localConfig) {
                 features: null
             },
             {
-                source: "/scripts/src/layerdata/community_path.geojson",
+                source: "/static/scripts/src/layerdata/community_path.geojson",
                 id: "cp",
                 title: "Community Path",
                 color: "orange",

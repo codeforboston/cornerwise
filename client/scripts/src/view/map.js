@@ -5,11 +5,11 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 infoLayers, info) {
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
-            return "images/marker-active";
+            return "/static/images/marker-active";
         } else if(isHovered){
-            return "images/marker-hover";
+            return "/static/images/marker-hover";
         } else {
-            return "images/marker-normal";
+            return "/static/images/marker-normal";
         }
     }
 
