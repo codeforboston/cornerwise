@@ -13,6 +13,10 @@ define(["backbone", "underscore"], function(B, _) {
                              + '<%= document.title %></a></li>'
                              + '<% }) %>'
                              + '</ul></div>'
+                             + '<div class="images">'
+                             + '<% _.each(images, function(thumb) { %>'
+                             + '<div class="thumb"><img class="proposal_thumb" src="<%=thumb %>"/></div>'
+                             + '<% }) %></div>'
                              + '<% } %>'
                              + '</div>'),
 

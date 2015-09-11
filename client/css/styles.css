@@ -8377,3 +8377,15 @@ li.layer .color {
     right: 10px;
     width: 15px;
 }
+
+div.thumb {
+    display: inline-block;
+    width: 200px;
+    height: 200px;
+    position: relative;
+}
+
+image.proposal_thumb {
+    max-height: 100%;
+    max-width: 100%;
+}
