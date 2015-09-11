@@ -40,7 +40,7 @@ def is_interesting(image_path):
     # of the image.
     w, h = dimensions(image_path)
 
-    return w > 100 and h > 100
+    return w > 200 and h > 200
 
 def make_thumbnail(image_path, percent=None, fit=None, dim=None, dest_file=None):
     """Uses the 'convert' command line utility to resize the image at the
