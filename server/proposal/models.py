@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -104,7 +107,20 @@ class Image(models.Model):
     proposal = models.ForeignKey(Proposal)
     document = models.ForeignKey(Document, null=True)
     image = models.FileField()
+    thumbnail = models.FileField(null=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (("proposal", "image"))
+
+    @property
+    def url(self):
+        return self.thumbnail and self.thumbnail.url or self.image.url
+
+    # TODO: These should be unnecessary. Figure out how to do this
+    # within Django!
+    def set_image_path(self, path):
+        self.image.name = os.path.relpath(path, settings.MEDIA_ROOT)
+
+    def set_thumbnail_path(self, path):
+        self.thumbnail.name = os.path.relpath(path, settings.MEDIA_ROOT)
