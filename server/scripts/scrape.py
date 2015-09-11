@@ -4,7 +4,7 @@ import json
 import logging
 import re
 from urllib.request import urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,10 @@ def attribute_for_title(title):
     return TITLES.get(title, to_camel(title))
 
 # TODO: Return None or error if the response is not successful
-def get_page(page=1, url=URL_FORMAT):
+def get_page(page=1, url_format=URL_FORMAT):
     "Returns the HTML content of the given Reports and Decisions page."
-    f = urlopen(url.format(page))
+    url = url_format.format(page)
+    f = urlopen(url)
     logger.info("Fetching page {}".format(page))
     html = f.read()
     f.close()
@@ -76,7 +77,7 @@ field_processors = {
     "reports": links_field,
     "decisions": links_field,
     "other": links_field,
-    "submissionDate": dates_field,
+    "firstHearingDate": dates_field,
     "updatedDate": datetime_field
 }
 
@@ -131,8 +132,16 @@ def find_cases(doc):
             continue
     return cases
 
-def cases_for_page():
-    pass
+
+def get_proposals_for_page(page, geocoder=None):
+    html = get_page(page)
+    doc = BeautifulSoup(html, "html.parser")
+    cases = find_cases(doc)
+
+    if geocoder:
+        add_geocode(geocoder, cases)
+
+    return cases
 
 def get_proposals_since(dt=None,
                         date_column="updatedDate",
@@ -153,6 +162,10 @@ def get_proposals_since(dt=None,
             # return a 404 error instead!
             html = get_page(i)
         except HTTPError as err:
+            break
+
+        except URLError as err:
+            logger.warn("Failed to retrieve URL for page %d.", i)
             break
 
         if not html:

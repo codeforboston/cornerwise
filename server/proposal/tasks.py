@@ -86,7 +86,7 @@ def fetch_document(doc):
     url = doc.url
     url_components = parse.urlsplit(url)
     filename = os.path.basename(url_components.path)
-    path = os.path.join(settings.STATIC_ROOT, "doc",
+    path = os.path.join(settings.MEDIA_ROOT, "doc",
                         str(doc.pk),
                         filename)
 
@@ -122,7 +122,9 @@ def extract_content(doc):
     docfile = doc.document
 
     if not docfile:
-        logger.warn("Document has not been copied to the local filesystem:")
+        logger.error("Document has not been copied to the local filesystem.")
+        logger.error("Exiting")
+        return
 
     try:
         path = docfile.path
@@ -130,8 +132,8 @@ def extract_content(doc):
         path = docfile.name
 
     if not os.path.exists(path):
-        logger.warn("Document %s is not where it says it is: %s",
-                    doc.pk, path)
+        logger.error("Document %s is not where it says it is: %s",
+                     doc.pk, path)
         return
 
     images_dir = os.path.join(os.path.dirname(path), "images")
@@ -177,6 +179,27 @@ def extract_content(doc):
         pass
 
 @celery_app.task
+def generate_thumbnail(image, replace=False):
+    if image.thumbnail and os.path.exists(image.thumbnail.name):
+        return
+
+    try:
+        thumbnail_path = images.make_thumbnail(image.image.name,
+                                               fit=settings.THUMBNAIL_DIM)
+    except Exception as err:
+        logger.error(err)
+        return
+
+    image.set_thumbnail_path(thumbnail_path)
+    image.save()
+
+@celery_app.task
+def generate_thumbnails(replace=False):
+    images = Image.objects.filter(thumbnail=None)
+    for image in images:
+        generate_thumbnail(image, replace=replace)
+
+@celery_app.task
 def extract_all_content():
     "Extract the contents of all documents."
     docs = Document.objects.all()
@@ -187,11 +210,8 @@ def extract_all_content():
 
 @celery_app.task
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, coder_type="google"):
-    if not since:
-        # If there was no last run, the scraper will fetch all
-        # proposals.
-        since = last_run()
+def scrape_reports_and_decisions(since=None, page=None, coder_type="google"):
+
 
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
@@ -201,8 +221,15 @@ def scrape_reports_and_decisions(since=None, coder_type="google"):
         geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
                                       settings.ARCGIS_CLIENT_SECRET)
 
-    # Array of dicts:
-    proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
+    if page is not None:
+        proposals_json = scrape.get_proposals_for_page(page, geocoder)
+    else:
+        if not since:
+            # If there was no last run, the scraper will fetch all
+            # proposals.
+            since = last_run()
+        proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
+
     proposals = []
 
     for p_dict in proposals_json:
