@@ -8380,12 +8380,12 @@ li.layer .color {
 
 div.thumb {
     display: inline-block;
-    width: 200px;
-    height: 200px;
+    width: 100px;
+    height: 100px;
     position: relative;
 }
 
-image.proposal_thumb {
-    max-height: 100%;
-    max-width: 100%;
+img.proposal_thumb {
+    max-height: 100% !important;
+    max-width: 100% !important;
 }

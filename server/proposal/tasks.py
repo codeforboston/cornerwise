@@ -54,7 +54,7 @@ def create_proposal_from_json(p_dict):
     # linked in the 'decision' page, the proposal is 'complete'.
     # Note that we don't have insight into whether the proposal was
     # approved!
-    is_complete = bool(p_dict["decisions"]["links"])
+    proposal.complete = bool(p_dict["decisions"]["links"])
 
     proposal.save()
 
@@ -154,9 +154,9 @@ def extract_content(doc):
             if not images.is_interesting(image_path):
                 continue
 
-            image = Image(image=image_path)
-            image.proposal = doc.proposal
-            image.document = doc
+            image = Image(proposal=doc.proposal,
+                          document=doc)
+            image.set_image_path(image_path)
 
             try:
                 image.save()
@@ -210,9 +210,8 @@ def extract_all_content():
 
 @celery_app.task
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, page=None, coder_type="google"):
-
-
+def scrape_reports_and_decisions(since=None, page=None, everything=False,
+                                 coder_type="google"):
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
         geocoder.bounds = settings.GEO_BOUNDS

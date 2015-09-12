@@ -25,7 +25,13 @@ def proposal_json(proposal, include_images=True):
 
 @make_response()
 def active_proposals(req):
-    proposals = Proposal.objects.filter(status="")
+    proposals = Proposal.objects.filter(status="", complete=False)
+
+    return {"proposals": list(map(proposal_json, proposals))}
+
+@make_response()
+def closed_proposals(req):
+    proposals = Proposal.objects.filter(complete=True)
 
     return {"proposals": list(map(proposal_json, proposals))}
 

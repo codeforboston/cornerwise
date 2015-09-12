@@ -50,6 +50,7 @@ class Proposal(models.Model):
     source = models.URLField(null=True,
                              help_text="The data source for the proposal.")
     status = models.CharField(max_length=64)
+    complete = models.BooleanField(default=False)
 
     # To enable geo queries
     objects = ProposalManager()
@@ -57,6 +58,9 @@ class Proposal(models.Model):
     def get_absolute_url(self):
         return reverse("view-proposal",
                        kwargs={"pk": self.pk})
+
+    def document_for_field(self, field):
+        return self.document_set.filter(field=field)
 
 class Attribute(models.Model):
     """
