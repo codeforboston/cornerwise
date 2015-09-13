@@ -47,7 +47,7 @@ Quickly build and launch the $image_name container. If a command is
 specified, run that command in the container and exit.
 
 Options:
-  -F      Prevents the script's default behavior of setting up the
+  -F      Suppress the script's default behavior of setting up the
           VM to forward traffic on the host port to localhost.
   -m <name> Specify a docker-machine machine to use
   -O      Do not automatically open the Django application in
