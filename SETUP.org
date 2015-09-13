@@ -25,7 +25,7 @@
    This is the recommended way to start the server, unless you need
    more fine-grained control.
 
-  - ~cd path/to/cornerwise/client~
+  - ~cd path/to/cornerwise~
   - ~./start.sh~
 
     The script will detect if you have Docker Toolbox installed. If you
@@ -43,7 +43,7 @@
     Django should start.
 
   - The easy start script will try by default to remap ports from the
-    virtual machine to localhost, so you should be able to browser to
+    virtual machine to localhost, so you should be able to browse to
     http://localhost:3000 (or another port, if you've configured it). If
     that fails, you can determine the IP address of the VM by opening a
     new terminal window and typing ~docker-machine ip dev~.
@@ -69,7 +69,9 @@
 
      - ~docker-machine create -d virtualbox dev~
 
-       Creates a new machine with the name 'dev'
+       Creates a new machine with the name 'dev'. This may take a minute
+       or two; it has to fetch boot2docker.iso, a stripped-down VM
+       image.
 
 *** Run
 
@@ -84,9 +86,13 @@
       which it will fetch from Docker Hub if it's not present on the
       local machine. Exposes the 'server' directory as /app inside the
       container. Maps the container's port 3000 to port 3000 on the
-      machine. Sets APP_PORT and APP_NAME environment variables, which
-      are used by the Django start script. Runs ~/bin/bash~ within the
-      new container.
+      virtual machine. Sets APP_PORT and APP_NAME environment variables,
+      which are used by the Django start script. Runs ~/bin/bash~ within
+      the new container.
+
+      If you have never run this before, it will need to download the
+      image, which includes (among other things) Python 3, PostGIS,
+      Redis, and GDAL utilities. It weighs in at a few hundred MB.
 
     - *You should see a bash prompt.*
 
@@ -96,15 +102,32 @@
 
       Run: ~eval $(docker-machine env dev)~
 
+      And try the ~docker~ command again.
+
     - ~sh /app/start.sh~
 
       Bash script to start the server. It starts Postgres and then
       Django.
 
 *** Opening in Browser
-    - (OS X) Quick way: ~open http://$(boot2docker ip):3000~
-    - *Determine IP address:* If you're using Boot2Docker, the port is exposed on the VM and not localhost. At the terminal, type ~boot2docker ip~ to determine the VM's IP address. If you're running Docker directly on Linux, use ~localhost~.
-    - In a browser, navigate to http:// **ip address** :3000
+    - (OS X) Quick way: ~open http://$(docker-machine ip dev):3000~
+    - (Linux) If you have xdg-open installed: ~xdg-open http://$(docker-machine ip dev):3000~
+
+      Running ~docker-machine ip dev)~ will print out the IP address of
+      the 'dev' machine. In our case, this is a VirtualBox VM. Because
+      the VM does not forward its ports to the host (i.e., your
+      computer) by default, you must connect to it using the IP address.
+
+*** VM Port Forwarding
+    - If you're using VirtualBox, you can set it up to forward, e.g., its port 3000 to your computer's port 3000 by running:
+
+    ~VBoxManage controlvm dev natpf1 "django,tcp,127.0.0.1,3000,,3000"~
+
+    "django" can be any name you choose. The first '3000' is the host
+    port. The second '3000' is the VM port. These do not have to be the
+    same.
+
+    - For additional details, see the [[http://www.virtualbox.org/manual/ch06.html][VirtualBox manual]].
 
 * Additional Notes
 
