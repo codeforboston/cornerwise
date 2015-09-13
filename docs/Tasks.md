@@ -22,7 +22,7 @@ from datetime import datetime
 tasks.scrape_reports_and_decisions(since=datetime(2015, 8, 1))
 ```
 
-Automated Tasks
+Tasks
 ==========
 
 Scraping Reports and Decisions
@@ -49,12 +49,16 @@ media directory (MEDIA_ROOT/doc/<id>/).
 Extract Content
 ----------
 
+Function: `extract_content`
+
 Accepts a Document object. Extracts images to MEDIA_ROOT/doc/<id>/images
 and text to MEDIA_ROOT/doc/<id>/text.txt. Creates a new
 proposal.models.Image objects for each 'interesting' image 
 
 Generate Thumbnail
 ----------
+
+Function `generate_thumbnail`
 
 Accepts a proposal.models.Image object and generates a thumbnail that
 fits to the dimensions specified in cornerwise.settings.THUMBNAIL_DIM.
