@@ -103,8 +103,7 @@ def fetch_document(doc):
 def fetch_all_documents():
     """Fetches all documents that have not been copied to the local
     filesystem."""
-    #docs = Document.objects.filter(document__isnull=True)
-    docs = Document.objects.all()
+    docs = Document.objects.filter(document__isnull=True)
 
     for doc in docs:
         #fetch_document.delay(doc)
@@ -211,7 +210,7 @@ def extract_all_content():
 @celery_app.task
 @transaction.atomic
 def scrape_reports_and_decisions(since=None, page=None, everything=False,
-                                 coder_type="google"):
+                                 coder_type=settings.GEOCODER):
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
         geocoder.bounds = settings.GEO_BOUNDS

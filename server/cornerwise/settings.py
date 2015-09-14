@@ -159,6 +159,7 @@ THUMBNAIL_DIM = (300, 300)
 
 # String appended to addresses to assist geocoder:
 GEO_REGION = "Somerville, MA"
+GEOCODER = "arcgis"
 
 try:
     # Allow user's local settings to shadow shared settings:
