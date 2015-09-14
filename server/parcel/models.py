@@ -31,3 +31,11 @@ class Parcel(models.Model):
     class Meta:
         managed = False
         db_table = 'parcel'
+
+class Attribute(models.Model):
+    parcel = models.ForeignKey(Parcel)
+    name = models.CharField(max_length=64)
+    value = models.CharField(max_length=256)
+
+    class Meta:
+        unique_together = (("parcel", "name"))
