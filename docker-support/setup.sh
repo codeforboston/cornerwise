@@ -3,6 +3,7 @@
 apt-get update
 apt-get install -y postgis-doc postgis
 apt-get install -y libgdal-dev binutils gdal-bin redis-server
+apt-get install -y xpdf-utils
 
 export CPLUS_INCLUDE_PATH=/usr/include/gdal
 export C_INCLUDE_PATH=/usr/include/gdal
@@ -16,6 +17,7 @@ local cornerwise all trust' /etc/postgresql/*/main/pg_hba.conf
 
 service postgresql start
 createdb -U postgres cornerwise
+createuser -U postgres cornerwise
 psql -U postgres -q -f /support/pg_setup.sql
 
 sh /support/export_parcels.sh

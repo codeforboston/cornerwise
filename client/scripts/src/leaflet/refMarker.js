@@ -8,8 +8,8 @@ define(["leaflet", "config"], function(L, config) {
                                       stroke: true,
                                       color: config.refMarkerColor
                                   }).addTo(this);
-            var icon = L.icon({iconUrl: "images/ref-marker@1x.png",
-                               iconRetinaUrl: "images/ref-marker@2x.png",
+            var icon = L.icon({iconUrl: "/static/images/ref-marker@1x.png",
+                               iconRetinaUrl: "/static/images/ref-marker@2x.png",
                                iconSize: [15, 15]});
             this.marker = L.marker(loc, {icon: icon}).addTo(this);
             return fg;

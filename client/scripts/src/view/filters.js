@@ -54,7 +54,6 @@ define(
                 this.collection.filterByDescriptionString(s);
             },
 
-
             descFilterChanged: function(e) {
                 var self = this;
                 clearTimeout(this._descTimeout);
@@ -132,7 +131,7 @@ define(
             },
 
             updateRadius: function(loc, newRadius) {
-                $("#radius-filter")
+                $("#radius-filter-group")
                     .val(newRadius)[newRadius ? "removeClass" : "addClass"]("inactive");
                 $("#radius-value").html(newRadius ? ("" + $u.commas(newRadius) + " ft") : "");
             }

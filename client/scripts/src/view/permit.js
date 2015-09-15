@@ -20,11 +20,11 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             "click": "onClick"
         },
 
-        template: $u.template( '<td><%= caseNumber %></td>' +
-                              '<td><b><%= description %></b>' +
-                              '<br><%= number %> <%= street %></td>' +
-                              '<td><span class="distance"><%= commas(refDistance) %> feet</span></td>' +
-                              '<td><%= formatDate(submitted) %></td>'
+        template: $u.template('<td><%= address %></td>'
+                              + '<td><b><%= summary %></b>'
+                              + '<br>Case: <%= caseNumber %></td>'
+                              + '<td><span class="distance"><%= commas(refDistance) %> feet</span></td>'
+                              // + '<td><%= formatDate(submitted) %></td>'
                              ),
 
         render: function() {
@@ -55,7 +55,6 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         selectedChanged: function (permit, selected) {
-
             this.$el.toggleClass("permit-selected", selected);
             if (selected) {
                 var parent = this.$el.parent(),

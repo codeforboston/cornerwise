@@ -95,7 +95,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': POSTGRES_HOST,
         'NAME': 'cornerwise',
-        'USER': 'cornerwise'
+        'USER': 'postgres'
     },
     'migrate': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -123,10 +123,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/client/'
+STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
 
 if not IS_PRODUCTION:
-    STATIC_ROOT = '/client'
+    STATIC_ROOT = '/client/'
+    MEDIA_ROOT = '/client/media/'
+else:
+    STATIC_ROOT = os.environ.get("APP_STATIC_ROOT", "/client/")
+    MEDIA_ROOT = os.environ.get("APP_MEDIA_ROOT", "/client/doc/")
 
 
 # Celery configuration
@@ -146,8 +151,15 @@ CELERYBEAT_SCHEDULE = {
 ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
 ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
 
-GEO_BOUNDS = [42.371861543730496, -71.13338470458984,
-              42.40393908425197, -71.0679817199707];
+GEO_BOUNDS = [42.371861543730496, -71.13338470458984, # northwest
+              42.40393908425197, -71.0679817199707];  # southeast
+
+# The 'fit-width' of image thumbnails:
+THUMBNAIL_DIM = (300, 300)
+
+# String appended to addresses to assist geocoder:
+GEO_REGION = "Somerville, MA"
+GEOCODER = "arcgis"
 
 try:
     # Allow user's local settings to shadow shared settings:

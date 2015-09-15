@@ -8,3 +8,4 @@
 celerybeat-schedule.*
 localConfig.js
 local_settings.py
+client/doc

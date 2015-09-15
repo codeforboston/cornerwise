@@ -25,17 +25,18 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^parcel/', include(parcel_urls)),
     url(r'^proposal/', include(proposal_urls)),
-
-    url(r'^ping', (lambda req: HttpResponse("running"))),
 ]
 
 if settings.DEBUG:
     urlpatterns += [
+        url(r'^' + settings.STATIC_URL + '(?P<path>.*)$', "django.views.static.serve", {
+            "document_root": settings.STATIC_ROOT
+        }),
+        url(r'^' + settings.MEDIA_URL + '(?P<path>.*)$', "django.views.static.serve", {
+            "document_root": settings.MEDIA_ROOT
+        }),
         url(r'^$', "django.views.static.serve", {
             "document_root": settings.STATIC_ROOT,
             "path": "index.html"
         }),
-        url(r'(?P<path>.*)$', "django.views.static.serve", {
-            "document_root": settings.STATIC_ROOT
-        })
     ]

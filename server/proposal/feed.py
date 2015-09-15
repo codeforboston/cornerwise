@@ -9,7 +9,8 @@ class ReportsAndDecisionsFeed(Feed):
     link = "/proposals/"
     description = ""
 
-    def items(self):
+    def items(self, request):
+        # TODO: Implement filters
         return Proposal.objects.order_by("-modified")\
                                .select_related()
 

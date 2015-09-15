@@ -44,7 +44,7 @@ define(["optional!local-config"], function(localConfig) {
         // Layers that are always shown
         baseLayers: [
             {
-                source: "/scripts/src/layerdata/somerville.geojson",
+                source: "/static/scripts/src/layerdata/somerville.geojson",
                 style: {
                     stroke: 0.1,
                     color: "#397f34",
@@ -56,6 +56,7 @@ define(["optional!local-config"], function(localConfig) {
 
         layers: [
             {
+                source: "/static/scripts/src/layerdata/glx.geojson",
                 id: "glx",
                 title: "Green Line Extension",
                 template:
@@ -63,7 +64,6 @@ define(["optional!local-config"], function(localConfig) {
                  '<br>Scheduled Opening: ' +
                  '<%= monthEstimate + "/" + yearEstimate %>' +
                  '<br><a href="<%= factSheet %>" target="_blank">Fact Sheet</a>'),
-                source: "/scripts/src/layerdata/glx.geojson",
                 color: "green",
                 shown: false,
                 marker: {
@@ -76,12 +76,21 @@ define(["optional!local-config"], function(localConfig) {
                 features: null
             },
             {
+                source: "/static/scripts/src/layerdata/community_path.geojson",
                 id: "cp",
                 title: "Community Path",
-                source: "/scripts/src/layerdata/community_path.geojson",
                 color: "orange",
                 shown: false,
                 features: null
+            },
+            {
+                source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
+                id: "neighborhoods",
+                title: "Neighborhood Boundaries",
+                color: "blue",
+                shown: false,
+                features: null,
+                template: "<%= title %>"
             }
         ],
 

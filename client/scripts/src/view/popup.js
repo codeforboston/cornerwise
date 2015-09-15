@@ -1,10 +1,24 @@
 define(["backbone", "underscore"], function(B, _) {
     return B.View.extend({
-        template: _.template('<div class="property"><strong>Case:</strong> <%= caseNumber %></div>' +
-                             '<div class="property"><strong>Address:</strong> ' +
-                             '<%= number %> <%= street %></div>' +
-                             '<div class="property"><strong>Description:</strong> ' +
-                             '<%= description %></div>'),
+        template: _.template('<div class="property"><strong>Case:</strong> <%= caseNumber %></div>'
+                             + '<div class="property"><strong>Address:</strong> '
+                             + '<%= address %></div>'
+                             + '<div class="property"><strong>Description:</strong> '
+                             + '<%= description %></div>'
+                             + '<% if (documents.length) { %>'
+                             + '<div class="property">'
+                             + '<ul class="document-list">'
+                             + '<% _.each(documents, function(document) { %>'
+                             + '<li><a href="<%= document.url %>" target="_blank">'
+                             + '<%= document.title %></a></li>'
+                             + '<% }) %>'
+                             + '</ul></div>'
+                             + '<div class="images">'
+                             + '<% _.each(images, function(thumb) { %>'
+                             + '<div class="thumb"><img class="proposal_thumb" src="<%=thumb %>"/></div>'
+                             + '<% }) %></div>'
+                             + '<% } %>'
+                             + '</div>'),
 
         initialize: function(options) {
             this.popup = options.popup;

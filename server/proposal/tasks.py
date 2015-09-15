@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import subprocess
 from urllib import parse, request
 
 from djcelery.models import PeriodicTask
@@ -9,9 +10,9 @@ from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.utils import IntegrityError
 
-from .models import Proposal, Event, Document
+from .models import Proposal, Event, Document, Image
 from cornerwise import celery_app
-from scripts import scrape, arcgis, gmaps
+from scripts import scrape, arcgis, gmaps, images
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,12 @@ def create_proposal_from_json(p_dict):
     try:
         proposal.location = Point(p_dict["long"], p_dict["lat"])
     except KeyError:
+        # If the dictionary does not have an associated location, do not
+        # create a Proposal.
         return
-    proposal.summary = "No summary available"
-    proposal.description = ""
+
+    proposal.summary = p_dict.get("summary")
+    proposal.description = p_dict.get("description")
     # This should not be hardcoded
     proposal.source = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions"
 
@@ -50,7 +54,7 @@ def create_proposal_from_json(p_dict):
     # linked in the 'decision' page, the proposal is 'complete'.
     # Note that we don't have insight into whether the proposal was
     # approved!
-    is_complete = bool(p_dict["decisions"]["links"])
+    proposal.complete = bool(p_dict["decisions"]["links"])
 
     proposal.save()
 
@@ -82,8 +86,8 @@ def fetch_document(doc):
     url = doc.url
     url_components = parse.urlsplit(url)
     filename = os.path.basename(url_components.path)
-    path = os.path.join(settings.STATIC_ROOT, "doc",
-                        str(doc.proposal.pk),
+    path = os.path.join(settings.MEDIA_ROOT, "doc",
+                        str(doc.pk),
                         filename)
 
     # Ensure that the intermediate directories exist:
@@ -95,23 +99,135 @@ def fetch_document(doc):
         doc.document = path
         doc.save()
 
+@celery_app.task
+def fetch_all_documents():
+    """Fetches all documents that have not been copied to the local
+    filesystem."""
+    docs = Document.objects.filter(document__isnull=True)
+
+    for doc in docs:
+        #fetch_document.delay(doc)
+        fetch_document(doc)
+
+@celery_app.task
+def extract_content(doc):
+    """If the given document (proposal.models.Document) has been copied to
+    the local filesystem, extract its images to a subdirectory of the
+    document's directory (docs/<doc id>/images). Extracts the text
+    content to docs/<doc id>/content.txt.
+
+    """
+
+    docfile = doc.document
+
+    if not docfile:
+        logger.error("Document has not been copied to the local filesystem.")
+        logger.error("Exiting")
+        return
+
+    try:
+        path = docfile.path
+    except:
+        path = docfile.name
+
+    if not os.path.exists(path):
+        logger.error("Document %s is not where it says it is: %s",
+                     doc.pk, path)
+        return
+
+    images_dir = os.path.join(os.path.dirname(path), "images")
+    os.makedirs(images_dir, exist_ok=True)
+
+    images_pattern = os.path.join(images_dir, "image")
+
+    logger.info("Extracting images to '%s'", images_dir)
+    status = subprocess.call(["pdfimages", "-all", path, images_pattern])
+
+    if status:
+        logger.warn("pdfimages failed with exit code %i", status)
+    else:
+        # Do stuff with the images in the directory
+        for image_name in os.listdir(images_dir):
+            image_path = os.path.join(images_dir, image_name)
+
+            if not images.is_interesting(image_path):
+                continue
+
+            image = Image(proposal=doc.proposal,
+                          document=doc)
+            image.set_image_path(image_path)
+
+            try:
+                image.save()
+            except IntegrityError:
+                # This can occur if the image has already been fetched
+                # and associated with the Proposal.
+                pass
+
+    # Could consider storing the full extracted text of the document in
+    # the database and indexing it, rather than extracting it to a file.
+    text_path = os.path.join(os.path.dirname(path), "text.txt")
+    status = subprocess.call(["pdftotext", path, text_path])
+
+    if status:
+        logger.error("Failed to extract text from {doc}".\
+                     format(doc=path))
+    else:
+        # Do stuff with the contents of the file.
+        # Possibly perform some rudimentary scraping?
+        pass
+
+@celery_app.task
+def generate_thumbnail(image, replace=False):
+    if image.thumbnail and os.path.exists(image.thumbnail.name):
+        return
+
+    try:
+        thumbnail_path = images.make_thumbnail(image.image.name,
+                                               fit=settings.THUMBNAIL_DIM)
+    except Exception as err:
+        logger.error(err)
+        return
+
+    image.set_thumbnail_path(thumbnail_path)
+    image.save()
+
+@celery_app.task
+def generate_thumbnails(replace=False):
+    images = Image.objects.filter(thumbnail=None)
+    for image in images:
+        generate_thumbnail(image, replace=replace)
+
+@celery_app.task
+def extract_all_content():
+    "Extract the contents of all documents."
+    docs = Document.objects.all()
+
+    for doc in docs:
+        extract_content(doc)
+
 
 @celery_app.task
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, coder_type="google"):
-    if not since:
-        # If there was no last run, the scraper will fetch all
-        # proposals.
-        since = last_run()
-
+def scrape_reports_and_decisions(since=None, page=None, everything=False,
+                                 coder_type=settings.GEOCODER):
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
+        geocoder.bounds = settings.GEO_BOUNDS
+        geocoder.region = settings.GEO_REGION
     else:
         geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
                                       settings.ARCGIS_CLIENT_SECRET)
 
-    # Array of dicts:
-    proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
+    if page is not None:
+        proposals_json = scrape.get_proposals_for_page(page, geocoder)
+    else:
+        if not since:
+            # If there was no last run, the scraper will fetch all
+            # proposals.
+            since = last_run()
+        proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
+
     proposals = []
 
     for p_dict in proposals_json:

@@ -53,15 +53,21 @@ def parcels_for_multi_request(req):
         if query:
             query |= q
         else:
-            query = q
+            query = qe
 
     return Parcel.objects.filter(query)
 
-def make_parcel_data(parcel):
+def make_parcel_data(parcel, include_attributes=False):
     d = geojson_data(parcel.shape)
     d["properties"] = {
         "type": parcel.poly_type,
+        "loc_id": parcel.loc_id
     }
+
+    if include_attributes:
+        d["properties"].update(
+            {a.name: a.value for a in parcel.attribute_set.all()})
+
     return d
 
 @make_response()
@@ -80,6 +86,14 @@ def parcel_at_point(req):
             "No matching parcels found",
             status=404)
     return make_parcel_data(parcel)
+
+@make_response()
+def parcel_with_loc_id(req, loc_id=None):
+    if not loc_id:
+        loc_id = req.GET["loc_id"]
+
+    parcel = Parcel.objects.get(loc_id=loc_id)
+    return make_parcel_data(parcel, include_attributes=True)
 
 
 @make_response()

@@ -9,11 +9,13 @@ from urllib.request import urlopen
 
 logger = logging.getLogger(__name__)
 
-def geocode(api_key, address):
-    data = (
+def geocode(api_key, address, bounds=None):
+    data = [
         ("key", api_key),
         ("address", address),
-    )
+        ("bounds", bounds or "")
+    ]
+
     url = "https://maps.googleapis.com/maps/api/geocode/json?" + urlencode(data)
 
     f = urlopen(url)
@@ -68,6 +70,18 @@ class GeocoderThread(threading.Thread):
 class GoogleGeocoder(object):
     def __init__(self, api_key):
         self.api_key = api_key
+        self._bounds = None
+        self.region = None
+
+    @property
+    def bounds(self):
+        return self._bounds
+
+    @bounds.setter
+    def bounds(self, bounds):
+        "Expects bounds to be in the form [nw-lat, nw-long, se-lat, se-long]"
+        self._bounds = "{bounds[0]},{bounds[3]}|{bounds[2]},{bounds[1]}"\
+            .format(bounds=bounds)
 
     def geocode_threaded(self, addrs, parallelism=5):
         address_q = Queue(len(addrs))
@@ -90,8 +104,10 @@ class GoogleGeocoder(object):
         # addresses:
         return [results[a] for a in addrs]
 
-    def geocode(self, addrs):
+    def geocode(self, addrs, bounds=None):
         results = []
         for addr in addrs:
-            results.append(simplify(geocode(self.api_key, addr)))
+            if self.region:
+                addr += " " + self.region
+            results.append(simplify(geocode(self.api_key, addr, self.bounds)))
         return results

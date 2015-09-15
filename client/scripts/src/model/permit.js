@@ -26,7 +26,17 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
+
+            if (!attrs.address)
+                attrs.address = [attrs.number, attrs.street].join(" ");
+
+            // TODO: Remove this once the migration to the Python
+            // backend is complete
             attrs.caseNumber = attrs.caseNumber || attrs.case_number;
+
+            if (!attrs.documents)
+                attrs.documents = [];
+
             return attrs;
         },
 
@@ -43,7 +53,6 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                       {lat: loc.lat,
                        lng: loc.lng})
                 .done(function(parcel) {
-                    console.log(parcel);
                     self.set("parcel", parcel);
                 })
                 .fail(function(error) {

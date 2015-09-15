@@ -1,6 +1,11 @@
 #reset {
-  position: relative;
-  left: 105px;
+    float: right;
+    position: relative;
+    top: 5px;
+}
+
+.inactive #reset {
+    opacity: 0.5;
 }
 /*!
  * Materialize v0.97.0 (http://materializecss.com)
@@ -8218,7 +8223,7 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
     background-color: rgba(255, 255, 255, 1);
 }
 
-#radius-filter.inactive {
+.inactive #radius-filter {
     opacity: 0.5;
 }
 
@@ -8371,4 +8376,16 @@ li.layer .color {
     position: absolute;
     right: 10px;
     width: 15px;
+}
+
+div.thumb {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+img.proposal_thumb {
+    max-height: 100% !important;
+    max-width: 100% !important;
 }

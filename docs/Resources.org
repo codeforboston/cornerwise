@@ -1,8 +1,12 @@
 * Somerville Planning Board
   - [[http://www.somervillema.gov/departments/planning-board/reports-and-decisions][Reports and Decisions]]
     Cases considered by the planning board (PB) or zoning board of appeals (ZBA), including links to plans, staff memos, and decisions, dating from April 2011 to present.
+
   - [[http://www.somervillema.gov/government/public-minutes][Public Minutes]]
     Minutes and agenda of public meetings.
+
+  - [[http://www.somervillema.gov/spotlights/comp-plan][SomerVision]]
+    A comprehensive plan to guide the growth and development of the City of Somerville over the next twenty years.
 
 * Other Resources
   - [[http://maps.bostonredevelopmentauthority.org/zoningviewer/][Boston Redevelopment Authority]]
