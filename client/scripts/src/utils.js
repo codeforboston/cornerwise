@@ -40,7 +40,7 @@ define(["underscore", "jquery"], function(_, $) {
         commas: commas
     };
 
-    return {
+    var $u = {
         everyPred: function(fs, arg) {
             return _.every(fs, function(f) {
                 return f(arg);
@@ -94,6 +94,22 @@ define(["underscore", "jquery"], function(_, $) {
             return function(data) {
                 return temp(_.extend(data, helpers));
             };
+        },
+
+        templateWithId: function(id) {
+            var templateString = $("#" + id).text();
+
+            if (!templateString) {
+                if (console) {
+                    console.error("Unknown template: %s", id);
+                }
+
+                return null;
+            }
+
+            return $u.template(templateString);
         }
     };
+
+    return $u;
 });

@@ -20,12 +20,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             "click": "onClick"
         },
 
-        template: $u.template('<td><%= address %></td>'
-                              + '<td><b><%= summary %></b>'
-                              + '<br>Case: <%= caseNumber %></td>'
-                              + '<td><span class="distance"><%= commas(refDistance) %> feet</span></td>'
-                              // + '<td><%= formatDate(submitted) %></td>'
-                             ),
+        template: $u.templateWithId("permit-template"),
 
         render: function() {
             var permit = this.model;

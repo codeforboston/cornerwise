@@ -11,6 +11,52 @@
   <link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" />
   set
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Template for permits in the permit table -->
+  <script type="text/template" id="permit-template">
+    <td><%= address %></td>
+    <td>
+      <b><%= summary %></b>
+      <br>Case: <%= caseNumber %></td>
+    <td>
+      <span class="distance"><%= commas(refDistance) %> feet</span>
+    </td>
+  </script>
+
+  <!-- Template for proposal popup information -->
+  <script type="text/template" id="popup-template">
+    <div class="property">
+      <strong>Case:</strong>
+      <%= caseNumber %>
+    </div>
+    <div class="property">
+      <strong>Address:</strong>
+      <%= address %>
+    </div>
+    <div class="property">
+      <strong>Description:</strong>
+      <%= description %>
+    </div>
+    <% if (documents.length) { %>
+    <div class="property">
+      <ul class="document-list">
+        <% _.each(documents, function(document) { %>
+        <li>
+          <a href="<%= document.url %>" target="_blank">
+            <%= document.title %></a>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <div class="images">
+      <% _.each(images, function(thumb, i) { %>
+      <div class="thumb">
+        <img class="proposal_thumb" src="<%=thumb %>"/>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </script>
 </head>
 <body>
   <div>
