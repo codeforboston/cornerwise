@@ -15,7 +15,8 @@ define(["optional!local-config"], function(localConfig) {
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
-        pzURL: "https://script.google.com/macros/s/AKfycbxdNiXwOYTAxEZE4LuGcCFsOW-JpQr9bQl6hx3NZIF4oc19UoBT/exec",
+        pzURL: "http://localhost:3000/proposal/list",
+
         mapId: "zoning-map",
 
         // Lat/long for the southwest
