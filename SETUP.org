@@ -132,3 +132,10 @@
 * Additional Notes
 
   - An image creates a snapshot of a machine. When you start a container from an image, you're starting clean. Changes you make to unshared folders (including--for now--Postgres data) will not be persisted on the image. When you stop the container, the data will be lost. This is acceptable for us while we stabilize the models, etc.
+
+* Troubleshooting
+  - If the script hangs while fetching a new image (~Using default tag:
+    latest~), or if url fetches hang inside the container, it may be an
+    issue with the VM's networking. I'm not sure exactly what causes it,
+    but you can fix it by running ~docker-machine restart dev~ in a
+    fresh terminal window.
