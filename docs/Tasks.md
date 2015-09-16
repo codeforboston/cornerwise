@@ -37,6 +37,15 @@ from the table. It creates a proposal.models.Proposal object for each
 entry in the table and associates a proposal.models.Document object for
 each linked document in the entry's fields.
 
+# Important Note #
+
+The scraper task will attempt to geocode the results. For this to work
+properly, you must go to the
+[Google Developer Console](console.developers.google.com/) and turn on
+the Google Maps Geocoding API. Then copy
+`server/cornerwise/local_settings.example.py` to `local_settings.py` in
+the same directory and edit the line beginning `GOOGLE_API_KEY`.
+
 Fetch Document
 ----------
 
