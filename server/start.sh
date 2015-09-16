@@ -13,7 +13,7 @@ if [ -z "$APP_NAME" ]; then
     export APP_NAME=$(basename $(dirname $(find $APP_ROOT -name settings.py | head -n 1)))
 fi
 
-pid_file=/var/run/$APP_NAME_django.pid
+pid_file=/var/run/${APP_NAME}_django.pid
 server_out=$APP_ROOT/django.log
 server_err=$APP_ROOT/error.log
 
@@ -26,17 +26,23 @@ if [ -n "$1" ]; then
     port="$1"
 fi
 
-if pid=$(cat $pid_file); then
-    if kill $pid 2>/dev/null; then
-        echo "Killed running server (pid: $pid)";
-    elif kill -0 $pid 2>/dev/null; then
-        echo "Could not kill the running server (pid: $pid)"
-        exit 1
-    fi
 
-    # Either we've killed the process, or the pid file was out of date
-    rm -f $pid_file
-fi;
+# TODO: Do a proper fix for this
+
+# Kill running servers:
+ps a | grep [r]unserver | awk '{print $1}' | xargs kill
+
+# if pid=$(cat $pid_file); then
+#     if kill $pid 2>/dev/null; then
+#         echo "Killed running server (pid: $pid)";
+#     elif kill -0 $pid 2>/dev/null; then
+#         echo "Could not kill the running server (pid: $pid)"
+#         exit 1
+#     fi
+
+#     # Either we've killed the process, or the pid file was out of date
+#     rm -f $pid_file
+# fi;
 
 # Prefer Python 3:
 PYTHON_BIN=$(which python3 || which python)
