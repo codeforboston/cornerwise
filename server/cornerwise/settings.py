@@ -128,7 +128,7 @@ MEDIA_URL = 'media/'
 
 if not IS_PRODUCTION:
     STATIC_ROOT = '/client/'
-    MEDIA_ROOT = '/client/media/'
+    MEDIA_ROOT = '/media/'
 else:
     STATIC_ROOT = os.environ.get("APP_STATIC_ROOT", "/client/")
     MEDIA_ROOT = os.environ.get("APP_MEDIA_ROOT", "/client/doc/")

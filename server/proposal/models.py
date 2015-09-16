@@ -23,7 +23,7 @@ class ProposalManager(models.GeoManager):
         return self.objects.filter(q)
 
     def build_query(self, params):
-        "Construct a query from parameters passed in "
+        "Construct a query from parameters"
         pass
 
     def for_parcel(self, parcel):
@@ -96,7 +96,14 @@ class Document(models.Model):
                              help_text="The field in which the document was found")
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
+
+    # If the document has been copied to the local filesystem:
     document = models.FileField(null=True)
+
+    # File containing extracted text of the document:
+    fulltext = models.FileField(null=True)
+    # File containing a thumbnail of the document:
+    thumbnail = models.FileField(null=True)
 
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
@@ -120,11 +127,3 @@ class Image(models.Model):
     @property
     def url(self):
         return self.thumbnail and self.thumbnail.url or self.image.url
-
-    # TODO: These should be unnecessary. Figure out how to do this
-    # within Django!
-    def set_image_path(self, path):
-        self.image.name = os.path.relpath(path, settings.MEDIA_ROOT)
-
-    def set_thumbnail_path(self, path):
-        self.thumbnail.name = os.path.relpath(path, settings.MEDIA_ROOT)

@@ -11,7 +11,8 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 
 from .models import Proposal, Event, Document, Image
-from cornerwise import celery_app
+from . import extract
+from cornerwise import celery_app, util
 from scripts import scrape, arcgis, gmaps, images
 
 logger = logging.getLogger(__name__)
@@ -122,7 +123,6 @@ def extract_content(doc):
 
     if not docfile:
         logger.error("Document has not been copied to the local filesystem.")
-        logger.error("Exiting")
         return
 
     try:
@@ -155,7 +155,8 @@ def extract_content(doc):
 
             image = Image(proposal=doc.proposal,
                           document=doc)
-            image.set_image_path(image_path)
+            image.image = image_path
+            #image.set_image_path(image_path)
 
             try:
                 image.save()
@@ -175,11 +176,48 @@ def extract_content(doc):
     else:
         # Do stuff with the contents of the file.
         # Possibly perform some rudimentary scraping?
-        pass
+        doc.fulltext = text_path
+        #doc.set_fulltext_path(text_path)
+        doc.save()
+
+def generate_doc_thumbnail(doc):
+    ""
+    docfile = doc.document
+
+    if not docfile:
+        logger.error("Document has not been copied to the local filesystem")
+        return
+
+    path = docfile.name
+
+    # Crude method to determine the document type:
+    extension = path.split(os.path.extsep)[-1]
+
+    # TODO: Dispatch on extension. Handle other common file types
+    if extension.lower() != "pdf":
+        logger.warn("Document %s does not appear to be a PDF.", path)
+        return
+
+    out_prefix = os.path.join(os.path.dirname(path), "thumbnail")
+
+    proc = subprocess.Popen(["pdftoppm", "-jpeg", "-singlefile",
+                             "-scale-to", "200", path, out_prefix],
+                              stderr=subprocess.PIPE)
+    _, err = proc.communicate()
+
+    if proc.returncode:
+        logger.error("Failed to generate PDF for document %s: %s",
+                     path, err)
+    else:
+        doc.thumbnail = out_prefix + os.path.extsep + "jpg"
+        #doc.thumbnail = util.media_path(path)
+        doc.save()
 
 @celery_app.task
 def generate_thumbnail(image, replace=False):
+    "Generate an image thumbnail."
     if image.thumbnail and os.path.exists(image.thumbnail.name):
+        logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
         return
 
     try:
@@ -189,7 +227,8 @@ def generate_thumbnail(image, replace=False):
         logger.error(err)
         return
 
-    image.set_thumbnail_path(thumbnail_path)
+    #image.set_thumbnail_path(thumbnail_path)
+    image.thumbnail = thumbnail_path
     image.save()
 
 @celery_app.task
