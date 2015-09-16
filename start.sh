@@ -9,7 +9,7 @@ docker_opts=""
 image_name="bdsand/cornerwise"
 
 # space-delimited list of environment variables, to be set in the container
-docker_environment="APP_PORT=$host_port APP_NAME=$(basename image_name)"
+docker_environment="APP_PORT=$host_port APP_NAME=$(basename $image_name)"
 
 # Optionally specify a file containing environment settings
 env_file=$project_dir/docker-support/env
