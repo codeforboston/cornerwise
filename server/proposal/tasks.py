@@ -10,9 +10,9 @@ from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.utils import IntegrityError
 
-from .models import Proposal, Event, Document, Image
+from .models import Proposal, Attribute, Event, Document, Image
 from . import extract
-from cornerwise import celery_app, util
+from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, images
 
 logger = logging.getLogger(__name__)
@@ -213,6 +213,7 @@ def generate_doc_thumbnail(doc):
         #doc.thumbnail = util.media_path(path)
         doc.save()
 
+
 @celery_app.task
 def generate_thumbnail(image, replace=False):
     "Generate an image thumbnail."
@@ -244,6 +245,17 @@ def extract_all_content():
 
     for doc in docs:
         extract_content(doc)
+
+@celery_app.task
+@transaction.atomic
+def add_doc_attributes(doc):
+    properties = extract.get_properties(doc)
+    for name, value in properties.items():
+        logger.info("Adding %s attribute", name)
+        attr = Attribute(proposal=doc.proposal,
+                         name=name,
+                         text_value=value)
+        attr.save()
 
 
 @celery_app.task
