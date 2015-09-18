@@ -10,12 +10,13 @@ from .models import Proposal, Document, Event, Image
 #def
 
 def proposal_json(proposal, include_images=True):
-    pdict = model_to_dict(proposal, exclude=["location"])
+    pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
     pdict["location"] = {"lat": proposal.location.y,
                          "lng": proposal.location.x}
     # TODO: If the document has been copied to the server, return
     # document.document.url instead of document.url as the URL.
-    pdict["documents"] = [model_to_dict(d, exclude=["event", "document"]) \
+    pdict["documents"] = [model_to_dict(d, exclude=["event", "document",
+                                                    "fulltext", "thumbnail"]) \
                           for d in proposal.document_set.all()]
 
     if include_images:
