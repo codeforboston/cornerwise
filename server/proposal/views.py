@@ -15,9 +15,7 @@ def proposal_json(proposal, include_images=True):
                          "lng": proposal.location.x}
     # TODO: If the document has been copied to the server, return
     # document.document.url instead of document.url as the URL.
-    pdict["documents"] = [model_to_dict(d, exclude=["event", "document",
-                                                    "fulltext", "thumbnail"]) \
-                          for d in proposal.document_set.all()]
+    pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
 
     if include_images:
         images = Image.objects.filter(document__proposal=proposal)

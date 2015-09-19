@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.forms.models import model_to_dict
 
 class ProposalManager(models.GeoManager):
     def between(self, start=None, end=None):
@@ -108,6 +109,14 @@ class Document(models.Model):
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
         unique_together = (("proposal", "url"))
+
+    def to_dict(self):
+        d = model_to_dict(self, exclude=["event", "document",
+                                         "fulltext", "thumbnail"])
+        if self.thumbnail:
+            d["thumb"] = self.thumbnail.url
+
+        return d
 
 class Image(models.Model):
     """An image associated with a document. In the future, it may be
