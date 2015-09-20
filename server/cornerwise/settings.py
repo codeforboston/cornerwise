@@ -50,7 +50,7 @@ INSTALLED_APPS = (
     'django.contrib.gis',
     'djcelery',
     'parcel',
-    'proposal',
+    'proposal.ProposalConfig',
     'shared'
 )
 
