@@ -202,10 +202,6 @@ elif [ $(uname) == "Darwin" ]; then
     exit 1
 fi
 
-#
-docker pull $image_name
-
-
 if ((!force_run || stop_running)); then
     # Determine if the container is already running:
     image_name_esc=$(echo "$image_name" | sed -n 's/\([\/.?]\)/\\\1/pg')
