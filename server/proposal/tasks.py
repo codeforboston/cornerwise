@@ -79,7 +79,7 @@ def create_proposal_from_json(p_dict):
     return proposal
 
 
-@celery_app.task
+@celery_app.task(name="proposal.fetch_document")
 def fetch_document(doc):
     """Copy the given document (proposal.models.Document) to a local
     directory.
@@ -100,7 +100,6 @@ def fetch_document(doc):
         doc.document = path
         doc.save()
 
-@celery_app.task
 def fetch_all_documents():
     """Fetches all documents that have not been copied to the local
     filesystem."""
@@ -110,15 +109,14 @@ def fetch_all_documents():
         #fetch_document.delay(doc)
         fetch_document(doc)
 
-@celery_app.task
-def extract_content(doc):
+@celery_app.task(name="proposal.extract_content")
+def extract_content(doc, encoding="ISO-8859-9"):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
     document's directory (docs/<doc id>/images). Extracts the text
     content to docs/<doc id>/content.txt.
 
     """
-
     docfile = doc.document
 
     if not docfile:
@@ -168,7 +166,12 @@ def extract_content(doc):
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
     text_path = os.path.join(os.path.dirname(path), "text.txt")
-    status = subprocess.call(["pdftotext", path, text_path])
+
+    # TODO: It may be practical to sniff pdfinfo, determine the PDF
+    # producer used, and make a best guess at encoding based on that
+    # information. We should be able to get away with using ISO-8859-9
+    # for now.
+    status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
 
     if status:
         logger.error("Failed to extract text from {doc}".\
@@ -214,7 +217,7 @@ def generate_doc_thumbnail(doc):
         doc.save()
 
 
-@celery_app.task
+@celery_app.task(name="proposal.generate_thumbnail")
 def generate_thumbnail(image, replace=False):
     "Generate an image thumbnail."
     if image.thumbnail and os.path.exists(image.thumbnail.name):
@@ -232,13 +235,13 @@ def generate_thumbnail(image, replace=False):
     image.thumbnail = thumbnail_path
     image.save()
 
-@celery_app.task
+@celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(replace=False):
     images = Image.objects.filter(thumbnail=None)
     for image in images:
         generate_thumbnail(image, replace=replace)
 
-@celery_app.task
+
 def extract_all_content():
     "Extract the contents of all documents."
     docs = Document.objects.all()
@@ -246,7 +249,7 @@ def extract_all_content():
     for doc in docs:
         extract_content(doc)
 
-@celery_app.task
+@celery_app.task(name="proposal.add_doc_attributes")
 @transaction.atomic
 def add_doc_attributes(doc):
     properties = extract.get_properties(doc)
@@ -258,7 +261,7 @@ def add_doc_attributes(doc):
         attr.save()
 
 
-@celery_app.task
+@celery_app.task(name="proposal.scrape_reports_and_decisions")
 @transaction.atomic
 def scrape_reports_and_decisions(since=None, page=None, everything=False,
                                  coder_type=settings.GEOCODER):
