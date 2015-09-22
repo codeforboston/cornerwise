@@ -180,7 +180,7 @@ def extract_content(doc, encoding="ISO-8859-9"):
         # Do stuff with the contents of the file.
         # Possibly perform some rudimentary scraping?
         doc.fulltext = text_path
-        #doc.set_fulltext_path(text_path)
+        doc.encoding = encoding
         doc.save()
 
 def generate_doc_thumbnail(doc):
@@ -259,6 +259,17 @@ def add_doc_attributes(doc):
                          name=name,
                          text_value=value)
         attr.save()
+
+def process_document(doc):
+    """
+    Run all tasks on a Document
+    """
+    fetch_document(doc)
+    extract_content(doc)
+    add_doc_attributes(doc)
+
+    for image in Image.objects.filter(document=doc):
+        generate_thumbnail(image)
 
 
 @celery_app.task(name="proposal.scrape_reports_and_decisions")

@@ -103,6 +103,7 @@ class Document(models.Model):
 
     # File containing extracted text of the document:
     fulltext = models.FileField(null=True)
+    encoding = models.CharField(max_length=20)
     # File containing a thumbnail of the document:
     thumbnail = models.FileField(null=True)
 
@@ -115,6 +116,9 @@ class Document(models.Model):
                                          "fulltext", "thumbnail"])
         if self.thumbnail:
             d["thumb"] = self.thumbnail.url
+
+        if self.document:
+            d["url"] = self.document.url
 
         return d
 
