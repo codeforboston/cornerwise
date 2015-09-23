@@ -45,7 +45,7 @@ def make_matcher(patt, group=None, value=None):
         patt = re.compile(patt)
 
     def matcher(line):
-        m = patt.match(line)
+        m = patt.search(line)
 
         if m:
             return m.group(group) if group else value
@@ -54,10 +54,18 @@ def make_matcher(patt, group=None, value=None):
 
     return matcher
 
+def footer_matcher(line):
+    if re.match(r"CITY HALL", line):
+        def skip_lines(infile):
+            next(infile)
+            next(infile)
+        return skip_lines
+
 section_matchers = [
+    footer_matcher,
     make_matcher(r"PLANNING STAFF REPORT",
                  value="Planning Staff Report"),
-    make_matcher(r"[IVX]+\. ([^a-z]+)(\n|$)", group=1)
+    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1),
 ]
 
 
@@ -72,9 +80,14 @@ def make_sections(lines, matchers=section_matchers):
 
         for matcher in matchers:
             name = matcher(line)
-            if name:
+
+            if callable(name):
+                name = name(lines)
+
+            if isinstance(name, str):
                 new_section_name = name
                 break
+
 
         if new_section_name:
             found[section_name] = section
@@ -91,15 +104,12 @@ def staff_reports(docs_manager=Document.objects):
     return docs_manager.filter(field="reports")\
                        .filter(title__icontains="staff report")
 
-def document_lines(doc):
-    with open(doc.fulltext.path) as txt:
-        return txt.readlines()
-
 def staff_report_properties(doc):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
     """
-    lines = document_lines(doc)
+    enc = doc.encoding
+    lines = (bline.decode(enc) for bline in doc.fulltext)
     sections = make_sections(lines)
 
     props = {}
@@ -110,5 +120,14 @@ def staff_report_properties(doc):
     return props
 
 def get_properties(doc):
-    # TODO: Dispatch on the document's 'field' (or title?)
-    return staff_report_properties(doc)
+    # TODO: Dispatch on the document's field and/or title
+    # (doc.field is the name of the column in which the document was found)
+
+    # Eventually, we'll want to introduce a pluggable property
+    # extraction interface, so that other cities and formats can be
+    # supported.
+
+    if doc.field == "reports" and re.match(r"staff report", doc.title, re.I):
+        return staff_report_properties(doc)
+    else:
+        return {}
