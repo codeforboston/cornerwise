@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import os
 import shutil
@@ -24,6 +25,26 @@ def last_run():
         return scrape_task.last_run_at
     except PeriodicTask.DoesNotExist:
         return None
+
+def extension(path):
+    return path.split(os.path.extsep)[-1].lower()
+
+def published_date(path):
+    # TODO: Handle other document types
+    ext = extension(path)
+
+    if ext == "pdf":
+        proc = subprocess.Popen(["pdfinfo", path],
+                                stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        out, err = proc.communicate()
+        m = re.search(r"CreationDate:\s+(.*?)\n", out.decode("UTF-8"))
+
+        if m:
+            datestr = m.group(1)
+            return datetime.strptime(datestr, "%c")
+
+    return datetime.fromtimestamp(os.path.getmtime(path))
 
 
 def create_proposal_from_json(p_dict):
@@ -193,11 +214,8 @@ def generate_doc_thumbnail(doc):
 
     path = docfile.name
 
-    # Crude method to determine the document type:
-    extension = path.split(os.path.extsep)[-1]
-
     # TODO: Dispatch on extension. Handle other common file types
-    if extension.lower() != "pdf":
+    if extension(path) != "pdf":
         logger.warn("Document %s does not appear to be a PDF.", path)
         return
 
@@ -235,8 +253,8 @@ def generate_thumbnail(image, replace=False):
     image.thumbnail = thumbnail_path
     image.save()
 
-@celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(replace=False):
+    "Generate thumbnails for all Images in the database."
     images = Image.objects.filter(thumbnail=None)
     for image in images:
         generate_thumbnail(image, replace=replace)
@@ -262,7 +280,7 @@ def add_doc_attributes(doc):
 
 def process_document(doc):
     """
-    Run all tasks on a Document
+    Run all tasks on a Document.
     """
     fetch_document(doc)
     extract_content(doc)
@@ -270,6 +288,8 @@ def process_document(doc):
 
     for image in Image.objects.filter(document=doc):
         generate_thumbnail(image)
+
+    generate_doc_thumbnail(doc)
 
 
 @celery_app.task(name="proposal.scrape_reports_and_decisions")

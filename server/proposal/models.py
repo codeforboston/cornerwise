@@ -98,18 +98,24 @@ class Document(models.Model):
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
 
+    # If available, determine when the document was published.
+    published = models.DateTimeField(null=True)
+
     # If the document has been copied to the local filesystem:
     document = models.FileField(null=True)
 
     # File containing extracted text of the document:
     fulltext = models.FileField(null=True)
-    encoding = models.CharField(max_length=20)
+    encoding = models.CharField(max_length=20, default="")
     # File containing a thumbnail of the document:
     thumbnail = models.FileField(null=True)
 
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
         unique_together = (("proposal", "url"))
+
+    def get_absolute_url(self):
+        return reverse("view-document", kwargs={"pk": self.pk})
 
     def to_dict(self):
         d = model_to_dict(self, exclude=["event", "document",
