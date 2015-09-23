@@ -179,7 +179,11 @@ if (which docker-machine >/dev/null); then
         docker-machine create -d virtualbox "$vm_name" >/dev/null
     fi
 
-    if [ $(docker-machine status $vm_name) != "Running" ] ; then
+    machine_status=$(docker-machine status $vm_name)
+
+    if [ "$machine_status" = "Timeout" ] ; then
+        docker-machine restart $vm_name
+    elif [ "$machine_status" = "Stopped" ]; then
         docker-machine start $vm_name
     fi;
 
