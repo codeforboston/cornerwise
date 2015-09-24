@@ -131,8 +131,9 @@ if not IS_PRODUCTION:
     MEDIA_ROOT = '/media/'
 else:
     STATIC_ROOT = os.environ.get("APP_STATIC_ROOT", "/client/")
-    MEDIA_ROOT = os.environ.get("APP_MEDIA_ROOT", "/client/doc/")
+    MEDIA_ROOT = os.environ.get("APP_MEDIA_ROOT", "/media/")
 
+DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
 # Celery configuration
 BROKER_URL = os.environ.get("REDIS_HOST", "redis://")

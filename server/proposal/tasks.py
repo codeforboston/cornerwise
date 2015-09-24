@@ -160,7 +160,8 @@ def extract_content(doc, encoding="ISO-8859-9"):
     images_pattern = os.path.join(images_dir, "image")
 
     logger.info("Extracting images to '%s'", images_dir)
-    status = subprocess.call(["pdfimages", "-all", path, images_pattern])
+    status = subprocess.call(["pdfimages", "-png", "-tiff", "-j", "-jp2",
+                              path, images_pattern])
 
     if status:
         logger.warn("pdfimages failed with exit code %i", status)
@@ -170,6 +171,8 @@ def extract_content(doc, encoding="ISO-8859-9"):
             image_path = os.path.join(images_dir, image_name)
 
             if not images.is_interesting(image_path):
+                # Delete 'uninteresting' images
+                os.unlink(image_path)
                 continue
 
             image = Image(proposal=doc.proposal,
