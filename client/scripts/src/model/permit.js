@@ -1,7 +1,5 @@
 define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLocation, config) {
     return B.Model.extend({
-        idAttribute: "case",
-
         initialize: function() {
                  this.listenTo(refLocation, "change", this.recalculateDistance)
                 .listenTo(this, "change:hovered", this.loadParcel)
