@@ -1,9 +1,10 @@
 define(
     ["jquery", "permits", "permits-view", "map-view",
      "filters-view", "collapsible-view", "layers-view",
-     "config"],
+     "config", "details-view", "routes"],
     function($, Permits, PermitsView, MapView, FiltersView,
-             CollapsibleView, LayersView, config) {
+             CollapsibleView, LayersView, config, DetailsView,
+             routes) {
         return {
             start: function() {
                 var permitsCollection = new Permits();
@@ -21,7 +22,6 @@ define(
                     collection: permitsCollection
                 });
 
-
                 var layersView = new CollapsibleView({
                     el: $("#layers")[0],
                     title: "Layers",
@@ -35,10 +35,26 @@ define(
                 // For testing:
                 window.permits = permitsCollection;
 
+                var detailsView = new DetailsView();
+                routes.getRouter().on("route", function(name, args) {
+                    if (name == "details" && args[0]) {
+                        var proposal = permitsCollection.get(args[0]);
+
+                        if (proposal) {
+                            detailsView.show(proposal);
+                        } else {
+                            detailsView.hide();
+                        }
+                    } else {
+                        detailsView.hide();
+                    }
+                });
+
                 return {
+                    filtersView: filtersView,
                     permits: permitsView,
-                    mapView: mapView,
-                    filtersView: filtersView
+                    layersView: layersView,
+                    mapView: mapView
                 };
             }
         };

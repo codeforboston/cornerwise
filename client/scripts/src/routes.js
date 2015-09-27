@@ -1,11 +1,9 @@
 define(["backbone"], function(B) {
+    var dispatcher = _.clone(B.Events);
+
     var AppRouter = B.Router.extend({
         routes: {
-            "": ""
-        },
-
-        showModal: function(pageName) {
-
+            "details/:id": "details"
         }
     });
 
@@ -13,14 +11,19 @@ define(["backbone"], function(B) {
 
     return {
         getRouter: function() {
-            return appRouter;
+            return appRouter || this.init();
+        },
+
+        getDispatcher: function() {
+            return dispatcher;
         },
 
         init: function() {
             appRouter = new AppRouter();
+
             B.history.start();
 
-            return this;
+            return appRouter;
         }
     };
 

@@ -1,6 +1,10 @@
-define(["backbone", "underscore", "utils"], function(B, _, $u) {
+define(["backbone", "underscore", "utils", "routes"], function(B, _, $u, routes) {
     return B.View.extend({
         template: $u.templateWithId("popup-template"),
+
+        events: {
+            "click ._details": "showDetails"
+        },
 
         initialize: function(options) {
             this.popup = options.popup;
@@ -26,6 +30,12 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         destroy: function() {
             this.undelegateEvents();
             this.remove();
+        },
+
+        showDetails: function(e) {
+            var proposalId = this.model.get("id");
+            routes.getRouter().navigate("details/" + proposalId,
+                                        {trigger: true});
         }
     });
 });

@@ -8389,3 +8389,11 @@ img.proposal_thumb {
     max-height: 100% !important;
     max-width: 100% !important;
 }
+
+
+#overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: hidden;
+}
