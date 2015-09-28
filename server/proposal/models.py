@@ -73,6 +73,12 @@ class Attribute(models.Model):
     text_value = models.TextField(null=True)
     date_value = models.DateTimeField(null=True)
 
+    def to_dict(self):
+        return {"name": self.name,
+                "value": self.string_value or \
+                self.text_value or \
+                self.date_value}
+
 class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.

@@ -1,15 +1,17 @@
+from django.conf import settings
 from django.forms.models import model_to_dict
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page
 
 from shared.request import make_response
 
-from .models import Proposal, Document, Event, Image
+from .models import Proposal, Attribute, Document, Event, Image
 
 #@make_response()
 #def
 
-def proposal_json(proposal, include_images=True):
+def proposal_json(proposal, include_images=True, include_attributes=False):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
     pdict["location"] = {"lat": proposal.location.y,
                          "lng": proposal.location.x}
@@ -20,6 +22,11 @@ def proposal_json(proposal, include_images=True):
     if include_images:
         images = Image.objects.filter(document__proposal=proposal)
         pdict["images"] = [img.image.url for img in images]
+
+    if include_attributes:
+        attributes = Attribute.objects.filter(proposal=proposal)
+        pdict["attributes"] = [a.to_dict() for a in attributes]
+
     return pdict
 
 @make_response()
@@ -35,7 +42,30 @@ def closed_proposals(req):
     return {"proposals": list(map(proposal_json, proposals))}
 
 @make_response()
-def view_proposal(req, pk):
+def view_proposal(req, pk=None):
+    if not pk:
+        pk = req.GET.get("pk")
+
     proposal = get_object_or_404(Proposal, pk=pk)
 
-    return {"proposal": proposal_json(proposal)}
+    return {"proposal": proposal_json(proposal, include_attributes=True)}
+
+# Document views
+@make_response()
+def view_document(req, pk):
+    "Retrieve details about a Document."
+    doc = get_object_or_404(Document, pk=pk)
+
+    return {"document": doc.to_dict()}
+
+def download_document(req, pk):
+    doc = get_object_or_404(Document, pk=pk)
+
+    if not doc.document:
+        return {}
+
+    if settings.IS_PRODUCTION:
+        # Server the file using mod_xsendfile
+        pass
+
+    return FileResponse(doc.document)

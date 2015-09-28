@@ -10,7 +10,8 @@ doc_urlpatterns = [
 urlpatterns = [
     url(r"^list$", views.active_proposals),
     url(r"^closed$", views.closed_proposals),
-    url(r"^view/(?P<pk>[0-9]+)", views.view_proposal, name="view-proposal"),
+    url(r"^view$", views.view_proposal),
+    url(r"^view/(?P<pk>[0-9]+)$", views.view_proposal, name="view-proposal"),
 
     # Feeds:
     url(r"^rss", feed.ReportsAndDecisionsFeed()),
