@@ -8392,8 +8392,49 @@ img.proposal_thumb {
 
 
 #overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
     position: absolute;
+    left: 0;
+    right: 0;
     top: 0;
     bottom: 0;
-    display: hidden;
+    display: none;
+}
+
+.details .close {
+    font-size: small;
+}
+
+.details {
+    background-color: white;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    margin: auto;
+    padding: 15px;
+    width: 80%;
+}
+
+.details .document {
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    display: inline-block;
+    max-width: 250px;
+    padding: 3px;
+}
+
+.document .thumb {
+    box-shadow: -1px 1px 2px black;
+    height: 75px;
+    margin: 3px;
+}
+
+.document .thumb:hover {
+    transform: scale(2);
+    -webkit-transform: scale(2);
+}
+
+.images .thumb {
+    max-height: 100px;
+    max-width: 100px;
 }

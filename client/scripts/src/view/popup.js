@@ -3,7 +3,7 @@ define(["backbone", "underscore", "utils", "routes"], function(B, _, $u, routes)
         template: $u.templateWithId("popup-template"),
 
         events: {
-            "click ._details": "showDetails"
+            "click a._details": "showDetails"
         },
 
         initialize: function(options) {
@@ -13,29 +13,38 @@ define(["backbone", "underscore", "utils", "routes"], function(B, _, $u, routes)
         },
 
         setContent: function(html) {
-            if (this.popup)
-                this.popup.setContent(html);
-            else if (this.marker)
-                this.marker.setPopupContent(html);
-            else if (this.$el)
-                this.$el.html(html);
-        },
+            if (this._content) {
+                this._content.remove();
+                delete this._content;
+            }
 
-        render: function() {
-            this.setContent(this.template(this.model.toJSON()));
+            var popup =
+                    this.popup ||
+                    (this.marker && this.marget.getPopup());
+
+            if (popup) {
+                var content = $(html);
+                popup.setContent(content[0]);
+                this._content = content;
+                var self = this;
+                content .on("click", "a._details", {id: this.model.get("id")},
+                            this.showDetails);
+            }
 
             return this;
         },
 
+        render: function() {
+            return this.setContent(this.template(this.model.toJSON()));
+        },
+
         destroy: function() {
-            this.undelegateEvents();
+            this.setContent("");
             this.remove();
         },
 
         showDetails: function(e) {
-            var proposalId = this.model.get("id");
-            routes.getRouter().navigate("details/" + proposalId,
-                                        {trigger: true});
+            routes.getDispatcher().trigger("showDetails", e.data.id);
         }
     });
 });

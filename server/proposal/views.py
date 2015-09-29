@@ -48,7 +48,7 @@ def view_proposal(req, pk=None):
 
     proposal = get_object_or_404(Proposal, pk=pk)
 
-    return {"proposal": proposal_json(proposal, include_attributes=True)}
+    return proposal_json(proposal, include_attributes=True)
 
 # Document views
 @make_response()
@@ -56,7 +56,7 @@ def view_document(req, pk):
     "Retrieve details about a Document."
     doc = get_object_or_404(Document, pk=pk)
 
-    return {"document": doc.to_dict()}
+    return doc.to_dict()
 
 def download_document(req, pk):
     doc = get_object_or_404(Document, pk=pk)

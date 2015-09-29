@@ -85,29 +85,34 @@ define(["underscore", "jquery"], function(_, $) {
         /**
          * Like _.template, except that it adds helper functions to the
          * data passed to the resulting template function.
+         *
+         * @param {string} templateString
+         * @param {object} helpers Mapping names to functions
+         * @param {object} settings Passed as second argument to _.template
          */
-        template: function(templateString, helpers) {
+        template: function(templateString, helpers, settings) {
             helpers = helpers || defaultHelpers;
 
-            var temp = _.template(templateString);
+            var temp = _.template(templateString, settings);
 
             return function(data) {
                 return temp(_.extend(data, helpers));
             };
         },
 
-        templateWithId: function(id) {
+        /**
+         * @param {string} id Element ID of the template element in the
+         * DOM.
+         * @param {object} options
+         */
+        templateWithId: function(id, options) {
             var templateString = $("#" + id).text();
 
             if (!templateString) {
-                if (console) {
-                    console.error("Unknown template: %s", id);
-                }
-
-                return null;
+                throw new Error("Unknown template: " + id);
             }
-
-            return $u.template(templateString);
+            options = options || {};
+            return $u.template(templateString, options.helpers, options);
         }
     };
 

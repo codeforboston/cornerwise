@@ -1,133 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="description" content="Find zoning information of City of Sommerville">
-  <title>Cornerwise</title>
-  <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
-  <!-- <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/> -->
-  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
-  <link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" />
-  set
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="Find zoning information of City of Sommerville">
+    <title>Cornerwise</title>
+    <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+    <!-- <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/> -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" />
+    set
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Template for permits in the permit table -->
-  <script type="text/template" id="permit-template">
-    <td><%= address %></td>
-    <td>
-      <b><%= summary %></b>
-      <br>Case: <%= caseNumber %></td>
-    <td>
-      <span class="distance"><%= commas(refDistance) %> feet</span>
-    </td>
-  </script>
+    <!-- Template for permits in the permit table -->
+    <script type="text/template" id="permit-template">
+      <td><%= address %></td>
+      <td>
+        <b><%= summary %></b>
+        <br>Case: <%= caseNumber %></td>
+      <td>
+        <span class="distance"><%= commas(refDistance) %> feet</span>
+      </td>
+    </script>
 
-  <!-- Template for proposal popup information -->
-  <script type="text/template" id="popup-template">
-    <div class="property">
-      <strong>Case:</strong>
-      <%= caseNumber %>
-    </div>
-    <div class="property">
-      <strong>Address:</strong>
-      <%= address %>
-    </div>
-    <div class="property">
-      <strong>Description:</strong>
-      <%= description %>
-    </div>
-    <% if (documents.length) { %>
-    <div class="property">
-      <ul class="document-list">
-        <% _.each(documents, function(document) { %>
-        <li>
-          <a href="<%= document.url %>" target="_blank">
-            <%= document.title %></a>
-        </li>
-        <% }) %>
-      </ul>
-    </div>
-    <div class="images">
-      <% _.each(images.slice(0, 4), function(thumb, i) { %>
-      <div class="thumb">
-        <img class="proposal_thumb" src="<%=thumb %>"/>
-      </div>
-      <% }) %>
-    </div>
-    <a class="_details" href="#">More&hellip;</a>
-    <% } %>
-  </script>
-
-  <script type="text/template" id="proposal-details">
-    <%= address %>
-  </script>
-</head>
-<body>
-  <div>
-    <nav class="navbar navbar-default navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
-
-          <a class="navbar-brand" rel="home" href="#" title="Buy Sell Rent Everyting">
-            <img style="max-width:100px; margin-top: -7px;"
-                 src="/static/images/cornerwise-logo.png">
-          </a>
+    <!-- Template for proposal popup information -->
+    <script type="text/template" id="popup-template">
+      <div class="popup-contents">
+        <div class="property">
+          <strong>Case:</strong>
+          <%= caseNumber %>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
+        <div class="property">
+          <strong>Address:</strong>
+          <%= address %>
+        </div>
+        <div class="property">
+          <strong>Description:</strong>
+          <%= description %>
+        </div>
+        <% if (documents.length) { %>
+        <div class="property">
+          <ul class="document-list">
+            <% _.each(documents, function(document) { %>
+            <li>
+              <a href="<%= document.url %>" target="_blank">
+                <%= document.title %></a>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+        <div class="images">
+          <% _.each(images.slice(0, 4), function(thumb, i) { %>
+          <div class="thumb">
+            <img class="proposal_thumb" src="<%=thumb %>"/>
+          </div>
+          <% }) %>
+        </div>
+        <a class="_details" href="#">More&hellip;</a>
+        <% } %>
+      </div>
+    </script>
+
+    <script type="text/template" id="proposal-details">
+      <div class="details">
+        <h4><%= proposal.address %></h4>
+        <a href="#" class="close">Close</a>
+        <div class="caseNumber"><%= proposal.caseNumber %></div>
+
+        <% if (proposal.attributes && proposal.attributes.length) { %>
+        <div class="attributes">
+        <% _.each(proposal.attributes, function(attr) { %>
+        <div class="attribute">
+          <strong><%= attr.name %>:</strong>
+          <%= attr.value %>
+        </div>
+        <% }); %>
+        </div>
+        <% } %>
+
+        <% if (proposal.documents && proposal.documents.length) { %>
+        <div class="documents">
+          <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
+          <div class="document">
+            <img class="thumb" src="<%= doc.thumb %>"/>
+            <strong class="title"><%= doc.title %></strong>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+
+        <% if (proposal.images && proposal.images.length) { %>
+        <div class="images">
+        <% _.each(proposal.images.slice(0, 10), function(src) { %>
+        <img class="thumb" src="<%= src %>"/>
+        <% }); %>
+        </div>
+        <% } %>
+      </div>
+    </script>
+  </head>
+  <body>
+    <div>
+      <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+
+            <a class="navbar-brand" rel="home" href="#" title="Buy Sell Rent Everyting">
+              <img style="max-width:100px; margin-top: -7px;"
+                   src="/static/images/cornerwise-logo.png">
+            </a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
               <li class="active"><a href="#">Petition Lists</a></li>
               <li><a href="#">Zoning Info</a></li>
               <li><a href="#">Capital Projects</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
-    <div class="maps container-fluid">
-      <div class="col-sm-8" id="map-container">
-        <div id="zoning-map">
-          <!-- The Leaflet map will appear here. -->
+      </nav>
+      <div class="maps container-fluid">
+        <div class="col-sm-8" id="map-container">
+          <div id="zoning-map">
+            <!-- The Leaflet map will appear here. -->
+          </div>
+          <div class="filter-group" id="ref-address">
+            <form id="ref-address-form">
+              <input type="text" name="address" placeholder="Type the Address">
+            </form>
+            <button name="geolocate" id="geolocate">
+              <div class="geolocateArrow"><img src="/static/images/geolocate-button.png" alt="Find my location" width="24" height="24"></div>
+            </button>
+            <div id="geolocating-indicator">
+              <img src="/static/images/geolocating.gif"/>
+            </div>
+          </div>
+
+          <div id="overlay"></div>
         </div>
-        <div class="filter-group" id="ref-address">
-          <form id="ref-address-form">
-            <input type="text" name="address" placeholder="Type the Address">
-          </form>
-          <button name="geolocate" id="geolocate">
-          <div class="geolocateArrow"><img src="/static/images/geolocate-button.png" alt="Find my location" width="24" height="24"></div>
-          </button>
-          <div id="geolocating-indicator">
-            <img src="/static/images/geolocating.gif"/>
+        <div class="col-sm-4" id="data-container">
+
+          <!-- <div id="spga-filters"></div> -->
+          <!-- <div id="type-filters"></div> -->
+
+          <div class="filter-group inactive" id="radius-filter-group">
+            <div class="filter-name">
+              Radius (ft):
+              <span id="radius-value"></span>
+              <button id="reset" class="waves-effect waves-light btn"  name="action">Reset</button>
+            </div>
+            <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100">
+          </div>
+
+          <table id="permit-list" class="table table-condensed">
+            <tfoot>
+              <tr><td colspan="3">Loading...</td></tr>
+            </tfoot>
+          </table>
+
+          <div id="layers"><div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-sm-4" id="data-container">
 
-        <!-- <div id="spga-filters"></div> -->
-        <!-- <div id="type-filters"></div> -->
-
-        <div class="filter-group inactive" id="radius-filter-group">
-          <div class="filter-name">
-            Radius (ft):
-            <span id="radius-value"></span>
-            <button id="reset" class="waves-effect waves-light btn"  name="action">Reset</button>
-          </div>
-          <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100">
-        </div>
-
-        <table id="permit-list" class="table table-condensed">
-          <tfoot>
-            <tr><td colspan="3">Loading...</td></tr>
-          </tfoot>
-        </table>
-
-        <div id="layers"><div>
-      </div>
-        </div>
-        <div id="overlay"></div>
-  </div>
-</body>
+    </div>
+  </body>
 </html>

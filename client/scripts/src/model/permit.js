@@ -1,5 +1,7 @@
 define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLocation, config) {
     return B.Model.extend({
+        urlRoot: "/proposal/view",
+
         initialize: function() {
                  this.listenTo(refLocation, "change", this.recalculateDistance)
                 .listenTo(this, "change:hovered", this.loadParcel)
@@ -34,8 +36,28 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
             if (!attrs.documents)
                 attrs.documents = [];
+            if (!attrs.attributes)
+                attrs.attributes = [];
 
             return attrs;
+        },
+
+        fetch: function(opts) {
+            this._fetched = true;
+
+            opts = opts || {};
+            var error = opts && opts.error;
+            opts.error = function(m, resp, options) {
+                if (error)
+                    error(m, resp, options);
+                m._fetched = false;
+            };
+
+            B.Model.prototype.fetch.call(this, opts);
+        },
+
+        fetchIfNeeded: function() {
+            return !this._fetched && this.fetch();
         },
 
         loadParcel: function(permit) {

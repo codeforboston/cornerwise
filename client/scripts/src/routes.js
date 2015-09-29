@@ -14,6 +14,10 @@ define(["backbone"], function(B) {
             return appRouter || this.init();
         },
 
+        /**
+         * Returns an event dispatcher that is shared by the entire
+         * application.
+         */
         getDispatcher: function() {
             return dispatcher;
         },

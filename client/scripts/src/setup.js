@@ -35,26 +35,13 @@ define(
                 // For testing:
                 window.permits = permitsCollection;
 
-                var detailsView = new DetailsView();
-                routes.getRouter().on("route", function(name, args) {
-                    if (name == "details" && args[0]) {
-                        var proposal = permitsCollection.get(args[0]);
-
-                        if (proposal) {
-                            detailsView.show(proposal);
-                        } else {
-                            detailsView.hide();
-                        }
-                    } else {
-                        detailsView.hide();
-                    }
-                });
-
+                var detailsView = new DetailsView({collection: permitsCollection});
                 return {
-                    filtersView: filtersView,
+                    filters: filtersView,
                     permits: permitsView,
-                    layersView: layersView,
-                    mapView: mapView
+                    layers: layersView,
+                    map: mapView,
+                    details: detailsView
                 };
             }
         };
