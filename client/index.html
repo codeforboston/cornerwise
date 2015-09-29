@@ -84,7 +84,11 @@
         <div class="documents">
           <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
           <a class="document" href="<%= doc.url %>" target="_blank">
+            <% if (doc.thumb) { %>
             <img class="thumb" src="<%= doc.thumb %>"/>
+            <% } else { %>
+            <div class="dummy-thumb thumb">Doc</div>
+            <% } %>
             <strong class="title"><%= doc.title %></strong>
           </a>
           <% }); %>

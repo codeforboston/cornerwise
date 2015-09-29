@@ -8429,9 +8429,21 @@ img.proposal_thumb {
     margin: 3px;
 }
 
+.document .dummy-thumb {
+    background-color: white;
+    border-radius: 3px;
+    color: lightgray;
+    display: table-cell;
+    font-size: x-large;
+    font-variant: small-caps;
+    text-align: center;
+    vertical-align: middle;
+    width: 60px;
+}
+
 .document .thumb:hover {
-    transform: scale(2);
-    -webkit-transform: scale(2);
+    transform: scale(1.5);
+    -webkit-transform: scale(1.5);
 }
 
 .images .thumb {
