@@ -52,7 +52,9 @@
         <div class="images">
           <% _.each(images.slice(0, 4), function(thumb, i) { %>
           <div class="thumb">
-            <img class="proposal_thumb" src="<%=thumb %>"/>
+            <a href="<%= thumb %>" target="_blank">
+              <img class="proposal_thumb" src="<%= thumb %>"/>
+            </a>
           </div>
           <% }) %>
         </div>
@@ -81,10 +83,10 @@
         <% if (proposal.documents && proposal.documents.length) { %>
         <div class="documents">
           <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
-          <div class="document">
+          <a class="document" href="<%= doc.url %>" target="_blank">
             <img class="thumb" src="<%= doc.thumb %>"/>
             <strong class="title"><%= doc.title %></strong>
-          </div>
+          </a>
           <% }); %>
         </div>
         <% } %>
@@ -92,7 +94,9 @@
         <% if (proposal.images && proposal.images.length) { %>
         <div class="images">
         <% _.each(proposal.images.slice(0, 10), function(src) { %>
-        <img class="thumb" src="<%= src %>"/>
+        <a href="<%= src %>" target="_blank">
+          <img class="thumb" src="<%= src %>"/>
+        </a>
         <% }); %>
         </div>
         <% } %>
