@@ -33,7 +33,7 @@ class Parcel(models.Model):
         db_table = 'parcel'
 
 class Attribute(models.Model):
-    parcel = models.ForeignKey(Parcel)
+    parcel = models.ForeignKey(Parcel, related_name="attributes")
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=256)
 
