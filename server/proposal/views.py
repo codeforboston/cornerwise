@@ -15,13 +15,12 @@ def proposal_json(proposal, include_images=True, include_attributes=False):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
     pdict["location"] = {"lat": proposal.location.y,
                          "lng": proposal.location.x}
-    # TODO: If the document has been copied to the server, return
-    # document.document.url instead of document.url as the URL.
+
     pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
 
     if include_images:
         images = Image.objects.filter(document__proposal=proposal)
-        pdict["images"] = [img.image.url for img in images]
+        pdict["images"] = [img.to_dict() for img in images]
 
     if include_attributes:
         attributes = Attribute.objects.filter(proposal=proposal)

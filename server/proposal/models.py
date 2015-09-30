@@ -152,3 +152,7 @@ class Image(models.Model):
     @property
     def url(self):
         return self.thumbnail and self.thumbnail.url or self.image.url
+
+    def to_dict(self):
+        return {"src": self.image.url,
+                "thumb": self.thumbnail.url if self.thumbnail else None}
