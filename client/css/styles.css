@@ -8166,7 +8166,7 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 #map-container {
     position: relative;
     margin-top: 1cm;
-
+    height: 100%;
 }
 /*This moves the data*/
 #data-container{
@@ -8415,12 +8415,45 @@ img.proposal_thumb {
     width: 80%;
 }
 
+.details h4 {
+  margin-bottom: 0.1em;
+}
+
+.details .case-number {
+  color: green;
+  font-style: italic;
+  text-align: right;
+}
+
+.details .attributes {
+
+}
+
+.details .section {
+  border-top: 2px solid lightgray;
+  margin-top: 10px;
+  padding-top: 10px;
+  position: relative;
+}
+
+.section-title {
+    color: gray;
+    font-variant: small-caps;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
 .details .document {
+    display: inline-block;
+    width: 25%;
+    padding: 3px;
+    text-align: center;
+}
+
+.details.document:hover {
     border: 1px solid #aaa;
     border-radius: 3px;
-    display: inline-block;
-    max-width: 250px;
-    padding: 3px;
 }
 
 .document .thumb {
@@ -8433,11 +8466,10 @@ img.proposal_thumb {
     background-color: white;
     border-radius: 3px;
     color: lightgray;
-    display: table-cell;
     font-size: x-large;
     font-variant: small-caps;
+    line-height: 75px;
     text-align: center;
-    vertical-align: middle;
     width: 60px;
 }
 
@@ -8447,6 +8479,8 @@ img.proposal_thumb {
 }
 
 .images .thumb {
+    display: inline-block;
     max-height: 100px;
     max-width: 100px;
+    padding-bottom: 5px;
 }

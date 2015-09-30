@@ -65,23 +65,24 @@
 
     <script type="text/template" id="proposal-details">
       <div class="details">
-        <h4><%= proposal.address %></h4>
         <a href="#" class="close">Close</a>
-        <div class="caseNumber"><%= proposal.caseNumber %></div>
+        <h4><%= proposal.address %></h4>
+        <div class="case-number"><%= proposal.caseNumber %></div>
 
         <% if (proposal.attributes && proposal.attributes.length) { %>
-        <div class="attributes">
+        <table class="attributes section table">
         <% _.each(proposal.attributes, function(attr) { %>
-        <div class="attribute">
-          <strong><%= attr.name %>:</strong>
-          <%= attr.value %>
-        </div>
+        <tr class="attribute">
+          <td><%= attr.name %>:</td>
+          <td><%= attr.value %></td>
+        </tr>
         <% }); %>
-        </div>
+        </table>
         <% } %>
 
         <% if (proposal.documents && proposal.documents.length) { %>
-        <div class="documents">
+        <div class="documents section">
+          <div class="section-title">Documents</div>
           <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
           <a class="document" href="<%= doc.url %>" target="_blank">
             <% if (doc.thumb) { %>
@@ -89,16 +90,17 @@
             <% } else { %>
             <div class="dummy-thumb thumb">Doc</div>
             <% } %>
-            <strong class="title"><%= doc.title %></strong>
+            <div class="title"><%= doc.title %></div>
           </a>
           <% }); %>
         </div>
         <% } %>
 
         <% if (proposal.images && proposal.images.length) { %>
-        <div class="images">
+        <div class="images section">
+          <div class="section-title">Images</div>
         <% _.each(proposal.images.slice(0, 10), function(img) { %>
-        <a href="<%= img.src %>" target="_blank">
+        <a class="thumb-link" href="<%= img.src %>" target="_blank">
           <img class="thumb" src="<%= img.thumb || img.src %>"/>
         </a>
         <% }); %>

@@ -23,6 +23,7 @@ define(["backbone", "underscore", "routes", "utils"], function(B, _, routes, $u)
 
             this.model = proposal;
             this.listenTo(proposal, "change", this.render);
+            proposal.fetchIfNeeded();
 
             if (this.showing)
                 this.render(proposal);
@@ -57,8 +58,6 @@ define(["backbone", "underscore", "routes", "utils"], function(B, _, routes, $u)
             this.render();
             this.$el.show();
             this.showing = true;
-
-            proposal.fetchIfNeeded();
         }
     });
 });

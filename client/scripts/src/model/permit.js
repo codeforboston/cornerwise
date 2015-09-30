@@ -53,7 +53,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                 m._fetched = false;
             };
 
-            B.Model.prototype.fetch.call(this, opts);
+            return B.Model.prototype.fetch.call(this, opts);
         },
 
         fetchIfNeeded: function() {
