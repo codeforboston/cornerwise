@@ -6,7 +6,8 @@ define(["backbone", "underscore", "routes", "utils"], function(B, _, routes, $u)
                                     {variable: "proposal"}),
         el: "#overlay",
         events: {
-            "click a.close": "hide"
+            "click a.close": "hide",
+            "click": "dismiss"
         },
 
         initialize: function() {
@@ -38,6 +39,15 @@ define(["backbone", "underscore", "routes", "utils"], function(B, _, routes, $u)
         hide: function() {
             this.$el.hide();
             this.showing = false;
+        },
+
+        /**
+         * If the user clicks on the #overlay element itself (i.e., the
+         * grayed-out margins), hide the details view.
+         */
+        dismiss: function(e) {
+            if (e.target == e.currentTarget)
+                this.hide();
         },
 
         onShow: function(id) {
