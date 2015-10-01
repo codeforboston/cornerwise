@@ -108,6 +108,27 @@
         <% }); %>
         </div>
         <% } %>
+
+        <% if (proposal.parcel) { %>
+        <% with(proposal.parcel) { %>
+        <div class="section">
+          <div class="section-title">
+            Parcel
+          </div>
+
+          <table class="table">
+            <tr>
+              <td>Lot Size:</td>
+              <td><%= properties.LOT_SIZE %> acres</td>
+            </tr>
+            <tr>
+              <td>Residential Area</td>
+              <td><%= commas(properties.RES_AREA) %> square feet</td>
+            </tr>
+          </table>
+        </div>
+        <% } %>
+        <% } %>
       </div>
     </script>
   </head>
