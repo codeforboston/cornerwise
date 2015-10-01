@@ -8308,21 +8308,21 @@ th.sort-field {
 }
 
 th.sort-field::after {
-    content: " ▲";
+    content: " â–²";
 }
 
 th.sort-field.desc::after {
-    content: " ▼";
+    content: " â–¼";
 }
 
 
 /* Collapsible View */
 a.toggle::after {
-    content: " ▸";
+    content: " â–¸";
 }
 
 .shown a.toggle::after {
-    content: " ▾";
+    content: " â–¾";
 }
 
 .collapse-title {
@@ -8437,8 +8437,10 @@ img.proposal_thumb {
 }
 
 .section-title {
+    background-color: rgba(255, 255, 255, 0.75);
     color: gray;
     font-variant: small-caps;
+    padding: 0.2em;
     position: absolute;
     right: 0;
     top: 0;
@@ -8460,6 +8462,7 @@ img.proposal_thumb {
     box-shadow: -1px 1px 2px black;
     height: 75px;
     margin: 3px;
+    transition: transform 0.05s linear;
 }
 
 .document .dummy-thumb {
@@ -8473,9 +8476,11 @@ img.proposal_thumb {
     width: 60px;
 }
 
-.document .thumb:hover {
+.document:hover .thumb {
     transform: scale(1.5);
-    -webkit-transform: scale(1.5);
+    transform-origin: 50% 100%;
+    -webkit-transform: scale(1.4);
+    -webkit-transform-origin: 50% 100%;
 }
 
 .images .thumb {

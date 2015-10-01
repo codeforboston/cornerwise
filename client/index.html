@@ -14,12 +14,12 @@
 
     <!-- Template for permits in the permit table -->
     <script type="text/template" id="permit-template">
-      <td><%= address %></td>
+      <td><%= proposal.address %></td>
       <td>
-        <b><%= summary %></b>
-        <br>Case: <%= caseNumber %></td>
+        <b><%= proposal.summary %></b>
+        <br>Case: <%= proposal.caseNumber %></td>
       <td>
-        <span class="distance"><%= commas(refDistance) %> feet</span>
+        <span class="distance"><%= commas(proposal.refDistance) %> feet</span>
       </td>
     </script>
 
@@ -28,29 +28,31 @@
       <div class="popup-contents">
         <div class="property">
           <strong>Case:</strong>
-          <%= caseNumber %>
+          <%= proposal.caseNumber %>
         </div>
         <div class="property">
           <strong>Address:</strong>
-          <%= address %>
+          <%= proposal.address %>
         </div>
+        <% if (proposal.description) { %>
         <div class="property">
           <strong>Description:</strong>
-          <%= description %>
+          <%= proposal.description %>
         </div>
-        <% if (documents.length) { %>
-        <div class="property">
-          <ul class="document-list">
-            <% _.each(documents, function(document) { %>
-            <li>
-              <a href="<%= document.url %>" target="_blank">
-                <%= document.title %></a>
-            </li>
-            <% }) %>
-          </ul>
-        </div>
+        <% } %>
+        <!-- <% if (proposal.documents.length) { %> -->
+        <!-- <div class="property"> -->
+        <!--   <ul class="document-list"> -->
+        <!--     <% _.each(proposal.documents, function(document) { %> -->
+        <!--     <li> -->
+        <!--       <a href="<%= document.url %>" target="_blank"> -->
+        <!--         <%= document.title %></a> -->
+        <!--     </li> -->
+        <!--     <% }) %> -->
+        <!--   </ul> -->
+        <!-- </div> -->
         <div class="images">
-          <% _.each(images.slice(0, 4), function(img, i) { %>
+          <% _.each(proposal.images.slice(0, 4), function(img, i) { %>
           <div class="thumb">
             <a href="<%= img.src %>" target="_blank">
               <img class="proposal_thumb" src="<%= img.thumb || img.src %>"/>

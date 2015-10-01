@@ -93,9 +93,20 @@ define(["underscore", "jquery"], function(_, $) {
         template: function(templateString, helpers, settings) {
             helpers = helpers || defaultHelpers;
 
+            if (settings) {
+                var varName = settings.variable;
+                delete settings.variable;
+            }
+
             var temp = _.template(templateString, settings);
 
             return function(data) {
+                if (varName) {
+                    var d = {};
+                    d[varName] = data;
+                    data = d;
+                }
+
                 return temp(_.extend(data, helpers));
             };
         },

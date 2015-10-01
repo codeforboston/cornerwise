@@ -1,6 +1,7 @@
 define(["backbone", "underscore", "utils", "routes"], function(B, _, $u, routes) {
     return B.View.extend({
-        template: $u.templateWithId("popup-template"),
+        template: $u.templateWithId("popup-template",
+                                    {variable: "proposal"}),
 
         events: {
             "click a._details": "showDetails"

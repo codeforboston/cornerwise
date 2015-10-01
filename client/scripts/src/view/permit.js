@@ -20,7 +20,8 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             "click": "onClick"
         },
 
-        template: $u.templateWithId("permit-template"),
+        template: $u.templateWithId("permit-template",
+                                    {variable: "proposal"}),
 
         render: function() {
             var permit = this.model;
