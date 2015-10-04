@@ -1,5 +1,4 @@
 from datetime import datetime
-import logging
 import os
 import shutil
 import subprocess
@@ -15,8 +14,6 @@ from .models import Proposal, Attribute, Event, Document, Image
 from . import extract
 from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, images
-
-logger = logging.getLogger(__name__)
 
 def last_run():
     "Determine the date and time of the last run of the task."
@@ -100,14 +97,20 @@ def create_proposal_from_json(p_dict):
     return proposal
 
 
+
+
 @celery_app.task(name="proposal.fetch_document")
-def fetch_document(doc):
+def fetch_document(doc, force=False):
     """Copy the given document (proposal.models.Document) to a local
     directory.
     """
+    if not force and doc.document and os.path.exists(doc.document.path):
+        return
+
     url = doc.url
     url_components = parse.urlsplit(url)
-    filename = os.path.basename(url_components.path)
+    ext = extension(os.path.basename(url_components.path))
+    filename = "download.%s" % ext
     path = os.path.join(settings.MEDIA_ROOT, "doc",
                         str(doc.pk),
                         filename)
@@ -139,6 +142,7 @@ def extract_content(doc, encoding="ISO-8859-9"):
 
     """
     docfile = doc.document
+    logger = extract_content.get_logger()
 
     if not docfile:
         logger.error("Document has not been copied to the local filesystem.")
@@ -210,6 +214,7 @@ def extract_content(doc, encoding="ISO-8859-9"):
 def generate_doc_thumbnail(doc):
     ""
     docfile = doc.document
+    logger = generate_doc_thumbnail.get_logger()
 
     if not docfile:
         logger.error("Document has not been copied to the local filesystem")
@@ -241,6 +246,7 @@ def generate_doc_thumbnail(doc):
 @celery_app.task(name="proposal.generate_thumbnail")
 def generate_thumbnail(image, replace=False):
     "Generate an image thumbnail."
+    logger = generate_thumbnail.get_logger()
     if image.thumbnail and os.path.exists(image.thumbnail.name):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
         return
@@ -274,6 +280,8 @@ def extract_all_content():
 @transaction.atomic
 def add_doc_attributes(doc):
     properties = extract.get_properties(doc)
+    logger = add_doc_attributes.get_logger()
+
     for name, value in properties.items():
         logger.info("Adding %s attribute", name)
         attr = Attribute(proposal=doc.proposal,
@@ -295,10 +303,19 @@ def process_document(doc):
     generate_doc_thumbnail(doc)
 
 
+@celery_app.task(name="proposal.fetch_documents")
+def fetch_unprocessed_documents():
+    docs = Document.objects.filter(document=None)
+
+    for doc in docs:
+        fetch_document(doc)
+
 @celery_app.task(name="proposal.scrape_reports_and_decisions")
 @transaction.atomic
 def scrape_reports_and_decisions(since=None, page=None, everything=False,
                                  coder_type=settings.GEOCODER):
+    logger = scrape_reports_and_decisions.get_logger()
+
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
         geocoder.bounds = settings.GEO_BOUNDS
