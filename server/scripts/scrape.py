@@ -143,18 +143,14 @@ def get_proposals_for_page(page, geocoder=None):
 
     return cases
 
-def get_proposals_since(dt=None,
-                        date_column="updatedDate",
-                        geocoder=None):
-    """
-    Continually scrape the proposals until the submission date is
-    less than or equal to the given date.
+def get_pages():
+    """Returns a generator that retrieves Reports and Decisions pages and
+    parses them as HTML.
 
-    Returns an array of dicts representing scraped cases.
     """
-    all_cases = []
     i = 0
     last_page = None
+
     while True:
         try:
             # There's currently a bug in the Reports and Decisions page
@@ -168,26 +164,57 @@ def get_proposals_since(dt=None,
             logger.warn("Failed to retrieve URL for page %d.", i)
             break
 
-        if not html:
-            break
-
         doc = BeautifulSoup(html, "html.parser")
-        cases = find_cases(doc)
-        if dt:
-            all_cases += [case for case in cases if case[date_column] > dt]
-
-            if cases[-1][date_column] <= dt:
-                break
-        else:
-            all_cases += cases
-
         if last_page is None:
             last_page = detect_last_page(doc)
+
+        yield doc
 
         i += 1
 
         if i > last_page:
             break
+
+def get_cases(gen=None):
+    "Returns a generator that produces cases."
+    if not gen:
+        gen = get_pages()
+
+    for doc in gen:
+        for case in find_cases(doc):
+            yield case
+
+def get_proposals_since(dt=None,
+                        stop_at_case=None,
+                        date_column="updatedDate",
+                        geocoder=None):
+    """Page through the Reports and Decisions page, scraping the proposals
+    until the submission date is less than or equal to the given date.
+
+    :param dt: If provided, stop scraping when the `date_column` is less
+    than or equal to this datetime.
+
+    :param stop_at_case: If provided, stop scraping when a case number
+    matches this string
+
+    :param date_column: Customize the name of the date column
+
+    :geocoder: An object with a geocode() method that accepts a list
+    of string addresses.
+
+    :returns: A list of dicts representing scraped cases.
+
+    """
+    all_cases = []
+
+    for case in get_cases():
+        if dt and case[date_column] <= dt:
+            break
+
+        if stop_at_case and stop_at_case == case["caseNumber"]:
+            break
+
+        all_cases.append(case)
 
     if geocoder:
         add_geocode(geocoder, all_cases)
