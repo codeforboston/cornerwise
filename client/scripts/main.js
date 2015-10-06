@@ -4,7 +4,7 @@ require.config({
         // Dependencies:
         "underscore": "lib/underscore-min",
         "backbone": "lib/backbone",
-        "leaflet": "http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet",
+        "leaflet": "http://cdn.leafletjs.com/leaflet-0.7.5/leaflet",
         "jquery": "http://code.jquery.com/jquery-1.11.3.min",
 
         // Utilities:
@@ -22,6 +22,7 @@ require.config({
         // Leaflet stuff:
         "ref-marker": "src/leaflet/refMarker",
         "info-layer-helper": "src/leaflet/infoLayer",
+        "recentered-map": "src/leaflet/recenteredMap",
 
         // Backbone Models:
         "permit": "src/model/permit",
