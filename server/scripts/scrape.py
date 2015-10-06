@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
+from itertools import takewhile
 import json
 import logging
 import re
@@ -205,21 +206,13 @@ def get_proposals_since(dt=None,
     :returns: A list of dicts representing scraped cases.
 
     """
-    all_cases = []
+    def guard(case):
+        return (not dt or case[date_column] > dt) and \
+            (not stop_at_case or case["caseNumber"] != stop_at_case)
 
-    for case in get_cases():
-        if dt and case[date_column] <= dt:
-            break
-
-        if stop_at_case and stop_at_case == case["caseNumber"]:
-            break
-
-        all_cases.append(case)
+    all_cases = list(takewhile(guard, get_cases()))
 
     if geocoder:
         add_geocode(geocoder, all_cases)
 
     return all_cases
-
-# Deprecate the old name:
-get_permits_since = get_proposals_since
