@@ -2,9 +2,6 @@
 service postgresql start
 service redis-server start # Required for celery and caching
 
-# Force Celery to run as root:
-export C_FORCE_ROOT=1
-
 if [ -z "$APP_ROOT" ]; then
     export APP_ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 fi
@@ -50,28 +47,35 @@ echo "Applying any outstanding migrations"
 $PYTHON_BIN $APP_ROOT/manage.py migrate
 echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
 
-$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>$server_err &
-django_pid=$!
-echo $django_pid >$pid_file
+$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err &
 
-sleep 1
-server_ping=$(curl -s "http://0.0.0.0:3000/ping")
-curl_code=$?
+# Force Celery to run as root
+export C_FORCE_ROOT=1
+export CELERY_CHDIR="$APP_ROOT"
+export DJANGO_SETTINGS_MODULE="settings"
+$PYTHON_BIN $APP_ROOT/manage.py celery worker
 
-if ((curl_code)); then
-    tail $server_err
-else
-    if [ "$server_ping" = "running" ]; then
-        echo "Django is now running on port $APP_PORT."
-    else
-        echo "The server is running, but there may be a configuration error."
-    fi
-fi
+# django_pid=$!
+# echo $django_pid >$pid_file
 
-wait $django_pid
-django_exit_code=$?
-if ((!django_exit_code)); then
-    echo "Django exited normally."
-else
-    echo "Django exited with code $django_exit_code."
-fi
+# sleep 1
+# server_ping=$(curl -s "http://0.0.0.0:3000/ping")
+# curl_code=$?
+
+# if ((curl_code)); then
+#     tail $server_err
+# else
+#     if [ "$server_ping" = "running" ]; then
+#         echo "Django is now running on port $APP_PORT."
+#     else
+#         echo "The server is running, but there may be a configuration error."
+#     fi
+# fi
+
+# wait $django_pid
+# django_exit_code=$?
+# if ((!django_exit_code)); then
+#     echo "Django exited normally."
+# else
+#     echo "Django exited with code $django_exit_code."
+# fi
