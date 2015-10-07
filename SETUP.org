@@ -38,7 +38,7 @@
   - Once you're running inside the container (you should see a prompt
     beginning with root@[some id]), you can start the server by typing:
 
-    ~sh /app/start.sh/~
+    ~sh /app/start.sh~
 
     Django should start.
 
