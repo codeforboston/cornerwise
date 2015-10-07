@@ -134,6 +134,10 @@ class Document(models.Model):
 
         return d
 
+    def get_path(self):
+        if self.docfile:
+            return self.docfile.path
+
 class Image(models.Model):
     """An image associated with a document. In the future, it may be
     worthwhile to alter this to allow images associated directly with a
