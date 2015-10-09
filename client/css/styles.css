@@ -8185,8 +8185,8 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 #ref-address {
     position: absolute;
     top: 20px;
-    left: 65px;
-    right: 30px;
+    left: 5%;
+    right: 35%;
     height: 40px;
 }
 
@@ -8315,21 +8315,21 @@ th.sort-field {
 }
 
 th.sort-field::after {
-    content: " ▴";
+    content: " â–´";
 }
 
 th.sort-field.desc::after {
-    content: " ▾";
+    content: " â–¾";
 }
 
 
 /* Collapsible View */
 a.toggle::after {
-    content: " ▸";
+    content: " â–¸";
 }
 
 .shown a.toggle::after {
-    content: " ▾";
+    content: " â–¾";
 }
 
 .collapse-title {
