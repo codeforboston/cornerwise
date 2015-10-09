@@ -167,10 +167,19 @@ define(
             // Called when a child permit has its "selected" attribute
             // set. Clears the existing selection.
             permitSelected: function(permit, selected) {
-                if (this.selected && this.selected != permit)
+                if (this.selected && this.selected.id != permit.id)
                     this.selected.set("selected", false);
 
-                this.selected = permit;
+                // If the permit is being deselected, clear selected
+                // property.
+                this.selected = selected ? permit : null;
+            },
+
+            permitZoomed: function(permit, zoomed) {
+                if (this.zoomed && this.zoomed.id != permit.id)
+                    this.zoomed.set("zoomed", false);
+
+                this.zoomed = zoomed ? permit : null;
             }
         });
     });

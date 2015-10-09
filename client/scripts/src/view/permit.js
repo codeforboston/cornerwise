@@ -17,7 +17,8 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         events: {
             "mouseover": "beginHover",
             "mouseout": "endHover",
-            "click": "onClick"
+            "click": "onClick",
+            "dblclick": "onDoubleClick"
         },
 
         template: $u.templateWithId("permit-template",
@@ -43,7 +44,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         onClick: function(e) {
-            this.model.set("selected", true);
+            this.model.selectOrZoom();
         },
 
         hoveredChanged: function(permit, hovered) {

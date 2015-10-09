@@ -1,8 +1,9 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
         "ref-location", "popup-view", "ref-marker", "layers",
-        "info-layer-helper"],
+        "info-layer-helper", "recentered-map"],
        function(B, config, L, $, _, refLocation, PopupView, RefMarker,
-                infoLayers, info) {
+                infoLayers, info, RecenteredMap) {
+
     function getMarkerPng(isHovered, isSelected) {
         if(isSelected){
             return "/static/images/marker-active";
@@ -27,10 +28,13 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
     return B.View.extend({
         initialize: function() {
-            var map = L.map(this.el),
+            var // map = new RecenteredMap(this.el),
+                map = L.map(this.el),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
+
+            window.cwmap = map;
 
             map.fitBounds(config.bounds);
 
@@ -118,10 +122,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     permit.set({hovered: false});
                 })
                 .on("click", function(e) {
-                    permit.set("selected", true);
+                    permit.selectOrZoom();
                 });
 
-            this.listenTo(permit, "change", this.permitChangd);
+            this.listenTo(permit, "change", this.changed);
         },
 
         permitRemoved: function(permit) {
@@ -153,13 +157,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     if (change.changed.selected) {
                         self.map.setView(marker.getLatLng());
 
-                        //open popup
-
+                        // The contents are rendered in the popupOpened
+                        // callback.
                         marker.unbindPopup().bindPopup("").openPopup();
-                    }
-
-                    if (change.changed.selected === false){
-                        //close popup
+                    } else if (change.changed.zoomed) {
+                        if (self.map.getZoom() < 18)
+                            self.map.setZoom(18);
                     }
                 });
 

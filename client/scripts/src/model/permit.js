@@ -98,6 +98,17 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
         recalculateDistance: function() {
             var dist = this.set("refDistance", this.getDistanceToRef());
+        },
+
+        selectOrZoom: function() {
+            if (this.get("selected")) {
+                if (!this.get("zoomed"))
+                    return this.set("zoomed", true);
+            } else {
+                return this.set("selected", true);
+            }
+
+            return this;
         }
     });
 });
