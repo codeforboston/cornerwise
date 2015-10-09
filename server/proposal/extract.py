@@ -68,6 +68,11 @@ section_matchers = [
     make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1),
 ]
 
+decision_section_matchers = [
+    footer_matcher,
+    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1)
+]
+
 
 def make_sections(lines, matchers=section_matchers):
     found = OrderedDict()
@@ -109,7 +114,7 @@ def staff_report_properties(doc):
     Planning Staff Report.
     """
     enc = doc.encoding
-    lines = (bline.decode(enc) for bline in doc.fulltext)
+    lines = (line.decode(enc) for line in doc.fulltext)
     sections = make_sections(lines)
 
     props = {}
@@ -118,6 +123,15 @@ def staff_report_properties(doc):
     props.update(properties(sections["Planning Staff Report"]))
 
     return props
+
+def decision_properties(doc):
+    enc = doc.encoding
+    lines = (line.decode(enc) for line in doc.fulltext)
+    sections = make_sections(lines, matchers=decision_section_matchers)
+
+    props = {}
+
+    #props.update(properties(sections[
 
 def get_properties(doc):
     # TODO: Dispatch on the document's field and/or title
@@ -129,5 +143,7 @@ def get_properties(doc):
 
     if doc.field == "reports" and re.match(r"staff report", doc.title, re.I):
         return staff_report_properties(doc)
+    elif re.match(r"decision", doc.title, re.I):
+        return decision_properties(doc)
     else:
         return {}
