@@ -38,7 +38,7 @@ def paragraphize(lines):
 
     return ps
 
-def make_matcher(patt, group=None, value=None):
+def make_matcher(patt, group=None, value=None, fn=None):
     assert group or value, "Matcher must have a group or value"
 
     if isinstance(patt, str):
@@ -48,7 +48,10 @@ def make_matcher(patt, group=None, value=None):
         m = patt.search(line)
 
         if m:
-            return m.group(group) if group else value
+            v = m.group(group) if group else value
+
+            return fn(v) if fn else v
+
 
         return None
 
@@ -130,6 +133,9 @@ def decision_properties(doc):
     sections = make_sections(lines, matchers=decision_section_matchers)
 
     props = {}
+    props.update(properties[sections["ZBA DECISION"]])
+
+    return sections
 
     #props.update(properties(sections[
 
