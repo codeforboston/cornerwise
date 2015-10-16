@@ -183,7 +183,7 @@ if (which docker-machine >/dev/null); then
 
     if [ "$machine_status" = "Timeout" ] ; then
         docker-machine restart $vm_name
-    elif [ "$machine_status" = "Stopped" ]; then
+    elif [ "$machine_status" != "Running" ]; then
         docker-machine start $vm_name
     fi;
 
