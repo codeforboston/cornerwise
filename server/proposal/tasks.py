@@ -13,6 +13,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 
 from .models import Proposal, Attribute, Event, Document, Image
+from utils import extension, normalize
 from . import extract
 from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, images
@@ -25,8 +26,6 @@ def last_run():
     except PeriodicTask.DoesNotExist:
         return None
 
-def extension(path):
-    return path.split(os.path.extsep)[-1].lower()
 
 def published_date(path):
     # TODO: Handle other document types
@@ -127,6 +126,7 @@ def fetch_document(doc, force=False):
         doc.save()
 
     return doc
+
 
 @celery_app.task(name="proposal.extract_text")
 def extract_text(doc, encoding="ISO-8859-9"):
@@ -295,6 +295,7 @@ def generate_thumbnail(image, replace=False):
 
     return thumbnail_path
 
+
 @celery_app.task(name="proposal.add_doc_attributes")
 @transaction.atomic
 def add_doc_attributes(doc):
@@ -305,6 +306,7 @@ def add_doc_attributes(doc):
         logger.info("Adding %s attribute", name)
         attr = Attribute(proposal=doc.proposal,
                          name=name,
+                         handle=normalize(name),
                          text_value=value)
         attr.save()
 
