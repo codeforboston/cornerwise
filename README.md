@@ -1,28 +1,47 @@
-# cornerwise
-Cornerwise/CodeForBoston
+Cornerwise
+==========
 
-Purpose : 
-----------------------------------------------------------------------------------------------------------------------------
-This project is used to give updates about the zoning changes to the users/subscribers of Cornerwise. 
+Cornerwise is a Code for Boston project that aims to make it easier to
+explore and visualize past, present, and pending changes to the built
+environment.  For now, we're exploring better ways to show the contents
+of Somerville, MA's Reports and Decisions page.
 
-Features : 
-----------------------------------------------------------------------------------------------------------------------------
-- get detailed view about the zone details on the map.
-- search zoning changes based on the address, zone type and description
-- find the zoning changes based on their current location.
-- track the zoning changes in the given radius. 
-- All the registered users get the notifications.
+In its current state, the project breaks more or less neatly into three
+pieces:
 
-Notifications : 
-----------------------------------------------------------------------------------------------------------------------------
-- Via Text Messages 
-- Via E-mail 
-- Via RSS Feed
+- Somerville-specific code that ingests semi-structured data from the city's [Reports and Decisions](www.somervillema.gov/departments/planning-board/reports-and-decisions) page and transforms it into searchable structured data.
+  
+- A server that responds to queries over the imported proposal data
+  
+- A client-side viewer
+
+
+
+Contributing
+----------
+
+We welcome contributions from people of all skillsets.  The best way to
+get involved is by coming to a Tuesday
+[Hack Night](www.meetup.com/Code-for-Boston/) and asking about the
+project.  You can also take a look at our [issues](Issues) page to find
+unclaimed issues marked *bite-sized* or *self-contained*.  These labels
+refer to issues that are, respectively, small or that require minimal
+familiarity with the existing codebase.
+
+
+Getting Started
+-----------
+
+See the [Setup](Setup.org) file for full instructions on getting
+Cornerwise running locally.
+
 
 Technologies used: 
-----------------------------------------------------------------------------------------------------------------------------
-- Python/GeoDjango - Webserver
-- PostGIS
-- HTML/CSS - For display purpose 
-- Backbone.js , require - for MVC 
-- Leaflet - for the interactive map view 
+----------
+
+- [Docker](https://www.docker.com)
+- [Python 3.4](https://www.python.org) and [Django](https://www.djangoproject.com)
+- [PostGIS](http://postgis.net)
+- HTML/CSS
+- [Backbone.js](http://backbonejs.org), [jQuery](http://jquery.com/)
+- [Leaflet](http://leafletjs.com/)
