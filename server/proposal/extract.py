@@ -55,7 +55,6 @@ def make_matcher(patt, group=None, value=None, fn=None):
 
             return fn(v) if fn else v
 
-
         return None
 
     return matcher
@@ -67,22 +66,9 @@ def footer_matcher(line):
             next(infile)
         return skip_lines
 
-section_matchers = [
-    footer_matcher,
-    make_matcher(r"PLANNING STAFF REPORT",
-                 value="Planning Staff Report"),
-    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1),
-]
-
-decision_section_matchers = [
-    footer_matcher,
-    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1),
-    make_matcher(r"(DECISION):", group=1)
-]
 
 
-def make_sections(lines, matchers=section_matchers):
-    found = OrderedDict()
+def generate_sections(lines, matchers):
     section_name = "Header"
     section = []
 
@@ -100,14 +86,32 @@ def make_sections(lines, matchers=section_matchers):
                 new_section_name = name
                 break
 
-
         if new_section_name:
-            found[section_name] = section
+            yield section_name, section
             section_name = new_section_name
             section = []
         else:
             section.append(line)
 
+
+def make_sections(lines, matchers):
+    """Partition the contents of a file into sections using the given list
+    of matches.
+
+    :param lines: An iterator or generator that produces lines of text
+    input
+
+    :param matchers: A list of callables that, when called with a line
+    of text, should return either None, a section name, or a callable.
+
+    :returns: An OrderedDict mapping section names to section contents
+    (a list of string)
+
+    """
+    found = OrderedDict()
+
+    for section_name, section in generate_sections(lines, matchers):
+        found[section_name] = section
 
     return found
 
@@ -119,12 +123,19 @@ def get_lines(doc):
 
     return lines
 
+staff_report_section_matchers = [
+    footer_matcher,
+    make_matcher(r"PLANNING STAFF REPORT",
+                 value="Planning Staff Report"),
+    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1),
+]
+
 def staff_report_properties(doc):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
     """
     lines = get_lines(doc)
-    sections = make_sections(lines)
+    sections = make_sections(lines, staff_report_section_matchers)
 
     props = {}
 
@@ -133,9 +144,18 @@ def staff_report_properties(doc):
 
     return props
 
+
+decision_section_matchers = [
+    footer_matcher,
+    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1),
+    make_matcher(r"DECISION:", value="Decision")
+]
+
 def decision_properties(doc):
+    """Extract a dictionary of properties from the contents of a Decision
+    Document."""
     lines = get_lines(doc)
-    sections = make_sections(lines, matchers=decision_section_matchers)
+    sections = make_sections(lines, decision_section_matchers)
 
     props = {}
     props.update(properties(sections["ZBA DECISION"]))
