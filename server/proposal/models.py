@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -69,7 +70,11 @@ class Attribute(models.Model):
     """
     proposal = models.ForeignKey(Proposal, related_name="attributes")
     name = models.CharField(max_length=128)
-    string_value = models.CharField(null=True, max_length=256)
+    handle = models.CharField(max_length=128, db_index=True)
+
+    # Either the date when the source document was published or the date
+    # when the attribute was observed:
+    published = models.DateTimeField()
     text_value = models.TextField(null=True)
     date_value = models.DateTimeField(null=True)
 
@@ -78,6 +83,24 @@ class Attribute(models.Model):
                 "value": self.string_value or \
                 self.text_value or \
                 self.date_value}
+
+    def set_value(self, v):
+        if isinstance(v, str):
+            self.text_value = v
+        elif isinstance(v, datetime):
+            self.date_value = v
+
+    def clear_value(self):
+        self.text_value = None
+        self.date_value = None
+
+    @property
+    def value(self):
+        return self.text_value or \
+            self.date_value
+
+
+
 
 class Event(models.Model):
     """
@@ -88,6 +111,7 @@ class Event(models.Model):
     duration = models.DurationField(null=True)
     description = models.TextField()
     proposal = models.ForeignKey(Proposal)
+
 
 class Document(models.Model):
     """
@@ -104,7 +128,7 @@ class Document(models.Model):
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
 
-    # If available, determine when the document was published.
+    # If available: when the document was published.
     published = models.DateTimeField(null=True)
 
     # If the document has been copied to the local filesystem:

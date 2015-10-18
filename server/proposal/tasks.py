@@ -17,6 +17,7 @@ from utils import extension, normalize
 from . import extract
 from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, images
+from shared import files_metadata
 
 def last_run():
     "Determine the date and time of the last run of the task."
@@ -27,22 +28,6 @@ def last_run():
         return None
 
 
-def published_date(path):
-    # TODO: Handle other document types
-    ext = extension(path)
-
-    if ext == "pdf":
-        proc = subprocess.Popen(["pdfinfo", path],
-                                stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE)
-        out, err = proc.communicate()
-        m = re.search(r"CreationDate:\s+(.*?)\n", out.decode("UTF-8"))
-
-        if m:
-            datestr = m.group(1)
-            return datetime.strptime(datestr, "%c")
-
-    return datetime.fromtimestamp(os.path.getmtime(path))
 
 
 def create_proposal_from_json(p_dict):
@@ -69,6 +54,7 @@ def create_proposal_from_json(p_dict):
     proposal.description = p_dict.get("description")
     # This should not be hardcoded
     proposal.source = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions"
+    proposal.modified = p_dict["updatedDate"]
 
     # For now, we assume that if there are one or more documents
     # linked in the 'decision' page, the proposal is 'complete'.
@@ -92,12 +78,11 @@ def create_proposal_from_json(p_dict):
                 doc.url = link["url"]
                 doc.title = link["title"]
                 doc.field = field
+                doc.published = p_dict["updatedDate"]
 
                 doc.save()
 
     return proposal
-
-
 
 
 @celery_app.task(name="proposal.fetch_document")
@@ -123,6 +108,12 @@ def fetch_document(doc, force=False):
     with request.urlopen(url) as resp, open(path, "wb") as out:
         shutil.copyfileobj(resp, out)
         doc.document = path
+
+        file_published = files_metadata.published_date(path)
+
+        if file_published:
+            doc.published = file_published
+
         doc.save()
 
     return doc
@@ -304,15 +295,31 @@ def add_doc_attributes(doc):
 
     for name, value in properties.items():
         logger.info("Adding %s attribute", name)
-        attr = Attribute(proposal=doc.proposal,
-                         name=name,
-                         handle=normalize(name),
-                         text_value=value)
+        published = doc.published or datetime.now()
+        handle = normalize(name)
+
+        try:
+            attr = Attribute.objects.get(proposal=doc.proposal,
+                                         handle=handle)
+        except Attribute.DoesNotExist as _:
+            attr = Attribute(proposal=doc.proposal,
+                             name=name,
+                             handle=normalize(name),
+                             published=published)
+            attr.set_value(value)
+        else:
+            # TODO: Either mark the old attribute as stale and create a
+            # new one or create a record that the value has changed
+            if published > attr.published:
+                attr.clear_value()
+                attr.set_value(value)
+
         attr.save()
 
 @celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(images):
     return generate_thumbnail.map(images)()
+
 
 @celery_app.task(name="proposal.process_document")
 def process_document(doc):
