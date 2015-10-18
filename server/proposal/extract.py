@@ -1,8 +1,11 @@
+"""Functions for extracting document attributes from its plaintext
+contents.
+"""
+
 from collections import OrderedDict
 import os
 import re
 
-from .models import Document, Proposal, Attribute
 
 empty_line = re.compile(r"\s*\n$")
 
@@ -73,7 +76,8 @@ section_matchers = [
 
 decision_section_matchers = [
     footer_matcher,
-    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1)
+    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1),
+    make_matcher(r"(DECISION):", group=1)
 ]
 
 
@@ -107,17 +111,19 @@ def make_sections(lines, matchers=section_matchers):
 
     return found
 
+def get_lines(doc):
+    """Returns a generator that successively produces lines from the
+    document."""
+    enc = doc.encoding
+    lines = (line.decode(enc) for line in doc.fulltext)
 
-def staff_reports(docs_manager=Document.objects):
-    return docs_manager.filter(field="reports")\
-                       .filter(title__icontains="staff report")
+    return lines
 
 def staff_report_properties(doc):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
     """
-    enc = doc.encoding
-    lines = (line.decode(enc) for line in doc.fulltext)
+    lines = get_lines(doc)
     sections = make_sections(lines)
 
     props = {}
@@ -128,12 +134,11 @@ def staff_report_properties(doc):
     return props
 
 def decision_properties(doc):
-    enc = doc.encoding
-    lines = (line.decode(enc) for line in doc.fulltext)
+    lines = get_lines(doc)
     sections = make_sections(lines, matchers=decision_section_matchers)
 
     props = {}
-    props.update(properties[sections["ZBA DECISION"]])
+    props.update(properties(sections["ZBA DECISION"]))
 
     return sections
 
