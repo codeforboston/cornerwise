@@ -33,13 +33,14 @@ def paragraphize(lines):
 
     for line in lines:
         if empty_line.match(line):
-            if current_p:
-                ps.append(current_p.join(" "))
+            ps.append(current_p)
             current_p = []
         else:
             current_p.append(line.strip())
 
-    return ps
+    ps.append(current_p)
+
+    return [" ".join(p) for p in ps if p]
 
 def make_matcher(patt, group=None, value=None, fn=None):
     assert group or value, "Matcher must have a group or value"
@@ -69,7 +70,13 @@ def footer_matcher(line):
 
 
 def generate_sections(lines, matchers):
-    section_name = "Header"
+    """
+
+    :returns: A generator that produces 2-tuples containing each section
+    name and its contents as a list of strings
+
+    """
+    section_name = "header"
     section = []
 
     for line in lines:
@@ -92,6 +99,8 @@ def generate_sections(lines, matchers):
             section = []
         else:
             section.append(line)
+
+    yield section_name, section
 
 
 def make_sections(lines, matchers):
@@ -139,16 +148,16 @@ def staff_report_properties(doc):
 
     props = {}
 
-    props.update(properties(sections["Header"]))
-    props.update(properties(sections["Planning Staff Report"]))
+    props.update(properties(sections["header"]))
+    props.update(properties(sections["planning staff report"]))
 
     return props
 
 
 decision_section_matchers = [
     footer_matcher,
-    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1),
-    make_matcher(r"DECISION:", value="Decision")
+    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1, fn=str.lower),
+    make_matcher(r"DECISION:", value="decision")
 ]
 
 def decision_properties(doc):
@@ -158,7 +167,7 @@ def decision_properties(doc):
     sections = make_sections(lines, decision_section_matchers)
 
     props = {}
-    props.update(properties(sections["ZBA DECISION"]))
+    props.update(properties(sections["zba decision"]))
 
     return sections
 
