@@ -153,6 +153,18 @@ def staff_report_properties(doc):
 
     return props
 
+# Decision Documents
+def find_vote(decision):
+    """
+    From the decision text,
+    """
+    patt = re.compile(r"voted (\d+-\d+)", re.I)
+    m = re.search(patt, decision)
+
+    if m:
+        return m.group(1)
+
+    return None, None
 
 decision_section_matchers = [
     footer_matcher,
@@ -169,7 +181,11 @@ def decision_properties(doc):
     props = {}
     props.update(properties(sections["zba decision"]))
 
-    return sections
+    vote = find_vote(" ".join(sections["decision"]))
+    if vote:
+        props["Vote"] = vote
+
+    return props
 
     #props.update(properties(sections[
 
