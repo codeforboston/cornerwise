@@ -226,7 +226,15 @@ if [ -n "$container_id" ]; then
 fi
 
 if [ -n "$container_id" ]; then
-    # Found a container. Attach to it:
+    # Found a container.
+
+    # If it's paused, unpause it:
+    is_paused=$(docker inspect --format='{{.State.Paused}}' $container_id)
+    if [ $is_paused = "true" ]; then
+        docker unpause $container_id
+    fi;
+
+    # Attach to it:
     echo "Attaching to running container ($container_id)."
     docker exec -it $container_id $run_command
 else
