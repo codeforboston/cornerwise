@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 
-from utils import normalize
-
 def add_handle(apps, schema_editor):
     Attribute = apps.get_model("proposal", "Attribute")
     db_alias = schema_editor.connection.alias

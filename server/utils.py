@@ -10,6 +10,16 @@ def extension(path):
     return path.split(os.path.extsep)[-1].lower()
 
 def make_file_mover(attr):
+    """Returns a function that takes an object and a new name and renames
+    the file associated with that object's `attr` file field.
+
+    :param attr: The name of the FileField attribute on the target
+    object
+
+    :returns: A function that can be bound as a method of an object with
+    the named file field.
+
+    """
     def move_file(self, new_path):
         file_field = getattr(self, attr)
         current_path = file_field and file_field.path
