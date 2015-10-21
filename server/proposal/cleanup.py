@@ -2,8 +2,7 @@
 again.
 """
 
-import logging
-import os
+import logging, os, re
 
 from django.conf import settings
 
@@ -41,26 +40,19 @@ def remove_duplicate_attributes():
 
     Attribute.objects.filter(pk__in=ids).delete()
 
+def rename_document(doc):
+    docpath = doc.document and doc.document.path
+    docdir, docname = os.path.split(docpath)
+    ext = extension(docname)
+    newpath = os.path.join(docdir, "download.%s" % ext)
+
+    try:
+        doc.move_file(newpath)
+    except Exception as err:
+        logger.error("Error while attempting rename:", err)
+        return
+
 def normalize_document_names():
     "Rename all local Documents to have names of the form download.<ext>."
     for doc in Document.objects.all():
-        docpath = doc.document and doc.document.path
-
-        if not docpath:
-            continue
-
-        docdir, docname = os.path.split(docpath)
-        ext = extension(docname)
-        newpath = os.path.join(docdir, "download.%s" % ext)
-
-        try:
-            os.rename(docpath, newpath)
-        except Exception as err:
-            logger.error("Error while attempting rename:", err)
-            return
-
-        try:
-            doc.document = newpath
-            doc.save()
-        except Exception as err:
-            os.rename(newpath, docpath)
+        rename_document(doc)

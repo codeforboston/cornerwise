@@ -7,6 +7,8 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
+import utils
+
 class ProposalManager(models.GeoManager):
     def between(self, start=None, end=None):
         q = None
@@ -100,8 +102,6 @@ class Attribute(models.Model):
             self.date_value
 
 
-
-
 class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
@@ -158,9 +158,12 @@ class Document(models.Model):
 
         return d
 
-    def get_path(self):
-        if self.docfile:
-            return self.docfile.path
+    @property
+    def local_path(self):
+        return self.document and self.document.path or ""
+
+    move_file = utils.make_file_mover("document")
+
 
 class Image(models.Model):
     """An image associated with a document. In the future, it may be
