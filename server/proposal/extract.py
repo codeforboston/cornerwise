@@ -3,6 +3,8 @@ contents.
 """
 
 from collections import OrderedDict
+from datetime import datetime
+from dateutil.parser import parse as date_parse
 import os
 import re
 
@@ -135,8 +137,10 @@ def get_lines(doc):
 staff_report_section_matchers = [
     footer_matcher,
     make_matcher(r"PLANNING STAFF REPORT",
-                 value="Planning Staff Report"),
-    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1),
+                 value="planning staff report"),
+    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)",
+                 group=1,
+                 fn=str.lower),
 ]
 
 def staff_report_properties(doc):
@@ -189,6 +193,14 @@ def decision_properties(doc):
 
     #props.update(properties(sections[
 
+def doc_type(doc):
+    if doc.field == "reports" and re.match(r"staff report", doc.title, re.I):
+        return "report"
+    elif re.match(r"decision", doc.title, re.I):
+        return "decision"
+
+    return ""
+
 def get_properties(doc):
     # TODO: Dispatch on the document's field and/or title
     # (doc.field is the name of the column in which the document was found)
@@ -196,10 +208,43 @@ def get_properties(doc):
     # Eventually, we'll want to introduce a pluggable property
     # extraction interface, so that other cities and formats can be
     # supported.
-
-    if doc.field == "reports" and re.match(r"staff report", doc.title, re.I):
+    dtype = doc_type(doc)
+    if dtype == "report":
         return staff_report_properties(doc)
-    elif re.match(r"decision", doc.title, re.I):
+    elif dtype == "decision":
         return decision_properties(doc)
     else:
         return {}
+
+def split_event(desc):
+    """
+    Splits a string description of an event into
+    """
+    now = datetime.now()
+    dt, tokens = date_parse(desc, fuzzy_with_tokens=True, default=now)
+
+    if dt == now:
+        return None
+
+    if len(tokens) > 0:
+        event_desc = tokens[0].strip()
+
+        if event_desc and not desc.index(event_desc.lstrip()) == 0:
+            event_desc = ""
+    else:
+        event_desc = ""
+
+    return {"date": dt, "title": event_desc}
+
+
+def get_events(doc, props=None):
+    dtype = doc_type(doc)
+
+    if doc.field == "reports":
+        if not props:
+            props = get_properties(doc)
+
+        dph = props.get("Dates of Public Hearing")
+        if dph:
+            return [split_event(dph)]
+        return []
