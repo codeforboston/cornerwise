@@ -110,7 +110,7 @@ class Event(models.Model):
     date = models.DateTimeField()
     duration = models.DurationField(null=True)
     description = models.TextField()
-    proposal = models.ForeignKey(Proposal)
+    proposals = models.ManyToManyField(Proposal)
 
 
 class Document(models.Model):
