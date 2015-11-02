@@ -69,7 +69,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
             this._parcelLoadAttempted = true;
 
-            $.getJSON(config.backendURL + "/parcel/at_point",
+            $.getJSON(config.backendURL + "/parcel/find",
                       {lat: loc.lat,
                        lng: loc.lng,
                        attributes: true})

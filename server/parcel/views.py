@@ -6,10 +6,11 @@ from functools import reduce
 import json
 import re
 
+from shared.address import normalize_street
 from shared.geo import geojson_data
 from shared.request import make_response, ErrorResponse
 
-from .models import Parcel
+from .models import Parcel, Attribute
 
 def make_query(d):
     subqueries = []
@@ -27,6 +28,14 @@ def make_query(d):
 
     if "loc_id" in d:
         subqueries.append(Q(loc_id=d["loc_id"]))
+
+    if "street" in d:
+        street = normalize_street(d["street"])
+        subqueries.append(Q(full_street=street))
+
+        if "number" in d:
+            subqueries.append(Q(address_num=d["number"]))
+
 
     if "types" in d:
         types = [t.upper() for t in re.split(r"\s*,\s*", d["types"])]
@@ -94,7 +103,7 @@ def make_parcel_data(parcel, include_attributes=False):
     return d
 
 @make_response()
-def parcel_at_point(req):
+def find_parcels(req):
     try:
         parcel = parcels_for_request(req)[0]
 
