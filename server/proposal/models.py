@@ -82,9 +82,7 @@ class Attribute(models.Model):
 
     def to_dict(self):
         return {"name": self.name,
-                "value": self.string_value or \
-                self.text_value or \
-                self.date_value}
+                "value": self.text_value or self.date_value}
 
     def set_value(self, v):
         if isinstance(v, str):
