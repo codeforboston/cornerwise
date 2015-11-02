@@ -13,8 +13,12 @@ from django.contrib.gis.db import models
 
 class Parcel(models.Model):
     gid = models.AutoField(primary_key=True)
-    shape_leng = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True)
-    shape_area = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True)
+    shape_leng = models.DecimalField(max_digits=1000,
+                                     decimal_places=24,
+                                     blank=True, null=True)
+    shape_area = models.DecimalField(max_digits=1000,
+                                     decimal_places=24,
+                                     blank=True, null=True)
     map_par_id = models.CharField(max_length=26, blank=True, null=True)
     loc_id = models.CharField(max_length=18, blank=True, null=True)
     poly_type = models.CharField(max_length=15, blank=True, null=True)
@@ -26,11 +30,20 @@ class Parcel(models.Model):
     no_match = models.CharField(max_length=1, blank=True, null=True)
     town_id = models.SmallIntegerField(blank=True, null=True)
     shape = models.MultiPolygonField(srid=97406, blank=True, null=True)
+
+    # Address:
+    address_num = models.CharField(max_length=64, null=True)
+    # Stored in all caps:
+    full_street = models.CharField(max_length=128, null=True)
+
     objects = models.GeoManager()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'parcel'
+
+    def index_attributes(self):
+        return {a.name: a.value for a in self.attributes.all()}
 
 class Attribute(models.Model):
     parcel = models.ForeignKey(Parcel, related_name="attributes")
