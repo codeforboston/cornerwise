@@ -106,8 +106,8 @@ class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
     """
-    title = models.CharField(max_length=256)
-    date = models.DateTimeField()
+    title = models.CharField(max_length=256, db_index=True)
+    date = models.DateTimeField(db_index=True)
     duration = models.DurationField(null=True)
     description = models.TextField()
     proposals = models.ManyToManyField(Proposal)
