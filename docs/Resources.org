@@ -8,6 +8,10 @@
   - [[http://www.somervillema.gov/spotlights/comp-plan][SomerVision]]
     A comprehensive plan to guide the growth and development of the City of Somerville over the next twenty years.
 
+  - [[http://www.somervillema.gov/zoning/resources/2015-01-22-ordinance-boa-submittal.pdf][Somerville Zoning Ordinance]]
+
+  - [[http://www.somervillema.gov/sites/default/files/ZoningApplicationAndReviewProcess.pdf][Zoning Application and Review Process]]
+
 * Other Resources
   - [[http://maps.bostonredevelopmentauthority.org/zoningviewer/][Boston Redevelopment Authority]]
     Possible source of inspiration for later versions of this project.
