@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Cornerwise Mockup</title>
+    <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
+
+    <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet-src.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+  </head>
+  <body>
+    <div id="map-container">
+      <div id="map">
+      </div>
+    </div>
+    <div id="start-banner" class="overlay">
+      <div class="overlay-contents">
+        <h3>what&rsquo;s being built near&hellip;</h3>
+        <div class="input-group">
+          <input class="big-input" type="text" name="address" placeholder="enter address" />
+          <button class="input-button go-button">go</button>
+        </div>
+
+
+      </div>
+    </div>
+
+    <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript">
+      App.init();
+    </script>
+  </body>
+</html>
