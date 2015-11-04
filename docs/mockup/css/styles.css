@@ -1,16 +1,7 @@
 body {
-    font-family: "Avenir", "Lucida Grande", sans-serif;
+    font-face: sans-serif;
     height: 100%;
     width: 100%;
-}
-
-a {
-    color: #A7DA99;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
 }
 
 #map-container {
@@ -26,64 +17,18 @@ a:hover {
     height: 100%;
 }
 
-#menu {
-    position: absolute;
-    left: 0;
-    padding: 1em;
-    right: 0;
-    top: 0;
-    text-align: right;
-    z-index: 2;
-}
-
-span.icon {
-    font-size: xx-large;
-}
-
-#logo {
-    background-color: rgba(255, 255, 255, 0.5);
-
-    padding: 0.2em;
-    position: absolute;
-    top: 0.5em;
-    left: 3em;
-    z-index: 3;
-}
-
-#logo img {
-    width: 150px;
-}
-
-#menu-button {
-    background-color: #63B91E;
-    border-radius: 0.5em;
-    color: white;
-    padding: 0.5em;
-}
-
-#menu-button a:hover {
-    text-decoration: none;
-}
-
-.overlay {
-    background-color: rgba(73, 86, 213, 0.7);
-    color: white;
-    overflow: hidden;
-}
-
-#search-banner {
+#start-banner {
+    background-color: rgba(73, 86, 213, 0.8);
     position: absolute;
     left: 0;
     right: 0;
     text-align: center;
     top: 100px;
-
-    transition: top 0.2s linear;
 }
 
 h3 {
     padding: 0;
-    margin: 0.5em;
+    margin: 2pt;;
 }
 
 .overlay-contents {
@@ -98,13 +43,7 @@ h3 {
 .input-group {
     background-color: white;
     border-radius: 5px;
-    margin: 0.3em;
-    padding: 0.1em;
-}
-
-.input-group .input {
-    background-color: none;
-    border: none;
+    padding: 5px;
 }
 
 .big-input {
@@ -130,84 +69,4 @@ h3 {
 
 .go-button {
     color: green;
-}
-
-#explore {
-    display: block;
-}
-
-#intro {
-    height: 12em;
-    overflow: hidden;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    transition: height 0.2s linear;
-}
-
-.section h3 {
-    color: #54C9D3;
-    font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    margin: 0.2em;
-}
-
-.overlay .section {
-    display: inline-block;
-    padding: 1em;
-    width: 33%;
-}
-
-.lede h4 {
-    font-variant: small-caps;
-    font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
-    font-weight: 500;
-    width: 50%;
-}
-
-.section .more {
-    text-align: right;
-}
-
-
-#controls {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    position: absolute;
-    height: 0;
-
-    transition: height 0.2s linear;
-}
-
-
-body.main #intro {
-    height: 0;
-}
-
-body.main #search-banner {
-    top: 0;
-}
-
-body.main #search-banner h3 {
-    display: none;
-}
-
-body.main  #explore {
-    display: inline-block
-}
-
-body.main #controls {
-    height: 7em;
-}
-
-.overlay-contents {
-    transition: padding 0.2s linear;
-}
-
-body.main #search-banner .overlay-contents {
-    padding: 0;
 }
