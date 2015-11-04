@@ -15,5 +15,12 @@ define(["utils"], function($u) {
             "source": "/src/layerdata/community_path.geojson",
             "template": null
         }
+        {
+          "title": "Fire Hydrants",
+          "tags" [],
+          "colors": "red",
+          "source": "/src/layer/",
+          "template": null
+        }
     ];
 });
