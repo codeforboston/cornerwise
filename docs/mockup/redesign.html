@@ -21,13 +21,7 @@
     <div id="logo">
       <img src="cornerwise-logo.png">
     </div>
-    <div id="menu">
-      <a id="menu-button" href="#">
-        <span class="icon">≡</span> MENU
-      </a>
 
-      <input type="checkbox" id="main_activated"/>
-    </div>
     <div id="search-banner" class="overlay">
       <div class="overlay-contents">
         <h3>what&rsquo;s being built near&hellip;</h3>
@@ -37,6 +31,14 @@
         </div>
       </div>
       <a id="explore" href="#">Explore the Data</a>
+    </div>
+
+    <div id="menu">
+        <a id="menu-button" href="#">
+          <span class="icon" aria-hidden="true">≡</span> MENU
+        </a>
+
+        <input type="checkbox" id="main_activated"/>
     </div>
 
     <div id="intro" class="overlay">
@@ -84,8 +86,10 @@
     </div>
 
     <script type="text/javascript" src="app.js"></script>
+    <script src="https://use.typekit.net/kfw4cim.js"></script>
     <script type="text/javascript">
       App.init();
+      try{Typekit.load({ async: true });}catch(e){}
     </script>
   </body>
 </html>
