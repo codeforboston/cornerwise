@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import shutil
 import subprocess
@@ -28,8 +28,6 @@ def last_run():
         return None
 
 
-
-
 def create_proposal_from_json(p_dict):
     "Constructs a Proposal from a dictionary."
     try:
@@ -54,7 +52,7 @@ def create_proposal_from_json(p_dict):
     proposal.description = p_dict.get("description")
     # This should not be hardcoded
     proposal.source = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions"
-    proposal.modified = p_dict["updatedDate"]
+    proposal.modified = p_dict["updated1Date"]
 
     # For now, we assume that if there are one or more documents
     # linked in the 'decision' page, the proposal is 'complete'.
@@ -131,7 +129,7 @@ the path of the text document.
     """
     logger = extract_text.get_logger()
 
-    path = doc.get_path()
+    path = doc.local_path
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
     text_path = os.path.join(os.path.dirname(path), "text.txt")
@@ -178,7 +176,7 @@ def extract_images(doc):
         logger.error("Document has not been copied to the local filesystem.")
         return []
 
-    path = doc.get_path()
+    path = docfile.path
 
     if not os.path.exists(path):
         logger.error("Document %s is not where it says it is: %s",
@@ -316,6 +314,25 @@ def add_doc_attributes(doc):
 
         attr.save()
 
+    # Find events and create them:
+    events = extract.get_events(doc, properties)
+    for e in events:
+        try:
+            event = Event.objects.get(title=e["title"],
+                                      date=e["date"])
+        except Event.DoesNotExist as dne:
+            event = Event(proposal=doc.proposal,
+                          title=e["title"],
+                          date=e["date"])
+        except KeyError as kerr:
+            logger.error("Missing required key in extracted event:",
+                         kerr.args)
+
+    if event:
+        event.save()
+
+    return properties
+
 @celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(images):
     return generate_thumbnail.map(images)()
@@ -339,7 +356,7 @@ def process_documents(docs):
 
 @celery_app.task(name="proposal.scrape_reports_and_decisions")
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, page=None, everything=False,
+def scrape_reports_and_decisions(since=None, page=None,
                                  coder_type=settings.GEOCODER):
     """
     Task that scrapes the reports and decisions page
@@ -361,6 +378,14 @@ def scrape_reports_and_decisions(since=None, page=None, everything=False,
             # If there was no last run, the scraper will fetch all
             # proposals.
             since = last_run()
+
+            if not since:
+                # If there is no record of a previous run, fetch
+                # proposals posted since the previous Monday.
+                now = datetime.now().replace(hour=0, minute=0,
+                                             second=0, microsecond=0)
+                since = now - timedelta(days=7 + now.weekday())
+
         proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
 
     proposals = []
