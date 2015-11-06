@@ -51,31 +51,6 @@ $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$se
 
 # Force Celery to run as root
 export C_FORCE_ROOT=1
-export CELERY_CHDIR="$APP_ROOT"
-export DJANGO_SETTINGS_MODULE="settings"
+
+# Start Celery:
 $PYTHON_BIN $APP_ROOT/manage.py celery worker
-
-# django_pid=$!
-# echo $django_pid >$pid_file
-
-# sleep 1
-# server_ping=$(curl -s "http://0.0.0.0:3000/ping")
-# curl_code=$?
-
-# if ((curl_code)); then
-#     tail $server_err
-# else
-#     if [ "$server_ping" = "running" ]; then
-#         echo "Django is now running on port $APP_PORT."
-#     else
-#         echo "The server is running, but there may be a configuration error."
-#     fi
-# fi
-
-# wait $django_pid
-# django_exit_code=$?
-# if ((!django_exit_code)); then
-#     echo "Django exited normally."
-# else
-#     echo "Django exited with code $django_exit_code."
-# fi

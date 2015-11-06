@@ -5,6 +5,7 @@ import subprocess
 from urllib import parse, request
 
 import celery
+from celery.utils.log import get_task_logger
 
 from djcelery.models import PeriodicTask
 from django.conf import settings
@@ -18,6 +19,8 @@ from . import extract
 from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, images
 from shared import files_metadata
+
+logger = get_task_logger(__name__)
 
 def last_run():
     "Determine the date and time of the last run of the task."
@@ -127,8 +130,6 @@ the path of the text document.
     :returns: The same document
 
     """
-    logger = extract_text.get_logger()
-
     path = doc.local_path
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
@@ -226,7 +227,6 @@ def generate_doc_thumbnail(doc):
     "Generate a Document thumbnail."
 
     docfile = doc.document
-    logger = generate_doc_thumbnail.get_logger()
 
     if not docfile:
         logger.error("Document has not been copied to the local filesystem")
@@ -267,7 +267,6 @@ def generate_thumbnail(image, replace=False):
 
     :returns: Thumbnail path"""
 
-    logger = generate_thumbnail.get_logger()
     thumbnail_path = image.thumbnail and image.thumbnail.name
     if os.path.exists(thumbnail_path):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
@@ -289,7 +288,6 @@ def generate_thumbnail(image, replace=False):
 @transaction.atomic
 def add_doc_attributes(doc):
     properties = extract.get_properties(doc)
-    logger = add_doc_attributes.get_logger()
 
     for name, value in properties.items():
         logger.info("Adding %s attribute", name)
@@ -361,8 +359,6 @@ def scrape_reports_and_decisions(since=None, page=None,
     """
     Task that scrapes the reports and decisions page
     """
-    logger = scrape_reports_and_decisions.get_logger()
-
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
         geocoder.bounds = settings.GEO_BOUNDS
