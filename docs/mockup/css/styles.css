@@ -28,7 +28,7 @@ a:hover {
 
 #menu {
     position: absolute;
-    padding: 1em;
+    padding: 0.5em;
     right: 0;
     top: 0;
     text-align: right;
@@ -40,11 +40,11 @@ span.icon {
 
 #logo {
     background-color: rgba(255, 255, 255, 0.5);
-
+    border-radius: 0.5em;
     padding: 0.2em;
     position: absolute;
-    top: 0.5em;
-    left: 3em;
+    bottom: 1em;
+    right: 1em;
     z-index: 2;
 }
 
@@ -60,6 +60,9 @@ span.icon {
 }
 
 #menu-button:hover {
+    background-color: white;
+    box-shadow: 0 0 4px #63b91e inset;
+    color: gray;
     text-decoration: none;
 }
 
@@ -123,7 +126,7 @@ h3 {
     float: right;
     font-size: x-large;
     font-variant: small-caps;
-    height: 35px;
+    height: 100%;
 }
 
 .go-button {
@@ -132,6 +135,7 @@ h3 {
 
 #explore {
     display: block;
+    padding-bottom: 1em;
 }
 
 #intro {
@@ -150,11 +154,12 @@ h3 {
     font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
     font-weight: 500;
     letter-spacing: 0.1em;
-    margin: 0.2em;
+    margin: 0;
+    margin-bottom: 0.2em;
 }
 
 .overlay .section {
-    display: inline-block;
+    float: left;
     padding: 1em;
     width: 33%;
     height: 100%;
@@ -164,6 +169,8 @@ h3 {
     font-variant: small-caps;
     font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
     font-weight: 500;
+    margin: 0;
+    margin-bottom: 0.2em;
     width: 50%;
 }
 
@@ -196,7 +203,7 @@ body.main #search-banner h3 {
 }
 
 body.main  #explore {
-    display: inline-block
+    display: inline-block;
 }
 
 body.main #controls {
@@ -209,4 +216,32 @@ body.main #controls {
 
 body.main #search-banner .overlay-contents {
     padding: 0;
+    width: 50%;
+
+    transition: width 0.2s linear;
+}
+
+a.filter-button {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: -2px 2px 5px black;
+    color:black;
+    display: inline-block;
+    padding: 5px;
+    text-align: center;
+    width: 5em;
+}
+
+
+@media screen and (min-width: 768px) {
+    .resp-portrait-show {
+        display: none;
+    }
+}
+
+
+@media screen and (max-width: 768px) {
+    .resp-portrait-hide {
+        display: none;
+    }
 }

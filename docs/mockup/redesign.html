@@ -13,12 +13,12 @@
     <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet-src.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
   </head>
-  <body>
+  <body class="main">
     <div id="map-container">
       <div id="map">
       </div>
     </div>
-    <div id="logo">
+    <div id="logo" class="resp-portrait-hide">
       <img src="cornerwise-logo.png">
     </div>
 
@@ -35,7 +35,8 @@
 
     <div id="menu">
         <a id="menu-button" href="#">
-          <span class="icon" aria-hidden="true">≡</span> MENU
+          <span class="icon" aria-hidden="true">≡</span>
+          <span class="resp-portrait-hide">MENU</span>
         </a>
 
         <input type="checkbox" id="main_activated"/>
@@ -73,6 +74,9 @@
     <div id="controls" class="overlay">
       <div class="section">
         <h3>FILTER</h3>
+        <a href="#" class="filter-button">Project Type</a>
+        <a href="#" class="filter-button">Something Else</a>
+        <a href="#" class="filter-button">Impact</a>
       </div>
       <div class="section">
         <h3>SUBSCRIBE</h3>
@@ -86,10 +90,10 @@
     </div>
 
     <script type="text/javascript" src="app.js"></script>
-    <script src="https://use.typekit.net/kfw4cim.js"></script>
+    <!-- <script src="https://use.typekit.net/kfw4cim.js"></script> -->
     <script type="text/javascript">
       App.init();
-      try{Typekit.load({ async: true });}catch(e){}
+      //try{Typekit.load({ async: true });}catch(e){}
     </script>
   </body>
 </html>
