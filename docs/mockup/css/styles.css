@@ -99,21 +99,27 @@ h3 {
 .input-group {
     background-color: white;
     border-radius: 5px;
+    line-height: 1em;
     margin: 0.3em;
     padding: 0.1em;
 }
 
 .input-group .input {
-    background-color: none;
+    background-color: transparent;
     border: none;
+    font-size: small;
+    width: 80%;
 }
 
-.big-input {
+.big-input .input {
     background-color: none;
     border: none;
     height: 35px;
     font-size: large;
-    width: 80%;
+}
+
+.big-input .input-button {
+    font-size: x-large;
 }
 
 ::-webkit-input-placeholder {
@@ -124,7 +130,6 @@ h3 {
     background: none;
     border: none;
     float: right;
-    font-size: x-large;
     font-variant: small-caps;
     height: 100%;
 }
@@ -216,6 +221,7 @@ body.main #controls {
 
 body.main #search-banner .overlay-contents {
     padding: 0;
+    margin-left: 0;
     width: 50%;
 
     transition: width 0.2s linear;
@@ -227,6 +233,7 @@ a.filter-button {
     box-shadow: -2px 2px 5px black;
     color:black;
     display: inline-block;
+    margin: 0 0.5em;
     padding: 5px;
     text-align: center;
     width: 5em;

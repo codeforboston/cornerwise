@@ -19,6 +19,15 @@ App = {
                                   fill: false
                               }}));
             });
+
+        $.getJSON("http://localhost:3000/proposal/list")
+            .done(function(response) {
+                $(response.proposals).each(function(i, feature) {
+                    if (feature.location)
+                        L.marker(feature.location).addTo(map);
+                });
+            });
+
         $("#main_activated").on("change", function(e) {
             if (this.checked) {
                 $(document.body).addClass("main");
@@ -26,5 +35,9 @@ App = {
                 $(document.body).removeClass("main");
             }
         });
+
+        if ($(document.body).hasClass("main")) {
+            $("#main_activated").prop("checked", true);
+        }
     }
 };
