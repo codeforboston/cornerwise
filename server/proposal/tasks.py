@@ -55,7 +55,7 @@ def create_proposal_from_json(p_dict):
     proposal.description = p_dict.get("description")
     # This should not be hardcoded
     proposal.source = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions"
-    proposal.modified = p_dict["updated1Date"]
+    proposal.modified = p_dict["updatedDate"]
 
     # For now, we assume that if there are one or more documents
     # linked in the 'decision' page, the proposal is 'complete'.
@@ -221,7 +221,6 @@ def extract_images(doc):
     return images
 
 
-
 @celery_app.task(name="proposal.generate_doc_thumbnail")
 def generate_doc_thumbnail(doc):
     "Generate a Document thumbnail."
@@ -331,6 +330,7 @@ def add_doc_attributes(doc):
 
     return properties
 
+
 @celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(images):
     return generate_thumbnail.map(images)()
@@ -347,10 +347,10 @@ def process_document(doc):
                   extract_text.s() | add_doc_attributes()))()
 
 
-
 @celery_app.task(name="proposal.process_documents")
 def process_documents(docs):
     return process_document.map(docs)()
+
 
 @celery_app.task(name="proposal.scrape_reports_and_decisions")
 @transaction.atomic
@@ -401,9 +401,3 @@ def scrape_reports_and_decisions(since=None, page=None,
 def run_tasks():
     return (scrape_reports_and_decisions.s() |
             process_document.s())()
-
-def fetch_unprocessed_documents():
-    docs = Document.objects.filter(document=None)
-
-    for doc in docs:
-        fetch_document(doc)
