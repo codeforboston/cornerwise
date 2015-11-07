@@ -1,15 +1,16 @@
 from django.conf import settings
+from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page
 
+from functools import reduce
+from itertools import chain
+
 from shared.request import make_response
 
 from .models import Proposal, Attribute, Document, Event, Image
-
-#@make_response()
-#def
 
 def proposal_json(proposal, include_images=True, include_attributes=False):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
@@ -28,9 +29,46 @@ def proposal_json(proposal, include_images=True, include_attributes=False):
 
     return pdict
 
+def build_attributes_query(d):
+    """Construct a Proposal query from query parameters.
+
+    :param d: A dictionary-like object, typically something like
+    request.GET.
+
+    :returns: A
+    """
+    # Query attributes:
+    subqueries = []
+
+    for k, val in d.items():
+        if not k.startswith("attr."):
+            continue
+        subqueries.append(Q(handle=k[5:], text_value__contains=val))
+
+    if subqueries:
+        return reduce(lambda q1, q2: q1 & q2, subqueries)
+
+def build_proposal_query(d):
+    subqueries = []
+    attrs_query = build_attributes_query(d)
+
+    if attrs_query:
+        ids = list(chain(*Attribute.objects.filter(attrs_query)\
+                         .values_list("proposal_id")))
+        subqueries.append(Q(pk__in=ids))
+
+    status = d.get("status", "active").lower()
+    if status == "closed":
+        subqueries.append(Q(complete=True))
+    elif status == "active":
+        subqueries.append(Q(complete=False))
+
+    return reduce(lambda q1, q2: q1 & q2, subqueries, Q())
+
+
 @make_response()
 def active_proposals(req):
-    proposals = Proposal.objects.filter(status="", complete=False)
+    proposals = Proposal.objects.filter(build_proposal_query(req.GET))
 
     return {"proposals": list(map(proposal_json, proposals))}
 
