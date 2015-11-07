@@ -75,5 +75,5 @@ class ArcGISCoder(object):
 
         f = urlopen(self.url, urlencode(data).encode("ISO-8859-1"))
         result = json.loads(f.read().decode("utf-8"))
-        return result["locations"]
+
         return [simplify(l) for l in result["locations"]]
