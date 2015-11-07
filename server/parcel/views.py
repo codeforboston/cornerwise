@@ -6,7 +6,7 @@ from functools import reduce
 import json
 import re
 
-from shared.address import normalize_street
+from shared.address import normalize_number, normalize_street
 from shared.geo import geojson_data
 from shared.request import make_response, ErrorResponse
 
@@ -34,7 +34,7 @@ def make_query(d):
         subqueries.append(Q(full_street=street))
 
         if "number" in d:
-            subqueries.append(Q(address_num=d["number"]))
+            subqueries.append(Q(address_num=normalize_number(d["number"])))
 
 
     if "types" in d:
