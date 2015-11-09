@@ -13,6 +13,21 @@ a:hover {
     text-decoration: underline;
 }
 
+#dev-controls {
+    background-color: white;
+    border: 1px solid gray;
+    opacity: 0.6;
+    padding: 1em;
+    position: absolute;
+    right: 0;
+    top: 25%;
+    z-index: 10;
+}
+
+#dev-controls:hover {
+    opacity: 1;
+}
+
 #map-container {
     position: absolute;
     top: 0;
@@ -237,6 +252,20 @@ a.filter-button {
     padding: 5px;
     text-align: center;
     width: 5em;
+}
+
+.zoomed-proposal-marker {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    box-shadow: -2px 2px 4px darkgray;
+    padding: 5px.;
+    text-align: center;
+}
+
+.zoomed-proposal-marker img {
+    max-height: 75px;
+    max-width: 100px !important;
 }
 
 
