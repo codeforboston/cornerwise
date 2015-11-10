@@ -2,6 +2,8 @@
 service postgresql start
 service redis-server start # Required for celery and caching
 
+pip install -r /support/requirements.txt
+
 if [ -z "$APP_ROOT" ]; then
     export APP_ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 fi
