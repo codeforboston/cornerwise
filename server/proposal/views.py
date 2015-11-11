@@ -5,6 +5,7 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page
 
+from collections import defaultdict
 from functools import reduce
 from itertools import chain
 
@@ -43,27 +44,45 @@ def build_attributes_query(d):
     for k, val in d.items():
         if not k.startswith("attr."):
             continue
+
         subqueries.append(Q(handle=k[5:], text_value__contains=val))
 
     if subqueries:
-        return reduce(lambda q1, q2: q1 & q2, subqueries)
+        query = reduce(Q.__or__, subqueries, Q())
+        attrs = Attribute.objects.filter(query)\
+                                 .values("proposal_id", "handle",
+                                         "text_value")
+        attr_maps = defaultdict(int)
+        for attr in attrs:
+            attr_maps[attr["proposal_id"]] += 1
+
+        return [pid for pid, c in attr_maps.items() if c == len(subqueries)]
+
+
+query_params = {
+    "region": "region_name",
+    "case": "case_number",
+    "address": "address"
+}
 
 def build_proposal_query(d):
-    subqueries = []
-    attrs_query = build_attributes_query(d)
+    subqueries = {}
+    ids = build_attributes_query(d)
 
-    if attrs_query:
-        ids = list(chain(*Attribute.objects.filter(attrs_query)\
-                         .values_list("proposal_id")))
-        subqueries.append(Q(pk__in=ids))
+    if ids:
+        subqueries["pk__in"] = ids
 
     status = d.get("status", "active").lower()
     if status == "closed":
-        subqueries.append(Q(complete=True))
+        subqueries["complete"] = True
     elif status == "active":
-        subqueries.append(Q(complete=False))
+        subqueries["complete"] = False
 
-    return reduce(lambda q1, q2: q1 & q2, subqueries, Q())
+    for k in d:
+        if k in query_params:
+            subqueries[query_params[k]] = d[k]
+
+    return Q(**subqueries)
 
 
 @make_response()
