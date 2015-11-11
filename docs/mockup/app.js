@@ -1,25 +1,64 @@
 App = {
-    init: function() {
+    setupMinimap: function(map, minimap) {
+        var rectLayer = L.rectangle(map.getBounds(),
+                                    {stroke: true,
+                                     weight: 2,
+                                     color: "#ff0000",
+                                     fill: true});
+        minimap.addLayer(rectLayer);
+        map.on("drag moveend resize zoomend", function(e) {
+            rectLayer.setBounds(map.getBounds());
+        });
+        minimap.on("click", function(e) {
+            map.setView(e.latlng);
+            console.log(rectLayer);
+        });
+    },
 
-        var mapElt = document.getElementById("map"),
-            map = L.map(mapElt),
+    init: function() {
+        var source = "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+            bounds = [[42.4190212708995, -71.07150077819824],
+                      [42.372305415983895, -71.13570213317871]];
+
+        var map = L.map("map"),
             proposals = L.featureGroup();
 
         window.map = map;
 
-        map.addLayer(L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"));
+        map.addLayer(L.tileLayer(source));
         map.addLayer(proposals);
-        map.fitBounds([[42.4190212708995, -71.07150077819824],
-                       [42.372305415983895, -71.13570213317871]]);
+        map.fitBounds(bounds);
+
+        var minimap = L.map("minimap",
+                            {attributionControl: false,
+                             dragging: false,
+                             touchZoom: false,
+                             scrollWheelZoom: false,
+                             boxZoom: false,
+                             zoomControl: false});
+        minimap.setView(map.getCenter());
+        minimap.setZoom(11);
+        minimap.addLayer(L.tileLayer(source));
+        App.setupMinimap(map, minimap);
+
         $.getJSON("https://raw.githubusercontent.com/cityofsomerville/geodata/master/somerville.geojson")
             .done(function(features) {
                 map.addLayer(
                     L.geoJson(features,
                               {style: {
-                                  stroke: 0.5,
+                                  stroke: true,
+                                  weight: 2,
                                   color: "#EB4E12",
                                   fill: false
                               }}));
+                minimap.addLayer(
+                    L.geoJson(features,
+                              {style: {
+                                  stroke: true,
+                                  weight: 2,
+                                  fill: false
+                              }}));
+
             });
 
         $.getJSON("http://localhost:3000/proposal/list")
@@ -32,6 +71,8 @@ App = {
                     }
                 });
             });
+
+        map.locate();
 
         function updateMarkers() {
             if (map.getZoom() >= 17) {

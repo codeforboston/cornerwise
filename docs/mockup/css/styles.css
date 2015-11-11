@@ -41,6 +41,17 @@ a:hover {
     height: 100%;
 }
 
+#minimap {
+    border: 2px solid black;
+    display: none;
+    position: absolute;
+    top: 10%;
+    left: 2%;
+    height: 10em;
+    width: 10em;
+    z-index: 20;
+}
+
 #menu {
     position: absolute;
     padding: 0.5em;
@@ -123,6 +134,7 @@ h3 {
     background-color: transparent;
     border: none;
     font-size: small;
+    padding: 0.4em;
     width: 80%;
 }
 
@@ -131,6 +143,7 @@ h3 {
     border: none;
     height: 35px;
     font-size: large;
+    padding: 0;
 }
 
 .big-input .input-button {
@@ -209,6 +222,9 @@ h3 {
     transition: height 0.2s linear;
 }
 
+body.main #minimap {
+    display: block;
+}
 
 body.main #intro {
     height: 0;
@@ -259,6 +275,7 @@ a.filter-button {
     border: 1px solid black;
     border-radius: 5px;
     box-shadow: -2px 2px 4px darkgray;
+    overflow: hidden;
     padding: 5px.;
     text-align: center;
 }
