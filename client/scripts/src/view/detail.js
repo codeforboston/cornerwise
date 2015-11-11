@@ -1,4 +1,6 @@
-define(["backbone", "underscore", "routes", "utils"], function(B, _, routes, $u) {
+define(["backbone", "underscore", "leaflet",
+        "routes", "utils", "config"],
+       function(B, _, L, routes, $u, config) {
     return B.View.extend({
         tagName: "div",
         className: "proposal-details",
@@ -23,17 +25,53 @@ define(["backbone", "underscore", "routes", "utils"], function(B, _, routes, $u)
             }
 
             this.model = proposal;
-            this.listenTo(proposal, "change", this.render);
+            this.listenTo(proposal, "change", this.renderChange);
             proposal.fetchIfNeeded();
 
             if (this.showing)
                 this.render(proposal);
         },
 
+        renderChange: function(proposal) {
+            // Don't re-render if the selection/hover status was the
+            // only change.
+            if (!_.every(_.keys(proposal.changed), function(k) {
+                return _.contains(["selected", "hovered"], k);
+            })) {
+                this.render(proposal);
+            }
+        },
+
         render: function() {
+            if (this.minimap)
+                this.minimap.remove();
+
             var html = this.template(this.model.toJSON());
 
             this.$el.html(html);
+
+            var minimap =
+                    this.minimap =
+                    L.map(this.$(".minimap")[0],
+                          {attributionControl: false,
+                           dragging: false,
+                           touchZoom: false,
+                           scrollWheelZoom: false,
+                           boxZoom: false,
+                           zoomControl: false});
+            minimap
+                .setView(this.model.get("location"))
+                .setZoom(17)
+                .addLayer(L.tileLayer(config.tilesURL));
+
+            var parcel = this.model.get("parcel");
+
+            if (parcel) {
+                var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
+                parcelLayer.setStyle(config.parcelStyle);
+                minimap.addLayer(parcelLayer)
+                    .setView(parcelLayer.getBounds().getCenter());
+            }
         },
 
         hide: function() {

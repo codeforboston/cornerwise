@@ -68,7 +68,10 @@
     <script type="text/template" id="proposal-details">
       <div class="details">
         <a href="#" class="close">Close</a>
-        <h4><%= proposal.address %></h4>
+        <h4>
+          <div class="minimap"></div>
+          <%= proposal.address %>
+        </h4>
         <div class="case-number"><%= proposal.caseNumber %></div>
 
         <% if (proposal.attributes && proposal.attributes.length) { %>
@@ -163,7 +166,7 @@
           </div>
           <div class="filter-group" id="ref-address">
             <form id="ref-address-form">
-              <input type="text" name="address" placeholder="Type the Address">
+              <input type="text" name="address" placeholder="Type an address">
             </form>
             <button name="geolocate" id="geolocate">
               <div class="geolocateArrow"><img src="/static/images/geolocate-button.png" alt="Find my location" width="24" height="24"></div>

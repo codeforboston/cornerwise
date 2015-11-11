@@ -28,7 +28,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
     return B.View.extend({
         initialize: function() {
-            var // map = new RecenteredMap(this.el),
+            var //map = new RecenteredMap(this.el),
                 map = L.map(this.el),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),

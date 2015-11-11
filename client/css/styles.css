@@ -8236,7 +8236,7 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 
 /* style #radius-filter range slider thumb color to match radius outline on map
    from http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html */
-   
+
 #radius-filter::-webkit-slider-thumb {
     background-color: #FF5A5A;
 }
@@ -8308,6 +8308,12 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
     position: absolute;
     right: 5px;
     top: 5px;
+}
+
+#overlay .minimap {
+    float: left;
+    height: 100px;
+    width: 100px;
 }
 
 .permit-info.excluded {
