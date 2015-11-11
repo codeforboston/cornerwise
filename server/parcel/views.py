@@ -3,8 +3,7 @@ from django.db.models import Q
 from django.shortcuts import render
 
 from functools import reduce
-import json
-import re
+import json, operator, re
 
 from shared.address import normalize_number, normalize_street
 from shared.geo import geojson_data
@@ -12,7 +11,7 @@ from shared.request import make_response, ErrorResponse
 
 from .models import Parcel, Attribute
 
-def make_query(d):
+def make_query(d, reducer=operator.and_):
     subqueries = []
 
     if "lng" in d and "lat" in d:
@@ -29,13 +28,21 @@ def make_query(d):
     if "loc_id" in d:
         subqueries.append(Q(loc_id=d["loc_id"]))
 
-    if "street" in d:
-        street = normalize_street(d["street"])
-        subqueries.append(Q(full_street=street))
+    street = d.get("street")
+    number = d.get("number")
+    if "address" in d:
+        m = re.match(r"(\d+)(-\d+)?\s", d["address"])
+        if m:
+            number = m.group(1)
+            street = d["address"][m.end():]
 
-        if "number" in d:
-            subqueries.append(Q(address_num=normalize_number(d["number"])))
+    if street:
+        sq = {"full_street": normalize_street(street)}
 
+        if number:
+            sq["address_num"] = normalize_number(number)
+
+        subqueries.append(Q(**sq))
 
     if "types" in d:
         types = [t.upper() for t in re.split(r"\s*,\s*", d["types"])]
@@ -43,7 +50,10 @@ def make_query(d):
     elif "include_row" not in d:
         subqueries.append(~Q(poly_type="ROW"))
 
-    return reduce(lambda q1, q2: q1 & q2, subqueries)
+    if d.get("mode") == "or":
+        reducer = operator.or_
+
+    return reduce(reducer, subqueries)
 
 def parcels_for_request(req):
     """
