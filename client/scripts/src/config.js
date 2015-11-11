@@ -20,8 +20,8 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         mapId: "zoning-map",
 
         // Lat/long for the southwest
-        bounds: [[42.371861543730496, -71.13338470458984],
-                 [42.40393908425197, -71.0679817199707]],
+        bounds:  [[42.42009843116784, -71.05768203735352],
+                  [42.370720143531976, -71.14445686340332]],
 
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,
