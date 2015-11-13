@@ -46,5 +46,10 @@ def keywords(text):
     tagged = nltk.pos_tag(tokenized)
     return map(join_words, noun_phrases(tagged))
 
-if __name__ == "__main__":
-    do_main()
+
+
+def setup():
+    return nltk.download("punkt") and \
+        nltk.download("averaged_perceptron_tagger")
+
+setup()
