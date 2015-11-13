@@ -56,7 +56,7 @@ def make_matcher(patt, group=0, value=None, fn=None):
         m = patt.search(line)
 
         if m:
-            v = m.group(group) if group else value
+            v = m.group(group) if group else value or m.group(0)
 
             return fn(v) if (fn and v) else v
 
@@ -65,7 +65,7 @@ def make_matcher(patt, group=0, value=None, fn=None):
     return matcher
 
 
-def skip_match(patt, n=1):
+def skip_match(patt, n=0):
     if isinstance(patt, str):
         patt = re.compile(patt)
 
