@@ -127,7 +127,7 @@ while getopts ":bBFm:Op:rRSthx" opt; do
             ;;
         h)
             print_help
-            exit 1
+            exit 0
             ;;
 
         \?)
@@ -254,7 +254,7 @@ else
         docker_opts="$docker_opts --rm"
     fi
 
-    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -v $project_dir/docker-runtime:/scripts -v $project_dir/docker-support:/support -p $host_port:$host_port $env_opts $image_name"
+    docker_opts="$docker_opts -it -v $project_dir/server:/app -v $project_dir/client:/client -v $project_dir/data:/data -v $project_dir/docker-support:/support -p $host_port:$host_port $env_opts $image_name"
 
     if ((!autostart)); then
         docker run $docker_opts $run_command
