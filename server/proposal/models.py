@@ -156,6 +156,10 @@ class Document(models.Model):
 
         return d
 
+    def get_text(self):
+        with open(self.fulltext.path, "r", encoding=self.encoding) as f:
+            return f.read()
+
     @property
     def local_path(self):
         return self.document and self.document.path or ""
