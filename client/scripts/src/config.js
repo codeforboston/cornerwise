@@ -92,6 +92,21 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 shown: false,
                 features: null,
                 template: "<%= title %>"
+            },
+            {
+                source: "/static/scripts/src/layerdata/firehydrant.geojson",
+                id: "firehydrant",
+                title: "Fire Hydrants",
+                color: "red",
+                shown: false,
+                marker: {
+                    type: "circle",
+                    color: "red",
+                    fillColor: "white",
+                    radius: 3,
+                    fillOpacity: 1
+                },
+                features: null
             }
         ],
 

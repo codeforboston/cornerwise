@@ -7,16 +7,13 @@
         "title": "firehydrant",
         "description": ""
       },
-      "geometry":{
-        "coordinates": [
-          [
+      "geometry": {
+          "coordinates": [
               -71.1309036,
               42.410710
-          ]
-        ],
+          ],
         "type": "Point"
       }
-    }
-
-  ]
+  }
+]
 }
