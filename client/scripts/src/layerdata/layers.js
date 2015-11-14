@@ -19,7 +19,7 @@ define(["utils"], function($u) {
           "title": "Fire Hydrants",
           "tags" [],
           "colors": "red",
-          "source": "/src/layer/",
+          "source": "/src/layerdata/firehydrant.geojson",
           "template": null
         }
     ];
