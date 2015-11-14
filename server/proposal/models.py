@@ -49,7 +49,7 @@ class Proposal(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 #    closed = models.DateTimeField(null=True,
                                   #help_text="The time when this proposal was closed.")
-    summary = models.CharField(max_length=256)
+    summary = models.CharField(max_length=256, default="")
     description = models.TextField()
     source = models.URLField(null=True,
                              help_text="The data source for the proposal.")
@@ -155,6 +155,10 @@ class Document(models.Model):
             d["url"] = self.document.url
 
         return d
+
+    def get_text(self):
+        with open(self.fulltext.path, "r", encoding=self.encoding) as f:
+            return f.read()
 
     @property
     def local_path(self):

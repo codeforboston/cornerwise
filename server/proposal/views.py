@@ -1,15 +1,17 @@
 from django.conf import settings
+from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page
 
+from collections import defaultdict
+from functools import reduce
+from itertools import chain
+
 from shared.request import make_response
 
 from .models import Proposal, Attribute, Document, Event, Image
-
-#@make_response()
-#def
 
 def proposal_json(proposal, include_images=True, include_attributes=False):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
@@ -28,9 +30,64 @@ def proposal_json(proposal, include_images=True, include_attributes=False):
 
     return pdict
 
+def build_attributes_query(d):
+    """Construct a Proposal query from query parameters.
+
+    :param d: A dictionary-like object, typically something like
+    request.GET.
+
+    :returns: A
+    """
+    # Query attributes:
+    subqueries = []
+
+    for k, val in d.items():
+        if not k.startswith("attr."):
+            continue
+
+        subqueries.append(Q(handle=k[5:], text_value__contains=val))
+
+    if subqueries:
+        query = reduce(Q.__or__, subqueries, Q())
+        attrs = Attribute.objects.filter(query)\
+                                 .values("proposal_id", "handle",
+                                         "text_value")
+        attr_maps = defaultdict(int)
+        for attr in attrs:
+            attr_maps[attr["proposal_id"]] += 1
+
+        return [pid for pid, c in attr_maps.items() if c == len(subqueries)]
+
+
+query_params = {
+    "region": "region_name",
+    "case": "case_number",
+    "address": "address"
+}
+
+def build_proposal_query(d):
+    subqueries = {}
+    ids = build_attributes_query(d)
+
+    if ids:
+        subqueries["pk__in"] = ids
+
+    status = d.get("status", "active").lower()
+    if status == "closed":
+        subqueries["complete"] = True
+    elif status == "active":
+        subqueries["complete"] = False
+
+    for k in d:
+        if k in query_params:
+            subqueries[query_params[k]] = d[k]
+
+    return Q(**subqueries)
+
+
 @make_response()
 def active_proposals(req):
-    proposals = Proposal.objects.filter(status="", complete=False)
+    proposals = Proposal.objects.filter(build_proposal_query(req.GET))
 
     return {"proposals": list(map(proposal_json, proposals))}
 

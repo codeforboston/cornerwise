@@ -5,14 +5,16 @@ contents.
 from collections import OrderedDict
 from datetime import datetime
 from dateutil.parser import parse as date_parse
+from utils import pushback_iter
+
 import os
 import re
 
 
 empty_line = re.compile(r"\s*\n$")
+property_pattern = re.compile(r"^([a-z]+(\s+[a-z]+)*): (.*)(\n|$)", re.I)
 
 def properties(lines):
-    property_pattern = re.compile(r"^([a-z]+(\s+[a-z]+)*): (.*)(\n|$)", re.I)
     properties = {}
     last_property = None
 
@@ -29,6 +31,7 @@ def properties(lines):
 
     return properties
 
+
 def paragraphize(lines):
     ps = []
     current_p = []
@@ -44,9 +47,8 @@ def paragraphize(lines):
 
     return [" ".join(p) for p in ps if p]
 
-def make_matcher(patt, group=None, value=None, fn=None):
-    assert group or value, "Matcher must have a group or value"
 
+def make_matcher(patt, group=0, value=None, fn=None):
     if isinstance(patt, str):
         patt = re.compile(patt)
 
@@ -54,25 +56,48 @@ def make_matcher(patt, group=None, value=None, fn=None):
         m = patt.search(line)
 
         if m:
-            v = m.group(group) if group else value
+            v = m.group(group) if group else value or m.group(0)
 
-            return fn(v) if fn else v
+            return fn(v) if (fn and v) else v
 
         return None
 
     return matcher
 
-def footer_matcher(line):
-    if re.match(r"CITY HALL", line):
-        def skip_lines(infile):
-            next(infile)
-            next(infile)
-        return skip_lines
 
+def skip_match(patt, n=0):
+    if isinstance(patt, str):
+        patt = re.compile(patt)
+
+    def skipper(line):
+        if re.match(patt, line):
+            def skip(inlines):
+                for i in range(n):
+                    next(inlines)
+            return skip
+    return skipper
+
+def subsection_matcher(line):
+    if re.match(r"^[0-9]+\.$", line):
+        subsection_patt = re.compile(r"^([a-z]+(\s+[a-z]+)*):", re.I)
+        def get_subsection_name(inlines):
+            for line in inlines:
+                m = subsection_patt.match(line)
+                if m:
+                    if isinstance(inlines, pushback_iter):
+                        inlines.pushback(line[m.end():])
+                    return m.group(1)
+        return get_subsection_name
+
+
+top_section_matcher = make_matcher(r"^([^a-z]{2,}):$", group=1,
+                                   fn=str.lower)
 
 
 def generate_sections(lines, matchers):
     """
+    :param lines: An iterable of strings
+    :param matchers: An iterable of functions
 
     :returns: A generator that produces 2-tuples containing each section
     name and its contents as a list of strings
@@ -96,7 +121,8 @@ def generate_sections(lines, matchers):
                 break
 
         if new_section_name:
-            yield section_name, section
+            if section:
+                yield section_name, section
             section_name = new_section_name
             section = []
         else:
@@ -104,10 +130,9 @@ def generate_sections(lines, matchers):
 
     yield section_name, section
 
-
 def make_sections(lines, matchers):
     """Partition the contents of a file into sections using the given list
-    of matches.
+    of matchers.
 
     :param lines: An iterator or generator that produces lines of text
     input
@@ -119,12 +144,8 @@ def make_sections(lines, matchers):
     (a list of string)
 
     """
-    found = OrderedDict()
+    return OrderedDict(generate_sections(lines, matchers))
 
-    for section_name, section in generate_sections(lines, matchers):
-        found[section_name] = section
-
-    return found
 
 def get_lines(doc):
     """Returns a generator that successively produces lines from the
@@ -135,25 +156,41 @@ def get_lines(doc):
     return lines
 
 staff_report_section_matchers = [
-    footer_matcher,
+    skip_match(r"CITY HALL", 2),
+    skip_match(r"Page \d+ of \d+"),
     make_matcher(r"PLANNING STAFF REPORT",
-                 value="planning staff report"),
+                 fn=str.lower),
     make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)",
                  group=1,
-                 fn=str.lower),
+                 fn=str.lower)
 ]
+
+def staff_report_sections(doc):
+    lines = get_lines(doc)
+    return make_sections(lines, staff_report_section_matchers)
+
 
 def staff_report_properties(doc):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
     """
-    lines = get_lines(doc)
-    sections = make_sections(lines, staff_report_section_matchers)
-
+    sections = staff_report_sections(doc)
     props = {}
 
     props.update(properties(sections["header"]))
     props.update(properties(sections["planning staff report"]))
+
+    pd = sections.get("project description")
+    if pd:
+        subsections = make_sections(pushback_iter(pd),
+                                    [subsection_matcher])
+
+        for pname in ["Proposal", "Subject Property",
+                      "Green Building Practices"]:
+            v = subsections.get(pname)
+            if v:
+                props[pname] = "\n".join(paragraphize(v))
+
 
     return props
 
@@ -171,17 +208,20 @@ def find_vote(decision):
     return None, None
 
 decision_section_matchers = [
-    footer_matcher,
+    skip_match(r"CITY HALL", 2),
     make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1, fn=str.lower),
-    make_matcher(r"DECISION:", value="decision")
+    make_matcher(r"DECISION:", value="decision"),
+    top_section_matcher
 ]
+
+def decision_sections(doc):
+    lines = get_lines(doc)
+    return make_sections(lines, decision_section_matchers)
 
 def decision_properties(doc):
     """Extract a dictionary of properties from the contents of a Decision
     Document."""
-    lines = get_lines(doc)
-    sections = make_sections(lines, decision_section_matchers)
-
+    sections = decision_sections(doc)
     props = {}
     props.update(properties(sections["zba decision"]))
 

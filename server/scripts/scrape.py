@@ -108,6 +108,7 @@ def add_geocode(geocoder, permits):
             logger.error("Skipping permit {id}; geolocation failed.".\
                          format(id=permit["caseNumber"]))
             continue
+
         permit["lat"] = loc["lat"]
         permit["long"] = loc["lng"]
         permit["score"] = location["properties"].get("score")
@@ -128,8 +129,7 @@ def find_cases(doc):
             cases.append(get_row_vals(attributes, tr))
         except Exception as err:
             logger.error("Failed to scrape row {num}: {err}"\
-                         .format(num=i,
-                                 err=err))
+                         .format(num=i, err=err))
             continue
     return cases
 

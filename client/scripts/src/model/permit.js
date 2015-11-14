@@ -72,14 +72,15 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             $.getJSON(config.backendURL + "/parcel/find",
                       {lat: loc.lat,
                        lng: loc.lng,
-                       attributes: true})
+                       attributes: true,
+                       mode: "or",
+                       address: this.get("address")})
                 .done(function(parcel) {
                     self.set("parcel", parcel);
                 })
                 .fail(function(error) {
                     if (error.status === 404) {
                         // There is no matching parcel:
-
                     }
                 });
         },

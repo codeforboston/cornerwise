@@ -1,4 +1,5 @@
 import os, re
+from collections import deque
 
 def normalize(s):
     s = re.sub(r"[',!@#$%^&*()-=[\]]+", "", s)
@@ -8,6 +9,27 @@ def normalize(s):
 
 def extension(path):
     return path.split(os.path.extsep)[-1].lower()
+
+class pushback_iter(object):
+    """An iterator that implements a pushback() method, allowing values to
+be added back to the 'stack' after consideration.
+
+    """
+    def __init__(self, it):
+        self.iterable = iter(it)
+        self.pushed = deque()
+
+    def pushback(self, v):
+        self.pushed.append(v)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.pushed:
+            return self.pushed.pop()
+        return next(self.iterable)
+
 
 def make_file_mover(attr):
     """Returns a function that takes an object and a new name and renames

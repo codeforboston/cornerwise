@@ -1,4 +1,5 @@
-import nltk
+from collections import defaultdict
+import nltk, redis
 
 def group_true(pred, l):
     """Group adjacent elements in the collection l for which pred(element)
@@ -35,16 +36,30 @@ def noun_phrases(tagged):
 
     return filter(is_noun_phrase, groups)
 
+def remove_subphrases(tagged):
+    last_terms = defaultdict(int)
+    for term in tagged:
+        last_terms[term[-1]] = max(len(term), last_terms[term[-1]])
+
+    return [term for term in tagged if len(term) == last_terms[term[-1]]]
+
+
 def join_words(tagged):
     return " ".join(tw[0] for tw in tagged)
 
 def keywords(text):
     """
+    :param text: a text string to be evaluated
+
     :returns: An iterable of strings containing the recognized
     """
     tokenized = nltk.word_tokenize(text)
     tagged = nltk.pos_tag(tokenized)
     return map(join_words, noun_phrases(tagged))
 
-if __name__ == "__main__":
-    do_main()
+def setup():
+    "Install required NLTK corpora"
+    return nltk.download("punkt") and \
+        nltk.download("averaged_perceptron_tagger")
+
+setup()

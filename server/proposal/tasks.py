@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import shutil
 import subprocess
 from urllib import parse, request
 
 import celery
+from celery.utils.log import get_task_logger
 
 from djcelery.models import PeriodicTask
 from django.conf import settings
@@ -19,6 +20,8 @@ from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, images
 from shared import files_metadata
 
+logger = get_task_logger(__name__)
+
 def last_run():
     "Determine the date and time of the last run of the task."
     try:
@@ -26,8 +29,6 @@ def last_run():
         return scrape_task.last_run_at
     except PeriodicTask.DoesNotExist:
         return None
-
-
 
 
 def create_proposal_from_json(p_dict):
@@ -129,9 +130,7 @@ the path of the text document.
     :returns: The same document
 
     """
-    logger = extract_text.get_logger()
-
-    path = doc.get_path()
+    path = doc.local_path
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
     text_path = os.path.join(os.path.dirname(path), "text.txt")
@@ -178,7 +177,7 @@ def extract_images(doc):
         logger.error("Document has not been copied to the local filesystem.")
         return []
 
-    path = doc.get_path()
+    path = docfile.path
 
     if not os.path.exists(path):
         logger.error("Document %s is not where it says it is: %s",
@@ -222,13 +221,11 @@ def extract_images(doc):
     return images
 
 
-
 @celery_app.task(name="proposal.generate_doc_thumbnail")
 def generate_doc_thumbnail(doc):
     "Generate a Document thumbnail."
 
     docfile = doc.document
-    logger = generate_doc_thumbnail.get_logger()
 
     if not docfile:
         logger.error("Document has not been copied to the local filesystem")
@@ -269,7 +266,6 @@ def generate_thumbnail(image, replace=False):
 
     :returns: Thumbnail path"""
 
-    logger = generate_thumbnail.get_logger()
     thumbnail_path = image.thumbnail and image.thumbnail.name
     if os.path.exists(thumbnail_path):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
@@ -291,7 +287,6 @@ def generate_thumbnail(image, replace=False):
 @transaction.atomic
 def add_doc_attributes(doc):
     properties = extract.get_properties(doc)
-    logger = add_doc_attributes.get_logger()
 
     for name, value in properties.items():
         logger.info("Adding %s attribute", name)
@@ -316,6 +311,26 @@ def add_doc_attributes(doc):
 
         attr.save()
 
+    # Find events and create them:
+    events = extract.get_events(doc, properties)
+    for e in events:
+        try:
+            event = Event.objects.get(title=e["title"],
+                                      date=e["date"])
+        except Event.DoesNotExist as dne:
+            event = Event(proposal=doc.proposal,
+                          title=e["title"],
+                          date=e["date"])
+        except KeyError as kerr:
+            logger.error("Missing required key in extracted event:",
+                         kerr.args)
+
+    if event:
+        event.save()
+
+    return properties
+
+
 @celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(images):
     return generate_thumbnail.map(images)()
@@ -332,20 +347,18 @@ def process_document(doc):
                   extract_text.s() | add_doc_attributes()))()
 
 
-
 @celery_app.task(name="proposal.process_documents")
 def process_documents(docs):
     return process_document.map(docs)()
 
+
 @celery_app.task(name="proposal.scrape_reports_and_decisions")
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, page=None, everything=False,
+def scrape_reports_and_decisions(since=None, page=None,
                                  coder_type=settings.GEOCODER):
     """
     Task that scrapes the reports and decisions page
     """
-    logger = scrape_reports_and_decisions.get_logger()
-
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
         geocoder.bounds = settings.GEO_BOUNDS
@@ -361,6 +374,14 @@ def scrape_reports_and_decisions(since=None, page=None, everything=False,
             # If there was no last run, the scraper will fetch all
             # proposals.
             since = last_run()
+
+            if not since:
+                # If there is no record of a previous run, fetch
+                # proposals posted since the previous Monday.
+                now = datetime.now().replace(hour=0, minute=0,
+                                             second=0, microsecond=0)
+                since = now - timedelta(days=7 + now.weekday())
+
         proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
 
     proposals = []
@@ -380,9 +401,3 @@ def scrape_reports_and_decisions(since=None, page=None, everything=False,
 def run_tasks():
     return (scrape_reports_and_decisions.s() |
             process_document.s())()
-
-def fetch_unprocessed_documents():
-    docs = Document.objects.filter(document=None)
-
-    for doc in docs:
-        fetch_document(doc)

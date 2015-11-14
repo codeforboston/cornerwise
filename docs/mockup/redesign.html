@@ -13,11 +13,13 @@
     <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet-src.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
   </head>
-  <body>
+  <body class="main">
     <div id="map-container">
       <div id="map">
       </div>
+      <div id="minimap"> </div>
     </div>
+<<<<<<< HEAD
     <div id="start-banner" class="overlay">
       <div class="overlay-contents">
         <h3>what&rsquo;s being built near&hellip;</h3>
@@ -25,14 +27,90 @@
           <input class="big-input" type="text" name="address" placeholder="enter address" />
           <button class="input-button go-button">go</button>
         </div>
+=======
+    <div id="logo" class="resp-portrait-hide">
+      <img src="cornerwise-logo.png">
+    </div>
+
+    <div id="search-banner" class="overlay">
+      <div class="overlay-contents">
+        <h3>what&rsquo;s being built near&hellip;</h3>
+        <div class="input-group big-input">
+          <input class="input" type="text" name="address" placeholder="enter address" />
+          <button class="input-button go-button">go</button>
+        </div>
+      </div>
+      <a id="explore" href="#">Explore the Data</a>
+    </div>
+
+    <div id="menu">
+        <a id="menu-button" href="#">
+          <span class="icon" aria-hidden="true">≡</span>
+          <span class="resp-portrait-hide">MENU</span>
+        </a>
+    </div>
+
+    <div id="dev-controls">
+      Main View:
+      <input type="checkbox" id="main_activated"/>
+    </div>
+
+    <div id="intro" class="overlay">
+      <div class="section">
+        <h3>PLANNING AND ZONING</h3>
+
+        <ul>
+          <li>current building projects</li>
+          <li>building requests</li>
+          <li>variances</li>
+          <li>schedule of public hearings</li>
+        </ul>
+
+        <div class="more">
+          <a href="#">Learn more</a>
+        </div>
+      </div>
+      <div class="section">
+        <h3>CITY INITIATIVES</h3>
+>>>>>>> origin/master
 
 
+<<<<<<< HEAD
+=======
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
+          a diam lectus. Sed sit amet ipsum mauris.
+          <br><br>
+          <a href="#">Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="controls" class="overlay">
+      <div class="section">
+        <h3>FILTER</h3>
+        <a href="#" class="filter-button">Project Type</a>
+        <a href="#" class="filter-button">Something Else</a>
+        <a href="#" class="filter-button">Impact</a>
+      </div>
+      <div class="section">
+        <h3>SUBSCRIBE</h3>
+        <span class="resp-portrait-hide">
+          Sign up for alerts near this address:
+        </span>
+
+        <div class="input-group">
+          <input class="input" type="text" name="address" placeholder="enter email" />
+          <button class="input-button go-button">go</button>
+        </div>
+>>>>>>> origin/master
       </div>
     </div>
 
     <script type="text/javascript" src="app.js"></script>
+    <!-- <script src="https://use.typekit.net/kfw4cim.js"></script> -->
     <script type="text/javascript">
       App.init();
+      //try{Typekit.load({ async: true });}catch(e){}
     </script>
   </body>
 </html>
