@@ -85,9 +85,11 @@ App = {
 
                     marker._unzoomedIcon =
                         marker.icon || new L.Icon.Default();
+                    var factor = Math.pow(2, (map.getZoom() - 17)),
+                        size = L.point(100*factor, 75*factor);
                     marker.setIcon(L.divIcon({
                         className: "zoomed-proposal-marker",
-                        iconSize: L.point(100, 75),
+                        iconSize: size,
                         html: "<img src='http://localhost:3000" +
                             images[0].thumb + "'/>"
                     }));

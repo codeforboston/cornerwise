@@ -281,8 +281,8 @@ a.filter-button {
 }
 
 .zoomed-proposal-marker img {
-    max-height: 75px;
-    max-width: 100px !important;
+    max-height: 100%;
+    max-width: 100% !important;
 }
 
 
