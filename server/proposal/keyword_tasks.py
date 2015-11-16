@@ -32,4 +32,5 @@ def add_full_docs(docs):
 def top_terms(doc):
     r = redis.StrictRedis()
     terms = keywords.keywords(doc.get_text())
-    return idf.sorted_terms(r, terms)
+    sorted_terms = idf.sorted_terms(r, terms)
+    return [t[0] for t in sorted_terms]

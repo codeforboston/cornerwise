@@ -31,11 +31,13 @@ def doc_key(doc_id):
     return "idf:docs:" + str(doc_id)
 
 
+def doc_count(r, term):
+    return int(r.get(term_key(term) + ":docs") or "0")
+
+
 def add_document(r, terms, doc_id=None):
     if doc_id and not r.setnx(doc_key(doc_id), "true"):
         return
-
-    terms = list(terms)
 
     # Increment the document count:
     r.incr("idf:doc_count")
@@ -52,9 +54,9 @@ def add_document(r, terms, doc_id=None):
 
 
 def inverse_frequencies(r, terms):
-    doc_total = r.get("idf:doc_count")
+    doc_total = int(r.get("idf:doc_count"))
 
-    return {term: log(doc_total/r.get(term_key(term) + ":docs"))
+    return {term: log(doc_total/(1 + doc_count(r, term)))
             for term in terms}
 
 
@@ -62,7 +64,7 @@ def tf_idf_terms(r, terms):
     tf = term_frequencies(raw_frequencies(terms))
     itf = inverse_frequencies(r, terms)
 
-    return {term: tf[term] * itf[term] for ferm in terms}
+    return {term: tf[term] * itf[term] for term in terms}
 
 
 def sorted_terms(r, terms):

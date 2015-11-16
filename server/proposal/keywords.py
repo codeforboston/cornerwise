@@ -55,7 +55,7 @@ def keywords(text):
     """
     tokenized = nltk.word_tokenize(text)
     tagged = nltk.pos_tag(tokenized)
-    return map(join_words, noun_phrases(tagged))
+    return list(map(join_words, noun_phrases(tagged)))
 
 def setup():
     "Install required NLTK corpora"
