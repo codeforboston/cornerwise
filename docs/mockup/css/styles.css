@@ -52,6 +52,20 @@ a:hover {
     z-index: 20;
 }
 
+#details {
+    background-color: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    width: 20em;
+    padding: 1em;
+    bottom: 20%;
+}
+
+#details img {
+    max-width: 100px;
+    float: left;
+    margin-right: 0.5em;
+}
+
 #menu {
     position: absolute;
     padding: 0.5em;

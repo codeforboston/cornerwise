@@ -11,7 +11,32 @@ App = {
         });
         minimap.on("click", function(e) {
             map.setView(e.latlng);
-            console.log(rectLayer);
+        });
+
+        $(minimap.getContainer()).on("mousedown", function(e) {
+            var offset = $(this).offset();
+            console.log(offset);
+
+            function move(e) {
+                var pointX = e.pageX - offset.left,
+                    pointY = e.pageY - offset.top,
+                    point = L.point(pointX, pointY),
+                    latLng = minimap.unproject(L.point(pointX, pointY)),
+                    currentCenter = rectLayer.getBounds().getCenter(),
+                    dLat = latLng.lat - currentCenter.lat,
+                    dLng = latLng.lng - currentCenter.lng;
+
+                map.setView(latLng);
+            }
+            function mouseup(e) {
+                $(document)
+                    .off("mousemove", move)
+                    .off("mouseup", mouseup);
+            }
+
+            $(document)
+                .on("mousemove", move)
+                .on("mouseup", mouseup);
         });
     },
 
@@ -68,9 +93,44 @@ App = {
                         var marker = L.marker(feature.location).addTo(proposals);
 
                         marker.proposal = feature;
+
+                        marker.on("click", function(e) {
+                            $(document).trigger("proposalSelected",
+                                                [{proposal: feature,
+                                                  marker: marker,
+                                                  how: "click",
+                                                  originalEvent: e}]);
+                        });
                     }
                 });
             });
+
+        // var detailsMinimap = L.map("details-minimap",
+        //                            {attributionControl: false,
+        //                             dragging: false,
+        //                             touchZoom: false,
+        //                             boxZoom: false,
+        //                             zoomControl: false});
+        // detailsMinimap.addLayer(L.tileLayer(source));
+        // detailsMinimap.setZoom(17);
+
+        $(document).on("proposalSelected",
+                       function(e, info) {
+                           if (!info || !info.proposal)
+                               // Hide the viewer
+                               return;
+
+                           var proposal = info.proposal,
+                               image = proposal.images.length ?
+                                   "http://localhost:3000" + proposal.images[0].src : "";
+
+                           $("#details")
+                               .find(".address").text(proposal.address)
+                               .end()
+                               .find("img").attr("src", image);
+
+                           // detailsMinimap.setView(proposal.location);
+                       });
 
         map.locate();
 
