@@ -45,8 +45,8 @@ a:hover {
     border: 2px solid black;
     display: none;
     position: absolute;
-    top: 10%;
-    left: 2%;
+    bottom: 18%;
+    right: 2%;
     height: 10em;
     width: 10em;
     z-index: 20;
@@ -54,10 +54,23 @@ a:hover {
 
 #details {
     background-color: rgba(255, 255, 255, 0.5);
+    display: none;
     position: absolute;
     width: 20em;
     padding: 1em;
     bottom: 20%;
+}
+
+#details .more {
+    color: forestgreen;
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+}
+
+#details .calendar img {
+    max-height: 50px;
+    max-width: 50px;
 }
 
 #details img {
@@ -78,13 +91,16 @@ span.icon {
     font-size: xx-large;
 }
 
+.leaflet-top .leaflet-control {
+    margin-top: 80px !important;
+}
+
 #logo {
-    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 0.5em;
-    padding: 0.2em;
+    display: none;
     position: absolute;
-    bottom: 1em;
-    right: 1em;
+    top: 0.4em;
+    left: 1em;
     z-index: 2;
 }
 
@@ -92,14 +108,14 @@ span.icon {
     width: 150px;
 }
 
-#menu-button {
+.button {
     background-color: #63B91E;
     border-radius: 0.5em;
     color: white;
     padding: 0.5em;
 }
 
-#menu-button:hover {
+.button:hover {
     background-color: white;
     box-shadow: 0 0 4px #63b91e inset;
     color: gray;
@@ -164,6 +180,11 @@ h3 {
     font-size: x-large;
 }
 
+button.big {
+
+    font-size: x-large;
+}
+
 ::-webkit-input-placeholder {
     font-style: italic;
 }
@@ -208,7 +229,7 @@ h3 {
 .overlay .section {
     float: left;
     padding: 1em;
-    width: 33%;
+    width: 30%;
     height: 100%;
 }
 
@@ -225,6 +246,15 @@ h3 {
     text-align: right;
 }
 
+#subscribe {
+
+    top: 2em;
+}
+
+#signup {
+    text-align: center;
+    line-height: 5em;
+}
 
 #controls {
     bottom: 0;
@@ -242,6 +272,10 @@ body.main #minimap {
 
 body.main #intro {
     height: 0;
+}
+
+body.main #logo {
+    display: block;
 }
 
 body.main #search-banner {

@@ -53,6 +53,7 @@ App = {
         map.addLayer(L.tileLayer(source));
         map.addLayer(proposals);
         map.fitBounds(bounds);
+        //map.zoomControl.setPosition("bottomleft");
 
         var minimap = L.map("minimap",
                             {attributionControl: false,
@@ -116,9 +117,11 @@ App = {
 
         $(document).on("proposalSelected",
                        function(e, info) {
-                           if (!info || !info.proposal)
+                           if (!info || !info.proposal) {
                                // Hide the viewer
+                               $("#details").hide();
                                return;
+                           }
 
                            var proposal = info.proposal,
                                image = proposal.images.length ?
@@ -127,7 +130,9 @@ App = {
                            $("#details")
                                .find(".address").text(proposal.address)
                                .end()
-                               .find("img").attr("src", image);
+                               .find("img.thumb").attr("src", image)
+                               .end()
+                               .show();
 
                            // detailsMinimap.setView(proposal.location);
                        });
