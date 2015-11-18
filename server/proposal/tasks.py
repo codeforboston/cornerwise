@@ -311,6 +311,9 @@ def add_doc_attributes(doc):
 
         attr.save()
 
+    add_doc_events(doc, properties)
+
+def add_doc_events(doc, properties):
     # Find events and create them:
     events = extract.get_events(doc, properties)
     event = None
