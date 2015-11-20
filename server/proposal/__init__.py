@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-from datetime import datetime
 
 class ProposalConfig(AppConfig):
     name = "proposal"
