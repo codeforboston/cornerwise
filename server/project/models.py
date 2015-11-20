@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms.models import model_to_dict
 
 # A project
 class Project(models.Model):
@@ -20,9 +21,13 @@ class Project(models.Model):
 
     proposals = models.ManyToManyField("proposal.Proposal")
 
+    def to_dict(self):
+        return model_to_dict(self)
+
 
 class BudgetItem(models.Model):
     project = models.ForeignKey(Project)
     year = models.IntegerField()
     budget = models.DecimalField(max_digits=11, decimal_places=2)
+    funding_source = models.CharField(max_length=64)
     comment = models.TextField()

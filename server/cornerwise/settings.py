@@ -51,6 +51,7 @@ INSTALLED_APPS = (
     'djcelery',
     'parcel',
     'proposal.ProposalConfig',
+    'project.ProjectConfig',
     'shared'
 )
 
@@ -135,7 +136,6 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
-# Celery configuration
 BROKER_URL = os.environ.get("REDIS_HOST", "redis://")
 
 ## Persist task results to the database
@@ -143,11 +143,13 @@ CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 
 from datetime import timedelta
 CELERYBEAT_SCHEDULE = {
-    "scrape-permits": {
+    "scrape-proposals": {
         "task": "proposal.scrape_reports_and_decisions",
         "schedule": timedelta(days=1),
     }
 }
+
+CELERYD_TASK_SOFT_TIME_LIMIT = 60
 
 ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
 ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
