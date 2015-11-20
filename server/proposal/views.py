@@ -8,6 +8,7 @@ from django.views.decorators.cache import cache_page
 from collections import defaultdict
 from functools import reduce
 from itertools import chain
+import re
 
 from shared.request import make_response
 
@@ -71,7 +72,11 @@ query_params = {
 
 def build_proposal_query(d):
     subqueries = {}
-    ids = build_attributes_query(d)
+    ids = build_attributes_query(d) or []
+
+    pids = d.get("id")
+    if pids:
+        ids = re.split(r"\s*,\s*", pids)
 
     if ids:
         subqueries["pk__in"] = ids
@@ -134,7 +139,7 @@ def download_document(req, pk):
         return {}
 
     if settings.IS_PRODUCTION:
-        # Server the file using mod_xsendfile
+        # Serve the file using mod_xsendfile
         pass
 
     return FileResponse(doc.document)
