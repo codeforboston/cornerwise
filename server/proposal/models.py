@@ -1,4 +1,4 @@
-import os
+import os, redis
 from datetime import datetime
 
 from django.conf import settings
@@ -108,7 +108,7 @@ class Event(models.Model):
     date = models.DateTimeField(db_index=True)
     duration = models.DurationField(null=True)
     description = models.TextField()
-    proposals = models.ManyToManyField(Proposal)
+    proposals = models.ManyToManyField(Proposal, related_name="proposals")
 
 
 class Document(models.Model):
@@ -173,7 +173,7 @@ class Image(models.Model):
     proposal.
 
     """
-    proposal = models.ForeignKey(Proposal)
+    proposal = models.ForeignKey(Proposal, related_name="images")
     document = models.ForeignKey(Document, null=True)
     image = models.FileField()
     thumbnail = models.FileField(null=True)
