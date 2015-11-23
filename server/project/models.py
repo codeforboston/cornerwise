@@ -21,8 +21,13 @@ class Project(models.Model):
 
     proposals = models.ManyToManyField("proposal.Proposal")
 
-    def to_dict(self):
-        return model_to_dict(self)
+    def to_dict(self, include_budget=True):
+        d = model_to_dict(self)
+
+        if include_budget:
+            d["budget"] = {bi.year: bi.to_dict() for bi in self.budgetitem_set.all()}
+
+        return d
 
 
 class BudgetItem(models.Model):
@@ -31,3 +36,6 @@ class BudgetItem(models.Model):
     budget = models.DecimalField(max_digits=11, decimal_places=2)
     funding_source = models.CharField(max_length=64)
     comment = models.TextField()
+
+    def to_dict(self):
+        return model_to_dict(self)

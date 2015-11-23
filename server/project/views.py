@@ -15,3 +15,7 @@ def view_project(req, pk=None):
     project = get_object_or_404(Project, pk=pk)
 
     return project.to_dict()
+
+@make_response()
+def list_projects(req):
+    return {"projects": [p.to_dict() for p in Project.objects.all()]}

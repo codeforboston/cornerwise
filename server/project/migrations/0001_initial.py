@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('year', models.IntegerField()),
                 ('budget', models.DecimalField(decimal_places=2, max_digits=11)),
+                ('funding_source', models.CharField(max_length=64)),
                 ('comment', models.TextField()),
             ],
         ),

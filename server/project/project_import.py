@@ -47,4 +47,5 @@ def rows_import(rows):
         i += 1
 
 def csv_import(infile):
-    rows_import(csv.DictReader(infile))
+    with open(infile, "r") as f:
+        rows_import(csv.DictReader(f))
