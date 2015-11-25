@@ -102,7 +102,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 marker: {
                     type: "circle",
                     color: "red",
-                    fillColor: "white",
+                    fillColor: "pink",
                     radius: 3,
                     fillOpacity: 1
                 },
