@@ -11,7 +11,32 @@ App = {
         });
         minimap.on("click", function(e) {
             map.setView(e.latlng);
-            console.log(rectLayer);
+        });
+
+        $(minimap.getContainer()).on("mousedown", function(e) {
+            var offset = $(this).offset();
+            console.log(offset);
+
+            function move(e) {
+                var pointX = e.pageX - offset.left,
+                    pointY = e.pageY - offset.top,
+                    point = L.point(pointX, pointY),
+                    latLng = minimap.unproject(L.point(pointX, pointY)),
+                    currentCenter = rectLayer.getBounds().getCenter(),
+                    dLat = latLng.lat - currentCenter.lat,
+                    dLng = latLng.lng - currentCenter.lng;
+
+                map.setView(latLng);
+            }
+            function mouseup(e) {
+                $(document)
+                    .off("mousemove", move)
+                    .off("mouseup", mouseup);
+            }
+
+            $(document)
+                .on("mousemove", move)
+                .on("mouseup", mouseup);
         });
     },
 
@@ -33,6 +58,7 @@ App = {
         map.addLayer(L.tileLayer(source));
         map.addLayer(proposals);
         map.fitBounds(bounds);
+        //map.zoomControl.setPosition("bottomleft");
 
         var minimap = L.map("minimap",
                             {attributionControl: false,
@@ -81,9 +107,48 @@ App = {
                         var marker = L.marker(feature.location).addTo(proposals);
 
                         marker.proposal = feature;
+
+                        marker.on("click", function(e) {
+                            $(document).trigger("proposalSelected",
+                                                [{proposal: feature,
+                                                  marker: marker,
+                                                  how: "click",
+                                                  originalEvent: e}]);
+                        });
                     }
                 });
             });
+
+        // var detailsMinimap = L.map("details-minimap",
+        //                            {attributionControl: false,
+        //                             dragging: false,
+        //                             touchZoom: false,
+        //                             boxZoom: false,
+        //                             zoomControl: false});
+        // detailsMinimap.addLayer(L.tileLayer(source));
+        // detailsMinimap.setZoom(17);
+
+        $(document).on("proposalSelected",
+                       function(e, info) {
+                           if (!info || !info.proposal) {
+                               // Hide the viewer
+                               $("#details").hide();
+                               return;
+                           }
+
+                           var proposal = info.proposal,
+                               image = proposal.images.length ?
+                                   "http://localhost:3000" + proposal.images[0].src : "";
+
+                           $("#details")
+                               .find(".address").text(proposal.address)
+                               .end()
+                               .find("img.thumb").attr("src", image)
+                               .end()
+                               .show();
+
+                           // detailsMinimap.setView(proposal.location);
+                       });
 
         map.locate();
 
@@ -98,9 +163,11 @@ App = {
 
                     marker._unzoomedIcon =
                         marker.icon || new L.Icon.Default();
+                    var factor = Math.pow(2, (map.getZoom() - 17)),
+                        size = L.point(100*factor, 75*factor);
                     marker.setIcon(L.divIcon({
                         className: "zoomed-proposal-marker",
-                        iconSize: L.point(100, 75),
+                        iconSize: size,
                         html: "<img src='http://localhost:3000" +
                             images[0].thumb + "'/>"
                     }));

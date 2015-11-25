@@ -276,15 +276,24 @@ def split_event(desc):
 
     return {"date": dt, "title": event_desc}
 
+event_fields = [("Dates of Public Hearing", "Public Hearing"),
+                ("Dates of Public Meeting", "Public Hearing")]
 
-def get_events(doc, props=None):
+def get_events(doc, props=None, fields=event_fields):
     dtype = doc_type(doc)
 
     if doc.field == "reports":
         if not props:
             props = get_properties(doc)
 
-        dph = props.get("Dates of Public Hearing")
-        if dph:
-            return [split_event(dph)]
-        return []
+        events = []
+        for (field, title) in fields:
+            date_prop = props.get(field)
+            if date_prop:
+                event = split_event(date_prop)
+                if not event["title"]:
+                    event["title"] = title
+
+                events.append(event)
+
+        return events

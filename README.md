@@ -9,7 +9,7 @@ of Somerville, MA's Reports and Decisions page.
 In its current state, the project breaks more or less neatly into three
 pieces:
 
-- Somerville-specific code that ingests semi-structured data from the city's [Reports and Decisions](www.somervillema.gov/departments/planning-board/reports-and-decisions) page and transforms it into searchable structured data.
+- Somerville-specific code that ingests semi-structured data from the city's [Reports and Decisions](http://www.somervillema.gov/departments/planning-board/reports-and-decisions) page and transforms it into searchable structured data.
   
 - A server that responds to queries over the imported proposal data
   
@@ -22,7 +22,7 @@ Contributing
 
 We welcome contributions from people of all skillsets.  The best way to
 get involved is by coming to a Tuesday
-[Hack Night](www.meetup.com/Code-for-Boston/) and asking about the
+[Hack Night](http://www.meetup.com/Code-for-Boston/) and asking about the
 project.  You can also take a look at our [issues](Issues) page to find
 unclaimed issues marked *bite-sized* or *self-contained*.  These labels
 refer to issues that are, respectively, small or that require minimal
@@ -32,7 +32,7 @@ familiarity with the existing codebase.
 Getting Started
 -----------
 
-See the [Setup](Setup.org) file for full instructions on getting
+See the [Setup](SETUP.org) file for full instructions on getting
 Cornerwise running locally.
 
 

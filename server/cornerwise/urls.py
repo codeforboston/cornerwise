@@ -19,12 +19,14 @@ from django.contrib import admin
 from django.http import HttpResponse
 
 import parcel.urls as parcel_urls
+import project.urls as project_urls
 import proposal.urls as proposal_urls
 from proposal import doc_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^parcel/', include(parcel_urls)),
+    url(r'^project/', include(project_urls)),
     url(r'^proposal/', include(proposal_urls)),
     url(r"^doc/", include(doc_urls)),
 ]

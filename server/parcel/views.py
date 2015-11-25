@@ -5,7 +5,7 @@ from django.shortcuts import render
 from functools import reduce
 import json, operator, re
 
-from shared.address import normalize_number, normalize_street
+from shared.address import normalize_number, normalize_street, split_address
 from shared.geo import geojson_data
 from shared.request import make_response, ErrorResponse
 
@@ -30,11 +30,10 @@ def make_query(d, reducer=operator.and_):
 
     street = d.get("street")
     number = d.get("number")
-    if "address" in d:
-        m = re.match(r"(\d+)(-\d+)?\s", d["address"])
+    if not street and "address" in d:
+        m = split_address(d["address"])
         if m:
-            number = m.group(1)
-            street = d["address"][m.end():]
+            number, street = m
 
     if street:
         sq = {"full_street": normalize_street(street)}
@@ -44,16 +43,16 @@ def make_query(d, reducer=operator.and_):
 
         subqueries.append(Q(**sq))
 
-    if "types" in d:
-        types = [t.upper() for t in re.split(r"\s*,\s*", d["types"])]
-        subqueries.append(Q(poly_type__in=types))
-    elif "include_row" not in d:
-        subqueries.append(~Q(poly_type="ROW"))
-
     if d.get("mode") == "or":
         reducer = operator.or_
 
-    return reduce(reducer, subqueries)
+    q = reduce(reducer, subqueries)
+
+    if "types" in d:
+        types = [t.upper() for t in re.split(r"\s*,\s*", d["types"])]
+        return q & Q(poly_type__in=types)
+    elif "include_row" not in d:
+        return q & ~Q(poly_type="ROW")
 
 def parcels_for_request(req):
     """

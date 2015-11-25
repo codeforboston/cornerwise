@@ -8312,8 +8312,11 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 
 #overlay .minimap {
     float: left;
-    height: 100px;
-    width: 100px;
+    height: 90px;
+    width: 110px;
+    margin-right: 10px;
+    position: relative;
+    top: -25px;
 }
 
 .permit-info.excluded {

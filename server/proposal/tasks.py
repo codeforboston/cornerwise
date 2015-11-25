@@ -17,7 +17,8 @@ from .models import Proposal, Attribute, Event, Document, Image
 from utils import extension, normalize
 from . import extract
 from cornerwise import celery_app
-from scripts import scrape, arcgis, gmaps, images
+from scripts import scrape, arcgis, gmaps
+from scripts.images import is_interesting, make_thumbnail
 from shared import files_metadata
 
 logger = get_task_logger(__name__)
@@ -171,7 +172,6 @@ def extract_images(doc):
     """
     # TODO: Break this into smaller subtasks
     docfile = doc.document
-    logger = extract_images.get_logger()
 
     if not docfile:
         logger.error("Document has not been copied to the local filesystem.")
@@ -201,7 +201,7 @@ def extract_images(doc):
         for image_name in os.listdir(images_dir):
             image_path = os.path.join(images_dir, image_name)
 
-            if not images.is_interesting(image_path):
+            if not is_interesting(image_path):
                 # Delete 'uninteresting' images
                 os.unlink(image_path)
                 continue
@@ -271,8 +271,8 @@ def generate_thumbnail(image, replace=False):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
     else:
         try:
-            thumbnail_path = images.make_thumbnail(image.image.name,
-                                               fit=settings.THUMBNAIL_DIM)
+            thumbnail_path = make_thumbnail(image.image.name,
+                                            fit=settings.THUMBNAIL_DIM)
         except Exception as err:
             logger.error(err)
             return
@@ -311,8 +311,12 @@ def add_doc_attributes(doc):
 
         attr.save()
 
+    add_doc_events(doc, properties)
+
+def add_doc_events(doc, properties):
     # Find events and create them:
     events = extract.get_events(doc, properties)
+    event = None
     for e in events:
         try:
             event = Event.objects.get(title=e["title"],
@@ -344,11 +348,14 @@ def process_document(doc):
     (fetch_document.s(doc) |
      celery.group((extract_images.s() | generate_thumbnails.s()),
                   generate_doc_thumbnail.s(),
-                  extract_text.s() | add_doc_attributes()))()
+                  extract_text.s() | add_doc_attributes.s()))()
 
 
 @celery_app.task(name="proposal.process_documents")
-def process_documents(docs):
+def process_documents(docs=None):
+    if not docs:
+        docs = Document.objects.filter(document="")
+
     return process_document.map(docs)()
 
 

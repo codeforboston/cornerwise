@@ -1,8 +1,9 @@
 from django.apps import AppConfig
 
-class ProposalConfig(AppConfig):
-    name = "proposal"
+class ProjectConfig(AppConfig):
+    name = "project"
 
     def ready(self):
         # Register tasks with Celery:
-        from . import tasks
+        #from . import tasks
+        pass

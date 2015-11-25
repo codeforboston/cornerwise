@@ -8,25 +8,30 @@ from django.views.decorators.cache import cache_page
 from collections import defaultdict
 from functools import reduce
 from itertools import chain
+import re
 
 from shared.request import make_response
 
 from .models import Proposal, Attribute, Document, Event, Image
 
-def proposal_json(proposal, include_images=True, include_attributes=False):
+def proposal_json(proposal, include_images=True, include_attributes=False,
+                  include_events=False, include_documents=True):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
     pdict["location"] = {"lat": proposal.location.y,
                          "lng": proposal.location.x}
 
-    pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
+    if include_documents:
+        pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
 
     if include_images:
-        images = Image.objects.filter(document__proposal=proposal)
-        pdict["images"] = [img.to_dict() for img in images]
+        pdict["images"] = [img.to_dict() for img in proposal.images.all()]
 
     if include_attributes:
         attributes = Attribute.objects.filter(proposal=proposal)
         pdict["attributes"] = [a.to_dict() for a in attributes]
+
+    if include_events:
+        pdict["events"] = [e.to_dict for e in proposal.events.all()]
 
     return pdict
 
@@ -67,7 +72,11 @@ query_params = {
 
 def build_proposal_query(d):
     subqueries = {}
-    ids = build_attributes_query(d)
+    ids = build_attributes_query(d) or []
+
+    pids = d.get("id")
+    if pids:
+        ids = re.split(r"\s*,\s*", pids)
 
     if ids:
         subqueries["pk__in"] = ids
@@ -77,6 +86,15 @@ def build_proposal_query(d):
         subqueries["complete"] = True
     elif status == "active":
         subqueries["complete"] = False
+    # If status is anything other than 'active' or 'closed', find all
+    # proposals.
+
+    event = d.get("event")
+    if event:
+        try:
+            subqueries["event"] = int(event)
+        except ValueError as verr:
+            pass
 
     for k in d:
         if k in query_params:
@@ -121,7 +139,7 @@ def download_document(req, pk):
         return {}
 
     if settings.IS_PRODUCTION:
-        # Server the file using mod_xsendfile
+        # Serve the file using mod_xsendfile
         pass
 
     return FileResponse(doc.document)

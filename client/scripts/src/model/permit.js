@@ -2,6 +2,10 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
     return B.Model.extend({
         urlRoot: "/proposal/view",
 
+        getType: function() {
+            return "proposal";
+        },
+
         initialize: function() {
                  this.listenTo(refLocation, "change", this.recalculateDistance)
                 .listenTo(this, "change:hovered", this.loadParcel)
@@ -85,6 +89,54 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                 });
         },
 
+        getThumb: function() {
+            var images = this.get("images");
+
+            if (images.length)
+                return images[0].thumb || images[0].src;
+
+            return null;
+        },
+
+        getAttribute: function(handle) {
+            var found = null;
+
+            $.each(this.get("attributes"), function(idx, attr) {
+                if (attr.handle === handle) {
+                    found = attr;
+                    return false;
+                }
+
+                return true;
+            });
+
+            return found;
+        },
+
+        fetchAttribute: function(handle) {
+            var found = this.getAttribute(handle),
+                deferred = $.Deferred();
+
+            if (found) {
+                deferred.resolve(found);
+            } else {
+                var self = this;
+                this.fetch()
+                    .done(function(model) {
+                        found = self.getAttribute(handle);
+                        if (found)
+                            deferred.resolve(found);
+                        else
+                            deferred.reject();
+                    })
+                    .fail(function() {
+                        deferred.reject();
+                    });
+            }
+
+            return deferred;
+        },
+
         getDistance: function(fromLoc, toLoc) {
             try {
                 return Math.round(L.latLng(fromLoc).distanceTo(toLoc), 0);
@@ -99,6 +151,10 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
         recalculateDistance: function() {
             var dist = this.set("refDistance", this.getDistanceToRef());
+        },
+
+        select: function() {
+            this.set({selected: true});
         },
 
         selectOrZoom: function() {

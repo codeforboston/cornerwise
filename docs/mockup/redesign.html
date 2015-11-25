@@ -17,6 +17,7 @@
     <div id="map-container">
       <div id="map">
       </div>
+<<<<<<< HEAD
       <div id="minimap"> </div>
     </div>
 <<<<<<< HEAD
@@ -30,9 +31,27 @@
 =======
     <div id="logo" class="resp-portrait-hide">
       <img src="cornerwise-logo.png">
+=======
+      <div id="minimap"></div>
+      <div id="details">
+        <div>
+          <img src="http://static2.wikia.nocookie.net/__cb20100904145954/simpsons/images/5/53/Fake_street.png" class="thumb"/>
+          <h3 class="address">123 Fake Street</h3>
+          <div id="details-minimap"></div>
+
+          <a class="more" href="#">View more&hellip;</a>
+          <a class="calendar" aria-label="View related event" href="#">
+            <img src="images/calendar.png">
+          </a>
+        </div>
+      </div>
+>>>>>>> origin/master
     </div>
 
     <div id="search-banner" class="overlay">
+      <div id="logo" class="resp-portrait-hide">
+      <img src="cornerwise-logo.png">
+    </div>
       <div class="overlay-contents">
         <h3>what&rsquo;s being built near&hellip;</h3>
         <div class="input-group big-input">
@@ -44,15 +63,26 @@
     </div>
 
     <div id="menu">
-        <a id="menu-button" href="#">
-          <span class="icon" aria-hidden="true">≡</span>
-          <span class="resp-portrait-hide">MENU</span>
-        </a>
+      <a id="menu-button" class="button big" href="#">
+        <span class="icon" aria-hidden="true">≡</span>
+        <span class="resp-portrait-hide">MENU</span>
+      </a>
     </div>
 
     <div id="dev-controls">
-      Main View:
-      <input type="checkbox" id="main_activated"/>
+      Main View: <input type="checkbox" id="main_activated"/>
+    </div>
+
+    <div id="data">
+      <table>
+        <thead>
+          <tr>
+            <th>Address</th>
+            <th>Applicant</th>
+          </tr>
+        </thead>
+        <tbody> </tbody>
+      </table>
     </div>
 
     <div id="intro" class="overlay">
@@ -92,16 +122,24 @@
         <a href="#" class="filter-button">Something Else</a>
         <a href="#" class="filter-button">Impact</a>
       </div>
-      <div class="section">
-        <h3>SUBSCRIBE</h3>
-        <span class="resp-portrait-hide">
-          Sign up for alerts near this address:
-        </span>
+      <div class="section"></div>
+      <div id="signup" class="section">
+        <!-- <span class="resp-portrait-hide"> -->
+        <!--   Sign up for alerts near this address: -->
+        <!-- </span> -->
+        <a id="subscribe" class="big button">SUBSCRIBE</a>
+        <!-- <div class="input-group"> -->
 
+<<<<<<< HEAD
         <div class="input-group">
           <input class="input" type="text" name="address" placeholder="enter email" />
           <button class="input-button go-button">go</button>
         </div>
+>>>>>>> origin/master
+=======
+          <!-- <input class="input" type="text" name="address" placeholder="enter email" /> -->
+          <!-- <button class="input-button go-button">go</button> -->
+        <!-- </div> -->
 >>>>>>> origin/master
       </div>
     </div>

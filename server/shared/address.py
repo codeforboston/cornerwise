@@ -1,7 +1,7 @@
 import re
 
 subs = {
-    "AVE": "AVENUE",
+    "AVENUE": "AVE",
     "COURT": "CT",
     "CRT": "CT",
     "DRIVE": "DR",
@@ -22,3 +22,11 @@ def normalize_number(num):
     m = re.match(r"\d+", num)
     if m:
         return m.group(0)
+
+def split_address(s):
+    m = re.match(r"(\d+)(-\d+)?\s", s)
+    if m:
+        number = m.group(1)
+        street = s[m.end():]
+
+        return number, street
