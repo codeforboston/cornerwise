@@ -19,7 +19,7 @@ a:hover {
     opacity: 0.6;
     padding: 1em;
     position: absolute;
-    right: 0;
+    left: 0;
     top: 25%;
     z-index: 10;
 }
@@ -52,28 +52,31 @@ a:hover {
     z-index: 20;
 }
 
-#details {
-    background-color: rgba(255, 255, 255, 0.5);
+.empty {
     display: none;
+}
+
+#preview {
+    background-color: rgba(255, 255, 255, 0.5);
     position: absolute;
     width: 20em;
     padding: 1em;
     bottom: 20%;
 }
 
-#details .more {
+#preview .more {
     color: forestgreen;
     position: absolute;
     bottom: 1em;
     right: 1em;
 }
 
-#details .calendar img {
+#preview .calendar img {
     max-height: 50px;
     max-width: 50px;
 }
 
-#details img {
+#preview img {
     max-width: 100px;
     float: left;
     margin-right: 0.5em;
@@ -345,4 +348,136 @@ a.filter-button {
     .resp-portrait-hide {
         display: none;
     }
+}
+
+
+#data {
+    background-color: #ffffff;
+    border: 1px solid black;
+    height: 60%;
+    padding: 0.5em;
+    position: absolute;
+    top: 15%;
+    right: 0;
+    width: 250px;
+    transition: right 0.2s ease-out;
+}
+
+#data.collapsed {
+    right: -260px;
+}
+
+#data .tabs {
+    position: absolute;
+    top: -22px;
+    width: 250px;
+}
+
+.tabs a {
+    background-color: #f9f9f9;
+    border: 1px solid black;
+    border-radius: 5px 5px 0 0;
+    color:black;
+    font-weight: bold;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.tabs a.selected {
+    background-color: white;
+    border-bottom: none;
+}
+
+#data .content {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+#data .toggler {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid black;
+    color: black;
+    left: -70px;
+    padding: 5px;
+    position: relative;
+    transform: rotate(90deg);
+}
+
+.project {
+    cursor: pointer;
+    height: 80px;
+    overflow: hidden;
+}
+
+.project:hover {
+    background-color: aliceblue;
+}
+
+.project .icon {
+    border: 1px solid gray;
+    float: left;
+    margin-right: 5px;
+    overflow: hidden;
+    height: 70px;
+    width: 60px;
+}
+
+.project .icon img {
+    height: 100%
+}
+
+.project .name {
+    font-weight: bold;
+}
+
+.department, .category {
+    font-size: small;
+    font-style: italic;
+}
+
+.project .category {
+    float: right;
+}
+
+.collapsed .when-expanded {
+    display: none;
+}
+
+.expanded .when-collapsed {
+    display: none;
+}
+
+.budget-point {
+    fill: red;
+}
+
+.budget-line {
+    stroke: navy;
+}
+
+#preview {
+    background-color: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    width: 20em;
+    padding: 1em;
+    bottom: 20%;
+}
+
+#preview .more {
+    color: forestgreen;
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+}
+
+#preview .calendar img {
+    max-height: 50px;
+    max-width: 50px;
+}
+
+#preview img {
+    max-width: 100px;
+    float: left;
+    margin-right: 0.5em;
 }
