@@ -6,17 +6,17 @@ define(["backbone", "underscore", "leaflet",
         className: "proposal-details",
         template: $u.templateWithId("proposal-details",
                                     {variable: "proposal"}),
-        el: "#overlay",
+
         events: {
             "click a.close": "hide",
             "click": "dismiss"
         },
 
         initialize: function() {
-            this.listenTo(this.collection, "change:selected",
-                          this.selectionChanged);
+            // this.listenTo(this.collection, "change:selected",
+            //               this.selectionChanged);
 
-            routes.getDispatcher().on("showDetails", _.bind(this.onShow, this));
+            // routes.getDispatcher().on("showDetails", _.bind(this.onShow, this));
         },
 
         selectionChanged: function(proposal) {

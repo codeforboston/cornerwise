@@ -12,7 +12,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
 
         tagName: "tr",
 
-        className: "permit-info",
+        className: "proposal-info",
 
         events: {
             "mouseover": "beginHover",
@@ -44,7 +44,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         onClick: function(e) {
-            this.model.selectOrZoom();
+            this.model.select();
         },
 
         hoveredChanged: function(permit, hovered) {

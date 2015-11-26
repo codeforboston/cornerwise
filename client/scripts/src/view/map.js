@@ -1,7 +1,7 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
-        "ref-location", "popup-view", "ref-marker", "layers",
+        "ref-location", "ref-marker", "layers",
         "info-layer-helper", "recentered-map"],
-       function(B, config, L, $, _, refLocation, PopupView, RefMarker,
+       function(B, config, L, $, _, refLocation, RefMarker,
                 infoLayers, info, RecenteredMap) {
 
     function getMarkerPng(isHovered, isSelected) {
@@ -47,22 +47,20 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.parcelLayer = parcelLayer;
             this.zoningLayer = zoningLayer;
 
+            map.on("zoomend moveend", _.bind(this.updateMarkers, this));
+
             // Map from case numbers to L.Markers
             this.caseMarker = {};
 
-            this.listenTo(this.collection, "add", this.permitAdded)
-                .listenTo(this.collection, "remove", this.permitRemoved)
-                .listenTo(this.collection, "change", this.changed);
-
             // Place the reference location marker:
             this.placeReferenceMarker();
+
             // ... and subscribe to updates:
-            this.listenTo(refLocation, "change", this.placeReferenceMarker);
-
-            this.listenTo(infoLayers, "change", this.layersChanged);
-
-            zoningLayer.on("popupopen", _.bind(this.popupOpened, this))
-                .on("popupclose", _.bind(this.popupClosed, this));
+            this.listenTo(this.collection, "add", this.permitAdded)
+                .listenTo(this.collection, "remove", this.permitRemoved)
+                .listenTo(this.collection, "change", this.changed)
+                .listenTo(refLocation, "change", this.placeReferenceMarker)
+                .listenTo(infoLayers, "change", this.layersChanged);
 
             return this;
         },
@@ -77,30 +75,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         // GeoJSON layer group containing parcel shapes
         parcelLayer: null,
 
-        el: function() {
-            return document.getElementById(config.mapId);
-        },
-
-        popupOpened: function(e) {
-            var view = new PopupView({popup: e.popup,
-                                      model: this.collection.selected});
-            e.popup._view = view;
-
-            view.render();
-        },
-
-        popupClosed: function(e) {
-            var view = e.popup._view;
-
-            if (view) {
-                e.popup._view = null;
-                view.destroy();
-            }
-        },
-
         // Callbacks:
         permitAdded: function(permit) {
-            // What is the actual signature for callbacks??
             var loc = permit.get("location");
 
             if (!loc)
@@ -122,7 +98,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     permit.set({hovered: false});
                 })
                 .on("click", function(e) {
-                    permit.selectOrZoom();
+                    permit.select();
                 });
 
             this.listenTo(permit, "change", this.changed);
@@ -156,10 +132,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                     if (change.changed.selected) {
                         self.map.setView(marker.getLatLng());
-
-                        // The contents are rendered in the popupOpened
-                        // callback.
-                        marker.unbindPopup().bindPopup("").openPopup();
                     } else if (change.changed.zoomed) {
                         if (self.map.getZoom() < 18)
                             self.map.setZoom(18);
@@ -193,6 +165,44 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 promise = $.Deferred();
 
             return marker ? promise.resolve(marker) : promise.fail();
+        },
+
+        updateMarkers: function() {
+            var map = this.map,
+                pLayer = this.zoningLayer;
+
+            if (map.getZoom() >= 17) {
+                var bounds = map.getBounds();
+                pLayer.eachLayer(function(marker) {
+                    var proposal = marker.proposal;
+
+                    if (!proposal)
+                        return;
+
+                    var images = proposal.get("images");
+                    if (!images || !images.length ||
+                        !bounds.contains(marker.getLatLng()))
+                        return;
+
+                    marker._unzoomedIcon =
+                        marker.icon || new L.Icon.Default();
+                    var factor = Math.pow(2, (map.getZoom() - 17)),
+                        size = L.point(100*factor, 75*factor);
+                    marker.setIcon(L.divIcon({
+                        className: "zoomed-proposal-marker",
+                        iconSize: size,
+                        html: "<img src='http://localhost:3000" +
+                            images[0].thumb + "'/>"
+                    }));
+                });
+            } else {
+                pLayer.eachLayer(function(marker) {
+                    if (marker._unzoomedIcon) {
+                        marker.setIcon(marker._unzoomedIcon);
+                        delete marker._unzoomedIcon;
+                    }
+                });
+            }
         },
 
         // Store a reference to the reference marker

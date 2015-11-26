@@ -2,10 +2,11 @@ define(["backbone", "underscore", "jquery"], function(B, _, $) {
     return B.View.extend({
         initialize: function(options) {
             // Object mapping titles -> views
-            this.subviews = options.subviews;
+            this.subviews = options.subviews || {};
             this.selected = _.keys(this.subviews)[0];
             this.panes = this.findPanes();
             this.renderTabs();
+            this.render();
         },
 
         renderTabs: function() {
@@ -41,12 +42,18 @@ define(["backbone", "underscore", "jquery"], function(B, _, $) {
         },
 
         findPanes: function() {
-            var panes = {};
+            var panes = {}, self = this;
             this.$(".pane").each(function(i, pane) {
-                var key = $(pane).data("key");
+                pane = $(pane);
+                var key = pane.data("key");
 
-                if (key)
-                    panes[key] = $(pane);
+                if (key) {
+                    panes[key] = pane;
+
+                    var view = self.subviews[key];
+                    if (view)
+                        view.setElement(pane);
+                }
             });
 
             return panes;

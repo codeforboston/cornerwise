@@ -1,15 +1,6 @@
 define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, PermitView, $) {
     return B.View.extend({
-        initialize: function() {
-            this.listenTo(this.collection, "fetching", this.fetchingBegan)
-                .listenTo(this.collection, "reset", this.fetchingComplete)
-                .listenTo(this.collection, "sort", this.render);
-
-            this.$el.append("<thead><tr></tr></thead>");
-            this.$el.append("<tbody/>");
-
-            this.buildHeader();
-        },
+        title: "Proposals",
 
         buildHeader: function() {
             var tr = this.$("thead tr");
@@ -30,14 +21,9 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
             "click th.sort": "onClickSort"
         },
 
-        el: function() {
-            return document.getElementById("permit-list");
-        },
-
-        tagName: "table",
-
         permitAdded: function(permit) {
             var view = new PermitView({model: permit});
+
             this.$("tbody").append(view.render().el);
         },
 
@@ -52,7 +38,25 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
 
         sortField: null,
 
+        build: function() {
+            this.listenTo(this.collection, "fetching", this.fetchingBegan)
+                .listenTo(this.collection, "reset", this.fetchingComplete)
+                .listenTo(this.collection, "sort", this.render);
+
+            this.$el.append("<thead><tr></tr></thead>");
+            this.$el.append("<tbody/>");
+
+            this.buildHeader();
+
+            this.collection.each(this.permitAdded);
+            this._built = true;
+        },
+
         render: function(change) {
+            if (!this._built) this.build();
+
+            if (!change) return;
+
             this.$el.removeClass("loading");
             this.$el.find("tbody").html("");
             var self = this;

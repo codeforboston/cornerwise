@@ -1,5 +1,5 @@
-define(["backbone"],
-       function(B) {
+define(["backbone", "underscore"],
+       function(B, _) {
            return B.Model.extend({
                urlRoot: "/project/view",
 
@@ -13,6 +13,25 @@ define(["backbone"],
                    });
 
                    return attrs;
+               },
+
+               getThumbnail: function() {
+                   return this.get("thumbnail") ||
+                       "/static/images/cityhall.jpg";
+               },
+
+               totalBudget: function() {
+                   var budgets = this.get("budget");
+
+                   return _.reduce(budgets,
+                                   function(acc, b) {
+                                       return acc+b.budget;
+                                   }, 0);
+               },
+
+               yearRange: function() {
+                   var years = _.map(parseInt, _.keys(this.get("budget")));
+                   return [_.min(years), _.max(years)];
                }
            });
        });
