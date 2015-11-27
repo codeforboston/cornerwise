@@ -3,6 +3,11 @@ define(["backbone", "underscore"],
            return B.Model.extend({
                urlRoot: "/project/view",
 
+               deptNames: {
+                   "DPW": "Department of Public Works",
+                   "T&I": "Transportation and Infrastructure"
+               },
+
                getType: function() {
                    return "project";
                },
@@ -15,7 +20,13 @@ define(["backbone", "underscore"],
                    return attrs;
                },
 
-               getThumbnail: function() {
+               categoryIcon: function() {
+                   var cat = this.get("category").toLowerCase(),
+                       brief = cat.replace(/[&\s\-]+/g, "_");
+                   return "/static/images/icon/" + brief + ".png";
+               },
+
+               thumbnail: function() {
                    return this.get("thumbnail") ||
                        "/static/images/cityhall.jpg";
                },
@@ -29,9 +40,17 @@ define(["backbone", "underscore"],
                                    }, 0);
                },
 
+               yearCount: function() {
+                   return _.size(this.get("budget"));
+               },
+
                yearRange: function() {
-                   var years = _.map(parseInt, _.keys(this.get("budget")));
+                   var years = _.map( _.keys(this.get("budget")), parseInt);
                    return [_.min(years), _.max(years)];
+               },
+
+               yearStart: function() {
+                   return _.min(_.map(_.keys(this.get("budget")), parseInt));
                }
            });
        });

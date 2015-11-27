@@ -135,12 +135,24 @@
     <script type="text/template" id="project-template">
       <div class="project">
         <div class="icon">
-          <img src="<%= project.getThumbnail() %>">
+          <img src="<%= project.thumbnail() %>">
         </div>
-        <div class="name"><%= project.get("name") %></div>
-        <div class="category"><%= project.get("category") %></div>
+        <div class="name" title="<%= project.get('name') %>">
+          <%= project.get("name") %>
+        </div>
+        <div class="category" title="<%= project.get('category') %>">
+          <img src="<%= project.categoryIcon() %>"/>
+        </div>
         <div class="department"><%= project.get("department") %></div>
-        <div class="budget"><%= prettyAmount(project.totalBudget()) %></div>
+        <div class="time-span">
+
+        </div>
+        <div class="budget">
+          <%= prettyAmount(project.totalBudget()) %>
+          <% if (project.yearCount() > 1) { %>
+          over <%= project.yearCount() %> years
+          <% } %>
+        </div>
         <div class="status"></div>
       </div>
     </script>
@@ -149,8 +161,8 @@
     <body class="main">
       <div id="map-container">
         <div id="map"></div>
-
         <div id="minimap"></div>
+        <div id="overlay"></div>
 
         <div id="preview">
           <div>

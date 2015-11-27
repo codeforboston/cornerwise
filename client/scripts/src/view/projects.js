@@ -9,6 +9,8 @@ define(["backbone", "project-view"], function(B, ProjectView) {
             this.listenTo(projects, "add", this.projectAdded)
                 .listenTo(projects, "reset", this.projectsReset)
                 .listenTo(projects, "change:selected", this.projectSelected);
+            this.$el.html("");
+            this.collection.each(this.projectAdded);
 
             this._built = true;
         },
@@ -21,10 +23,6 @@ define(["backbone", "project-view"], function(B, ProjectView) {
 
         render: function() {
             this.build();
-
-            this.$el.html("");
-
-            this.collection.each(this.projectAdded);
         }
     });
 });

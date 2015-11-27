@@ -46,7 +46,10 @@ define(["underscore", "jquery"], function(_, $) {
                 mag = "b";
                 amount /= 1000000000;
             }
-            return currency + amount.toFixed(1) + mag;
+
+            var amountStr = amount.toFixed(1).replace(/\.0$/, "");
+
+            return currency + amountStr + mag;
         }
 
         return currency + commas(amount);

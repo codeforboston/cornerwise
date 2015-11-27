@@ -13,10 +13,10 @@ define(["backbone", "underscore", "leaflet",
         },
 
         initialize: function() {
-            // this.listenTo(this.collection, "change:selected",
-            //               this.selectionChanged);
+            this.listenTo(this.collection, "change:selected",
+                          this.selectionChanged);
 
-            // routes.getDispatcher().on("showDetails", _.bind(this.onShow, this));
+            routes.getDispatcher().on("showDetails", _.bind(this.onShow, this));
         },
 
         selectionChanged: function(proposal) {
@@ -43,35 +43,35 @@ define(["backbone", "underscore", "leaflet",
         },
 
         render: function() {
-            if (this.minimap)
-                this.minimap.remove();
+            // if (this.minimap)
+            //     this.minimap.remove();
 
             var html = this.template(this.model.toJSON());
 
             this.$el.html(html);
 
-            var minimap =
-                    this.minimap =
-                    L.map(this.$(".minimap")[0],
-                          {attributionControl: false,
-                           dragging: false,
-                           touchZoom: false,
-                           scrollWheelZoom: false,
-                           boxZoom: false,
-                           zoomControl: false});
-            minimap
-                .setView(this.model.get("location"))
-                .setZoom(17)
-                .addLayer(L.tileLayer(config.tilesURL));
+            // var minimap =
+            //         this.minimap =
+            //         L.map(this.$(".minimap")[0],
+            //               {attributionControl: false,
+            //                dragging: false,
+            //                touchZoom: false,
+            //                scrollWheelZoom: false,
+            //                boxZoom: false,
+            //                zoomControl: false});
+            // minimap
+            //     .setView(this.model.get("location"))
+            //     .setZoom(17)
+            //     .addLayer(L.tileLayer(config.tilesURL));
 
-            var parcel = this.model.get("parcel");
+            // var parcel = this.model.get("parcel");
 
-            if (parcel) {
-                var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
-                parcelLayer.setStyle(config.parcelStyle);
-                minimap.addLayer(parcelLayer)
-                    .setView(parcelLayer.getBounds().getCenter());
-            }
+            // if (parcel) {
+            //     var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
+            //     parcelLayer.setStyle(config.parcelStyle);
+            //     minimap.addLayer(parcelLayer)
+            //         .setView(parcelLayer.getBounds().getCenter());
+            // }
         },
 
         hide: function() {

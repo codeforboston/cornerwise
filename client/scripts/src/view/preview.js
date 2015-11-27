@@ -2,13 +2,13 @@ define(["backbone", "routes", "underscore", "config"],
        function(B, routes, _, config) {
            return B.View.extend({
                initialize: function(options) {
-                   this.$el
-                       .hide();
-                   this.$("a._details").on("click",
-                                           _.bind(this.showDetails, this));
+                   this.$el.hide();
+                   this.$el.on("click", "a.more",
+                               _.bind(this.showDetails, this));
 
                    this.listenTo(this.collection, "change:selected",
                                  this.selectionChanged);
+                   window.routes = routes;
                },
 
                events: {
@@ -16,7 +16,7 @@ define(["backbone", "routes", "underscore", "config"],
                },
 
                showDetails: function(e) {
-                   routes.getDispatcher().trigger("showDetails", e.data.id);
+                   routes.getDispatcher().trigger("showDetails", this.collection.selected.id);
                },
 
                selectionChanged: function(proposal) {
