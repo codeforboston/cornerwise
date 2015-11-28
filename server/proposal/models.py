@@ -169,24 +169,25 @@ class Document(models.Model):
 
 
 class Image(models.Model):
-    """An image associated with a document. In the future, it may be
-    worthwhile to alter this to allow images associated directly with a
-    proposal.
-
+    """An image associated with a document.
     """
     proposal = models.ForeignKey(Proposal, related_name="images")
-    document = models.ForeignKey(Document, null=True)
-    image = models.FileField()
+    document = models.ForeignKey(Document, null=True,
+                                 help_text="Source document for image")
+    image = models.FileField(null=True)
     thumbnail = models.FileField(null=True)
+    url = models.URLField(null=True, unique=True)
+    # Crude way to specify that an image should not be copied to the
+    # local filesystem:
+    skip_cache = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (("proposal", "image"))
 
-    @property
-    def url(self):
-        return self.thumbnail and self.thumbnail.url or self.image.url
+    def get_url(self):
+        return self.image and self.image.url or self.url
 
     def to_dict(self):
-        return {"src": self.image.url,
+        return {"src": self.get_url(),
                 "thumb": self.thumbnail.url if self.thumbnail else None}
