@@ -1,10 +1,9 @@
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render_to_response
 from django.template.loader import render_to_string
 
-import logging
-import json
-import re
+import logging, json, re
 
 logger = logging.getLogger("logger")
 
@@ -40,8 +39,9 @@ def make_response(template=None, error_template="error.html"):
             jsonp_callback = req.GET.get("callback")
 
             if jsonp_callback:
+                content = json.dumps(data, cls=DjangoJSONEncoder)
                 body = "{callback}({json})".format(callback=jsonp_callback,
-                                                   json=json.dumps(data))
+                                                   json=content)
 
                 response = HttpResponse(body, status=status)
                 response["Content-Type"] = "application/javascript"
