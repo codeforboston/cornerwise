@@ -17,7 +17,7 @@ from .models import Proposal, Attribute, Event, Document, Image
 from utils import extension, normalize
 from . import extract
 from cornerwise import celery_app
-from scripts import scrape, arcgis, gmaps
+from scripts import scrape, arcgis, gmaps, street_view
 from scripts.images import is_interesting, make_thumbnail
 from shared import files_metadata
 
@@ -220,6 +220,19 @@ def extract_images(doc):
 
     return images
 
+@celery_app.task(name="proposal.add_street_view")
+def add_street_view(proposal):
+    api_key = getattr(settings, "GOOGLE_API_KEY")
+    secret = getattr(settings, "GOOGLE_STREET_VIEW_SECRET")
+
+    if api_key:
+        location = "{0.address}, {0.region_name}".format(proposal)
+        url = street_view.street_view_url(proposal.address, api_key,
+                                          secret=secret)
+        try:
+            proposal.images.create(url=url, skip_cache=True)
+        except IntegrityError as ie:
+            logger.warning("")
 
 @celery_app.task(name="proposal.generate_doc_thumbnail")
 def generate_doc_thumbnail(doc):
@@ -257,6 +270,23 @@ def generate_doc_thumbnail(doc):
         return thumb_path
 
 
+@celery_app.task(name="proposal.fetch_image")
+def fetch_image(image):
+    url = image.url
+
+    if url:
+        components = parse.urlsplit(url)
+        ext = extension(os.path.basename(components.path))
+        filename = "image_%s.%s" % (image.pk, ext)
+        path = os.path.join(settings.MEDIA_ROOT, "image", filename)
+        with request.urlopen(url) as resp, open(path, "wb") as out:
+            shutil.copyfileobj(resp, out)
+            image.document = path
+
+            image.save()
+
+    return image
+
 @celery_app.task(name="proposal.generate_thumbnail")
 def generate_thumbnail(image, replace=False):
     """Generate an image thumbnail.
@@ -270,6 +300,10 @@ def generate_thumbnail(image, replace=False):
     if os.path.exists(thumbnail_path):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
     else:
+        if not image.image:
+            logger.info("No local image for Image #%s", image.pk)
+            return
+
         try:
             thumbnail_path = make_thumbnail(image.image.name,
                                             fit=settings.THUMBNAIL_DIM)

@@ -3,67 +3,28 @@
  */
 define(
     ["backbone", "underscore", "ref-location", "utils",
-     "arcgis", "collapsible-view", "spga-filter-view",
-     "type-filter-view"],
+     "arcgis"],
 
-    function(B, _, refLocation, $u, arcgis, CollapsibleView, SPGAFilterView,
-             TypeFilterView) {
+    function(B, _, refLocation, $u, arcgis, CollapsibleView) {
         return B.View.extend({
             el: function() {
                 return document.body;
             },
 
-            filterViews: {
-                // "#spga-filters": { view: SPGAFilterView,
-                //                    title: "Granting Authority" },
-                "#type-filters": { view: TypeFilterView,
-                                   title: "Permit Types" }
-            },
-
             initialize: function() {
                 this.listenTo(refLocation, "change:radius", this.updateRadius)
                     .listenTo(refLocation, "change:geolocating", this.toggleGeolocating);
-
-                // Construct subview:
-                this.subviews = _.map(this.filterViews, function(view, sel) {
-                    var subview = new view.view({collection: this.collection});
-                    var collapseView =
-                            new CollapsibleView({
-                                el: self.$(sel)[0],
-                                title: view.title,
-                                view: subview
-                            });
-                    return collapseView.render();
-                }, this);
             },
 
             events: {
-                "change #desc-filter": "refreshDescriptionFilter",
-                "keyup #desc-filter": "descFilterChanged",
-
                 "submit #ref-address-form": "submitAddress",
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
-                "change #radius-filter": "updateRadiusFilter",
-                "input #radius-filter": "updateRadiusLabel",
                 "click #reset": "clearInputs"
             },
 
-            refreshDescriptionFilter: function() {
-                var s = ($("#desc-filter").val() || "").trim();
-                this.collection.filterByDescriptionString(s);
-            },
-
-            descFilterChanged: function(e) {
-                var self = this;
-                clearTimeout(this._descTimeout);
-                this._descTimeout = setTimeout(function() {
-                    self.refreshDescriptionFilter();
-                }, 200);
-            },
-
-
             submitAddress: function(e) {
+
                 if (refLocation.get("geolocating"))
                     return false;
 
@@ -104,21 +65,6 @@ define(
                 return refLocation.setFromBrowser().then(this.reverseGeocodeAddress);
             },
 
-            updateRadiusFilter: function(e) {
-                // Parse the input and convert from feet to meters:
-                var val = parseFloat(e.target.value);
-
-                // Verify that the value is sensible:
-                if (!isNaN(val) && val > 0) {
-                    refLocation.set("radius", val);
-                }
-            },
-
-            updateRadiusLabel: function(e) {
-                var val = e.target.value;
-                $("#radius-value").html("" + $u.commas(val) + " ft");
-            },
-
             clearInputs: function(e) {
                 // Parse the input and convert from feet to meters:
                 // Verify that the value is sensible:
@@ -128,12 +74,6 @@ define(
 
             toggleGeolocating: function(loc, isGeolocating) {
                 $("#ref-address").toggleClass("geolocating", isGeolocating);
-            },
-
-            updateRadius: function(loc, newRadius) {
-                $("#radius-filter-group")
-                    .val(newRadius)[newRadius ? "removeClass" : "addClass"]("inactive");
-                $("#radius-value").html(newRadius ? ("" + $u.commas(newRadius) + " ft") : "");
             }
         });
     });

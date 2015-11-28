@@ -5,11 +5,8 @@
     <meta name="description" content="Find zoning information of City of Sommerville">
     <title>Cornerwise</title>
     <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
-    <!-- <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/> -->
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="/static/css/styles.css" type="text/css" media="screen" />
-    set
+    <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Template for permits in the permit table -->
@@ -25,6 +22,21 @@
 
     <!-- Template for proposal popup information -->
     <script type="text/template" id="popup-template">
+      <div>
+        <img src="http://static2.wikia.nocookie.net/__cb20100904145954/simpsons/images/5/53/Fake_street.png" class="thumb"/>
+        <h3 class="address"><%= proposal.address %></h3>
+        <div class="applicant">
+          <strong>Applicant:</strong>
+          <span class="applicant-name"><%= proposal.getAttributeValue("applicant_name") %></span>
+        </div>
+        <div id="details-minimap"></div>
+
+        <a class="more" href="#">View more&hellip;</a>
+        <a class="calendar" aria-label="View related event" href="#">
+          <img src="/static/images/calendar.png">
+        </a>
+      </div>
+</div>
       <div class="popup-contents">
         <div class="property">
           <strong>Case:</strong>
@@ -40,17 +52,6 @@
           <%= proposal.description %>
         </div>
         <% } %>
-        <!-- <% if (proposal.documents.length) { %> -->
-        <!-- <div class="property"> -->
-        <!--   <ul class="document-list"> -->
-        <!--     <% _.each(proposal.documents, function(document) { %> -->
-        <!--     <li> -->
-        <!--       <a href="<%= document.url %>" target="_blank"> -->
-        <!--         <%= document.title %></a> -->
-        <!--     </li> -->
-        <!--     <% }) %> -->
-        <!--   </ul> -->
-        <!-- </div> -->
         <div class="images">
           <% _.each(proposal.images.slice(0, 4), function(img, i) { %>
           <div class="thumb">
@@ -63,10 +64,11 @@
         <a class="_details" href="#">More&hellip;</a>
         <% } %>
       </div>
-    </script>
+</script>
 
-    <script type="text/template" id="proposal-details">
-      <div class="details">
+
+<script type="text/template" id="proposal-details">
+  <div class="details">
         <a href="#" class="close">Close</a>
         <h4>
           <div class="minimap"></div>
@@ -78,7 +80,7 @@
         <table class="attributes section table">
         <% _.each(proposal.attributes, function(attr) { %>
         <tr class="attribute">
-          <td><%= attr.name %>:</td>
+          <th scope="row"><%= attr.name %>:</th>
           <td><%= attr.value %></td>
         </tr>
         <% }); %>
@@ -134,78 +136,145 @@
         <% } %>
       </div>
     </script>
-  </head>
-  <body>
-    <div>
-      <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container-fluid">
-          <div class="navbar-header">
 
-            <a class="navbar-brand" rel="home" href="#" title="Buy Sell Rent Everyting">
-              <img style="max-width:100px; margin-top: -7px;"
-                   src="/static/images/cornerwise-logo.png">
+    <script type="text/template" id="project-template">
+      <div class="project">
+        <div class="icon">
+          <img src="<%= project.thumbnail() %>">
+        </div>
+        <div class="name" title="<%= project.get('name') %>">
+          <%= project.get("name") %>
+        </div>
+        <div class="category" title="<%= project.get('category') %>">
+          <img src="<%= project.categoryIcon() %>"/>
+        </div>
+        <div class="department"><%= project.get("department") %></div>
+        <div class="time-span"></div>
+        <div class="status">
+          <div class="<%= project.get('approved') ? 'approved' : 'pending' %>"/>
+        </div>
+        <div class="budget">
+          <%= prettyAmount(project.totalBudget()) %>
+          <% if (project.yearCount() > 1) { %>
+          over <%= project.yearCount() %> years
+          <% } %>
+        </div>
+        <div class="status"></div>
+      </div>
+    </script>
+
+    <script type="text/template" id="project-preview-template">
+      <h3><%= project.get("name") %></h3>
+      <div class="category"><%= project.get("category") %></div>
+      <div class="department"><%= project.departmentName() %></div>
+
+      <svg class="budget-chart" height="50"/>
+    </script>
+
+  </head>
+    <body class="main">
+      <div id="map-container">
+        <div id="map"></div>
+        <div id="minimap"></div>
+
+        <div id="project-preview"></div>
+        <div id="preview">
+          <div>
+            <img src="http://static2.wikia.nocookie.net/__cb20100904145954/simpsons/images/5/53/Fake_street.png" class="thumb"/>
+            <h3 class="address">123 Fake Street</h3>
+            <div class="applicant">
+              <strong>Applicant:</strong>
+              <span class="applicant-name"></span>
+            </div>
+            <div id="details-minimap"></div>
+
+            <a class="more" href="#">View more&hellip;</a>
+            <a class="calendar" aria-label="View related event" href="#">
+              <img src="/static/images/calendar.png">
             </a>
           </div>
-          <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Petition Lists</a></li>
-              <li><a href="#">Zoning Info</a></li>
-              <li><a href="#">Capital Projects</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div>
         </div>
-      </nav>
-      <div class="maps">
-        <div id="map-container">
-          <div id="zoning-map">
-            <!-- The Leaflet map will appear here. -->
-          </div>
-          <div class="filter-group" id="ref-address">
+
+        <div id="overlay"></div>
+      </div>
+
+      <div id="search-banner" class="overlay">
+        <div id="logo" class="resp-portrait-hide">
+          <img src="/static/images/cornerwise-logo.png">
+        </div>
+        <div class="overlay-contents">
+          <h3>what&rsquo;s being built near&hellip;</h3>
+          <div class="input-group big-input">
             <form id="ref-address-form">
-              <input type="text" name="address" placeholder="Type an address">
+              <input class="input" type="text" name="address" placeholder="enter address" />
+              <button type="submit" class="input-button go-button">go</button>
             </form>
-            <button name="geolocate" id="geolocate">
-              <div class="geolocateArrow"><img src="/static/images/geolocate-button.png" alt="Find my location" width="24" height="24"></div>
-            </button>
-            <div id="geolocating-indicator">
-              <img src="/static/images/geolocating.gif"/>
-            </div>
           </div>
-
-          <div id="overlay"></div>
         </div>
+        <a id="explore" href="#">Explore the Data</a>
+      </div>
 
-        <!-- navigator -->
-        <div id="data-container">
+      <div id="menu">
+        <a id="menu-button" class="button big" href="#">
+          <span class="icon" aria-hidden="true">≡</span>
+          <span class="resp-portrait-hide">MENU</span>
+        </a>
+      </div>
 
-          <!-- <div id="spga-filters"></div> -->
-          <!-- <div id="type-filters"></div> -->
+      <div id="data">
+        <div class="tabs"> </div>
+        <div class="tab-pane">
+        </div>
+      </div>
 
-          <div class="filter-group inactive" id="radius-filter-group">
-            <div class="filter-name">
-              Radius (ft):
-              <span id="radius-value"></span>
-              <button id="reset" class="waves-effect waves-light btn"  name="action">Reset</button>
-            </div>
-            <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100">
+      <div id="intro" class="overlay">
+        <div class="section">
+          <h3>PLANNING AND ZONING</h3>
+
+          <ul>
+            <li>current building projects</li>
+            <li>building requests</li>
+            <li>variances</li>
+            <li>schedule of public hearings</li>
+          </ul>
+
+          <div class="more">
+            <a href="#">Learn more</a>
           </div>
+        </div>
+        <div class="section">
+          <h3>CITY INITIATIVES</h3>
 
-          <table id="permit-list" class="table table-condensed">
-            <tfoot>
-              <tr><td colspan="3">Loading...</td></tr>
-            </tfoot>
-          </table>
+          <div class="lede">
+            <h4>GREEN LINE EXTENSION</h4>
 
-          <div id="layers"><div>
-            </div>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
+            a diam lectus. Sed sit amet ipsum mauris.
+            <br><br>
+            <a class="_details" href="#">Details</a>
           </div>
         </div>
       </div>
 
-    </div>
-  </body>
+      <div id="controls" class="overlay">
+        <div class="section">
+          <h3>FILTER</h3>
+          <a href="#" class="filter-button">Project Type</a>
+          <a href="#" class="filter-button">Something Else</a>
+          <a href="#" class="filter-button">Impact</a>
+        </div>
+        <div class="section"></div>
+        <div id="signup" class="section">
+          <!-- <span class="resp-portrait-hide"> -->
+          <!--   Sign up for alerts near this address: -->
+          <!-- </span> -->
+          <a id="subscribe" class="big button">SUBSCRIBE</a>
+          <!-- <div class="input-group"> -->
+
+          <!-- <input class="input" type="text" name="address" placeholder="enter email" /> -->
+          <!-- <button class="input-button go-button">go</button> -->
+          <!-- </div> -->
+        </div>
+      </div>
+    </body>
 </html>

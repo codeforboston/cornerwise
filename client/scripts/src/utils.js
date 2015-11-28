@@ -30,6 +30,31 @@ define(["underscore", "jquery"], function(_, $) {
         return pieces.join(",");
     }
 
+    function prettyAmount(amount, currency) {
+        currency = currency || "$";
+
+        var mag = "";
+
+        if (amount >= 10000) {
+            if (amount < 1000000) {
+                mag = "k";
+                amount /= 1000;
+            } else if (amount < 1000000000) {
+                mag = "m";
+                amount /= 1000000;
+            } else {
+                mag = "b";
+                amount /= 1000000000;
+            }
+
+            var amountStr = amount.toFixed(1).replace(/\.0$/, "");
+
+            return currency + amountStr + mag;
+        }
+
+        return currency + commas(amount);
+    }
+
     var defaultHelpers = {
         formatDate: function(d) {
             return (d.toLocaleDateString) ?
@@ -37,7 +62,13 @@ define(["underscore", "jquery"], function(_, $) {
                 d.toString().slice(0, 15);
         },
 
-        commas: commas
+        commas: commas,
+
+        pluralize: function(n, sing, plur) {
+            return n == 1 ? sing : (plur || sing + "s");
+        },
+
+        prettyAmount: prettyAmount
     };
 
     var $u = {
@@ -81,6 +112,16 @@ define(["underscore", "jquery"], function(_, $) {
         },
 
         commas: commas,
+
+        currentYear: function() {
+            return (new Date()).getFullYear();
+        },
+
+        /**
+         * @param {number} amount
+         * @param {String} currency
+         */
+        prettyAmount: prettyAmount,
 
         /**
          * Like _.template, except that it adds helper functions to the

@@ -8,16 +8,14 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
     var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
-        tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-        //tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        //tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+        tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
 
         backendURL: "http://localhost:3000",
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
         pzURL: "http://localhost:3000/proposal/list",
-
-        mapId: "zoning-map",
 
         // Lat/long for the southwest
         bounds:  [[42.42009843116784, -71.05768203735352],
@@ -116,6 +114,13 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         parcelStyle: {
             stroke: 0.5,
             color: "orange"
+        },
+
+        minimapRectStyle: {
+            stroke: true,
+            weight: 2,
+            color: "#ff0000",
+            fill: true
         },
 
         // Esri:

@@ -1,22 +1,27 @@
 body {
-<<<<<<< HEAD
-    font-face: sans-serif;
-=======
     font-family: "Proxima Nova", "Avenir", "Lucida Grande", sans-serif;
->>>>>>> origin/master
     height: 100%;
     width: 100%;
 }
 
-<<<<<<< HEAD
-=======
 a {
-    color: #A7DA99;
+    color: #2D642B;
     text-decoration: none;
 }
 
 a:hover {
     text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+h4 {
+  font-size: 2.28rem;
+  line-height: 110%;
+  margin: 1.14rem 0 0.912rem 0;
 }
 
 #dev-controls {
@@ -34,7 +39,6 @@ a:hover {
     opacity: 1;
 }
 
->>>>>>> origin/master
 #map-container {
     position: absolute;
     top: 0;
@@ -48,15 +52,11 @@ a:hover {
     height: 100%;
 }
 
-<<<<<<< HEAD
-#start-banner {
-    background-color: rgba(73, 86, 213, 0.8);
-=======
 #minimap {
     border: 2px solid black;
     display: none;
     position: absolute;
-    bottom: 18%;
+    bottom: 2%;
     right: 2%;
     height: 10em;
     width: 10em;
@@ -67,37 +67,13 @@ a:hover {
     display: none;
 }
 
-#preview {
-    background-color: rgba(255, 255, 255, 0.5);
-    position: absolute;
-    width: 20em;
-    padding: 1em;
-    bottom: 20%;
-}
 
-#preview .more {
-    color: forestgreen;
-    position: absolute;
-    bottom: 1em;
-    right: 1em;
-}
-
-#preview .calendar img {
-    max-height: 50px;
-    max-width: 50px;
-}
-
-#preview img {
-    max-width: 100px;
-    float: left;
-    margin-right: 0.5em;
-}
 
 #menu {
     position: absolute;
     padding: 0.5em;
     right: 0;
-    top: 0;
+    top: -0.2em;
     text-align: right;
 }
 
@@ -113,7 +89,7 @@ span.icon {
     border-radius: 0.5em;
     display: none;
     position: absolute;
-    top: 0.4em;
+    top: 0.5em;
     left: 1em;
     z-index: 2;
 }
@@ -123,7 +99,7 @@ span.icon {
 }
 
 .button {
-    background-color: #63B91E;
+    background-color: #2D642B;
     border-radius: 0.5em;
     color: white;
     padding: 0.5em;
@@ -131,29 +107,30 @@ span.icon {
 
 .button:hover {
     background-color: white;
-    box-shadow: 0 0 4px #63b91e inset;
-    color: gray;
+    box-shadow: 0 0 4px #2b2b2b inset;
+    color: #2b2b2b;
     text-decoration: none;
 }
 
 .overlay {
-    background-color: rgba(73, 86, 213, 0.7);
+    background-color: #2b2b2b;
     color: white;
     overflow: hidden;
 }
 
 #search-banner {
->>>>>>> origin/master
     position: absolute;
     left: 0;
     right: 0;
     text-align: center;
     top: 100px;
+
+    transition: top 0.2s linear;
 }
 
 h3 {
     padding: 0;
-    margin: 2pt;;
+    margin: 0.5em;
 }
 
 .overlay-contents {
@@ -168,9 +145,6 @@ h3 {
 .input-group {
     background-color: white;
     border-radius: 5px;
-<<<<<<< HEAD
-    padding: 5px;
-=======
     line-height: 1em;
     margin: 0.3em;
     padding: 0.1em;
@@ -182,7 +156,6 @@ h3 {
     font-size: small;
     padding: 0.4em;
     width: 80%;
->>>>>>> origin/master
 }
 
 .big-input .input {
@@ -217,12 +190,11 @@ button.big {
 .go-button {
     color: green;
 }
-<<<<<<< HEAD
-=======
 
 #explore {
+    color: #4EAF48;
     display: block;
-    padding-bottom: 1em;
+    padding-bottom: 1.2em;
 }
 
 #intro {
@@ -310,7 +282,7 @@ body.main  #explore {
 }
 
 body.main #controls {
-    height: 7em;
+/*     height: 7em; */
 }
 
 .overlay-contents {
@@ -365,10 +337,10 @@ a.filter-button {
         display: none;
     }
 }
-<<<<<<< HEAD
->>>>>>> origin/master
-=======
 
+#data.collapsed {
+    width: 0;
+}
 
 #data {
     background-color: #ffffff;
@@ -378,8 +350,9 @@ a.filter-button {
     position: absolute;
     top: 15%;
     right: 0;
-    width: 250px;
-    transition: right 0.2s ease-out;
+    width: 35%;
+
+    transition: width 0.2s ease-in;
 }
 
 #data.collapsed {
@@ -407,10 +380,18 @@ a.filter-button {
     border-bottom: none;
 }
 
-#data .content {
+#data .tab-pane {
     height: 100%;
     width: 100%;
     overflow: auto;
+}
+
+.pane {
+    display: none;
+}
+
+.pane.showing {
+    display: block;
 }
 
 #data .toggler {
@@ -427,9 +408,14 @@ a.filter-button {
     cursor: pointer;
     height: 80px;
     overflow: hidden;
+    position: relative;
 }
 
 .project:hover {
+    background-color: aliceblue;
+}
+
+.project:nth-child(odd) {
     background-color: aliceblue;
 }
 
@@ -447,16 +433,37 @@ a.filter-button {
 }
 
 .project .name {
-    font-weight: bold;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 70%;
 }
 
-.department, .category {
+.department {
     font-size: small;
     font-style: italic;
 }
 
 .project .category {
-    float: right;
+    padding-left: 2px;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+}
+
+.category img {
+    width: 20px;
+    height: 20px;
+}
+
+.project .budget {
+    position: absolute;
+    bottom: 15px;
+    right: 0;
+    font-size: small;
+
 }
 
 .collapsed .when-expanded {
@@ -475,12 +482,23 @@ a.filter-button {
     stroke: navy;
 }
 
-#preview {
+#preview, #project-preview {
     background-color: rgba(255, 255, 255, 0.5);
+    display: none;
     position: absolute;
     width: 20em;
     padding: 1em;
-    bottom: 20%;
+    bottom: 2%;
+}
+
+.chart-path {
+    fill: rgba(0, 41, 128, 0.65);
+    stroke: navy;
+}
+
+.chart-point {
+    fill:yellow;
+    stroke: black;
 }
 
 #preview .more {
@@ -490,9 +508,14 @@ a.filter-button {
     right: 1em;
 }
 
+#preview .calendar {
+    bottom: 1em;
+    position: absolute;
+}
+
 #preview .calendar img {
-    max-height: 50px;
-    max-width: 50px;
+    max-height: 40px;
+    max-width: 40px;
 }
 
 #preview img {
@@ -500,4 +523,145 @@ a.filter-button {
     float: left;
     margin-right: 0.5em;
 }
->>>>>>> origin/master
+
+tr.proposal-info {
+    cursor: pointer;
+}
+
+tr.proposal-info:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.proposal-info > * {
+    padding: 0.2em;
+}
+
+tr.proposal-selected, tr.proposal-hovered {
+    background-color: #2a749b !important;
+    color: white;
+}
+
+.permit-name {
+    font-weight: bold;
+}
+
+.permit-desc {
+    font-size: smaller;
+}
+
+.permit-info .distance {
+    font-style: italic;
+}
+
+.permit-details {
+    padding: 2px;
+    postion: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+#overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+}
+
+.details .close {
+    font-size: small;
+    float: right;
+}
+
+.details {
+    background-color: white;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    margin-right: 35%;
+    margin-left: 5%;
+    padding: 15px;
+    margin-top: 3.5rem;
+    width: 50%;
+}
+
+
+
+.details h4 {
+  margin-bottom: 0.1em;
+}
+
+.details .case-number {
+  color: green;
+  font-style: italic;
+  text-align: right;
+}
+
+.attribute th {
+    text-align: left;
+    vertical-align: top;
+}
+
+.details .section {
+  border-top: 2px solid lightgray;
+  margin-top: 10px;
+  padding-top: 10px;
+  position: relative;
+}
+
+.section-title {
+    background-color: rgba(255, 255, 255, 0.75);
+    color: gray;
+    font-variant: small-caps;
+    padding: 0.2em;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.details .document {
+    display: inline-block;
+    width: 25%;
+    padding: 3px;
+    text-align: center;
+}
+
+.details.document:hover {
+    border: 1px solid #aaa;
+    border-radius: 3px;
+}
+
+.document .thumb {
+    box-shadow: -1px 1px 2px black;
+    height: 75px;
+    margin: 3px;
+    transition: transform 0.05s linear;
+}
+
+.document .dummy-thumb {
+    background-color: white;
+    border-radius: 3px;
+    color: lightgray;
+    display: inline-block;
+    font-size: x-large;
+    font-variant: small-caps;
+    line-height: 75px;
+    text-align: center;
+    width: 60px;
+}
+
+.document:hover .thumb {
+    transform: scale(1.5);
+    transform-origin: 50% 100%;
+    -webkit-transform: scale(1.4);
+    -webkit-transform-origin: 50% 100%;
+}
+
+.images .thumb {
+    display: inline-block;
+    max-height: 100px;
+    max-width: 100px;
+    padding-bottom: 5px;
+}

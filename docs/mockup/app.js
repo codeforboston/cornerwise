@@ -109,6 +109,7 @@ App = {
                         marker.proposal = feature;
 
                         marker.on("click", function(e) {
+                            map.setView(feature.location);
                             $(document).trigger("proposalSelected",
                                                 [{proposal: feature,
                                                   marker: marker,
@@ -195,6 +196,164 @@ App = {
 
         if ($(document.body).hasClass("main")) {
             $("#main_activated").prop("checked", true);
+        }
+<<<<<<< HEAD
+>>>>>>> origin/master
+=======
+
+        $("a.toggler").click(function(e) {
+            var parent = $(this).parent(),
+                collapsed = parent.hasClass("collapsed");
+            parent.toggleClass("collapsed", !collapsed)
+                .toggleClass("expanded", collapsed);
+        });
+
+
+        // projects:
+        var container = $("#data .content"),
+            template = container.find(".project");
+
+        $.getJSON("http://localhost:3000/project/list")
+            .done(function(json) {
+                var projects = json.projects.slice(0, 10);
+
+                container.html("");
+
+                projects.forEach(function(project) {
+                    var div = template.clone();
+
+                    div.find(".name").text(project.name).end()
+                        .find(".category").text(project.category).end()
+                        .find(".department").text(project.department).end()
+                        .appendTo(container);
+
+                    div.on("click", function(e) {
+                        updateChart(project);
+                    });
+
+                });
+            });
+
+        function createChart(elt, w, h, data) {
+            // Data:
+            // {y: {max, min, values, labels}
+            //  x: {max, min, values, labels}}
+            var yMax = data.y.max,
+                xMin = data.x.min,
+                xRange = data.x.max - xMin,
+
+                svgNS = "http://www.w3.org/2000/svg",
+                g = document.createElementNS(svgNS, "g"),
+                pieces = ["M"];
+
+            var i = -1, len = x.values.length;
+
+            for(; ++i < len;) {
+                var x = (data.x.values[i] - xMin)/xRange,
+                    y = data.y.values[i]/yMax;
+
+                pieces.push("L", Math.floor(x*w), Math.floor(y*h));
+            }
+
+            var path = pieces.join(" "),
+                pathElement = document.createElementNS(svgNS, "path");
+
+
+            var budget = proj.budget,
+                maxBudget = Math.max.apply(null,
+                                           $.map(budget,
+                                                 function(b) { return b.budget; })),
+                startYear = new Date().getFullYear(),
+                l = 10,
+                svgNS = "http://www.w3.org/2000/svg",
+                chart = $("#preview svg"),
+                height = chart.height(),
+                width = chart.width(),
+                minY = 10,
+                maxY = 90,
+                dw = width/l,
+                dh = height/maxBudget,
+                lastX, lastY;
+
+            $("#preview").show();
+
+            chart = chart[0];
+
+            for (var i = 0; i < l; i++) {
+                var year = startYear + i,
+                    yearBudget = budget[year] || { budget: 0 },
+                    circle = document.createElementNS(svgNS, "circle"),
+                    x = dw*i,
+                    y = maxY - dh*yearBudget.budget;
+
+                circle.setAttribute("class", "budget-point");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", 3);
+                chart.appendChild(circle);
+
+                if (lastX !== undefined) {
+                    var line = document.createElementNS(svgNS, "line");
+                    line.setAttribute("x1", lastX);
+                    line.setAttribute("y1", lastY);
+                    line.setAttribute("x2", x);
+                    line.setAttribute("y2", y);
+                    line.setAttribute("class", "budget-line");
+                    chart.appendChild(line);
+                }
+
+                lastX = x;
+                lastY = y;
+            }
+        }
+
+        function updateChart(proj) {
+            var budget = proj.budget,
+                maxBudget = Math.max.apply(null,
+                                           $.map(budget,
+                                                 function(b) { return b.budget; })),
+                startYear = new Date().getFullYear(),
+                l = 10,
+                svgNS = "http://www.w3.org/2000/svg",
+                chart = $("#preview svg"),
+                height = chart.height(),
+                width = chart.width(),
+                minY = 10,
+                maxY = 90,
+                dw = width/l,
+                dh = height/maxBudget,
+                lastX, lastY;
+
+            $("#preview").show();
+
+            chart = chart[0];
+
+            for (var i = 0; i < l; i++) {
+                var year = startYear + i,
+                    yearBudget = budget[year] || { budget: 0 },
+                    circle = document.createElementNS(svgNS, "circle"),
+                    x = dw*i,
+                    y = maxY - dh*yearBudget.budget;
+
+                circle.setAttribute("class", "budget-point");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", 3);
+                chart.appendChild(circle);
+
+                if (lastX !== undefined) {
+                    var line = document.createElementNS(svgNS, "line");
+                    line.setAttribute("x1", lastX);
+                    line.setAttribute("y1", lastY);
+                    line.setAttribute("x2", x);
+                    line.setAttribute("y2", y);
+                    line.setAttribute("class", "budget-line");
+                    chart.appendChild(line);
+                }
+
+                lastX = x;
+                lastY = y;
+            }
         }
 >>>>>>> origin/master
     }

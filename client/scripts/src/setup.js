@@ -1,47 +1,67 @@
 define(
     ["jquery", "permits", "permits-view", "map-view",
-     "filters-view", "collapsible-view", "layers-view",
-     "config", "details-view", "routes"],
-    function($, Permits, PermitsView, MapView, FiltersView,
-             CollapsibleView, LayersView, config, DetailsView,
-             routes) {
+     "details-view", "minimap-view", "preview-view",
+     "projects", "projects-view", "project-preview-view",
+     "tab-view", "filters-view", "config"],
+    function($, Permits, PermitsView, MapView, DetailsView,
+             MinimapView, PreviewView, Projects, ProjectsView,
+             ProjectPreview, TabView, FiltersView, config) {
         return {
             start: function() {
-                var permitsCollection = new Permits();
-
-                // The views
-                var permitsView = new PermitsView({
-                    collection: permitsCollection
-                });
+                var permitsCollection = new Permits(),
+                    projects = new Projects();
 
                 var mapView = new MapView({
-                    collection: permitsCollection
+                    collection: permitsCollection,
+                    el: "#map"
                 });
 
-                var filtersView = new FiltersView({
-                    collection: permitsCollection
+                var minimapView = new MinimapView({
+                    el: "#minimap",
+                    linkedMap: mapView.map
                 });
 
-                var layersView = new CollapsibleView({
-                    el: $("#layers")[0],
-                    title: "Layers",
-                    shown: true,
-                    view: new LayersView()
+                var detailsView = new DetailsView({
+                    collection: permitsCollection,
+                    el: "#overlay"
                 });
-                layersView.render();
+
+                var previewView = new PreviewView({
+                    collection: permitsCollection,
+                    el: "#preview"
+                });
+
+                var projectPreview = new ProjectPreview({
+                    collection: projects,
+                    el: "#project-preview"
+                });
+
+                var tabView = new TabView({
+                    el: "#data",
+                    subviews: {
+                        "proposals": new PermitsView({
+                            collection: permitsCollection
+                        }),
+                        "projects": new ProjectsView({
+                            collection: projects
+                        })
+                    }
+                });
 
                 permitsCollection.fetch({dataType: "jsonp"});
+                projects.fetch({dataType: "jsonp"});
 
                 // For testing:
                 window.permits = permitsCollection;
 
-                var detailsView = new DetailsView({collection: permitsCollection});
                 return {
-                    filters: filtersView,
-                    permits: permitsView,
-                    layers: layersView,
+                    //permits: permitsView,
                     map: mapView,
-                    details: detailsView
+                    minimap: minimapView,
+                    preview: previewView,
+                    details: detailsView,
+                    filters: new FiltersView(),
+                    exploreView: tabView
                 };
             }
         };

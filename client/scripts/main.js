@@ -27,10 +27,12 @@ require.config({
         // Backbone Models:
         "permit": "src/model/permit",
         "layer": "src/model/layer",
+        "project": "src/model/project",
 
         // Backbone Collections:
         "permits": "src/model/permits",
         "layers": "src/model/layers",
+        "projects": "src/model/projects",
 
         // Backbone Views:
         "permits-view": "src/view/permits",
@@ -38,10 +40,19 @@ require.config({
         "details-view": "src/view/detail",
         "filters-view": "src/view/filters",
         "map-view": "src/view/map",
+        "minimap-view": "src/view/minimap",
+        "preview-view": "src/view/preview",
+        "projects-view": "src/view/projects",
+        "project-view": "src/view/project",
+        "project-preview-view": "src/view/projectPreview",
+        // TODO: Remove
         "popup-view": "src/view/popup",
         "layers-view": "src/view/layers",
 
+        // View managers:
         "collapsible-view": "src/view/collapsible",
+        "tab-view": "src/view/tabs",
+
         "spga-filter-view": "src/view/spgaFilter",
         "type-filter-view": "src/view/typeFilter",
 
@@ -56,7 +67,5 @@ require.config({
 });
 
 require(["setup"], function(setup) {
-    setup.start();
-
-    console.log("Setup complete.");
+    window.app = setup.start();
 });

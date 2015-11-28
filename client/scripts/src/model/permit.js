@@ -113,6 +113,12 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return found;
         },
 
+        getAttributeValue: function(handle) {
+            var attr = this.getAttribute(handle);
+
+            return attr && attr.value;
+        },
+
         fetchAttribute: function(handle) {
             var found = this.getAttribute(handle),
                 deferred = $.Deferred();
