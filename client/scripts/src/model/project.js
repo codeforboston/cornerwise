@@ -26,18 +26,28 @@ define(["backbone", "underscore"],
                    return "/static/images/icon/" + brief + ".png";
                },
 
+               departmentName: function() {
+                   var dept = this.get("department");
+                   return this.deptNames[dept] || dept;
+               },
+
                thumbnail: function() {
                    return this.get("thumbnail") ||
                        "/static/images/cityhall.jpg";
                },
 
                totalBudget: function() {
-                   var budgets = this.get("budget");
+                   if (!this._totalBudget) {
+                       var budgets = this.get("budget");
 
-                   return _.reduce(budgets,
-                                   function(acc, b) {
-                                       return acc+b.budget;
-                                   }, 0);
+                       this._totalBudget =
+                           _.reduce(budgets,
+                                    function(acc, b) {
+                                        return acc+b.budget;
+                                    }, 0);
+                   }
+
+                   return this._totalBudget;
                },
 
                yearCount: function() {

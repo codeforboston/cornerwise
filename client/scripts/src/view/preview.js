@@ -2,7 +2,6 @@ define(["backbone", "routes", "underscore", "config"],
        function(B, routes, _, config) {
            return B.View.extend({
                initialize: function(options) {
-                   this.$el.hide();
                    this.$el.on("click", "a.more",
                                _.bind(this.showDetails, this));
 

@@ -52,7 +52,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         selectedChanged: function (permit, selected) {
-            this.$el.toggleClass("permit-selected", selected);
+            this.$el.toggleClass("proposal-selected", selected);
             if (selected) {
                 var parent = this.$el.parent(),
                     topOffset = parent.scrollTop(),

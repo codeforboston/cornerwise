@@ -1,10 +1,10 @@
-define(["backbone", "underscore"],
-       function(B, _) {
+define(["backbone", "underscore", "utils"],
+       function(B, _, $u) {
            var svgNS = "http://www.w3.org/2000/svg";
 
            function transformFn(yt, yb, xl, xr) {
-               var w = yb - yt,
-                   h = xr - xl;
+               var h = yb - yt,
+                   w = xr - xl;
 
                var tform = function(item) {
                    return [item.x*w + xl, yb - item.y*h];
@@ -19,8 +19,37 @@ define(["backbone", "underscore"],
            }
 
            return B.View.extend({
-               render: function() {
+               template: $u.templateWithId("project-preview-template",
+                                           {variable: "project"}),
 
+               initialize: function(options) {
+                   this.listenTo(this.collection,
+                                 "change:selected",
+                                 this.selectionChanged);
+               },
+
+               selectionChanged: function(project) {
+                   if (!project) {
+                       this.$el.html("");
+                       return;
+                   }
+
+                   this.$el.show().html(this.template(project));
+                   var year = $u.currentYear()+1,
+                       svg = this.$("svg.budget-chart"),
+                       width = svg.width(),
+                       height = svg.height(),
+                       bmap = this.buildBudgetMap(
+                           project.get("budget"),
+                           _.range(year, year+10)),
+                       transform = transformFn(10, height-10,
+                                               10, width-10);
+
+                   var pointsGroup = this.chartPoints(bmap, transform[0]),
+                       pathGroup = this.chartPath(bmap, transform[0]);
+
+                   svg.append(pathGroup)
+                       .append(pointsGroup);
                },
 
                buildBudgetMap: function(budget, years) {
@@ -28,8 +57,8 @@ define(["backbone", "underscore"],
                        bmap = {};
 
                    _.each(budget, function(item) {
-                       if (item > maxy)
-                           maxy = item;
+                       if (item.budget > maxy)
+                           maxy = item.budget;
                    });
 
                    // Add missing:
@@ -39,7 +68,7 @@ define(["backbone", "underscore"],
 
                        bmap[year] = {
                            x: i/l,
-                           y: b.budget/maxy,
+                           y: b.budget ? b.budget/maxy : 0,
                            budget: b.budget || 0,
                            comment: b.comment || ""
                        };
@@ -50,13 +79,17 @@ define(["backbone", "underscore"],
 
                chartPath: function(bmap, transform) {
                    var path = document.createElementNS(svgNS, "path"),
-                       pieces = [];
+                       start = transform({x: 0, y: 0}),
+                       end = transform({x: 1, y: 0}),
+                       pieces = ["M", start[0], start[1]],
+                       pos;
 
                    _.each(bmap, function(budget) {
-                       var pos = transform(budget.x);
-                       pieces.push(pieces.length ? "L" : "M",
-                                   pos[0], pos[1]);
+                       pos = transform(budget);
+                       pieces.push("L", pos[0], pos[1]);
                    });
+
+                   pieces.push("L", pos[0], end[1]);
 
                    $(path).attr({"d": pieces.join(" "),
                                  "class": "chart-path"});
@@ -74,7 +107,7 @@ define(["backbone", "underscore"],
                        $(c).attr({"class": "chart-point",
                                   "cx": pos[0],
                                   "cy": pos[1],
-                                  "r": "5"})
+                                  "r": "2"})
                            .data("budget", budget);
 
                        g.appendChild(c);
@@ -141,8 +174,8 @@ define(["backbone", "underscore"],
                        bmap = {data: data};
 
                    _.each(budget, function(item) {
-                       if (item > maxy)
-                           maxy = item;
+                       if (item.budget > maxy)
+                           maxy = item.budget;
                    });
 
                    var l = years.length;
@@ -160,52 +193,6 @@ define(["backbone", "underscore"],
                    });
 
                    return bmap;
-               },
-
-               renderChart: function() {
-                   var budget = this.model.get("budget"),
-                       maxBudget = _.max(_.pluck(budget, "budget")),
-                       startYear = new Date().getFullYear(),
-                       year = startYear,
-                       l = _.keys(budget).length,
-                       i = 0,
-                       svgNS = "http://www.w3.org/2000/svg",
-                       chart = this.$("svg"),
-                       height = chart.height(),
-                       width = chart.width(),
-                       dw = width/l,
-                       dh = height/maxBudget,
-                       lastX, lastY;
-
-                   chart = chart[0];
-
-                   while (i < l) {
-                       var yearBudget = budget[year] || {budget: 0},
-                           circle = document.createElementNS(svgNS, "circle"),
-                           x = dw*i,
-                           y = dh*yearBudget.budget;
-
-                       circle.setAttribute("class", "budget-point");
-                       circle.setAttribute("cx", x);
-                       circle.setAttribute("cy", y);
-                       circle.setAttribute("r", 10);
-                       chart.appendChild(circle);
-
-                       if (lastX && lastY) {
-                           var line = document.createElementNS(svgNS, "line");
-                           line.setAttribute("x1", lastX);
-                           line.setAttribute("y1", lastY);
-                           line.setAttribute("x2", x);
-                           line.setAttribute("y2", y);
-                           line.setAttribute("class", "budget-line");
-                           chart.appendChild(line);
-                       }
-
-                       lastX = x;
-                       lastY = y;
-
-                       if (budget[year++]) ++i;
-                   }
                }
            });
        });

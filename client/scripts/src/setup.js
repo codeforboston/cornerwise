@@ -1,11 +1,11 @@
 define(
     ["jquery", "permits", "permits-view", "map-view",
      "details-view", "minimap-view", "preview-view",
-     "projects", "projects-view", "tab-view", "filters-view",
-     "config"],
+     "projects", "projects-view", "project-preview-view",
+     "tab-view", "filters-view", "config"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
-             TabView, FiltersView, config) {
+             ProjectPreview, TabView, FiltersView, config) {
         return {
             start: function() {
                 var permitsCollection = new Permits(),
@@ -31,14 +31,19 @@ define(
                     el: "#preview"
                 });
 
+                var projectPreview = new ProjectPreview({
+                    collection: projects,
+                    el: "#project-preview"
+                });
+
                 var tabView = new TabView({
                     el: "#data",
                     subviews: {
-                        "projects": new ProjectsView({
-                            collection: projects
-                        }),
                         "proposals": new PermitsView({
                             collection: permitsCollection
+                        }),
+                        "projects": new ProjectsView({
+                            collection: projects
                         })
                     }
                 });

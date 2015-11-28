@@ -5,12 +5,23 @@ body {
 }
 
 a {
-    color: #A7DA99;
+    color: #2D642B;
     text-decoration: none;
 }
 
 a:hover {
     text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+h4 {
+  font-size: 2.28rem;
+  line-height: 110%;
+  margin: 1.14rem 0 0.912rem 0;
 }
 
 #dev-controls {
@@ -56,37 +67,13 @@ a:hover {
     display: none;
 }
 
-#preview {
-    background-color: rgba(255, 255, 255, 0.5);
-    position: absolute;
-    width: 20em;
-    padding: 1em;
-    bottom: 2%;
-}
 
-#preview .more {
-    color: forestgreen;
-    position: absolute;
-    bottom: 1em;
-    right: 1em;
-}
-
-#preview .calendar img {
-    max-height: 50px;
-    max-width: 50px;
-}
-
-#preview img {
-    max-width: 100px;
-    float: left;
-    margin-right: 0.5em;
-}
 
 #menu {
     position: absolute;
     padding: 0.5em;
     right: 0;
-    top: 0;
+    top: -0.2em;
     text-align: right;
 }
 
@@ -102,7 +89,7 @@ span.icon {
     border-radius: 0.5em;
     display: none;
     position: absolute;
-    top: 0.4em;
+    top: 0.5em;
     left: 1em;
     z-index: 2;
 }
@@ -112,7 +99,7 @@ span.icon {
 }
 
 .button {
-    background-color: #63B91E;
+    background-color: #2D642B;
     border-radius: 0.5em;
     color: white;
     padding: 0.5em;
@@ -120,13 +107,13 @@ span.icon {
 
 .button:hover {
     background-color: white;
-    box-shadow: 0 0 4px #63b91e inset;
-    color: gray;
+    box-shadow: 0 0 4px #2b2b2b inset;
+    color: #2b2b2b;
     text-decoration: none;
 }
 
 .overlay {
-    background-color: rgba(73, 86, 213, 0.7);
+    background-color: #2b2b2b;
     color: white;
     overflow: hidden;
 }
@@ -205,8 +192,9 @@ button.big {
 }
 
 #explore {
+    color: #4EAF48;
     display: block;
-    padding-bottom: 1em;
+    padding-bottom: 1.2em;
 }
 
 #intro {
@@ -350,6 +338,9 @@ a.filter-button {
     }
 }
 
+#data.collapsed {
+    width: 0;
+}
 
 #data {
     background-color: #ffffff;
@@ -359,8 +350,9 @@ a.filter-button {
     position: absolute;
     top: 15%;
     right: 0;
-    width: 300px;
-    transition: right 0.2s ease-out;
+    width: 35%;
+
+    transition: width 0.2s ease-in;
 }
 
 #data.collapsed {
@@ -420,6 +412,10 @@ a.filter-button {
 }
 
 .project:hover {
+    background-color: aliceblue;
+}
+
+.project:nth-child(odd) {
     background-color: aliceblue;
 }
 
@@ -486,12 +482,23 @@ a.filter-button {
     stroke: navy;
 }
 
-#preview {
+#preview, #project-preview {
     background-color: rgba(255, 255, 255, 0.5);
+    display: none;
     position: absolute;
     width: 20em;
     padding: 1em;
     bottom: 2%;
+}
+
+.chart-path {
+    fill: rgba(0, 41, 128, 0.65);
+    stroke: navy;
+}
+
+.chart-point {
+    fill:yellow;
+    stroke: black;
 }
 
 #preview .more {
@@ -501,9 +508,14 @@ a.filter-button {
     right: 1em;
 }
 
+#preview .calendar {
+    bottom: 1em;
+    position: absolute;
+}
+
 #preview .calendar img {
-    max-height: 50px;
-    max-width: 50px;
+    max-height: 40px;
+    max-width: 40px;
 }
 
 #preview img {
@@ -518,6 +530,15 @@ tr.proposal-info {
 
 tr.proposal-info:nth-child(odd) {
     background-color: aliceblue;
+}
+
+.proposal-info > * {
+    padding: 0.2em;
+}
+
+tr.proposal-selected, tr.proposal-hovered {
+    background-color: #2a749b !important;
+    color: white;
 }
 
 .permit-name {
@@ -552,6 +573,7 @@ tr.proposal-info:nth-child(odd) {
 
 .details .close {
     font-size: small;
+    float: right;
 }
 
 .details {
@@ -561,8 +583,11 @@ tr.proposal-info:nth-child(odd) {
     margin-right: 35%;
     margin-left: 5%;
     padding: 15px;
-    /* width: 50%; */
+    margin-top: 3.5rem;
+    width: 50%;
 }
+
+
 
 .details h4 {
   margin-bottom: 0.1em;
@@ -574,8 +599,9 @@ tr.proposal-info:nth-child(odd) {
   text-align: right;
 }
 
-.details .attributes {
-
+.attribute th {
+    text-align: left;
+    vertical-align: top;
 }
 
 .details .section {
@@ -618,6 +644,7 @@ tr.proposal-info:nth-child(odd) {
     background-color: white;
     border-radius: 3px;
     color: lightgray;
+    display: inline-block;
     font-size: x-large;
     font-variant: small-caps;
     line-height: 75px;

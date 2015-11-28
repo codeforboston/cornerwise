@@ -22,6 +22,21 @@
 
     <!-- Template for proposal popup information -->
     <script type="text/template" id="popup-template">
+      <div>
+        <img src="http://static2.wikia.nocookie.net/__cb20100904145954/simpsons/images/5/53/Fake_street.png" class="thumb"/>
+        <h3 class="address"><%= proposal.address %></h3>
+        <div class="applicant">
+          <strong>Applicant:</strong>
+          <span class="applicant-name"><%= proposal.getAttributeValue("applicant_name") %></span>
+        </div>
+        <div id="details-minimap"></div>
+
+        <a class="more" href="#">View more&hellip;</a>
+        <a class="calendar" aria-label="View related event" href="#">
+          <img src="/static/images/calendar.png">
+        </a>
+      </div>
+</div>
       <div class="popup-contents">
         <div class="property">
           <strong>Case:</strong>
@@ -37,17 +52,6 @@
           <%= proposal.description %>
         </div>
         <% } %>
-        <!-- <% if (proposal.documents.length) { %> -->
-        <!-- <div class="property"> -->
-        <!--   <ul class="document-list"> -->
-        <!--     <% _.each(proposal.documents, function(document) { %> -->
-        <!--     <li> -->
-        <!--       <a href="<%= document.url %>" target="_blank"> -->
-        <!--         <%= document.title %></a> -->
-        <!--     </li> -->
-        <!--     <% }) %> -->
-        <!--   </ul> -->
-        <!-- </div> -->
         <div class="images">
           <% _.each(proposal.images.slice(0, 4), function(img, i) { %>
           <div class="thumb">
@@ -60,10 +64,11 @@
         <a class="_details" href="#">More&hellip;</a>
         <% } %>
       </div>
-    </script>
+</script>
 
-    <script type="text/template" id="proposal-details">
-      <div class="details">
+
+<script type="text/template" id="proposal-details">
+  <div class="details">
         <a href="#" class="close">Close</a>
         <h4>
           <div class="minimap"></div>
@@ -75,7 +80,7 @@
         <table class="attributes section table">
         <% _.each(proposal.attributes, function(attr) { %>
         <tr class="attribute">
-          <td><%= attr.name %>:</td>
+          <th scope="row"><%= attr.name %>:</th>
           <td><%= attr.value %></td>
         </tr>
         <% }); %>
@@ -144,8 +149,9 @@
           <img src="<%= project.categoryIcon() %>"/>
         </div>
         <div class="department"><%= project.get("department") %></div>
-        <div class="time-span">
-
+        <div class="time-span"></div>
+        <div class="status">
+          <div class="<%= project.get('approved') ? 'approved' : 'pending' %>"/>
         </div>
         <div class="budget">
           <%= prettyAmount(project.totalBudget()) %>
@@ -157,13 +163,21 @@
       </div>
     </script>
 
+    <script type="text/template" id="project-preview-template">
+      <h3><%= project.get("name") %></h3>
+      <div class="category"><%= project.get("category") %></div>
+      <div class="department"><%= project.departmentName() %></div>
+
+      <svg class="budget-chart" height="50"/>
+    </script>
+
   </head>
     <body class="main">
       <div id="map-container">
         <div id="map"></div>
         <div id="minimap"></div>
-        <div id="overlay"></div>
 
+        <div id="project-preview"></div>
         <div id="preview">
           <div>
             <img src="http://static2.wikia.nocookie.net/__cb20100904145954/simpsons/images/5/53/Fake_street.png" class="thumb"/>
@@ -180,6 +194,8 @@
             </a>
           </div>
         </div>
+
+        <div id="overlay"></div>
       </div>
 
       <div id="search-banner" class="overlay">
@@ -262,78 +278,3 @@
       </div>
     </body>
 </html>
-
-<!--   <body> -->
-<!--     <div> -->
-<!--       <nav class="navbar navbar-default navbar-fixed-top"> -->
-<!--         <div class="container-fluid"> -->
-<!--           <div class="navbar-header"> -->
-
-<!--             <a class="navbar-brand" rel="home" href="#" title="Buy Sell Rent Everyting"> -->
-<!--               <img style="max-width:100px; margin-top: -7px;" -->
-<!--                    src="/static/images/cornerwise-logo.png"> -->
-<!--             </a> -->
-<!--           </div> -->
-<!--           <div id="navbar" class="navbar-collapse collapse"> -->
-<!--             <ul class="nav navbar-nav"> -->
-<!--               <li class="active"><a href="#">Petition Lists</a></li> -->
-<!--               <li><a href="#">Zoning Info</a></li> -->
-<!--               <li><a href="#">Capital Projects</a></li> -->
-<!--             </ul> -->
-<!--             <ul class="nav navbar-nav navbar-right"> -->
-<!--               <li><a href="#about">About</a></li> -->
-<!--               <li><a href="#contact">Contact</a></li> -->
-<!--             </ul> -->
-<!--           </div> -->
-<!--         </div> -->
-<!--       </nav> -->
-<!--       <div class="maps"> -->
-<!--         <div id="map-container"> -->
-<!--           <div id="zoning-map"> -->
-<!--             <\!-- The Leaflet map will appear here. -\-> -->
-<!--           </div> -->
-<!--           <div class="filter-group" id="ref-address"> -->
-<!--             <form id="ref-address-form"> -->
-<!--               <input type="text" name="address" placeholder="Type an address"> -->
-<!--             </form> -->
-<!--             <button name="geolocate" id="geolocate"> -->
-<!--               <div class="geolocateArrow"><img src="/static/images/geolocate-button.png" alt="Find my location" width="24" height="24"></div> -->
-<!--             </button> -->
-<!--             <div id="geolocating-indicator"> -->
-<!--               <img src="/static/images/geolocating.gif"/> -->
-<!--             </div> -->
-<!--           </div> -->
-
-<!--           <div id="overlay"></div> -->
-<!--         </div> -->
-
-<!--         <\!-- navigator -\-> -->
-<!--         <div id="data-container"> -->
-
-<!--           <\!-- <div id="spga-filters"></div> -\-> -->
-<!--           <\!-- <div id="type-filters"></div> -\-> -->
-
-<!--           <div class="filter-group inactive" id="radius-filter-group"> -->
-<!--             <div class="filter-name"> -->
-<!--               Radius (ft): -->
-<!--               <span id="radius-value"></span> -->
-<!--               <button id="reset" class="waves-effect waves-light btn"  name="action">Reset</button> -->
-<!--             </div> -->
-<!--             <input type="range" class="inactive" id="radius-filter" min="1000" max="20000" step="100"> -->
-<!--           </div> -->
-
-<!--           <table id="permit-list" class="table table-condensed"> -->
-<!--             <tfoot> -->
-<!--               <tr><td colspan="3">Loading...</td></tr> -->
-<!--             </tfoot> -->
-<!--           </table> -->
-
-<!--           <div id="layers"><div> -->
-<!--             </div> -->
-<!--           </div> -->
-<!--         </div> -->
-<!--       </div> -->
-
-<!--     </div> -->
-<!--   </body> -->
-<!-- </html> -->

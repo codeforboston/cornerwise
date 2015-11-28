@@ -44,6 +44,7 @@ require.config({
         "preview-view": "src/view/preview",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
+        "project-preview-view": "src/view/projectPreview",
         // TODO: Remove
         "popup-view": "src/view/popup",
         "layers-view": "src/view/layers",

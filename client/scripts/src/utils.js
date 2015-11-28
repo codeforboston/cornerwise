@@ -113,6 +113,10 @@ define(["underscore", "jquery"], function(_, $) {
 
         commas: commas,
 
+        currentYear: function() {
+            return (new Date()).getFullYear();
+        },
+
         /**
          * @param {number} amount
          * @param {String} currency
