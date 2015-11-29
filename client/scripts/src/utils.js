@@ -16,18 +16,28 @@ define(["underscore", "jquery"], function(_, $) {
     };
 
     function commas(s) {
-        var re = /(\d+)(\d{3})(\.\d+|\b|$)/g, m,
-            pieces = [];
+        s = s.toString();
+        var split = s.split("."),
+            after = split[1];
 
-        while((m = re.exec(s))) {
-            s = m[1];
+        s = split[0];
 
-            pieces.unshift(m[2] + (m[3] || ""));
+        var l = s.length;
+        if (l <= 3)
+            return s;
+
+        var istart = 0,
+            iend = (l % 3) || 3,
+            pieces = [],
+            p;
+
+        while ((p = s.slice(istart, iend))) {
+            pieces.push(p);
+            istart = iend;
+            iend += 3;
         }
 
-        pieces.unshift(s);
-
-        return pieces.join(",");
+        return pieces.join(",") + (after ? ("." + after) : "");
     }
 
     function prettyAmount(amount, currency) {

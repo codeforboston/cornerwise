@@ -138,7 +138,7 @@
     </script>
 
     <script type="text/template" id="project-template">
-      <div class="project">
+      <div class="project <%= project.get('selected') ? 'selected' : '' %>">
         <div class="icon">
           <img src="<%= project.thumbnail() %>">
         </div>
@@ -168,7 +168,7 @@
       <div class="category"><%= project.get("category") %></div>
       <div class="department"><%= project.departmentName() %></div>
 
-      <svg class="budget-chart" height="50"/>
+      <svg class="budget-chart" height="90" width="300"/>
     </script>
 
   </head>

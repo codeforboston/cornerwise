@@ -8,15 +8,8 @@ define(["backbone", "underscore", "utils"],
 
                function scaleX(x) { return x*w; }
                function scaleY(y) { return y*h; }
-
-               function tformX(x) {
-                   return x*w + xl;
-               }
-
-               function tformY(y) {
-                   return yb - y*h;
-               }
-
+               function tformX(x) { return x*w + xl; }
+               function tformY(y) { return yb - y*h; }
                function tform(item) {
                    return [tformX(item.x), tformY(item.y)];
                };
@@ -69,7 +62,7 @@ define(["backbone", "underscore", "utils"],
                        years = _.range(year, year+7),
                        bmap = this.buildBudgetMap(
                            project.get("budget"), years),
-                       t = transformFn(10, height-10, 10, width-10),
+                       t = transformFn(20, height-20, 10, width-10),
                        transform = t.toCanvas;
 
                    var pointsGroup = this.chartPoints(bmap, transform),
@@ -128,7 +121,9 @@ define(["backbone", "underscore", "utils"],
 
                 chartBars: function(bmap, t) {
                     var g = document.createElementNS(svgNS, "g"),
-                        w = t.scaleX(0.05);
+                        w = t.scaleX(0.05),
+                        overCallback = _.bind(this.onRectMouseover, this),
+                        outCallback = _.bind(this.onRectMouseout, this);
 
                    _.each(bmap, function(budget) {
                        var bar = document.createElementNS(svgNS, "rect"),
@@ -138,8 +133,10 @@ define(["backbone", "underscore", "utils"],
                                     height: t.scaleY(budget.y),
                                     x: pos[0] - w/2,
                                     y: pos[1],
-                                    "class": "chart-path"
-                                   });
+                                    "class": "chart-bar"})
+                           .on("mouseover", budget, overCallback)
+                           .on("mouseout", budget, outCallback);
+
                        g.appendChild(bar);
                     });
 
@@ -181,7 +178,7 @@ define(["backbone", "underscore", "utils"],
                                   "text-anchor": "end",
                                   "transform": ("rotate(-45, " + pos[0] +
                                                 ", " + pos[1] + ")")})
-                           .text(label);
+                           .text(label + " ");
 
                        // Tick mark
                        $(l).attr({"class": "chart-x-tick",
@@ -242,6 +239,59 @@ define(["backbone", "underscore", "utils"],
                    });
 
                    return bmap;
+               },
+
+               onRectMouseover: function(e) {
+                   if (e.target !== e.currentTarget)
+                       return;
+
+                   if (this._label)
+                       this._label.remove();
+
+                   var item = e.data,
+                       rect = $(e.target),
+                       svg = rect.closest("svg"),
+                       w = parseInt(rect[0].getAttribute("width")),
+                       h = parseInt(rect[0].getAttribute("height")),
+                       x = parseInt(rect.attr("x")),
+                       y = parseInt(rect.attr("y")),
+
+                       labelGroup = $(document.createElementNS(svgNS, "g")),
+                       label = $(document.createElementNS(svgNS, "text"));
+
+                   label.attr({"class": "budget-label",
+                               "x": x+w/2,
+                               "y": 10,
+                               "text-anchor": "middle"})
+                       .text("$" + $u.commas(item.budget));
+
+                   var lw = label.width();
+
+                   if (x+lw+10 >= svg.width())
+                       label.attr("text-anchor", "end");
+                   else if (x-lw-10 <= 0)
+                       label.attr("text-anchor", "start");
+
+                   if (y-h-10 >= 0) {
+                       $(document.createElementNS(svgNS, "line"))
+                           .attr({"class": "budget-label-line",
+                                  "x1": x+w/2,
+                                  "y1": y-h,
+                                  "x2": x+w/2,
+                                  "y2": 15})
+                           .appendTo(labelGroup);
+                   }
+
+                   labelGroup.append(label).appendTo(svg);
+
+                   this._label = labelGroup;
+               },
+
+               onRectMouseout: function(e) {
+                   if (e.target !== e.currentTarget)
+                       return;
+
+                   this._label.remove();
                }
            });
        });

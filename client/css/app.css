@@ -491,7 +491,8 @@ a.filter-button {
 }
 
 .chart-label {
-    font-size: small;
+    font-size: x-small;
+    
 }
 
 #preview, #project-preview {
@@ -503,14 +504,27 @@ a.filter-button {
     bottom: 2%;
 }
 
-.chart-path {
+.chart-bar, .chart-path {
     fill: rgba(0, 41, 128, 0.65);
     stroke: navy;
+}
+
+.chart-bar:hover {
+    fill: white;
 }
 
 .chart-point {
     fill:yellow;
     stroke: black;
+}
+
+.budget-label {
+    font-size: small;
+    font-weight: bold;
+}
+
+.budget-label-line {
+    stroke: red;
 }
 
 #preview .more {
@@ -548,6 +562,7 @@ tr.proposal-info:nth-child(odd) {
     padding: 0.2em;
 }
 
+.project.selected,
 tr.proposal-selected, tr.proposal-hovered {
     background-color: #2a749b !important;
     color: white;
