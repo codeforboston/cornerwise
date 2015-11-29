@@ -22,6 +22,21 @@ define(["backbone", "project-view", "underscore"],
                    this.$el.append(view.render().el);
                },
 
+               projectSelected: function(project, selected) {
+                   if (this.selected) {
+                       if (this.selected.id == project.id)
+                       {
+                           if (!selected)
+                               this.selected = null;
+                       } else {
+                           this.selected.set("selected", false);
+                       }
+                   }
+
+                   if (selected)
+                       this.selected = project;
+               },
+
                render: function() {
                    this.build();
                }

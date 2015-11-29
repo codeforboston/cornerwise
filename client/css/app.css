@@ -474,12 +474,24 @@ a.filter-button {
     display: none;
 }
 
+.budget-chart {
+
+}
+
 .budget-point {
     fill: red;
 }
 
 .budget-line {
     stroke: navy;
+}
+
+.chart-x-tick {
+    stroke: black;
+}
+
+.chart-label {
+    font-size: small;
 }
 
 #preview, #project-preview {

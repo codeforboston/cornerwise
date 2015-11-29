@@ -6,16 +6,43 @@ define(["backbone", "underscore", "utils"],
                var h = yb - yt,
                    w = xr - xl;
 
-               var tform = function(item) {
-                   return [item.x*w + xl, yb - item.y*h];
+               function scaleX(x) { return x*w; }
+               function scaleY(y) { return y*h; }
+
+               function tformX(x) {
+                   return x*w + xl;
+               }
+
+               function tformY(y) {
+                   return yb - y*h;
+               }
+
+               function tform(item) {
+                   return [tformX(item.x), tformY(item.y)];
                };
 
-               var itform = function(pos) {
-                   var x = pos[0], y = pos[1];
-                   return [(x-xl)/w, (yb-y)/h];
-               };
+               function itformX(x) {
+                   return (x-xl)/w;
+               }
 
-               return [tform, itform];
+               function itformY(y) {
+                   return (yb-y)/h;
+               }
+
+               function itform(pos) {
+                   return [itformX(pos[0]), itformY(pos[1])];
+               }
+
+               return {
+                   toX: tformX,
+                   toY: tformY,
+                   toCanvas: tform,
+                   fromX: itformX,
+                   fromY: itformY,
+                   fromCanvas: itform,
+                   scaleX: scaleX,
+                   scaleY: scaleY
+               };
            }
 
            return B.View.extend({
@@ -39,17 +66,19 @@ define(["backbone", "underscore", "utils"],
                        svg = this.$("svg.budget-chart"),
                        width = svg.width(),
                        height = svg.height(),
+                       years = _.range(year, year+7),
                        bmap = this.buildBudgetMap(
-                           project.get("budget"),
-                           _.range(year, year+10)),
-                       transform = transformFn(10, height-10,
-                                               10, width-10);
+                           project.get("budget"), years),
+                       t = transformFn(10, height-10, 10, width-10),
+                       transform = t.toCanvas;
 
-                   var pointsGroup = this.chartPoints(bmap, transform[0]),
-                       pathGroup = this.chartPath(bmap, transform[0]);
+                   var pointsGroup = this.chartPoints(bmap, transform),
+                       //pathGroup = this.chartPath(bmap, transform),
+                       barsGroup = this.chartBars(bmap, t),
+                       labelsGroup = this.chartXLabels(years, 0, transform);
 
-                   svg.append(pathGroup)
-                       .append(pointsGroup);
+                   svg .append(barsGroup)
+                       .append(labelsGroup);
                },
 
                buildBudgetMap: function(budget, years) {
@@ -97,6 +126,26 @@ define(["backbone", "underscore", "utils"],
                    return path;
                },
 
+                chartBars: function(bmap, t) {
+                    var g = document.createElementNS(svgNS, "g"),
+                        w = t.scaleX(0.05);
+
+                   _.each(bmap, function(budget) {
+                       var bar = document.createElementNS(svgNS, "rect"),
+                           pos = t.toCanvas(budget);
+
+                       $(bar).attr({width: w,
+                                    height: t.scaleY(budget.y),
+                                    x: pos[0] - w/2,
+                                    y: pos[1],
+                                    "class": "chart-path"
+                                   });
+                       g.appendChild(bar);
+                    });
+
+                    return g;
+                } ,
+
                chartPoints: function(bmap, transform) {
                    var g = document.createElementNS(svgNS, "g");
 
@@ -118,11 +167,11 @@ define(["backbone", "underscore", "utils"],
 
                chartXLabels: function(labels, yp, transform) {
                    var g = document.createElementNS(svgNS, "g"),
-                       l = labels.length;
+                       len = labels.length;
 
                    _.each(labels, function(label, i) {
-                       var xp = i/l,
-                           pos = transform(xp, yp),
+                       var xp = i/len,
+                           pos = transform({x: xp, y: yp}),
                            t = document.createElementNS(svgNS, "text"),
                            l = document.createElementNS(svgNS, "line");
 
@@ -130,16 +179,16 @@ define(["backbone", "underscore", "utils"],
                                   "x": pos[0],
                                   "y": pos[1],
                                   "text-anchor": "end",
-                                  "transform": ("rotate(" + pos[0] + " " +
-                                                pos[1] + " -45)")})
+                                  "transform": ("rotate(-45, " + pos[0] +
+                                                ", " + pos[1] + ")")})
                            .text(label);
 
                        // Tick mark
                        $(l).attr({"class": "chart-x-tick",
-                                  "x1": pos[0] + 2,
-                                  "y1": pos[1],
-                                  "x2": pos[0] - 2,
-                                  "y2": pos[1]});
+                                  "x1": pos[0],
+                                  "y1": pos[1] + 2,
+                                  "x2": pos[0],
+                                  "y2": pos[1] + 5});
 
                        g.appendChild(t);
                        g.appendChild(l);
