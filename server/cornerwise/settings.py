@@ -33,7 +33,7 @@ IS_PRODUCTION = False
 SECRET_KEY = '98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not IS_PRODUCTION
 
 ALLOWED_HOSTS = []
 
@@ -163,6 +163,13 @@ THUMBNAIL_DIM = (300, 300)
 # String appended to addresses to assist geocoder:
 GEO_REGION = "Somerville, MA"
 GEOCODER = "arcgis"
+
+# Load select environment variables into settings:
+_G = globals()
+for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",
+               "ARCGIS_CLIENT_ID", "ARCGIS_CLIENT_SECRET",
+               "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET"]:
+    _G[envvar] = os.environ.get(envvar, "")
 
 try:
     # Allow user's local settings to shadow shared settings:
