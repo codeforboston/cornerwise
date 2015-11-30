@@ -55,4 +55,8 @@ $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$se
 export C_FORCE_ROOT=1
 
 # Start Celery:
-$PYTHON_BIN $APP_ROOT/manage.py celery worker
+if [ "$DJANGO_MODE" != "production" ]; then
+    celery_opts = " --autoreload"
+fi
+
+$PYTHON_BIN $APP_ROOT/manage.py celery worker $celery_opts
