@@ -220,6 +220,7 @@ def extract_images(doc):
 
     return images
 
+
 @celery_app.task(name="proposal.add_street_view")
 def add_street_view(proposal):
     api_key = getattr(settings, "GOOGLE_API_KEY")
@@ -227,12 +228,23 @@ def add_street_view(proposal):
 
     if api_key:
         location = "{0.address}, {0.region_name}".format(proposal)
-        url = street_view.street_view_url(proposal.address, api_key,
+        url = street_view.street_view_url(location, api_key,
                                           secret=secret)
         try:
-            proposal.images.create(url=url, skip_cache=True)
+            if not proposal.images\
+                           .filter(source="google_street_view")\
+                           .exists():
+                image = proposal.images.create(url=url,
+                                           skip_cache=True,
+                                               source="google_street_view",
+                                               priority=1)
+                return image
         except IntegrityError as ie:
-            logger.warning("")
+            logger.warning("Image with that URL already exists")
+
+    else:
+        logger.warning("Add a local_settings file with your Google API key.")
+
 
 @celery_app.task(name="proposal.generate_doc_thumbnail")
 def generate_doc_thumbnail(doc):
@@ -391,6 +403,12 @@ def process_documents(docs=None):
         docs = Document.objects.filter(document="")
 
     return process_document.map(docs)()
+
+
+@celery_app.task(name="proposal.process_proposals")
+def process_proposals(proposals):
+    "Perform additional processing on proposals."
+    add_street_view.map(proposals)
 
 
 @celery_app.task(name="proposal.scrape_reports_and_decisions")

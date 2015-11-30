@@ -24,7 +24,8 @@ def proposal_json(proposal, include_images=True, include_attributes=False,
         pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
 
     if include_images:
-        pdict["images"] = [img.to_dict() for img in proposal.images.all()]
+        pdict["images"] = [img.to_dict() for img in \
+                           proposal.images.order_by("-priority")]
 
     if include_attributes:
         attributes = Attribute.objects.filter(proposal=proposal)

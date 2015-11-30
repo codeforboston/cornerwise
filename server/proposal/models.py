@@ -180,6 +180,8 @@ class Image(models.Model):
     # Crude way to specify that an image should not be copied to the
     # local filesystem:
     skip_cache = models.BooleanField(default=False)
+    priority = models.IntegerField(default=0, db_index=True)
+    source = models.CharField(max_length=64, default="document")
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
