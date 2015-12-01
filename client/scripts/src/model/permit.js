@@ -95,7 +95,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             if (images.length)
                 return images[0].thumb || images[0].src;
 
-            return null;
+            return config.defaultProposalThumb;
         },
 
         getAttribute: function(handle) {
@@ -119,6 +119,15 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return attr && attr.value;
         },
 
+        /**
+         * Get (from local cache) or fetch (from server) the proposal
+         * attribute with the given handle.
+         *
+         * @param {String} handle
+         *
+         * @return {$.Deferred} that will resolve to an attribute, or
+         * null if the attribute is not found.
+         */
         fetchAttribute: function(handle) {
             var found = this.getAttribute(handle),
                 deferred = $.Deferred();

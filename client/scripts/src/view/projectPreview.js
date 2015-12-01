@@ -42,13 +42,21 @@ define(["backbone", "underscore", "utils"],
                template: $u.templateWithId("project-preview-template",
                                            {variable: "project"}),
 
-               initialize: function(options) {
-                   this.listenTo(this.collection,
-                                 "change:selected",
-                                 this.selectionChanged);
+               setModel: function(project) {
+                   if (this.model) {
+                       this.stopListening(this.model);
+                   }
+
+                   this.model = project;
+
+                   if (!project) return;
+
+                   this.listenTo(project, "change", this.render);
                },
 
-               selectionChanged: function(project) {
+               render: function() {
+                   var project = this.model;
+
                    if (!project) {
                        this.$el.html("");
                        return;

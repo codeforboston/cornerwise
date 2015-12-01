@@ -2,17 +2,18 @@ define(
     ["jquery", "permits", "permits-view", "map-view",
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
-     "tab-view", "filters-view", "config"],
+     "preview-manager", "tab-view", "filters-view", "config"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
-             ProjectPreview, TabView, FiltersView, config) {
+             ProjectPreview, PreviewManager, TabView,
+             FiltersView, config) {
         return {
             start: function() {
-                var permitsCollection = new Permits(),
+                var proposals = new Permits(),
                     projects = new Projects();
 
                 var mapView = new MapView({
-                    collection: permitsCollection,
+                    collection: proposals,
                     el: "#map"
                 });
 
@@ -22,25 +23,26 @@ define(
                 });
 
                 var detailsView = new DetailsView({
-                    collection: permitsCollection,
+                    collection: proposals,
                     el: "#overlay"
                 });
 
-                var previewView = new PreviewView({
-                    collection: permitsCollection,
-                    el: "#preview"
-                });
-
-                var projectPreview = new ProjectPreview({
-                    collection: projects,
-                    el: "#project-preview"
-                });
+                var proposalPreview = new PreviewView(),
+                    projectPreview = new ProjectPreview(),
+                    previewManager = new PreviewManager({
+                        el: "#preview",
+                        collections: [proposals, projects],
+                        previewMap: {
+                            project: projectPreview,
+                            proposal: proposalPreview
+                        }
+                    });
 
                 var tabView = new TabView({
                     el: "#data",
                     subviews: {
                         "proposals": new PermitsView({
-                            collection: permitsCollection
+                            collection: proposals
                         }),
                         "projects": new ProjectsView({
                             collection: projects
@@ -48,17 +50,17 @@ define(
                     }
                 });
 
-                permitsCollection.fetch({dataType: "jsonp"});
+                proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
                 // For testing:
-                window.permits = permitsCollection;
+                window.permits = proposals;
 
                 return {
                     //permits: permitsView,
                     map: mapView,
                     minimap: minimapView,
-                    preview: previewView,
+                    preview: previewManager,
                     details: detailsView,
                     filters: new FiltersView(),
                     exploreView: tabView

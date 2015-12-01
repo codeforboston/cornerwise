@@ -2,9 +2,9 @@
  * PermitsCollection
  */
 define(
-    ["backbone", "underscore", "leaflet", "permit",
-     "ref-location", "config", "utils"],
-    function(B, _, L, Permit, refLocation, config, $u) {
+    ["backbone", "jquery", "underscore", "leaflet",
+     "permit", "ref-location", "config", "utils"],
+    function(B, $, _, L, Permit, refLocation, config, $u) {
         return B.Collection.extend({
             model: Permit,
 
@@ -121,6 +121,20 @@ define(
 
             clearRadiusFilter: function() {
                 this.removeFilter("radius");
+            },
+
+
+            /**
+             * @param {L.LatLngBounds} viewBox Proposals that lie within
+             * the viewBox will pass the filter.  All others will be
+             * hidden.
+             */
+            filterByViewBox: function(viewBox) {
+                this.addFilter("viewbox", function(proposal) {
+                    var location = proposal.get("location");
+
+                    return location && viewBox.contains(location);
+                });
             },
 
             /*

@@ -100,7 +100,7 @@ define(["backbone", "underscore", "leaflet",
             if (proposal && this.model &&
                 this.model.get("id") !== proposal.get("id"))
             {
-                this.selectionChanged(proposal);
+                this.setModel(proposal);
             }
 
             this.render();

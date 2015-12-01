@@ -15,7 +15,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
-        pzURL: "http://localhost:3000/proposal/list",
+        pzURL: "/proposal/list",
 
         // Lat/long for the southwest
         bounds:  [[42.42009843116784, -71.05768203735352],
@@ -25,6 +25,8 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         refPointDefault: {lat: 42.387545768736246,
                           lng: -71.09950304031372},
         refMarkerColor: "red",
+
+        defaultProposalThumb: "/static/images/marker-normal@2x.png",
 
         // Map of { "permit abbreviation": "human readable permit name" }
         permitTypes: {

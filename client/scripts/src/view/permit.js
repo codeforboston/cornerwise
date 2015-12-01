@@ -21,7 +21,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             "dblclick": "onDoubleClick"
         },
 
-        template: $u.templateWithId("permit-template",
+        template: $u.templateWithId("proposal-template",
                                     {variable: "proposal"}),
 
         render: function() {

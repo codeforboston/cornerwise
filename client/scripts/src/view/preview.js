@@ -1,12 +1,13 @@
-define(["backbone", "routes", "underscore", "config"],
-       function(B, routes, _, config) {
+define(["backbone", "routes", "underscore", "config", "utils"],
+       function(B, routes, _, config, $u ) {
            return B.View.extend({
-               initialize: function(options) {
+               template: $u.templateWithId("proposal-preview-template",
+                                           {variable: "proposal"}),
+
+               initialize: function() {
                    this.$el.on("click", "a.more",
                                _.bind(this.showDetails, this));
 
-                   this.listenTo(this.collection, "change:selected",
-                                 this.selectionChanged);
                    window.routes = routes;
                },
 
@@ -18,32 +19,20 @@ define(["backbone", "routes", "underscore", "config"],
                    routes.getDispatcher().trigger("showDetails", this.collection.selected.id);
                },
 
-               selectionChanged: function(proposal) {
-                   var attrs = proposal.attributes;
-                   if (!attrs.selected) {
-                       this.$el.hide();
-                       return;
+               setModel: function(proposal) {
+                   if (this.model) {
+                       this.stopListening(this.model);
                    }
 
-                   var thumb = proposal.getThumb();
+                   this.model = proposal;
 
-                   this.$("img.thumb")
-                       .show(!!thumb)
-                       .attr("src", thumb);
-                   this.$(".address").text(attrs.address);
+                   if (!proposal) return;
 
-                   var self = this;
-                   proposal.fetchAttribute("applicant_name")
-                       .done(function(applicant) {
-                           self.$(".applicant-name")
-                               .text(applicant.value);
-                           self.$(".applicant").show();
-                       })
-                       .fail(function() {
-                           self.$(".applicant").hide();
-                       });
+                   this.listenTo(proposal, "change", this.render);
+               },
 
-                   this.$el.show();
+               render: function() {
+                   this.$el.html(this.template(this.model));
                }
            });
        });
