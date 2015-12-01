@@ -1,5 +1,10 @@
 define(["backbone", "underscore"],
        function(B, _) {
+           function parse10Int(s) {
+               return parseInt(s);
+           }
+
+
            return B.Model.extend({
                urlRoot: "/project/view",
 
@@ -55,12 +60,12 @@ define(["backbone", "underscore"],
                },
 
                yearRange: function() {
-                   var years = _.map( _.keys(this.get("budget")), parseInt);
+                   var years = _.map( _.keys(this.get("budget")), parse10Int);
                    return [_.min(years), _.max(years)];
                },
 
                yearStart: function() {
-                   return _.min(_.map(_.keys(this.get("budget")), parseInt));
+                   return _.min(_.map(_.keys(this.get("budget")), parse10Int));
                }
            });
        });

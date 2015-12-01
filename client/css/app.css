@@ -86,11 +86,16 @@ span.icon {
 }
 
 #logo {
+    background: url(/static/images/cornerwise-logo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
     border-radius: 0.5em;
     display: none;
+    height: 100px;
     position: absolute;
     top: 0.5em;
     left: 1em;
+    width: 160px;
     z-index: 2;
 }
 
@@ -159,11 +164,20 @@ h3 {
 }
 
 .big-input .input {
-    background-color: none;
     border: none;
     height: 35px;
     font-size: large;
     padding: 0;
+}
+
+.overlay .input-group {
+    background-color:transparent;
+    border: 1px solid white;
+}
+
+.overlay .input {
+    color: white;
+    font-family: "Avenir";
 }
 
 .big-input .input-button {
@@ -193,7 +207,7 @@ button.big {
 
 #explore {
     color: #4EAF48;
-    display: block;
+    display: none;
     padding-bottom: 1.2em;
 }
 
@@ -325,21 +339,39 @@ a.filter-button {
 }
 
 
-@media screen and (min-width: 768px) {
-    .resp-portrait-show {
-        display: none;
-    }
-}
-
-
-@media screen and (max-width: 768px) {
-    .resp-portrait-hide {
-        display: none;
-    }
-}
-
 #data.collapsed {
     width: 0;
+}
+
+#data.collapsed:hover {
+    width: 0.5em;
+}
+
+#data.collapsed .tabs, #data.collapsed .tabs-pane {
+    display: none;
+}
+
+#data-controls {
+    background-color: white;
+    border: 1px solid black;
+    border-right: none;
+    padding: 0.5em;
+    position: absolute;
+    width: 5em;
+    left: -6em;
+    top: 1em;
+}
+
+#expand-data {
+    display: none;
+}
+
+#data.collapsed #collapse-data {
+    display: none;
+}
+
+#data.collapsed #expand-data {
+    display: block;
 }
 
 #data {
@@ -355,10 +387,6 @@ a.filter-button {
     transition: width 0.2s ease-in;
 }
 
-#data.collapsed {
-    right: -260px;
-}
-
 #data .tabs {
     position: absolute;
     top: -22px;
@@ -371,6 +399,7 @@ a.filter-button {
     border-radius: 5px 5px 0 0;
     color:black;
     font-weight: bold;
+    padding-top: 0.2em;
     padding-left: 0.5em;
     padding-right: 0.5em;
 }
@@ -464,7 +493,15 @@ a.filter-button {
     bottom: 15px;
     right: 0;
     font-size: small;
+}
 
+.project .status {
+    color: goldenrod;
+    font-size: small;
+}
+
+.status.approved {
+    color: green;
 }
 
 .collapsed .when-expanded {
@@ -532,6 +569,11 @@ a.filter-button {
     padding-bottom: 2em;
 }
 
+#preview h3 {
+    font-weight: 500;
+    margin-left: 0;
+}
+
 #preview .more {
     color: forestgreen;
     float: right;
@@ -559,6 +601,16 @@ a.filter-button {
     bottom: 0;
     left:0;
     right:0;
+}
+
+.applicant-name {
+    font-size: small;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.legal-notice {
+    font-size: small;
 }
 
 tr.proposal-info {
@@ -702,4 +754,29 @@ tr.proposal-selected, tr.proposal-hovered {
     max-height: 100px;
     max-width: 100px;
     padding-bottom: 5px;
+}
+
+
+
+@media screen and (min-width: 768px) {
+    .resp-portrait-show {
+        display: none;
+    }
+}
+
+
+@media screen and (max-width: 768px) {
+    .resp-portrait-hide {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    #logo {
+        background: url(/static/images/cornerwise-owl.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        height: 80%;
+        width: 50px;
+    }
 }

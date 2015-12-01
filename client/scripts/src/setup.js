@@ -50,6 +50,16 @@ define(
                     }
                 });
 
+                $(document)
+                    .on("click", "#expand-data",
+                        function(e) {
+                            $("#data").removeClass("collapsed");
+                        })
+                    .on("click", "#collapse-data",
+                        function(e) {
+                            $("#data").addClass("collapsed");
+                        });
+
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 

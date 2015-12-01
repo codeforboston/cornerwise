@@ -47,6 +47,10 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
         },
 
         fetch: function(opts) {
+            if (this._fetched) {
+                return $.Deferred().resolve(this);
+            }
+
             this._fetched = true;
 
             opts = opts || {};
@@ -117,6 +121,20 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             var attr = this.getAttribute(handle);
 
             return attr && attr.value;
+        },
+
+        /**
+         * Instantly return the current, locally stored value of the
+         * given attribute.  If the attribute is not available locally,
+         * fetch it from the server and return null.
+         */
+        getAttributeValueOrFetch: function(handle) {
+            var val = this.getAttributeValue(handle);
+
+            if (!val)
+                this.fetchAttribute(handle);
+
+            return val;
         },
 
         /**

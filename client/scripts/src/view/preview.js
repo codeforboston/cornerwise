@@ -4,11 +4,10 @@ define(["backbone", "routes", "underscore", "config", "utils"],
                template: $u.templateWithId("proposal-preview-template",
                                            {variable: "proposal"}),
 
-               initialize: function() {
+               setElement: function(elt) {
+                   B.View.prototype.setElement.call(this, elt);
                    this.$el.on("click", "a.more",
                                _.bind(this.showDetails, this));
-
-                   window.routes = routes;
                },
 
                events: {
@@ -16,7 +15,7 @@ define(["backbone", "routes", "underscore", "config", "utils"],
                },
 
                showDetails: function(e) {
-                   routes.getDispatcher().trigger("showDetails", this.collection.selected.id);
+                   routes.getDispatcher().trigger("showDetails", this.model.id);
                },
 
                setModel: function(proposal) {

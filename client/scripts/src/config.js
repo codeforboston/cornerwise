@@ -17,9 +17,9 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         // planning and zoning report.
         pzURL: "/proposal/list",
 
-        // Lat/long for the southwest
-        bounds:  [[42.42009843116784, -71.05768203735352],
-                  [42.370720143531976, -71.14445686340332]],
+        // Lat/long for the southwest and northeasth corners
+        bounds:  [[42.37268587541869, -71.14334106445312],
+                  [42.41712035469828, -71.05914115905762]],
 
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,
