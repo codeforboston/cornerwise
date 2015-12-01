@@ -435,6 +435,7 @@ a.filter-button {
 .project .name {
     font-weight: 500;
     overflow: hidden;
+    padding-top: 5px;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 70%;
@@ -443,14 +444,14 @@ a.filter-button {
 .department {
     font-size: small;
     font-style: italic;
+    padding-top: 0.1em;
 }
 
 .project .category {
     padding-left: 2px;
     position: absolute;
-    right: 0;
-    top: 0;
-
+    right: 5px;
+    top: 5px;
 }
 
 .category img {
@@ -527,16 +528,18 @@ a.filter-button {
     stroke: red;
 }
 
+#preview {
+    padding-bottom: 2em;
+}
+
 #preview .more {
     color: forestgreen;
-    position: absolute;
-    bottom: 1em;
-    right: 1em;
+    float: right;
 }
 
 #preview .calendar {
+    display: none;
     bottom: 1em;
-    position: absolute;
 }
 
 #preview .calendar img {
@@ -548,6 +551,14 @@ a.filter-button {
     max-width: 100px;
     float: left;
     margin-right: 0.5em;
+}
+
+#preview .controls {
+    padding: 0.5em;
+    position: absolute;
+    bottom: 0;
+    left:0;
+    right:0;
 }
 
 tr.proposal-info {
