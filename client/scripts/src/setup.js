@@ -2,11 +2,12 @@ define(
     ["jquery", "permits", "permits-view", "map-view",
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
-     "preview-manager", "tab-view", "filters-view", "config"],
+     "preview-manager", "tab-view", "filters-view",
+     "glossary", "config"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView,
-             FiltersView, config) {
+             FiltersView, glossary, config) {
         return {
             start: function() {
                 var proposals = new Permits(),
@@ -66,8 +67,11 @@ define(
                 // For testing:
                 window.permits = proposals;
 
+                glossary.init();
+
                 return {
                     //permits: permitsView,
+                    glossary: glossary,
                     map: mapView,
                     minimap: minimapView,
                     preview: previewManager,

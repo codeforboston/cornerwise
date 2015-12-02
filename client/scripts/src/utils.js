@@ -82,6 +82,16 @@ define(["underscore", "jquery"], function(_, $) {
     };
 
     var $u = {
+        keepArgs: function(fn, n) {
+            return function() {
+                return fn.apply(this, _.take(arguments, n));
+            };
+        },
+
+        escapeRegex: function(s) {
+            return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");
+        },
+
         everyPred: function(fs, arg) {
             return _.every(fs, function(f) {
                 return f(arg);

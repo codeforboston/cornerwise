@@ -46,16 +46,14 @@ require.config({
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
         "project-preview-view": "src/view/projectPreview",
-        // TODO: Remove
-        "popup-view": "src/view/popup",
         "layers-view": "src/view/layers",
 
         // View managers:
         "collapsible-view": "src/view/collapsible",
         "tab-view": "src/view/tabs",
 
-        "spga-filter-view": "src/view/spgaFilter",
-        "type-filter-view": "src/view/typeFilter",
+        // Additional features:
+        "glossary": "src/glossary",
 
         "setup": "src/setup"
     },

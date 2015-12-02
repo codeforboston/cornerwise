@@ -533,13 +533,40 @@ a.filter-button {
     
 }
 
-#preview, #project-preview {
+#preview {
     background-color: rgba(255, 255, 255, 0.5);
     display: none;
     position: absolute;
     width: 20em;
     padding: 1em;
     bottom: 2%;
+}
+
+a.glossary {
+    border-bottom: 1px dashed crimson;
+    color: black;
+    position: relative;
+}
+
+a.glossary:hover {
+    border-bottom: 1px dashed black;
+    text-decoration: none;
+}
+
+.definition .term {
+    font-weight: 500;
+}
+
+.definition {
+    background-color: white;
+    border: 2px solid green;
+    border-radius: 5px;
+    bottom: 0;
+    left: 110%;
+    padding: 0.5em;
+    position: absolute;
+    width: 150px;
+    z-index: 2;
 }
 
 .chart-bar, .chart-path {
