@@ -129,7 +129,7 @@ define(["backbone", "underscore", "utils"],
 
                 chartBars: function(bmap, t) {
                     var g = document.createElementNS(svgNS, "g"),
-                        w = t.scaleX(0.05),
+                        w = t.scaleX(0.102),
                         overCallback = _.bind(this.onRectMouseover, this),
                         outCallback = _.bind(this.onRectMouseout, this);
 
@@ -178,15 +178,14 @@ define(["backbone", "underscore", "utils"],
                        var xp = i/len,
                            pos = transform({x: xp, y: yp}),
                            t = document.createElementNS(svgNS, "text"),
-                           l = document.createElementNS(svgNS, "line");
+                           l = document.createElementNS(svgNS, "line"),
+                           fylabel = "FY" + label.toString().slice(-2);
 
                        $(t).attr({"class": "chart-label",
                                   "x": pos[0],
-                                  "y": pos[1],
-                                  "text-anchor": "end",
-                                  "transform": ("rotate(-45, " + pos[0] +
-                                                ", " + pos[1] + ")")})
-                           .text(label + " ");
+                                  "y": pos[1]+20, 
+                                  "text-anchor": "middle"})
+                           .text(fylabel);
 
                        // Tick mark
                        $(l).attr({"class": "chart-x-tick",

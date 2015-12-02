@@ -529,7 +529,8 @@ a.filter-button {
 }
 
 .chart-label {
-    font-size: x-small;
+    font-size: small;
+    font-weight: bold;
     
 }
 
