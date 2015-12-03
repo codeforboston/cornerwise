@@ -139,9 +139,22 @@ define(["underscore", "jquery"], function(_, $) {
 
         /**
          * @param {number} amount
-         * @param {String} currency
+         * @param {string} currency
+         *
+         * @returns {string}
          */
         prettyAmount: prettyAmount,
+
+        /**
+         * Register a default template helper, which will be available
+         * to templates created with $u.template().
+         *
+         * @param {string} name
+         * @param {Function}
+         */
+        registerHelper: function(name, fn) {
+            defaultHelpers[name] = fn;
+        },
 
         /**
          * Like _.template, except that it adds helper functions to the

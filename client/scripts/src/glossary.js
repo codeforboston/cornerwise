@@ -51,6 +51,11 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
                 term = a.text().trim(),
                 definition = definitions[term];
 
+            if (!definition) {
+                this.onMouseLeave(e);
+                return;
+            }
+
             if (!this.definitionContainer)
                 this.definitionContainer = $("<div class='definition'/>");
 
