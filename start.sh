@@ -47,16 +47,16 @@ Quickly build and launch the $image_name container. If a command is
 specified, run that command in the container and exit.
 
 Options:
+  -e <file> Specify a file containing environment variables to use
   -F      Suppress the script's default behavior of setting up the
           VM to forward traffic on the host port to localhost.
   -m <name> Specify a docker-machine machine to use
-  -O      Do not automatically open the Django application in
-          browser.
   -p <port> Run on a port other than $host_port
   -r      Force Docker to run a new container, rather than
           attach to one that is already running
   -R      Do NOT remove the container after it has exited
-  -x      If a running container is found, stop it
+  -x      If a running container is found, stop it and start a new
+          one
 "
 }
 
@@ -69,7 +69,6 @@ should_build=0
 # If true, do not attach to a running container (if applicable):
 force_run=0
 vm_port_forwarding=1
-open_in_browser=1
 # How long should the script wait for the application to launch?
 open_timeout=30
 # Do not rebuild the image if support files have changed
@@ -90,6 +89,9 @@ while getopts ":bBFm:Op:rRSthx" opt; do
             ignore_changes=1
             skip_build_prompt=1
             ;;
+        e)
+            env_file="$OPTARG"
+            ;;
         r)
             force_run=1
             ;;
@@ -104,9 +106,6 @@ while getopts ":bBFm:Op:rRSthx" opt; do
             ;;
         m)
             vm_name="$OPTARG"
-            ;;
-        O)
-            open_in_browser=0
             ;;
         p)
             if ! [[ $OPTARG =~ ^[0-9]{4,}$ ]]; then
@@ -262,30 +261,6 @@ else
         # Start the server:
         container_id=$(docker run -d $docker_opts /app/start.sh)
         echo "Container started with id $container_id."
-
-        if ((open_in_browser)); then
-            ps_count=0
-            wait_time=$open_timeout
-            while ((ps_count==0)); do
-                if ((wait_count <= 0)); then
-                    break
-                fi
-
-                sleep 2
-                wait_count -= 2
-                ps_count=$((docker ps | grep runserver | wc -l))
-            done
-
-            if ((ps_count > 0)); then
-                # The server is running in the container.
-                if ((vm_port_forwarding || !use_machine)); then
-                    vm_host="localhost"
-                else
-                    vm_host=$(docker-machine ip "$vm_name")
-                fi
-                open_browser "http://$vm_host:$host_port/index.html"
-            fi
-        fi
 
         # Attach to the container, and we're done
         docker exec -it $container_id $run_command
