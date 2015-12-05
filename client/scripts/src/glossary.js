@@ -7,7 +7,8 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
         "RA": "Residential zone",
         "RB": "Residential zone",
         // "Special Permit": "Explanation and link",
-        "FAR": "Floor-area ratio measures the ratio of the structure's floor area to the area of the plot on which it stands."
+        "FAR": "Floor-area ratio measures the ratio of the structure's floor area to the area of the plot on which it stands.",
+        "SZO": "Somerville Zoning Ordinance"
     };
 
     var reStr = _.map(definitions,
@@ -67,8 +68,7 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
 
         onMouseLeave: function(e) {
             if (this.definitionContainer) {
-                var a = $(e.target);
-                if (this.definitionContainer.parent().is(a)) {
+                if (this.definitionContainer.parent().is(e.currentTarget)) {
                     this.definitionContainer.remove();
                 }
             }
@@ -78,6 +78,8 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
             $(document)
                 .on("mouseenter", "a.glossary", _.bind(this.onMouseEnter, this))
                 .on("mouseleave", "a.glossary", _.bind(this.onMouseLeave, this));
+
+            $u.registerHelper("gloss", this.addMarkup);
         }
     };
 });
