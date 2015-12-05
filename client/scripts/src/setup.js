@@ -13,14 +13,30 @@ define(
                 var proposals = new Permits(),
                     projects = new Projects();
 
+                var showIntro = true;
+
+                // Show introduction?
+                $(document.body).toggleClass("main", !showIntro);
+                if (showIntro) {
+
+                }
+
+                $("#explore").on("click", function(e) {
+                    $(document.body)
+                        .addClass("main")
+                        .trigger("explore");
+                });
+
                 var mapView = new MapView({
                     collection: proposals,
                     el: "#map"
                 });
 
-                var minimapView = new MinimapView({
-                    el: "#minimap",
-                    linkedMap: mapView.map
+                $(document.body).on("explore", function() {
+                    new MinimapView({
+                        el: "#minimap",
+                        linkedMap: mapView.map
+                    });
                 });
 
                 var detailsView = new DetailsView({
@@ -73,7 +89,6 @@ define(
                     //permits: permitsView,
                     glossary: glossary,
                     map: mapView,
-                    minimap: minimapView,
                     preview: previewManager,
                     details: detailsView,
                     filters: new FiltersView(),

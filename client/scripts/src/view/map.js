@@ -29,7 +29,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
     return B.View.extend({
         initialize: function() {
             var //map = new RecenteredMap(this.el),
-                map = L.map(this.el),
+            map = L.map(this.el, {zoomControl: false}),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
@@ -191,8 +191,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     marker.setIcon(L.divIcon({
                         className: "zoomed-proposal-marker",
                         iconSize: size,
-                        html: "<img src='http://localhost:3000" +
-                            images[0].thumb + "'/>"
+                        html: "<img src='" + images[0].thumb + "'/>"
                     }));
                 });
             } else {
@@ -214,26 +213,13 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             if (!this._hideRefMarker) {
                 if (!this._refMarker) {
                     this._refMarker =
-                        (new RefMarker(loc, refLocation.getRadiusMeters()))
+                        (new RefMarker(refLocation))
                         .addTo(this.zoningLayer);
-                } else {
-                    this._refMarker.setRadius(loc, refLocation.getRadiusMeters());
                 }
 
-                // If the radius has changed, fit the map bounds to the
-                // filtered area.
-                if (change && change.changed.hasOwnProperty("radius")) {
-                    if (change.get("radius")) {
-                        this.zoomToRefLocation();
-                    } else {
-                        // If the radius has been cleared, fit the map
-                        // bounds to the feature group:
-                        this.map.fitBounds(this.zoningLayer.getBounds(),
-                                           {padding: [5, 5]});
-                    }
-                } else {
-                    // Recenter
-                    this.map.panTo(loc);
+                // Recenter
+                if (refLocation.get("setMethod") !== "auto") {
+                    this.map.setView(loc, Math.max(this.map.getZoom(), 16));
                 }
             }
         },

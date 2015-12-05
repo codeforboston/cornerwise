@@ -24,19 +24,8 @@ h4 {
   margin: 1.14rem 0 0.912rem 0;
 }
 
-#dev-controls {
-    background-color: white;
-    border: 1px solid gray;
-    opacity: 0.6;
-    padding: 1em;
-    position: absolute;
-    left: 0;
-    top: 25%;
-    z-index: 10;
-}
-
-#dev-controls:hover {
-    opacity: 1;
+#data {
+    display: none;
 }
 
 #map-container {
@@ -129,7 +118,7 @@ span.icon {
     right: 0;
     text-align: center;
     top: 100px;
-
+    
     transition: top 0.2s linear;
 }
 
@@ -149,10 +138,10 @@ h3 {
 
 .input-group {
     background-color: white;
-    border-radius: 5px;
     line-height: 1em;
     margin: 0.3em;
     padding: 0.1em;
+    position: relative;
 }
 
 .input-group .input {
@@ -161,6 +150,17 @@ h3 {
     font-size: small;
     padding: 0.4em;
     width: 80%;
+}
+
+.input-group .status {
+    display: none;
+    position: absolute;
+    right: 1.5em;
+    top: 0.2em;
+}
+
+body.geolocating #ref-address-form .status {
+    display: block;
 }
 
 .big-input .input {
@@ -185,12 +185,16 @@ h3 {
 }
 
 button.big {
-
     font-size: x-large;
 }
 
-::-webkit-input-placeholder {
-    font-style: italic;
+.overlay ::-webkit-input-placeholder {
+    color: white;
+    font-weight: lighter;
+}
+
+input:focus::-webkit-input-placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .input-button {
@@ -202,12 +206,12 @@ button.big {
 }
 
 .go-button {
-    color: green;
+    color: white;
 }
 
 #explore {
     color: #4EAF48;
-    display: none;
+    display: block;
     padding-bottom: 1.2em;
 }
 
@@ -271,6 +275,14 @@ button.big {
     transition: height 0.2s linear;
 }
 
+body.main #explore {
+    display: none;
+}
+
+body.main #data {
+    display: block;
+}
+
 body.main #minimap {
     display: block;
 }
@@ -289,10 +301,6 @@ body.main #search-banner {
 
 body.main #search-banner h3 {
     display: none;
-}
-
-body.main  #explore {
-    display: inline-block;
 }
 
 body.main #controls {
@@ -534,7 +542,7 @@ a.filter-button {
 }
 
 #preview {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.8);
     display: none;
     position: absolute;
     width: 20em;
