@@ -156,6 +156,23 @@ define(["underscore", "jquery"], function(_, $) {
             defaultHelpers[name] = fn;
         },
 
+        setCookie: function(name, value, options) {
+            document.cookie = [
+                encodeURIComponent(name), "=",
+                encodeURIComponent(value), ";"
+            ].join("");
+        },
+
+        getCookie: function(name) {
+            var cookie = document.cookie,
+                patt = new RegExp("(^|;\\s*)" +
+                                  $u.escapeRegex(encodeURIComponent(name)) +
+                                 "=([^;]+)"),
+                m = cookie.match(patt);
+
+            return m && decodeURIComponents(m[2]);
+        },
+
         /**
          * Like _.template, except that it adds helper functions to the
          * data passed to the resulting template function.
