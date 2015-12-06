@@ -219,7 +219,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                 // Recenter
                 if (refLocation.get("setMethod") !== "auto") {
-                    this.map.setView(loc, Math.max(this.map.getZoom(), 16));
+                    this.map.setView(loc, Math.max(this.map.getZoom(), 16),
+                                     {animate: false});
                 }
             }
         },

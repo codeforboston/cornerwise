@@ -22,9 +22,7 @@ define(
                 }
 
                 $("#explore").on("click", function(e) {
-                    $(document.body)
-                        .addClass("main")
-                        .trigger("explore");
+                    $(document).trigger("showMain");
                 });
 
                 var mapView = new MapView({
@@ -32,7 +30,8 @@ define(
                     el: "#map"
                 });
 
-                $(document.body).on("explore", function() {
+                $(document).one("showMain", function() {
+                    $(document.body).addClass("main");
                     new MinimapView({
                         el: "#minimap",
                         linkedMap: mapView.map

@@ -41,7 +41,7 @@ define(["backbone", "leaflet", "config", "arcgis", "utils"], function(B, L, conf
                         setMethod: "geolocate"
                     });
 
-                    $("body").addClass("main");
+                    $(document).trigger("showMain");
 
                     return loc;
                 })
@@ -60,7 +60,7 @@ define(["backbone", "leaflet", "config", "arcgis", "utils"], function(B, L, conf
                     altitude: null,
                     setMethod: "address"
                 });
-                $("body").addClass("main");
+                $(document).trigger("showMain");
             }).always(function() {
                 self.set("geolocating", false);
             });
