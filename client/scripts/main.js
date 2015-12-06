@@ -21,6 +21,7 @@ require.config({
 
         // Leaflet stuff:
         "ref-marker": "src/leaflet/refMarker",
+        "proposal-marker": "src/leaflet/proposalMarker",
         "info-layer-helper": "src/leaflet/infoLayer",
         "recentered-map": "src/leaflet/recenteredMap",
 

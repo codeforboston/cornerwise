@@ -279,11 +279,10 @@ body.main #explore {
     display: none;
 }
 
-body.main #data {
-    display: block;
-}
-
-body.main #minimap {
+body.main #data, 
+body.main #preview, 
+body.main #minimap,
+body.main #logo {
     display: block;
 }
 
@@ -291,9 +290,6 @@ body.main #intro {
     height: 0;
 }
 
-body.main #logo {
-    display: block;
-}
 
 body.main #search-banner {
     top: 0;
@@ -332,13 +328,18 @@ a.filter-button {
 }
 
 .zoomed-proposal-marker {
-    background-color: white;
+    background-color: #eee;
     border: 1px solid black;
     border-radius: 5px;
     box-shadow: -2px 2px 4px darkgray;
+    line-height: 75px;
     overflow: hidden;
-    padding: 5px.;
+    padding: 5px;
     text-align: center;
+}
+
+.zoomed-proposal-marker:hover {
+    background-color: white;
 }
 
 .zoomed-proposal-marker img {
@@ -553,6 +554,7 @@ a.filter-button {
 a.glossary {
     border-bottom: 1px dashed crimson;
     color: black;
+    cursor: help;
     position: relative;
 }
 

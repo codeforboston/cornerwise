@@ -1,31 +1,8 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
-        "ref-location", "ref-marker", "layers",
+        "ref-location", "ref-marker", "proposal-marker", "layers",
         "info-layer-helper", "recentered-map"],
        function(B, config, L, $, _, refLocation, RefMarker,
-                infoLayers, info, RecenteredMap) {
-
-    function getMarkerPng(isHovered, isSelected) {
-        if(isSelected){
-            return "/static/images/marker-active";
-        } else if(isHovered){
-            return "/static/images/marker-hover";
-        } else {
-            return "/static/images/marker-normal";
-        }
-    }
-
-    function getIcon(permit) {
-        // Generate an L.icon for a given permit's parameters
-        var isHovered = permit.get("hovered"),
-            isSelected = permit.get("selected");
-
-        png = getMarkerPng(isHovered, isSelected);
-
-        return L.icon({iconUrl: png + "@1x.png",
-                       iconRetinaUrl: png + "@2x.png",
-                       iconSize: [48, 55]});
-    }
-
+                ProposalMarker, infoLayers, info, RecenteredMap) {
     return B.View.extend({
         initialize: function() {
             var //map = new RecenteredMap(this.el),
@@ -47,7 +24,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.parcelLayer = parcelLayer;
             this.zoningLayer = zoningLayer;
 
-            map.on("zoomend moveend", _.bind(this.updateMarkers, this));
+            map.on("moveend", _.bind(this.updateMarkers, this));
 
             // Map from case numbers to L.Markers
             this.caseMarker = {};
@@ -56,8 +33,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.placeReferenceMarker();
 
             // ... and subscribe to updates:
-            this.listenTo(this.collection, "add", this.permitAdded)
-                .listenTo(this.collection, "remove", this.permitRemoved)
+            this.listenTo(this.collection, "add", this.proposalAdded)
+                .listenTo(this.collection, "remove", this.proposalRemoved)
                 .listenTo(this.collection, "change", this.changed)
                 .listenTo(refLocation, "change", this.placeReferenceMarker)
                 .listenTo(infoLayers, "change", this.layersChanged);
@@ -76,35 +53,33 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         parcelLayer: null,
 
         // Callbacks:
-        permitAdded: function(permit) {
-            var loc = permit.get("location");
+        proposalAdded: function(proposal) {
+            var loc = proposal.get("location");
 
             if (!loc)
                 return;
 
-            var normalIcon = getIcon(permit);
-            var marker = L.marker(loc, {icon: normalIcon,
-                                        riseOnHover: true});
+            var marker = new ProposalMarker(proposal);
 
             marker.addTo(this.zoningLayer);
 
-            this.caseMarker[permit.get("caseNumber")] = marker;
+            this.caseMarker[proposal.get("caseNumber")] = marker;
 
             marker
                 .on("mouseover", function(e) {
-                    permit.set({hovered: true});
+                    proposal.set({hovered: true});
                 })
                 .on("mouseout", function(e) {
-                    permit.set({hovered: false});
+                    proposal.set({hovered: false});
                 })
                 .on("click", function(e) {
-                    permit.select();
+                    proposal.select();
                 });
 
-            this.listenTo(permit, "change", this.changed);
+            this.listenTo(proposal, "change", this.changed);
         },
 
-        permitRemoved: function(permit) {
+        proposalRemoved: function(permit) {
             this.getMarkerForPermit(permit)
                 .done(function(marker) {
                     this.zoningLayer.removeLayer(marker);
@@ -126,7 +101,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     if (excluded) {
                         self.zoningLayer.removeLayer(marker);
                     } else {
-                        marker.setIcon(getIcon(change));
                         marker.addTo(self.zoningLayer);
                     }
 
@@ -173,33 +147,16 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             if (map.getZoom() >= 17) {
                 var bounds = map.getBounds();
-                pLayer.eachLayer(function(marker) {
-                    var proposal = marker.proposal;
 
-                    if (!proposal)
+                _.each(this.caseMarker, function(marker) {
+                    if (!bounds.contains(marker.getLatLng()))
                         return;
 
-                    var images = proposal.get("images");
-                    if (!images || !images.length ||
-                        !bounds.contains(marker.getLatLng()))
-                        return;
-
-                    marker._unzoomedIcon =
-                        marker.icon || new L.Icon.Default();
-                    var factor = Math.pow(2, (map.getZoom() - 17)),
-                        size = L.point(100*factor, 75*factor);
-                    marker.setIcon(L.divIcon({
-                        className: "zoomed-proposal-marker",
-                        iconSize: size,
-                        html: "<img src='" + images[0].thumb + "'/>"
-                    }));
+                    marker.setZoomed(map.getZoom() - 17);
                 });
             } else {
-                pLayer.eachLayer(function(marker) {
-                    if (marker._unzoomedIcon) {
-                        marker.setIcon(marker._unzoomedIcon);
-                        delete marker._unzoomedIcon;
-                    }
+                _.each(this.caseMarker, function(marker) {
+                    marker.unsetZoomed();
                 });
             }
         },
