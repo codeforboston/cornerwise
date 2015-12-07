@@ -65,12 +65,18 @@ define(["underscore", "jquery"], function(_, $) {
         return currency + commas(amount);
     }
 
+    function capitalize(s) {
+        return s[0].toUpperCase() + s.slice(1);
+    }
+
     var defaultHelpers = {
         formatDate: function(d) {
             return (d.toLocaleDateString) ?
                 d.toLocaleDateString() :
                 d.toString().slice(0, 15);
         },
+
+        capitalize: capitalize,
 
         commas: commas,
 
@@ -87,6 +93,8 @@ define(["underscore", "jquery"], function(_, $) {
                 return fn.apply(this, _.take(arguments, n));
             };
         },
+
+        capitalize: capitalize,
 
         escapeRegex: function(s) {
             return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");

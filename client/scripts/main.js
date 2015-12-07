@@ -44,9 +44,9 @@ require.config({
         "minimap-view": "src/view/minimap",
         "preview-manager": "src/view/previewManager",
         "preview-view": "src/view/preview",
+        "project-preview-view": "src/view/projectPreview",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
-        "project-preview-view": "src/view/projectPreview",
         "layers-view": "src/view/layers",
 
         // View managers:
@@ -55,6 +55,7 @@ require.config({
 
         // Additional features:
         "glossary": "src/glossary",
+        "legal-notice": "src/legalNotice",
 
         "setup": "src/setup"
     },

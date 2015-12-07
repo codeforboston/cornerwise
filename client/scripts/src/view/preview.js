@@ -1,6 +1,6 @@
 define(["backbone", "routes", "underscore", "config",
-        "glossary", "utils"],
-       function(B, routes, _, config, glossary, $u) {
+        "utils"],
+       function(B, routes, _, config, $u) {
            return B.View.extend({
                template: $u.templateWithId("proposal-preview-template",
                                            {variable: "proposal"}),
@@ -32,9 +32,7 @@ define(["backbone", "routes", "underscore", "config",
                },
 
                render: function() {
-                   var html =
-                           glossary.addMarkup(
-                               this.template(this.model));
+                   var html = this.template(this.model);
 
                    this.$el.html(html);
                    return this;

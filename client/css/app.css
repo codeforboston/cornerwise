@@ -215,6 +215,10 @@ input:focus::-webkit-input-placeholder {
     padding-bottom: 1.2em;
 }
 
+#geolocate {
+    color: #4EAF48;
+}
+
 #intro {
     height: 12em;
     overflow: hidden;
@@ -609,6 +613,11 @@ a.glossary:hover {
 #preview h3 {
     font-weight: 500;
     margin-left: 0;
+}
+
+#preview .case-number {
+    color: #EE6C43;
+    font-size: smaller;
 }
 
 #preview .more {
