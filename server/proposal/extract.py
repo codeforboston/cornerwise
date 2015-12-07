@@ -231,7 +231,63 @@ def decision_properties(doc):
 
     return props
 
-    #props.update(properties(sections[
+
+def remove_match(s, m):
+    return s[0:m.start()].rstrip() + s[m.end():]
+
+def legal_notice_properties(notice):
+    # The 'legal notice' section of Somerville Planning Staff Reports
+    # have the same general format.  Here, we exploit this fact to
+    # extract some useful information:
+    type_match = r"(?P<type>revision to|special permit|time extension|variance)"
+    per_patt = r"((?:under|per) (?:SZO)? .(?P<per>\d+\.\d+(\.(\d+|[A-Z]))?))"
+    section_patt = r"\u00A7(?P<per>\d+\.\d+(\.(\d+|[A-Z]))?)"
+    sought_split = r"and (?:seeks? )?a {0}".format(type_match)
+    patt = r"seeks? a {0}".format(type_match)
+    sentences = re.split(r"\.\s+(?=[A-Z])", notice)
+    sought = []
+
+    for sentence in sentences:
+        m = re.search(patt, sentence, re.I)
+        if m:
+            rest = sentence[m.end():]
+            while True:
+                sought_m = re.search(sought_split, rest, re.I)
+
+                if not sought_m:
+                    break
+
+                desc = rest[0:sought_m.start()]
+                per_m = re.search(per_patt, desc)
+                if not per_m:
+                    per_m = re.search(section_patt, desc)
+                if per_m:
+                    desc = remove_match(desc, per_m)
+
+                sought.append(
+                    {"per": per_m and per_m.group("per"),
+                     "type": sought_m.group("type"),
+                     "description": desc.strip()})
+
+                rest = rest[sought_m.end():]
+
+            if rest:
+                per_m = re.search(per_patt, rest)
+                if not per_m:
+                    per_m = re.search(section_patt, rest)
+                per = per_m and per_m.group("per")
+                if per:
+                    desc = remove_match(rest, per_m)
+                else:
+                    desc = rest
+
+                sought.append(
+                    {"per": per,
+                     "type": m.group("type"),
+                     "description": desc.strip()})
+
+    return sought
+
 
 def doc_type(doc):
     if doc.field == "reports" and re.match(r"staff report", doc.title, re.I):
