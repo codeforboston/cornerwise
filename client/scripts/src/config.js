@@ -11,7 +11,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         //tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
         tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
 
-        backendURL: "http://localhost:3000",
+        backendURL: "",
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
