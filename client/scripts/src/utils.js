@@ -65,12 +65,18 @@ define(["underscore", "jquery"], function(_, $) {
         return currency + commas(amount);
     }
 
+    function capitalize(s) {
+        return s[0].toUpperCase() + s.slice(1);
+    }
+
     var defaultHelpers = {
         formatDate: function(d) {
             return (d.toLocaleDateString) ?
                 d.toLocaleDateString() :
                 d.toString().slice(0, 15);
         },
+
+        capitalize: capitalize,
 
         commas: commas,
 
@@ -82,6 +88,18 @@ define(["underscore", "jquery"], function(_, $) {
     };
 
     var $u = {
+        keepArgs: function(fn, n) {
+            return function() {
+                return fn.apply(this, _.take(arguments, n));
+            };
+        },
+
+        capitalize: capitalize,
+
+        escapeRegex: function(s) {
+            return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");
+        },
+
         everyPred: function(fs, arg) {
             return _.every(fs, function(f) {
                 return f(arg);
@@ -129,9 +147,39 @@ define(["underscore", "jquery"], function(_, $) {
 
         /**
          * @param {number} amount
-         * @param {String} currency
+         * @param {string} currency
+         *
+         * @returns {string}
          */
         prettyAmount: prettyAmount,
+
+        /**
+         * Register a default template helper, which will be available
+         * to templates created with $u.template().
+         *
+         * @param {string} name
+         * @param {Function}
+         */
+        registerHelper: function(name, fn) {
+            defaultHelpers[name] = fn;
+        },
+
+        setCookie: function(name, value, options) {
+            document.cookie = [
+                encodeURIComponent(name), "=",
+                encodeURIComponent(value), ";"
+            ].join("");
+        },
+
+        getCookie: function(name) {
+            var cookie = document.cookie,
+                patt = new RegExp("(^|;\\s*)" +
+                                  $u.escapeRegex(encodeURIComponent(name)) +
+                                 "=([^;]+)"),
+                m = cookie.match(patt);
+
+            return m && decodeURIComponents(m[2]);
+        },
 
         /**
          * Like _.template, except that it adds helper functions to the

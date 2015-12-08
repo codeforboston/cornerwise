@@ -21,6 +21,7 @@ require.config({
 
         // Leaflet stuff:
         "ref-marker": "src/leaflet/refMarker",
+        "proposal-marker": "src/leaflet/proposalMarker",
         "info-layer-helper": "src/leaflet/infoLayer",
         "recentered-map": "src/leaflet/recenteredMap",
 
@@ -43,19 +44,18 @@ require.config({
         "minimap-view": "src/view/minimap",
         "preview-manager": "src/view/previewManager",
         "preview-view": "src/view/preview",
+        "project-preview-view": "src/view/projectPreview",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
-        "project-preview-view": "src/view/projectPreview",
-        // TODO: Remove
-        "popup-view": "src/view/popup",
         "layers-view": "src/view/layers",
 
         // View managers:
         "collapsible-view": "src/view/collapsible",
         "tab-view": "src/view/tabs",
 
-        "spga-filter-view": "src/view/spgaFilter",
-        "type-filter-view": "src/view/typeFilter",
+        // Additional features:
+        "glossary": "src/glossary",
+        "legal-notice": "src/legalNotice",
 
         "setup": "src/setup"
     },

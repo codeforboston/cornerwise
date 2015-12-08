@@ -11,15 +11,16 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         //tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
         tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
 
-        backendURL: "http://localhost:3000",
+        backendURL: "",
 
         // URL from which to fetch the JSON representing the latest
         // planning and zoning report.
         pzURL: "/proposal/list",
 
-        // Lat/long for the southwest and northeasth corners
-        bounds:  [[42.37268587541869, -71.14334106445312],
-                  [42.41712035469828, -71.05914115905762]],
+        // Lat/long for the southwest and northeasth corners of the
+        // map's initial viewing area.
+        bounds:  [[42.37236882604975, -71.14565849304199],
+                  [42.41680352972898, -71.04806900024413]],
 
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,

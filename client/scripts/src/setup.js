@@ -2,24 +2,40 @@ define(
     ["jquery", "permits", "permits-view", "map-view",
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
-     "preview-manager", "tab-view", "filters-view", "config"],
+     "preview-manager", "tab-view", "filters-view",
+     "glossary", "config"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView,
-             FiltersView, config) {
+             FiltersView, glossary, config) {
         return {
             start: function() {
                 var proposals = new Permits(),
                     projects = new Projects();
+
+                var showIntro = true;
+
+                // Show introduction?
+                $(document.body).toggleClass("main", !showIntro);
+                if (showIntro) {
+
+                }
+
+                $("#explore").on("click", function(e) {
+                    $(document).trigger("showMain");
+                });
 
                 var mapView = new MapView({
                     collection: proposals,
                     el: "#map"
                 });
 
-                var minimapView = new MinimapView({
-                    el: "#minimap",
-                    linkedMap: mapView.map
+                $(document).one("showMain", function() {
+                    $(document.body).addClass("main");
+                    new MinimapView({
+                        el: "#minimap",
+                        linkedMap: mapView.map
+                    });
                 });
 
                 var detailsView = new DetailsView({
@@ -66,10 +82,12 @@ define(
                 // For testing:
                 window.permits = proposals;
 
+                glossary.init();
+
                 return {
                     //permits: permitsView,
+                    glossary: glossary,
                     map: mapView,
-                    minimap: minimapView,
                     preview: previewManager,
                     details: detailsView,
                     filters: new FiltersView(),

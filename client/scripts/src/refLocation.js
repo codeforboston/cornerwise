@@ -1,5 +1,5 @@
 /*
- * The reference location is used to determine the
+ * The reference location is used to determine the distance to
  */
 define(["backbone", "leaflet", "config", "arcgis", "utils"], function(B, L, config, arcgis, $u) {
     var LocationModel = B.Model.extend({
@@ -7,7 +7,8 @@ define(["backbone", "leaflet", "config", "arcgis", "utils"], function(B, L, conf
             lat: config.refPointDefault.lat,
             lng: config.refPointDefault.lng,
             // The search radius, centered on the current latitude and longitude:
-            radius: null
+            radius: null,
+            setMethod: "auto"
         },
 
         getPoint: function() {
@@ -36,8 +37,11 @@ define(["backbone", "leaflet", "config", "arcgis", "utils"], function(B, L, conf
                     self.set({
                         lat: loc[0],
                         lng: loc[1],
-                        altitude: loc[2]
+                        altitude: loc[2],
+                        setMethod: "geolocate"
                     });
+
+                    $(document).trigger("showMain");
 
                     return loc;
                 })
@@ -53,8 +57,10 @@ define(["backbone", "leaflet", "config", "arcgis", "utils"], function(B, L, conf
                 self.set({
                     lat: loc[0],
                     lng: loc[1],
-                    altitude: null
+                    altitude: null,
+                    setMethod: "address"
                 });
+                $(document).trigger("showMain");
             }).always(function() {
                 self.set("geolocating", false);
             });

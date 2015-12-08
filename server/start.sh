@@ -49,14 +49,14 @@ echo "Applying any outstanding migrations"
 $PYTHON_BIN $APP_ROOT/manage.py migrate
 echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
 
-$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err &
+$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err || exit $?
 
 # Force Celery to run as root
 export C_FORCE_ROOT=1
 
 # Start Celery:
 if [ "$DJANGO_MODE" != "production" ]; then
-    celery_opts = " --autoreload"
+    celery_opts=" --autoreload"
 fi
 
 $PYTHON_BIN $APP_ROOT/manage.py celery worker $celery_opts

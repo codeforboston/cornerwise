@@ -1,5 +1,6 @@
-define(["backbone", "routes", "underscore", "config", "utils"],
-       function(B, routes, _, config, $u ) {
+define(["backbone", "routes", "underscore", "config",
+        "utils"],
+       function(B, routes, _, config, $u) {
            return B.View.extend({
                template: $u.templateWithId("proposal-preview-template",
                                            {variable: "proposal"}),
@@ -31,7 +32,10 @@ define(["backbone", "routes", "underscore", "config", "utils"],
                },
 
                render: function() {
-                   this.$el.html(this.template(this.model));
+                   var html = this.template(this.model);
+
+                   this.$el.html(html);
+                   return this;
                }
            });
        });

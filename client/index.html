@@ -11,10 +11,10 @@
 
     <!-- Template for proposals in the proposal table -->
     <script type="text/template" id="proposal-template">
-      <td><%= proposal.address %></td>
+      <td><%- proposal.address %></td>
       <td>
-        <b><%= proposal.summary %></b>
-        <br>Case: <%= proposal.caseNumber %></td>
+        <b><%- proposal.summary %></b>
+        <br>Case: <%- proposal.caseNumber %></td>
       <td>
         <span class="distance"><%= commas(proposal.refDistance) %> feet</span>
       </td>
@@ -27,16 +27,16 @@
     <a href="#" class="close">Close</a>
     <h4>
       <div class="minimap"></div>
-      <%= proposal.address %>
+      <%- proposal.address %>
     </h4>
-    <div class="case-number"><%= proposal.caseNumber %></div>
+    <div class="case-number"><%- proposal.caseNumber %></div>
 
     <% if (proposal.attributes && proposal.attributes.length) { %>
     <table class="attributes section table">
       <% _.each(proposal.attributes, function(attr) { %>
       <tr class="attribute">
-        <th scope="row"><%= attr.name %>:</th>
-        <td><%= attr.value %></td>
+        <th scope="row"><%- attr.name %>:</th>
+        <td><%- attr.value %></td>
       </tr>
       <% }); %>
     </table>
@@ -48,11 +48,11 @@
       <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
       <a class="document" href="<%= doc.url %>" target="_blank">
         <% if (doc.thumb) { %>
-        <img class="thumb" src="<%= doc.thumb %>"/>
+        <img class="thumb" src="<%- doc.thumb %>"/>
         <% } else { %>
         <div class="dummy-thumb thumb">Doc</div>
         <% } %>
-        <div class="title"><%= doc.title %></div>
+        <div class="title"><%- doc.title %></div>
       </a>
       <% }); %>
     </div>
@@ -79,11 +79,11 @@
       <table class="table">
         <tr>
           <td>Lot Size:</td>
-          <td><%= properties.LOT_SIZE %> acres</td>
+          <td><%- properties.LOT_SIZE %> acres</td>
         </tr>
         <tr>
           <td>Residential Area</td>
-          <td><%= commas(properties.RES_AREA) %> square feet</td>
+          <td><%- commas(properties.RES_AREA) %> square feet</td>
         </tr>
       </table>
     </div>
@@ -94,14 +94,15 @@
 
     <script type="text/template" id="project-template">
       <div class="icon">
-        <img src="<%= project.thumbnail() %>">
+        <img src="<%- project.thumbnail() %>">
       </div>
-      <div class="name" title="<%= project.get('name') %>">
-        <%= project.get("name") %>
+      <div class="name" title="<%- project.get('name') %>">
+        <%- project.get("name") %>
       </div>
-      <div class="category" title="<%= project.get('category') %>">
-        <img src="<%= project.categoryIcon() %>"/>
+      <div class="category" title="<%- project.get('category') %>">
+        <img src="<%- project.categoryIcon() %>"/>
       </div>
+<<<<<<< HEAD
       <div class="department"><%= project.get("department") %></div>
       <div class="year range"><% var years = project.yearRange();
            if (years[0] == years[1]) {
@@ -113,12 +114,38 @@
       </div>
       <div class="budget">
         <%= prettyAmount(project.totalBudget()) %>
+=======
+      <div class="department"><%- project.get("department") %></div>
+      <div class="time-span"></div>
+      <div class="status">
+        <div class="<%- project.get('approved') ? 'approved' : 'pending' %>"/>
+      </div>
+      <div class="budget">
+        <%- prettyAmount(project.totalBudget()) %>
+        <% var years = project.yearRange();
+           if (years[0] == years[1]) {
+        %>
+        in <span class="budget-year"><%- years[0] %></span>
+        <% } else { %>
+        ~
+        <span class="budget-years">
+          <%- years[0] %>&ndash;<%= years[1] %>
+        </span>
+        <% } %>
+      </div>
+      <div class="status <%- project.get('approved') ? 'approved' : '' %>">
+        <% if (project.get("approved")) { %>
+        ✓ Approved
+        <% } else { %>
+        ⚙ Pending Review
+        <% } %>
+>>>>>>> origin/master
       </div>
     </script>
 
     <script type="text/template" id="proposal-preview-template">
       <div>
-        <img src="<%= proposal.getThumb() %>" class="thumb"/>
+        <img src="<%- proposal.getThumb() %>" class="thumb"/>
         <h3 class="address"><%= proposal.get("address") %></h3>
         <div class="applicant">
           <%
@@ -151,9 +178,9 @@
     </script>
 
     <script type="text/template" id="project-preview-template">
-      <h3><%= project.get("name") %></h3>
-      <div class="category"><%= project.get("category") %></div>
-      <div class="department"><%= project.departmentName() %></div>
+      <h3><%- project.get("name") %></h3>
+      <div class="category"><%- project.get("category") %></div>
+      <div class="department"><%- project.departmentName() %></div>
       <div class="desription">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
       </div>
@@ -163,13 +190,15 @@
     </script>
 
   </head>
-    <body class="main">
+    <body>
       <div id="map-container">
         <div id="map"></div>
         <div id="minimap"></div>
 
-        <div id="preview"> </div>
+        <!-- container for preview of selected proposal/project -->
+        <div id="preview"></div>
 
+        <!-- container for detail view -->
         <div id="overlay"></div>
       </div>
 
@@ -179,12 +208,14 @@
           <h3>what&rsquo;s being built near&hellip;</h3>
           <div class="input-group big-input">
             <form id="ref-address-form">
-              <input class="input" type="text" name="address" placeholder="enter address" />
+              <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off"/>
+              <img src="/static/images/geolocating.gif" class="status" alt="searching" />
               <button type="submit" class="input-button go-button">go</button>
             </form>
           </div>
         </div>
-        <!-- <a id="explore" href="#">Explore the Data</a> -->
+        <a id="geolocate" href="#">Near Me</a>
+        <a id="explore" href="#">Explore the Data</a>
       </div>
 
       <div id="menu">
@@ -223,12 +254,7 @@
           <h3>CITY INITIATIVES</h3>
 
           <div class="lede">
-            <h4>GREEN LINE EXTENSION</h4>
 
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-            a diam lectus. Sed sit amet ipsum mauris.
-            <br><br>
-            <a class="_details" href="#">Details</a>
           </div>
         </div>
       </div>

@@ -24,19 +24,8 @@ h4 {
   margin: 1.14rem 0 0.912rem 0;
 }
 
-#dev-controls {
-    background-color: white;
-    border: 1px solid gray;
-    opacity: 0.6;
-    padding: 1em;
-    position: absolute;
-    left: 0;
-    top: 25%;
-    z-index: 10;
-}
-
-#dev-controls:hover {
-    opacity: 1;
+#data {
+    display: none;
 }
 
 #map-container {
@@ -129,7 +118,7 @@ span.icon {
     right: 0;
     text-align: center;
     top: 100px;
-
+    
     transition: top 0.2s linear;
 }
 
@@ -149,10 +138,10 @@ h3 {
 
 .input-group {
     background-color: white;
-    border-radius: 5px;
     line-height: 1em;
     margin: 0.3em;
     padding: 0.1em;
+    position: relative;
 }
 
 .input-group .input {
@@ -161,6 +150,17 @@ h3 {
     font-size: small;
     padding: 0.4em;
     width: 80%;
+}
+
+.input-group .status {
+    display: none;
+    position: absolute;
+    right: 1.5em;
+    top: 0.2em;
+}
+
+body.geolocating #ref-address-form .status {
+    display: block;
 }
 
 .big-input .input {
@@ -185,12 +185,16 @@ h3 {
 }
 
 button.big {
-
     font-size: x-large;
 }
 
-::-webkit-input-placeholder {
-    font-style: italic;
+.overlay ::-webkit-input-placeholder {
+    color: white;
+    font-weight: lighter;
+}
+
+input:focus::-webkit-input-placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .input-button {
@@ -202,13 +206,17 @@ button.big {
 }
 
 .go-button {
-    color: green;
+    color: white;
 }
 
 #explore {
     color: #4EAF48;
-    display: none;
+    display: block;
     padding-bottom: 1.2em;
+}
+
+#geolocate {
+    color: #4EAF48;
 }
 
 #intro {
@@ -271,7 +279,14 @@ button.big {
     transition: height 0.2s linear;
 }
 
-body.main #minimap {
+body.main #explore {
+    display: none;
+}
+
+body.main #data, 
+body.main #preview, 
+body.main #minimap,
+body.main #logo {
     display: block;
 }
 
@@ -279,9 +294,6 @@ body.main #intro {
     height: 0;
 }
 
-body.main #logo {
-    display: block;
-}
 
 body.main #search-banner {
     top: 0;
@@ -289,10 +301,6 @@ body.main #search-banner {
 
 body.main #search-banner h3 {
     display: none;
-}
-
-body.main  #explore {
-    display: inline-block;
 }
 
 body.main #controls {
@@ -324,13 +332,18 @@ a.filter-button {
 }
 
 .zoomed-proposal-marker {
-    background-color: white;
+    background-color: #eee;
     border: 1px solid black;
     border-radius: 5px;
     box-shadow: -2px 2px 4px darkgray;
+    line-height: 75px;
     overflow: hidden;
-    padding: 5px.;
+    padding: 5px;
     text-align: center;
+}
+
+.zoomed-proposal-marker:hover {
+    background-color: white;
 }
 
 .zoomed-proposal-marker img {
@@ -534,13 +547,41 @@ a.filter-button {
     
 }
 
-#preview, #project-preview {
-    background-color: rgba(255, 255, 255, 0.5);
+#preview {
+    background-color: rgba(255, 255, 255, 0.8);
     display: none;
     position: absolute;
     width: 20em;
     padding: 1em;
     bottom: 2%;
+}
+
+a.glossary {
+    border-bottom: 1px dashed crimson;
+    color: black;
+    cursor: help;
+    position: relative;
+}
+
+a.glossary:hover {
+    border-bottom: 1px dashed black;
+    text-decoration: none;
+}
+
+.definition .term {
+    font-weight: 500;
+}
+
+.definition {
+    background-color: white;
+    border: 2px solid green;
+    border-radius: 5px;
+    bottom: 0;
+    left: 110%;
+    padding: 0.5em;
+    position: absolute;
+    width: 150px;
+    z-index: 2;
 }
 
 .chart-bar, .chart-path {
@@ -573,6 +614,11 @@ a.filter-button {
 #preview h3 {
     font-weight: 500;
     margin-left: 0;
+}
+
+#preview .case-number {
+    color: #EE6C43;
+    font-size: smaller;
 }
 
 #preview .more {

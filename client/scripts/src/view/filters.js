@@ -2,10 +2,10 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "ref-location", "utils",
-     "arcgis"],
+    ["backbone", "underscore", "jquery", "ref-location",
+     "utils", "arcgis"],
 
-    function(B, _, refLocation, $u, arcgis, CollapsibleView) {
+    function(B, _, $, refLocation, $u, arcgis, CollapsibleView) {
         return B.View.extend({
             el: function() {
                 return document.body;
@@ -24,14 +24,17 @@ define(
             },
 
             submitAddress: function(e) {
-
                 if (refLocation.get("geolocating"))
                     return false;
+
+                $(e.target).removeClass("error");
 
                 var addr = e.target.elements["address"].value;
 
                 refLocation.setFromAddress(addr).fail(function(err) {
-                    // Indicate to the user why geocoding failed.
+                    $(e.target)
+                        .addClass("error")
+                        .find(".error-reason").text("Could not locate that address!");
                 });
 
                 return false;
@@ -73,7 +76,8 @@ define(
             },
 
             toggleGeolocating: function(loc, isGeolocating) {
-                $("#ref-address").toggleClass("geolocating", isGeolocating);
+                $(document.body)
+                    .toggleClass("geolocating", isGeolocating);
             }
         });
     });
