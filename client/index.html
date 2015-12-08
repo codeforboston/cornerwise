@@ -22,74 +22,74 @@
 
 
 
-<script type="text/template" id="proposal-details">
-  <div class="details">
-    <a href="#" class="close">Close</a>
-    <h4>
-      <div class="minimap"></div>
-      <%- proposal.address %>
-    </h4>
-    <div class="case-number"><%- proposal.caseNumber %></div>
+    <script type="text/template" id="proposal-details">
+      <div class="details">
+        <a href="#" class="close">Close</a>
+        <h4>
+          <div class="minimap"></div>
+          <%- proposal.address %>
+        </h4>
+        <div class="case-number"><%- proposal.caseNumber %></div>
 
-    <% if (proposal.attributes && proposal.attributes.length) { %>
-    <table class="attributes section table">
-      <% _.each(proposal.attributes, function(attr) { %>
-      <tr class="attribute">
-        <th scope="row"><%- attr.name %>:</th>
-        <td><%- attr.value %></td>
-      </tr>
-      <% }); %>
-    </table>
-    <% } %>
-
-    <% if (proposal.documents && proposal.documents.length) { %>
-    <div class="documents section">
-      <div class="section-title">Documents</div>
-      <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
-      <a class="document" href="<%= doc.url %>" target="_blank">
-        <% if (doc.thumb) { %>
-        <img class="thumb" src="<%- doc.thumb %>"/>
-        <% } else { %>
-        <div class="dummy-thumb thumb">Doc</div>
+        <% if (proposal.attributes && proposal.attributes.length) { %>
+        <table class="attributes section table">
+          <% _.each(proposal.attributes, function(attr) { %>
+          <tr class="attribute">
+            <th scope="row"><%- attr.name %>:</th>
+            <td><%- attr.value %></td>
+          </tr>
+          <% }); %>
+        </table>
         <% } %>
-        <div class="title"><%- doc.title %></div>
-      </a>
-      <% }); %>
-    </div>
-    <% } %>
 
-    <% if (proposal.images && proposal.images.length) { %>
-    <div class="images section">
-      <div class="section-title">Images</div>
-      <% _.each(proposal.images.slice(0, 10), function(img) { %>
-      <a class="thumb-link" href="<%= img.src %>" target="_blank">
-        <img class="thumb" src="<%= img.thumb || img.src %>"/>
-      </a>
-      <% }); %>
-    </div>
-    <% } %>
+        <% if (proposal.documents && proposal.documents.length) { %>
+        <div class="documents section">
+          <div class="section-title">Documents</div>
+          <% _.each(proposal.documents.slice(0, 10), function(doc) { %>
+          <a class="document" href="<%= doc.url %>" target="_blank">
+            <% if (doc.thumb) { %>
+            <img class="thumb" src="<%- doc.thumb %>"/>
+            <% } else { %>
+            <div class="dummy-thumb thumb">Doc</div>
+            <% } %>
+            <div class="title"><%- doc.title %></div>
+          </a>
+          <% }); %>
+        </div>
+        <% } %>
 
-    <% if (proposal.parcel) { %>
-    <% with(proposal.parcel) { %>
-    <div class="section">
-      <div class="section-title">
-        Parcel
+        <% if (proposal.images && proposal.images.length) { %>
+        <div class="images section">
+          <div class="section-title">Images</div>
+          <% _.each(proposal.images.slice(0, 10), function(img) { %>
+          <a class="thumb-link" href="<%= img.src %>" target="_blank">
+            <img class="thumb" src="<%= img.thumb || img.src %>"/>
+          </a>
+          <% }); %>
+        </div>
+        <% } %>
+
+        <% if (proposal.parcel) { %>
+        <% with(proposal.parcel) { %>
+        <div class="section">
+          <div class="section-title">
+            Parcel
+          </div>
+
+          <table class="table">
+            <tr>
+              <td>Lot Size:</td>
+              <td><%- properties.LOT_SIZE %> acres</td>
+            </tr>
+            <tr>
+              <td>Residential Area</td>
+              <td><%- commas(properties.RES_AREA) %> square feet</td>
+            </tr>
+          </table>
+        </div>
+        <% } %>
+        <% } %>
       </div>
-
-      <table class="table">
-        <tr>
-          <td>Lot Size:</td>
-          <td><%- properties.LOT_SIZE %> acres</td>
-        </tr>
-        <tr>
-          <td>Residential Area</td>
-          <td><%- commas(properties.RES_AREA) %> square feet</td>
-        </tr>
-      </table>
-    </div>
-    <% } %>
-    <% } %>
-  </div>
     </script>
 
     <script type="text/template" id="project-template">
@@ -111,7 +111,7 @@
         <%- prettyAmount(project.totalBudget()) %>
         <% var years = project.yearRange();
            if (years[0] == years[1]) {
-        %>
+           %>
         in <span class="budget-year"><%- years[0] %></span>
         <% } else { %>
         ~
@@ -132,7 +132,8 @@
     <script type="text/template" id="proposal-preview-template">
       <div>
         <img src="<%- proposal.getThumb() %>" class="thumb"/>
-        <h3 class="address"><%= proposal.get("address") %></h3>
+        <h3 class="address"><%- proposal.get("address") %></h3>
+        <div class="case-number"><%- proposal.get("caseNumber") %></div>
         <div class="applicant">
           <%
              var applicant = proposal.getAttributeValueOrFetch("applicant_name"),
@@ -140,16 +141,16 @@
              owner = proposal.getAttributeValue("owner_name");
              if (applicant) {
              %>
-          <div class="applicant-name"> <%= applicant %> (applicant)</div>
+          <div class="applicant-name"><%- applicant %></div>
           <% }
              if (owner) {
              %>
-          <div class="applicant-name"> <%= owner %> (owner) </div>
+          <div class="applicant-name"><%- owner %></div>
           <%
              }
              if (notice) {
              %>
-          <div class="legal-notice"><%= notice %></div>
+          <div class="legal-notice"><%= gloss(abridge(notice)) %></div>
           <% } %>
         </div>
         <div id="details-minimap"></div>
@@ -176,94 +177,96 @@
     </script>
 
   </head>
-    <body>
-      <div id="map-container">
-        <div id="map"></div>
-        <div id="minimap"></div>
+  <body>
+    <div id="map-container">
+      <div id="map"></div>
+      <div id="minimap"></div>
 
-        <!-- container for preview of selected proposal/project -->
-        <div id="preview"></div>
+      <!-- container for preview of selected proposal/project -->
+      <div id="preview"></div>
 
-        <!-- container for detail view -->
-        <div id="overlay"></div>
-      </div>
+      <!-- container for detail view -->
+      <div id="overlay"></div>
+    </div>
 
-      <div id="search-banner" class="overlay">
-        <div id="logo" class="resp-portrait-hide"></div>
-        <div class="overlay-contents">
-          <h3>what&rsquo;s being built near&hellip;</h3>
-          <div class="input-group big-input">
-            <form id="ref-address-form">
-              <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off"/>
-              <img src="/static/images/geolocating.gif" class="status" alt="searching" />
-              <button type="submit" class="input-button go-button">go</button>
-            </form>
-          </div>
-        </div>
-        <a id="geolocate" href="#">Near Me</a>
-        <a id="explore" href="#">Explore the Data</a>
-      </div>
+    <div id="modal"></div>
 
-      <div id="menu">
-        <a id="menu-button" class="button big" href="#">
-          <span class="icon" aria-hidden="true">≡</span>
-          <span class="resp-portrait-hide">MENU</span>
-        </a>
-      </div>
-
-      <div id="data" class="collapsed">
-        <div id="data-controls">
-          <a href="#" id="expand-data" class="when-collapsed">Explore &larr;</a>
-          <a href="#" id="collapse-data" class="when-expanded">Hide &rarr;</a>
-        </div>
-        <div class="tabs"></div>
-        <div class="tab-pane">
+    <div id="search-banner" class="overlay">
+      <div id="logo" class="resp-portrait-hide"></div>
+      <div class="overlay-contents">
+        <h3>what&rsquo;s being built near&hellip;</h3>
+        <div class="input-group big-input">
+          <form id="ref-address-form">
+            <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off"/>
+            <img src="/static/images/geolocating.gif" class="status" alt="searching" />
+            <button type="submit" class="input-button go-button">go</button>
+          </form>
         </div>
       </div>
+      <a id="geolocate" href="#">Near Me</a>
+      <a id="explore" href="#">Explore the Data</a>
+    </div>
 
-      <div id="intro" class="overlay">
-        <div class="section">
-          <h3>PLANNING AND ZONING</h3>
+    <div id="menu">
+      <a id="menu-button" class="button big" href="#">
+        <span class="icon" aria-hidden="true">≡</span>
+        <span class="resp-portrait-hide">MENU</span>
+      </a>
+    </div>
 
-          <ul>
-            <li>current building projects</li>
-            <li>building requests</li>
-            <li>variances</li>
-            <li>schedule of public hearings</li>
-          </ul>
+    <div id="data" class="collapsed">
+      <div id="data-controls">
+        <a href="#" id="expand-data" class="when-collapsed">Explore &larr;</a>
+        <a href="#" id="collapse-data" class="when-expanded">Hide &rarr;</a>
+      </div>
+      <div class="tabs"></div>
+      <div class="tab-pane">
+      </div>
+    </div>
 
-          <div class="more">
-            <a href="#">Learn more</a>
-          </div>
-        </div>
-        <div class="section">
-          <h3>CITY INITIATIVES</h3>
+    <div id="intro" class="overlay">
+      <div class="section">
+        <h3>PLANNING AND ZONING</h3>
 
-          <div class="lede">
+        <ul>
+          <li>current building projects</li>
+          <li>building requests</li>
+          <li>variances</li>
+          <li>schedule of public hearings</li>
+        </ul>
 
-          </div>
+        <div class="more">
+          <a href="#">Learn more</a>
         </div>
       </div>
+      <div class="section">
+        <h3>CITY INITIATIVES</h3>
 
-      <div id="controls" class="overlay">
-        <div class="section">
-          <h3>FILTER</h3>
-          <a href="#" class="filter-button">Project Type</a>
-          <a href="#" class="filter-button">Something Else</a>
-          <a href="#" class="filter-button">Impact</a>
-        </div>
-        <div class="section"></div>
-        <div id="signup" class="section">
-          <!-- <span class="resp-portrait-hide"> -->
-          <!--   Sign up for alerts near this address: -->
-          <!-- </span> -->
-          <a id="subscribe" class="big button">SUBSCRIBE</a>
-          <!-- <div class="input-group"> -->
+        <div class="lede">
 
-          <!-- <input class="input" type="text" name="address" placeholder="enter email" /> -->
-          <!-- <button class="input-button go-button">go</button> -->
-          <!-- </div> -->
         </div>
       </div>
-    </body>
+    </div>
+
+    <div id="controls" class="overlay">
+      <div class="section">
+        <h3>FILTER</h3>
+        <a href="#" class="filter-button">Project Type</a>
+        <a href="#" class="filter-button">Something Else</a>
+        <a href="#" class="filter-button">Impact</a>
+      </div>
+      <div class="section"></div>
+      <div id="signup" class="section">
+        <!-- <span class="resp-portrait-hide"> -->
+        <!--   Sign up for alerts near this address: -->
+        <!-- </span> -->
+        <a id="subscribe" class="big button">SUBSCRIBE</a>
+        <!-- <div class="input-group"> -->
+
+        <!-- <input class="input" type="text" name="address" placeholder="enter email" /> -->
+        <!-- <button class="input-button go-button">go</button> -->
+        <!-- </div> -->
+      </div>
+    </div>
+  </body>
 </html>
