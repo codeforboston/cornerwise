@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.gis.geos.polygon import Polygon
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
@@ -35,6 +36,7 @@ def proposal_json(proposal, include_images=True, include_attributes=False,
         pdict["events"] = [e.to_dict for e in proposal.events.all()]
 
     return pdict
+
 
 def build_attributes_query(d):
     """Construct a Proposal query from query parameters.
@@ -82,6 +84,12 @@ def build_proposal_query(d):
     if ids:
         subqueries["pk__in"] = ids
 
+    bounds = d.get("bounds")
+    if bounds:
+        coords = [float(coord) for coord in bounds.split(",")]
+        bbox = Polygon.from_bbox(*coords, srid=97406)
+        subqueries["location__within"] = bbox
+
     status = d.get("status", "active").lower()
     if status == "closed":
         subqueries["complete"] = True
@@ -110,11 +118,13 @@ def active_proposals(req):
 
     return {"proposals": list(map(proposal_json, proposals))}
 
+
 @make_response()
 def closed_proposals(req):
     proposals = Proposal.objects.filter(complete=True)
 
     return {"proposals": list(map(proposal_json, proposals))}
+
 
 @make_response()
 def view_proposal(req, pk=None):
@@ -125,6 +135,7 @@ def view_proposal(req, pk=None):
 
     return proposal_json(proposal, include_attributes=True)
 
+
 # Document views
 @make_response()
 def view_document(req, pk):
@@ -132,6 +143,7 @@ def view_document(req, pk):
     doc = get_object_or_404(Document, pk=pk)
 
     return doc.to_dict()
+
 
 def download_document(req, pk):
     doc = get_object_or_404(Document, pk=pk)
