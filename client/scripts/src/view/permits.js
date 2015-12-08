@@ -22,9 +22,13 @@ define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, Pe
         },
 
         permitAdded: function(permit) {
-            var view = new PermitView({model: permit});
+            var view = new PermitView({model: permit}).render(),
+                collection = this.collection;
 
-            this.$("tbody").append(view.render().el);
+            this.$("tbody").append(view.el);
+            view.$el.on("click", function() {
+                collection.setSelection([permit.id]);
+            });
         },
 
         fetchingBegan: function() {

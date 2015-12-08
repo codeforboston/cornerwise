@@ -21,7 +21,7 @@ define(
 
                 }
 
-                $("#explore").on("click", function(e) {
+                $(document).on("click", "#explore,#modal", function(e) {
                     $(document).trigger("showMain");
                 });
 

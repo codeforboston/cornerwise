@@ -16,9 +16,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
 
         events: {
             "mouseover": "beginHover",
-            "mouseout": "endHover",
-            "click": "onClick",
-            "dblclick": "onDoubleClick"
+            "mouseout": "endHover"
         },
 
         template: $u.templateWithId("proposal-template",
@@ -41,10 +39,6 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             } else {
                 this.$el.removeClass("excluded");
             }
-        },
-
-        onClick: function(e) {
-            this.model.select();
         },
 
         hoveredChanged: function(permit, hovered) {
