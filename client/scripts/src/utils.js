@@ -16,6 +16,8 @@ define(["underscore", "jquery"], function(_, $) {
     };
 
     function commas(s) {
+        if (!s) return "";
+
         s = s.toString();
         var split = s.split("."),
             after = split[1];
@@ -104,6 +106,15 @@ define(["underscore", "jquery"], function(_, $) {
             return _.every(fs, function(f) {
                 return f(arg);
             });
+        },
+
+        findIndex: function(coll, f) {
+            for (var i = 0, l = coll.length; i < l; i++) {
+                if (f(coll[i]))
+                    return i;
+            }
+
+            return -1;
         },
 
         promiseLocation: function() {
