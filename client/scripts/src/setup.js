@@ -3,11 +3,12 @@ define(
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
      "preview-manager", "tab-view", "filters-view",
-     "glossary", "config"],
+     "glossary", "config", "backbone", "routes",
+     "legal-notice"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView,
-             FiltersView, glossary, config) {
+             FiltersView, glossary, config, B, routes) {
         return {
             start: function() {
                 var proposals = new Permits(),
@@ -61,7 +62,8 @@ define(
                             collection: proposals
                         }),
                         "projects": new ProjectsView({
-                            collection: projects
+                            collection: projects,
+                            proposals: proposals
                         })
                     }
                 });
