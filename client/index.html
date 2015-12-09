@@ -102,6 +102,19 @@
       <div class="category" title="<%- project.get('category') %>">
         <img src="<%- project.categoryIcon() %>"/>
       </div>
+<<<<<<< HEAD
+      <div class="department"><%= project.get("department") %></div>
+      <div class="year range"><% var years = project.yearRange();
+           if (years[0] == years[1]) {
+        %>
+      <%= years[0] %>
+        <% } else { %>
+          <%= years[0] %>&ndash;<%= years[1] %>
+        <% } %>
+      </div>
+      <div class="budget">
+        <%= prettyAmount(project.totalBudget()) %>
+=======
       <div class="department"><%- project.get("department") %></div>
       <div class="time-span"></div>
       <div class="status">
@@ -126,6 +139,7 @@
         <% } else { %>
         ⚙ Pending Review
         <% } %>
+>>>>>>> origin/master
       </div>
     </script>
 
