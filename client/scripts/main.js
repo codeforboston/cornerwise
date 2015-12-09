@@ -31,6 +31,7 @@ require.config({
         "project": "src/model/project",
 
         // Backbone Collections:
+        "selectable": "src/model/selectableCollection",
         "permits": "src/model/permits",
         "layers": "src/model/layers",
         "projects": "src/model/projects",

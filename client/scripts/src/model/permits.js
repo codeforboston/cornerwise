@@ -3,9 +3,10 @@
  */
 define(
     ["backbone", "jquery", "underscore", "leaflet",
-     "permit", "ref-location", "config", "utils"],
-    function(B, $, _, L, Permit, refLocation, config, $u) {
-        return B.Collection.extend({
+     "permit", "ref-location", "selectable", "config",
+     "utils"],
+    function(B, $, _, L, Permit, refLocation, Selectable, config, $u) {
+        return Selectable.extend({
             model: Permit,
 
             url: config.pzURL,
@@ -16,7 +17,7 @@ define(
 
             initialize: function() {
                 this.listenTo(refLocation, "change", this.updateRadiusFilter);
-                this.on("change:selected", this.permitSelected);
+                this.selection = [];
             },
 
             fetch: function(opts) {
@@ -178,42 +179,7 @@ define(
                                             }));
             },
 
-            /**
-             * @param {number|number[]} selection An id or ids of the
-             * proposal(s) to select.
-             */
-            setSelection: function(selection) {
-                if (!_.isArray(selection))
-                    selection = [selection];
 
-                var deselect = _.difference(this.selection, selection);
-                _.each(deselect,
-                       function(id) {
-                           this.get(id).set("selected", false);
-                       },
-                       this);
-                var select = _.difference(selection, this.selection);
-                _.each(select,
-                       function(id) {
-                           this.get(id).set("selected", true);
-                       },
-                       this);
-
-                this.selection = selection;
-            },
-
-            addToSelection: function() {
-
-            },
-
-            /**
-             * @return {Proposal[]}
-             */
-            getSelection: function() {
-                return _.map(this.selection,
-                             function(id) { return this.get(id); },
-                             this);
-            },
 
             // Called when a child permit has its "selected" attribute
             // set. Clears the existing selection.

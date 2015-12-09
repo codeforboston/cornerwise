@@ -59,7 +59,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             if (!loc)
                 return;
 
-            var marker = new ProposalMarker(proposal);
+            var marker = new ProposalMarker(proposal),
+                proposals = this.collection;
 
             marker.addTo(this.zoningLayer);
 
@@ -73,7 +74,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     proposal.set({hovered: false});
                 })
                 .on("click", function(e) {
-                    proposal.select();
+                    proposals.setSelection(proposal.id);
                 });
 
             this.listenTo(proposal, "change", this.changed);
@@ -105,10 +106,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     }
 
                     if (change.changed.selected) {
-                        //self.map.setView(marker.getLatLng());
+                        // self.map.setView(marker.getLatLng(),
+                        //                  {animate: false});
                     } else if (change.changed.zoomed) {
                         if (self.map.getZoom() < 18)
-                            self.map.setZoom(18);
+                            self.map.setView(marker.get("location"), 17,
+                                             {animate: false});
                     }
                 });
 

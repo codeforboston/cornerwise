@@ -70,7 +70,7 @@ define(["backbone", "underscore", "utils"],
                        years = _.range(year, year+7),
                        bmap = this.buildBudgetMap(
                            project.get("budget"), years),
-                       t = transformFn(20, height-20, 10, width-10),
+                       t = transformFn(20, height-20, 20, width-10),
                        transform = t.toCanvas;
 
                    var pointsGroup = this.chartPoints(bmap, transform),
@@ -183,7 +183,7 @@ define(["backbone", "underscore", "utils"],
 
                        $(t).attr({"class": "chart-label",
                                   "x": pos[0],
-                                  "y": pos[1]+20, 
+                                  "y": pos[1]+20,
                                   "text-anchor": "middle"})
                            .text(fylabel);
 

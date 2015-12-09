@@ -1,6 +1,7 @@
-define(["backbone", "project", "project-view"],
-       function(B, Project, ProjectView) {
-           return B.Collection.extend({
+define(["backbone", "underscore", "project", "project-view",
+       "selectable"],
+       function(B, _, Project, ProjectView, Selectable) {
+           return Selectable.extend({
                model: Project,
 
                url: "/project/list",
@@ -10,7 +11,7 @@ define(["backbone", "project", "project-view"],
                },
 
                initialize: function() {
-                   this.on("change:selected", this.projectSelected);
+                   this.selection = [];
                },
 
                projectSelected: function(project, selected) {

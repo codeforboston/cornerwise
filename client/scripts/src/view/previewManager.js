@@ -4,8 +4,16 @@ define(["backbone", "jquery", "underscore"],
        function(B, $, _) {
            return B.View.extend({
                initialize: function(options) {
+                   // Map of keys to Views
                    this.previewMap = options.previewMap;
+                   // Map of keys to Backbone collections.  Must
+                   // implement getSelection() and emit 'selection'
+                   // events.
                    this.collections = options.collections;
+                   // Object that emits 'viewSelected' events:
+                   this.viewSelection = options.viewSelection;
+                   // The key of the currently selected view, if any:
+                   this.selectedView = options.viewSelection.selected;
 
                    var el = this.el;
                    _.each(options.previewMap, function(view) {
@@ -13,25 +21,39 @@ define(["backbone", "jquery", "underscore"],
                    });
 
                    var self = this;
-                   _.each(options.collections, function(coll) {
-                       self.listenTo(coll, "change:selected",
-                                     self.onSelection);
+                   _.each(options.collections, function(coll, name) {
+                       self.listenTo(coll, "selection", self.render);
                    });
+
+                   this.listenTo(options.viewSelection, "viewSelected",
+                                 function(key) {
+                                     self.selectedView = key;
+                                     self.render();
+                                 });
+
+                   this.$el.hide();
                },
 
-               onSelection: function(model, selected) {
-                   if (this.model && this.model.id == model.id && !selected) {
+               getSelection: function() {
+                   if (!this.selectedView) return [];
+
+                   return this.collections[this.selectedView].getSelection();
+               },
+
+               render: function() {
+                   var sel = this.getSelection();
+
+                   if (!sel.length) {
                        this.$el.hide();
-                       this.model = null;
-                       return;
+                       return this;
                    }
 
-                   this.model = model;
-
-                   var view = this.previewMap[model.getType()];
-                   view.setModel(model);
+                   var view = this.previewMap[this.selectedView];
+                   view.setModel(sel[0]);
                    this.$el.show();
                    view.render();
+
+                   return this;
                }
            });
        });

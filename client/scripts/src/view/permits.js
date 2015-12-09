@@ -1,89 +1,118 @@
-define(["backbone", "permits", "permit-view", "jquery"], function(B, Permits, PermitView, $) {
-    return B.View.extend({
-        title: "Proposals",
+define(["backbone", "permits", "permit-view", "routes", "jquery"],
+       function(B, Permits, PermitView, routes, $) {
+           return B.View.extend({
+               title: "Proposals",
 
-        buildHeader: function() {
-            var tr = this.$("thead tr");
-            _.each([["Address","address"],
-                    ["Description", "description"],
-                    ["Distance", "refDistance"],
-                   // ["Submitted", "submitted"]
-                   ],
-                   function(p) {
-                       $("<th>").text(p[0])
-                           .data("sortField", p[1])
-                           .addClass("sort")
-                           .appendTo(tr);
+               initialize: function() {
+                   routes.getRouter().on("route:details",
+                                         function(_) {
+
+                                         });
+               },
+
+               buildHeader: function() {
+                   var tr = this.$("thead tr");
+                   _.each([["Address","address"],
+                           ["Description", "description"],
+                           ["Distance", "refDistance"],
+                           // ["Submitted", "submitted"]
+                          ],
+                          function(p) {
+                              $("<th>").text(p[0])
+                                  .data("sortField", p[1])
+                                  .addClass("sort")
+                                  .appendTo(tr);
+                          });
+               },
+
+               events: {
+                   "click th.sort": "onClickSort"
+               },
+
+               permitAdded: function(permit) {
+                   var view = new PermitView({model: permit}).render(),
+                       collection = this.collection;
+
+                   this.$("tbody").append(view.el);
+                   view.$el.on("click", function() {
+                       collection.setSelection([permit.id]);
                    });
-        },
+               },
 
-        events: {
-            "click th.sort": "onClickSort"
-        },
+               fetchingBegan: function() {
+                   // TODO: Display a loading indicator
+                   this.$el.addClass("loading");
+               },
 
-        permitAdded: function(permit) {
-            var view = new PermitView({model: permit}).render(),
-                collection = this.collection;
+               fetchingComplete: function() {
 
-            this.$("tbody").append(view.el);
-            view.$el.on("click", function() {
-                collection.setSelection([permit.id]);
-            });
-        },
+               },
 
-        fetchingBegan: function() {
-            // TODO: Display a loading indicator
-            this.$el.addClass("loading");
-        },
+               sortField: null,
 
-        fetchingComplete: function() {
+               build: function() {
+                   this.listenTo(this.collection, "fetching", this.fetchingBegan)
+                       .listenTo(this.collection, "reset", this.fetchingComplete)
+                       .listenTo(this.collection, "sort", this.render);
 
-        },
+                   this.$el.append("<thead><tr></tr></thead>");
+                   this.$el.append("<tbody/>");
 
-        sortField: null,
+                   this.buildHeader();
 
-        build: function() {
-            this.listenTo(this.collection, "fetching", this.fetchingBegan)
-                .listenTo(this.collection, "reset", this.fetchingComplete)
-                .listenTo(this.collection, "sort", this.render);
+                   this.collection.each(this.permitAdded);
+                   this._built = true;
+               },
 
-            this.$el.append("<thead><tr></tr></thead>");
-            this.$el.append("<tbody/>");
+               render: function(change) {
+                   if (!this._built) this.build();
 
-            this.buildHeader();
+                   if (!change) return;
 
-            this.collection.each(this.permitAdded);
-            this._built = true;
-        },
+                   this.$el
+                       .removeClass("loading")
+                       .find("tbody").html("")
+                       .on("focus", _.bind(this.onFocus, this));
+                   var self = this;
+                   _.each(change.models, function(p) {
+                       self.permitAdded(p);
+                   });
+               },
 
-        render: function(change) {
-            if (!this._built) this.build();
+               onClickSort: function(e) {
+                   var th = $(e.target),
+                       sortField = th.data("sortField"),
+                       descending = th.hasClass("sort-field") &&
+                           !th.hasClass("desc");;
 
-            if (!change) return;
+                   this.collection.sortByField(sortField, descending);
+                   // Remove 'sort-field' and 'desc' from all th
+                   this.$("th").removeClass("sort-field desc");
 
-            this.$el.removeClass("loading");
-            this.$el.find("tbody").html("");
-            var self = this;
-            _.each(change.models, function(p) {
-                self.permitAdded(p);
-            });
-        },
+                   this.sortField = sortField;
+                   th.addClass("sort-field")
+                       .toggleClass("desc", descending);
 
-        onClickSort: function(e) {
-            var th = $(e.target),
-                sortField = th.data("sortField"),
-                descending = th.hasClass("sort-field") &&
-                    !th.hasClass("desc");;
+                   return false;
+               },
 
-            this.collection.sortByField(sortField, descending);
-            // Remove 'sort-field' and 'desc' from all th
-            this.$("th").removeClass("sort-field desc");
+               onFocus: function(e) {
+                   var callback = _.bind(this.onKeyDown, this);
+                   $(document).on("keydown", callback);
+                   this.$el.on("blur", function() {
+                       $(document).off("keydown", callback);
+                   });
+               },
 
-            this.sortField = sortField;
-            th.addClass("sort-field")
-                .toggleClass("desc", descending);
-
-            return false;
-        }
-    });
-});
+               onKeyDown: function(e) {
+                   if (e.which == 38) {
+                       this.collection.selectPrev();
+                   } else if (e.which == 40) {
+                       this.collection.selectNext();
+                   } else {
+                       return true;
+                   }
+                   return false;
+               }
+           });
+       });

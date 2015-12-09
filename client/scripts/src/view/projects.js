@@ -3,6 +3,11 @@ define(["backbone", "project-view", "underscore"],
            return B.View.extend({
                title: "Capital Projects",
 
+               initialize: function(options) {
+                   // The proposal collection:
+                   this.proposals = options.proposals;
+               },
+
                build: function() {
                    if (this._built) return;
 
@@ -17,24 +22,33 @@ define(["backbone", "project-view", "underscore"],
                },
 
                projectAdded: function(project) {
-                   var view = new ProjectView({model: project});
+                   var view = new ProjectView({model: project}),
+                       el = view.render().el,
+                       coll = this.collection;
 
-                   this.$el.append(view.render().el);
+                   this.$el.append(el);
+                   view.$el.on("click", function() {
+                       coll.setSelection(project.id);
+                   });
                },
 
                projectSelected: function(project, selected) {
                    if (this.selected) {
                        if (this.selected.id == project.id)
                        {
-                           if (!selected)
+                           if (!selected) {
                                this.selected = null;
+                               //this.proposals.setSelection([]);
+                           }
                        } else {
                            this.selected.set("selected", false);
                        }
                    }
 
-                   if (selected)
+                   if (selected) {
                        this.selected = project;
+                       //this.proposals.setSelection(project.get("proposals"));
+                   }
                },
 
                render: function() {

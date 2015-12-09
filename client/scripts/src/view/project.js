@@ -7,8 +7,7 @@ define(["backbone", "utils"], function(B, $u) {
 
         events: {
             "mouseover": "beginHover",
-            "mouseout": "endHover",
-            "click": "onClick"
+            "mouseout": "endHover"
         },
 
         initialize: function() {
@@ -32,10 +31,6 @@ define(["backbone", "utils"], function(B, $u) {
 
         endHover: function() {
             this.model.set("hovered", false);
-        },
-
-        onClick: function() {
-            this.model.set("selected", true);
         }
     });
 });

@@ -44,17 +44,6 @@ define(
                     el: "#overlay"
                 });
 
-                var proposalPreview = new PreviewView(),
-                    projectPreview = new ProjectPreview(),
-                    previewManager = new PreviewManager({
-                        el: "#preview",
-                        collections: [proposals, projects],
-                        previewMap: {
-                            project: projectPreview,
-                            proposal: proposalPreview
-                        }
-                    });
-
                 var tabView = new TabView({
                     el: "#data",
                     subviews: {
@@ -67,6 +56,21 @@ define(
                         })
                     }
                 });
+
+                var proposalPreview = new PreviewView(),
+                    projectPreview = new ProjectPreview(),
+                    previewManager = new PreviewManager({
+                        el: "#preview",
+                        collections: {
+                            proposals: proposals,
+                            projects: projects
+                        },
+                        previewMap: {
+                            projects: projectPreview,
+                            proposals: proposalPreview
+                        },
+                        viewSelection: tabView
+                    });
 
                 $(document)
                     .on("click", "#expand-data",

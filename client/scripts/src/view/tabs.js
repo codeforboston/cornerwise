@@ -28,9 +28,19 @@ define(["backbone", "underscore", "jquery"], function(B, _, $) {
             tabBar.on("click", _.bind(this.clickedTab, this));
         },
 
-        clickedTab: function(e) {
-            var tab = $(e.target).closest(".tab"),
+        selectTab: function(keyOrTab) {
+            var key, tab;
+
+            if (_.isString(keyOrTab)) {
+                if (keyOrTab == this.selected) return;
+                key = keyOrTab;
+                tab = this.$el.filter(function(elt) {
+                    return $(elt).data("key") == key;
+                });
+            } else {
+                tab = keyOrTab;
                 key = tab.data("key");
+            }
 
             if (key === this.selected)
                 return;
@@ -39,6 +49,14 @@ define(["backbone", "underscore", "jquery"], function(B, _, $) {
             this.$(".tab.selected").removeClass("selected");
             tab.addClass("selected");
             this.render();
+
+            this.trigger("viewSelected", key);
+        },
+
+        clickedTab: function(e) {
+            var tab = $(e.target).closest(".tab");
+
+            this.selectTab(tab);
         },
 
         findPanes: function() {
