@@ -380,11 +380,16 @@ a.filter-button {
     background-color: white;
     border: 1px solid black;
     border-right: none;
+    left: -4.5em;
     padding: 0.5em;
     position: absolute;
-    width: 5em;
-    left: -6em;
+    width: 3.5em;
     top: 1em;
+}
+
+#data.collapsed #data-controls {
+    left: -6em;
+    width: 5em;
 }
 
 #expand-data {
@@ -718,6 +723,15 @@ tr.proposal-selected, tr.proposal-hovered {
     top: 0;
     bottom: 0;
     display: none;
+}
+
+#overlay .minimap {
+    float: left;
+    height: 90px;
+    width: 110px;
+    margin-right: 10px;
+    position: relative;
+    margin-top: -20px;
 }
 
 .details .close {

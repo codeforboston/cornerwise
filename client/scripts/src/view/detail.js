@@ -43,35 +43,35 @@ define(["backbone", "underscore", "leaflet",
         },
 
         render: function() {
-            // if (this.minimap)
-            //     this.minimap.remove();
+            if (this.minimap)
+                this.minimap.remove();
 
             var html = this.template(this.model.toJSON());
 
             this.$el.html(html);
 
-            // var minimap =
-            //         this.minimap =
-            //         L.map(this.$(".minimap")[0],
-            //               {attributionControl: false,
-            //                dragging: false,
-            //                touchZoom: false,
-            //                scrollWheelZoom: false,
-            //                boxZoom: false,
-            //                zoomControl: false});
-            // minimap
-            //     .setView(this.model.get("location"))
-            //     .setZoom(17)
-            //     .addLayer(L.tileLayer(config.tilesURL));
+            var minimap =
+                    this.minimap =
+                    L.map(this.$(".minimap")[0],
+                          {attributionControl: false,
+                           dragging: false,
+                           touchZoom: false,
+                           scrollWheelZoom: false,
+                           boxZoom: false,
+                           zoomControl: false});
+            minimap
+                .setView(this.model.get("location"))
+                .setZoom(17)
+                .addLayer(L.tileLayer(config.tilesURL));
 
-            // var parcel = this.model.get("parcel");
+            var parcel = this.model.get("parcel");
 
-            // if (parcel) {
-            //     var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
-            //     parcelLayer.setStyle(config.parcelStyle);
-            //     minimap.addLayer(parcelLayer)
-            //         .setView(parcelLayer.getBounds().getCenter());
-            // }
+            if (parcel) {
+                var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
+                parcelLayer.setStyle(config.parcelStyle);
+                minimap.addLayer(parcelLayer)
+                    .setView(parcelLayer.getBounds().getCenter());
+            }
         },
 
         hide: function() {
@@ -88,6 +88,11 @@ define(["backbone", "underscore", "leaflet",
                 this.hide();
         },
 
+        onRoute: function(route, _params) {
+            if (route !== "details")
+                this.hide();
+        },
+
         onShow: function(id) {
             var proposal = this.collection.get(id);
 
@@ -97,15 +102,20 @@ define(["backbone", "underscore", "leaflet",
         },
 
         show: function(proposal) {
-            if (proposal && this.model &&
-                this.model.get("id") !== proposal.get("id"))
-            {
-                this.setModel(proposal);
-            }
+            this.model = proposal;
+            // if (proposal && this.model &&
+            //     this.model.get("id") !== proposal.get("id"))
+            // {
+            //     this.setModel(proposal);
+            // }
+
+            if (!proposal)
+                return this.hide();
 
             this.render();
             this.$el.show();
             this.showing = true;
+            return this;
         }
     });
 });
