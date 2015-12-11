@@ -58,11 +58,10 @@ define(["backbone", "underscore", "leaflet",
                            touchZoom: false,
                            scrollWheelZoom: false,
                            boxZoom: false,
-                           zoomControl: false});
-            minimap
-                .setView(this.model.get("location"))
-                .setZoom(17)
-                .addLayer(L.tileLayer(config.tilesURL));
+                           zoomControl: false,
+                           layers: [L.tileLayer(config.tilesURL)],
+                           center: this.model.get("location"),
+                           zoom: 17});
 
             var parcel = this.model.get("parcel");
 
