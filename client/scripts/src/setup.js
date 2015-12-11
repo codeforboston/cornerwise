@@ -2,13 +2,13 @@ define(
     ["jquery", "permits", "permits-view", "map-view",
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
-     "preview-manager", "tab-view", "filters-view",
+     "preview-manager", "tab-view", "layers-view",
      "glossary", "config", "backbone", "routes",
      "legal-notice"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
-             ProjectPreview, PreviewManager, TabView,
-             FiltersView, glossary, config, B, routes) {
+             ProjectPreview, PreviewManager, TabView, LayersView,
+             glossary, config, B, routes) {
         return {
             start: function() {
                 var proposals = new Permits(),
@@ -72,14 +72,24 @@ define(
                         viewSelection: tabView
                     });
 
+                var layers = new LayersView({
+                    el: "#layers .contents"
+                }).render();
+
                 $(document)
-                    .on("click", "#expand-data",
-                        function(e) {
-                            $("#data").removeClass("collapsed");
+                    .on("click", "a._collapse",
+                        function() {
+                            $(this).closest("._collapsible")
+                                .addClass("collapsed")
+                                .removeClass("expanded")
+                                .trigger("collapsed");
                         })
-                    .on("click", "#collapse-data",
-                        function(e) {
-                            $("#data").addClass("collapsed");
+                    .on("click", "a._expand",
+                        function() {
+                            $(this).closest("._collapsible")
+                                .removeClass("collapsed")
+                                .addClass("expanded")
+                                .trigger("expanded");
                         });
 
                 proposals.fetch({dataType: "jsonp"});
@@ -91,13 +101,12 @@ define(
                 glossary.init();
 
                 return {
-                    //permits: permitsView,
                     glossary: glossary,
                     map: mapView,
                     preview: previewManager,
                     details: detailsView,
-                    filters: new FiltersView(),
-                    exploreView: tabView
+                    exploreView: tabView,
+                    layersView: layers
                 };
             }
         };

@@ -40,7 +40,6 @@ require.config({
         "permits-view": "src/view/permits",
         "permit-view": "src/view/permit",
         "details-view": "src/view/detail",
-        "filters-view": "src/view/filters",
         "map-view": "src/view/map",
         "minimap-view": "src/view/minimap",
         "preview-manager": "src/view/previewManager",

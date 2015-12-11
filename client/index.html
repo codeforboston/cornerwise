@@ -150,7 +150,7 @@
         <div id="details-minimap"></div>
 
         <div class="controls">
-          <a class="more" href="#">View more&hellip;</a>
+          <a class="more" href="#details/<%- proposal.id %>">View more&hellip;</a>
           <a class="calendar" aria-label="View related event" href="#">
             <img src="/static/images/calendar.png">
           </a>
@@ -170,6 +170,17 @@
       <svg class="budget-chart" height="90" width="300"/>
     </script>
 
+    <script type="text/template" id="layer-item-template">
+      <input type="checkbox"
+             name="<%- layer.id %>"
+             id="<%- layer.id %>-layer"
+             <% if (layer.shown) { %>checked<% } %>/>
+      <label class="title" for="<%- layer.id %>-layer">
+        <%- layer.title %>
+      </label>
+      <a href="#" class="color" style="background-color: <%- layer.color %>"/>
+    </script>
+
   </head>
   <body>
     <div id="map-container">
@@ -181,6 +192,16 @@
 
       <!-- container for detail view -->
       <div id="overlay"></div>
+    </div>
+
+    <div id="layers" class="collapsed _collapsible">
+      <div class="controls">
+        <a href="#" class="_expand when-collapsed"></a>
+        <a href="#" class="_collapse when-expanded"></a>
+      </div>
+      <div class="contents">
+
+      </div>
     </div>
 
     <div id="modal"></div>
@@ -208,15 +229,17 @@
       </a>
     </div>
 
-    <div id="data" class="collapsed">
+    <div id="data" class="collapsed _collapsible">
       <div id="data-controls">
-        <a href="#" id="expand-data" class="when-collapsed">Explore &larr;</a>
-        <a href="#" id="collapse-data" class="when-expanded">Hide &rarr;</a>
+        <a href="#" id="expand-data" class="_expand when-collapsed">Explore &larr;</a>
+        <a href="#" id="collapse-data" class="_collapse when-expanded">Hide &rarr;</a>
       </div>
       <div class="tabs"></div>
       <div class="tab-pane">
       </div>
     </div>
+
+
 
     <div id="intro" class="overlay">
       <div class="section">

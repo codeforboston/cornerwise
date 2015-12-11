@@ -14,13 +14,14 @@ define(["utils"], function($u) {
             "colors": "orange",
             "source": "/src/layerdata/community_path.geojson",
             "template": null
-        }
+        },
+
         {
-          "title": "Fire Hydrants",
-          "tags" [],
-          "colors": "red",
-          "source": "/src/layerdata/firehydrant.geojson",
-          "template": null
+            "title": "Fire Hydrants",
+            "tags": [],
+            "colors": "red",
+            "source": "/src/layerdata/firehydrant.geojson",
+            "template": null
         }
     ];
 });
