@@ -48,6 +48,7 @@ require.config({
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
         "layers-view": "src/view/layers",
+        "filters-view": "src/view/filters",
 
         // View managers:
         "collapsible-view": "src/view/collapsible",

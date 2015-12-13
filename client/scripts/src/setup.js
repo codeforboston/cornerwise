@@ -3,12 +3,12 @@ define(
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
      "preview-manager", "tab-view", "layers-view",
-     "glossary", "config", "backbone", "routes",
-     "legal-notice"],
+     "filters-view", "glossary", "config", "backbone",
+     "routes", "legal-notice"],
     function($, Permits, PermitsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView, LayersView,
-             glossary, config, B, routes) {
+             FiltersView, glossary, config, B, routes) {
         return {
             start: function() {
                 var proposals = new Permits(),
@@ -100,13 +100,16 @@ define(
 
                 glossary.init();
 
+                var filtersView = new FiltersView();
+
                 return {
                     glossary: glossary,
                     map: mapView,
                     preview: previewManager,
                     details: detailsView,
                     exploreView: tabView,
-                    layersView: layers
+                    layersView: layers,
+                    filtersView: filtersView
                 };
             }
         };
