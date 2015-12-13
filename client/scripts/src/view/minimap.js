@@ -2,7 +2,8 @@ define(["backbone", "config"],
        function(B, config) {
            return B.View.extend({
                initialize: function(options) {
-                   var linked = options.linkedMap;
+                   var linked = options.linkedMap,
+                       resetButton = this.$el.siblings(".reset");
 
                    if (!linked) return;
 
@@ -29,11 +30,17 @@ define(["backbone", "config"],
                    linked.on("drag moveend resize zoomend",
                              function(e) {
                                  rectLayer.setBounds(linked.getBounds());
+
+                                 resetButton.toggle(linked.getZoom() > 14);
                              });
                    map.on("click",
                           function(e) {
                               linked.setView(e.latlng);
                           });
+                   resetButton.on("click",
+                                  function(e) {
+                                      linked.fitBounds(config.bounds);
+                                  });
 
                    $.getJSON("/static/scripts/src/layerdata/somerville.geojson")
                        .done(function(features) {
