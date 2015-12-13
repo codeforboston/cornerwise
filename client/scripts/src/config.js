@@ -22,6 +22,9 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         bounds:  [[42.37236882604975, -71.14565849304199],
                   [42.41680352972898, -71.04806900024413]],
 
+        maxBounds: [[42.35524578349561, -71.18951797485352],
+                    [42.444107964019395, -70.99004745483398]],
+
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,
                           lng: -71.09950304031372},

@@ -6,7 +6,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
     return B.View.extend({
         initialize: function() {
             var //map = new RecenteredMap(this.el),
-            map = L.map(this.el, {zoomControl: false}),
+            map = L.map(this.el, {zoomControl: false,
+                                  minZoom: 13,
+                                  maxBounds: config.maxBounds}),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
