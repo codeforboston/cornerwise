@@ -1,13 +1,16 @@
 "use strict";
-
 define(["jquery", "underscore", "utils"], function($, _, $u) {
     var definitions = {
         "CBD": "Central Business District zone",
         "CCD": "Central Commercial District zone (??)",
         "RA": "Residential zone",
         "RB": "Residential zone",
-        // "Special Permit": "Explanation and link",
-        "FAR": "Floor-area ratio measures the ratio of the structure's floor area to the area of the plot on which it stands.",
+        "LEED": "Leadership in Energy and Environmental Design is a certification program that recognizes environmentally responsible building practices.",
+        "waiver": "",
+        "Site Plan Review": "",
+        "Special Permit": "A special permit is required for certain allowed uses that are subject to review by the zoning authority.",
+        "variance": "A variance is required for uses that are not permitted by the local zoning law.",
+        "FAR": "Floor-area ratio measures the ratio of the structure's floor area to the area of the plot. High-density buildings like apartment complexes have a high FAR.",
         "SZO": "Somerville Zoning Ordinance"
     };
 
@@ -60,8 +63,7 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
             if (!this.definitionContainer)
                 this.definitionContainer = $("<div class='definition'/>");
 
-            var html = ["<span class='term'>", _.escape(term), "</span> ",
-                        _.escape(definition)].join("");
+            var html = _.escape(definition);
 
             this.definitionContainer.html(html).appendTo(a);
         },
