@@ -6,6 +6,8 @@ explore and visualize past, present, and pending changes to the built
 environment.  For now, we're exploring better ways to show the contents
 of Somerville, MA's Reports and Decisions page.
 
+[Show me!](http://www.somervillema.gov/cornerwise)
+
 In its current state, the project breaks more or less neatly into three
 pieces:
 
