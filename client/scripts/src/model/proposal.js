@@ -68,7 +68,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return !this._fetched && this.fetch();
         },
 
-        loadParcel: function(permit) {
+        loadParcel: function(proposal) {
             if (this._parcelLoadAttempted)
                 return;
 

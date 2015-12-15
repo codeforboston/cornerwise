@@ -27,19 +27,19 @@ require.config({
         "recentered-map": "src/leaflet/recenteredMap",
 
         // Backbone Models:
-        "permit": "src/model/permit",
+        "proposal": "src/model/proposal",
         "layer": "src/model/layer",
         "project": "src/model/project",
 
         // Backbone Collections:
         "selectable": "src/model/selectableCollection",
-        "permits": "src/model/permits",
+        "proposals": "src/model/proposals",
         "layers": "src/model/layers",
         "projects": "src/model/projects",
 
         // Backbone Views:
-        "permits-view": "src/view/permits",
-        "permit-view": "src/view/permit",
+        "proposals-view": "src/view/proposals",
+        "proposal-view": "src/view/proposal",
         "details-view": "src/view/detail",
         "map-view": "src/view/map",
         "minimap-view": "src/view/minimap",

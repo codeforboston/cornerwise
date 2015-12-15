@@ -1,5 +1,5 @@
-define(["backbone", "permits", "permit-view", "routes", "jquery"],
-       function(B, Permits, PermitView, routes, $) {
+define(["backbone", "proposal-view", "routes", "jquery"],
+       function(B, ProposalView, routes, $) {
            return B.View.extend({
                title: "Proposals",
 
@@ -29,13 +29,13 @@ define(["backbone", "permits", "permit-view", "routes", "jquery"],
                    "click th.sort": "onClickSort"
                },
 
-               permitAdded: function(permit) {
-                   var view = new PermitView({model: permit}).render(),
+               proposalAdded: function(proposal) {
+                   var view = new ProposalView({model: proposal}).render(),
                        collection = this.collection;
 
                    this.$("tbody").append(view.el);
                    view.$el.on("click", function() {
-                       collection.setSelection([permit.id]);
+                       collection.setSelection([proposal.id]);
                    });
                },
 
@@ -60,7 +60,7 @@ define(["backbone", "permits", "permit-view", "routes", "jquery"],
 
                    this.buildHeader();
 
-                   this.collection.each(this.permitAdded);
+                   this.collection.each(this.proposalAdded);
                    this._built = true;
                },
 
@@ -75,7 +75,7 @@ define(["backbone", "permits", "permit-view", "routes", "jquery"],
                        .on("focus", _.bind(this.onFocus, this));
                    var self = this;
                    _.each(change.models, function(p) {
-                       self.permitAdded(p);
+                       self.proposalAdded(p);
                    });
                },
 

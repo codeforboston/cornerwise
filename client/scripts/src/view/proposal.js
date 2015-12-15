@@ -1,5 +1,5 @@
 /*
- * View representing a permit in the permits list.
+ * View representing a proposal in the proposals list.
  */
 define(["backbone", "underscore", "utils"], function(B, _, $u) {
     return B.View.extend({
@@ -23,17 +23,17 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
                                     {variable: "proposal"}),
 
         render: function() {
-            var permit = this.model;
-            this.$el.html(this.template(permit.toJSON()));
+            var proposal = this.model;
+            this.$el.html(this.template(proposal.toJSON()));
 
-            if (permit.get("excluded")) {
+            if (proposal.get("excluded")) {
                 this.$el.addClass("excluded");
             }
 
             return this;
         },
 
-        excludedChanged: function(permit, shouldExclude) {
+        excludedChanged: function(proposal, shouldExclude) {
             if (shouldExclude) {
                 this.$el.addClass("excluded");
             } else {
@@ -41,11 +41,11 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             }
         },
 
-        hoveredChanged: function(permit, hovered) {
-            this.$el.toggleClass("permit-hovered", hovered);
+        hoveredChanged: function(proposal, hovered) {
+            this.$el.toggleClass("proposal-hovered", hovered);
         },
 
-        selectedChanged: function (permit, selected) {
+        selectedChanged: function (proposal, selected) {
             this.$el.toggleClass("proposal-selected", selected);
             if (selected) {
                 var parent = this.$el.parent(),
@@ -62,7 +62,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             }
         },
 
-        distanceChanged: function(permit, refDistance) {
+        distanceChanged: function(proposal, refDistance) {
             this.$(".distance").html($u.commas(refDistance) + " feet");
         },
 

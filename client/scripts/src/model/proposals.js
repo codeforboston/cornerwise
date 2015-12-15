@@ -1,13 +1,13 @@
 /*
- * PermitsCollection
+ * ProposalsCollection
  */
 define(
     ["backbone", "jquery", "underscore", "leaflet",
-     "permit", "ref-location", "selectable", "config",
+     "proposal", "ref-location", "selectable", "config",
      "utils"],
-    function(B, $, _, L, Permit, refLocation, Selectable, config, $u) {
+    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u) {
         return Selectable.extend({
-            model: Permit,
+            model: Proposal,
 
             url: config.pzURL,
 
@@ -52,21 +52,21 @@ define(
 
             /**
              * Applies each of the functions in the array fs to the
-             * permits in the collection. If any of the functions
-             * returns false, the Permit will be updated: its "excluded"
+             * proposals in the collection. If any of the functions
+             * returns false, the Proposal will be updated: its "excluded"
              * attribute will be set to true.
              *
              * @param {Array} fs
              */
             applyFilters: function(fs) {
                 var count = this.length;
-                this.each(function(permit) {
-                    var excluded = permit.get("excluded"),
-                        shouldExclude = !$u.everyPred(fs, permit);
+                this.each(function(proposal) {
+                    var excluded = proposal.get("excluded"),
+                        shouldExclude = !$u.everyPred(fs, proposal);
 
-                    // Is the permit already excluded, and should it be?
+                    // Is the proposal already excluded, and should it be?
                     if (excluded !== shouldExclude) {
-                        permit.set("excluded", shouldExclude);
+                        proposal.set("excluded", shouldExclude);
                     }
                     if (shouldExclude) --count;
                 });
@@ -94,8 +94,8 @@ define(
 
             filterByDescription: function(regex) {
                 if (regex) {
-                    this.addFilter("search", function(permit) {
-                        return !!(regex.exec(permit.get("description")));
+                    this.addFilter("search", function(proposal) {
+                        return !!(regex.exec(proposal.get("description")));
                     });
                 } else {
                     this.removeFilter("search");
@@ -109,8 +109,8 @@ define(
 
             filterByRadius: function(refPoint, radius) {
                 if (refPoint && radius) {
-                    this.addFilter("radius", function(permit) {
-                        var location = permit.get("location");
+                    this.addFilter("radius", function(proposal) {
+                        var location = proposal.get("location");
 
                         return location &&
                             L.latLng(location).distanceTo(refPoint) <= radius;
@@ -143,8 +143,8 @@ define(
              */
             filterByAuthority: function(spga) {
                 if (spga) {
-                    this.addFilter("spga", function(permit) {
-                        return _.contains(spga, permit.get("spga"));
+                    this.addFilter("spga", function(proposal) {
+                        return _.contains(spga, proposal.get("spga"));
                     });
                 } else {
                     this.removeFilter("spga");
@@ -153,8 +153,8 @@ define(
 
             filterByTypes: function(types) {
                 if (types) {
-                    this.addFilter("types", function(permit) {
-                        return _.contains(types, permit.get("permit"));
+                    this.addFilter("types", function(proposal) {
+                        return _.contains(types, proposal.get("proposal"));
                     });
                 } else {
                     this.removeFilter("types");
@@ -170,7 +170,7 @@ define(
                 }
             },
 
-            // Returns a LatLngBounds object for the permits that are
+            // Returns a LatLngBounds object for the proposals that are
             // not excluded.
             getBounds: function() {
                 return L.latLngBounds(_.map(this.where({excluded: false}),
@@ -181,22 +181,22 @@ define(
 
 
 
-            // Called when a child permit has its "selected" attribute
+            // Called when a child proposal has its "selected" attribute
             // set. Clears the existing selection.
-            permitSelected: function(permit, selected) {
-                if (this.selected && this.selected.id != permit.id)
+            proposalSelected: function(proposal, selected) {
+                if (this.selected && this.selected.id != proposal.id)
                     this.selected.set("selected", false);
 
-                // If the permit is being deselected, clear selected
+                // If the proposal is being deselected, clear selected
                 // property.
-                this.selected = selected ? permit : null;
+                this.selected = selected ? proposal : null;
             },
 
-            permitZoomed: function(permit, zoomed) {
-                if (this.zoomed && this.zoomed.id != permit.id)
+            proposalZoomed: function(proposal, zoomed) {
+                if (this.zoomed && this.zoomed.id != proposal.id)
                     this.zoomed.set("zoomed", false);
 
-                this.zoomed = zoomed ? permit : null;
+                this.zoomed = zoomed ? proposal : null;
             }
         });
     });

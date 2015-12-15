@@ -1,17 +1,17 @@
 define(
-    ["jquery", "permits", "permits-view", "map-view",
+    ["jquery", "proposals", "proposals-view", "map-view",
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
      "preview-manager", "tab-view", "layers-view",
      "filters-view", "glossary", "config", "backbone",
      "routes", "legal-notice"],
-    function($, Permits, PermitsView, MapView, DetailsView,
+    function($, Proposals, ProposalsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView, LayersView,
              FiltersView, glossary, config, B, routes) {
         return {
             start: function() {
-                var proposals = new Permits(),
+                var proposals = new Proposals(),
                     projects = new Projects();
 
                 var showIntro = true;
@@ -47,7 +47,7 @@ define(
                 var tabView = new TabView({
                     el: "#data",
                     subviews: {
-                        "proposals": new PermitsView({
+                        "proposals": new ProposalsView({
                             collection: proposals
                         }),
                         "projects": new ProjectsView({
@@ -96,7 +96,7 @@ define(
                 projects.fetch({dataType: "jsonp"});
 
                 // For testing:
-                window.permits = proposals;
+                window.proposals = proposals;
 
                 glossary.init();
 
