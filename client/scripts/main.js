@@ -6,6 +6,7 @@ require.config({
         "backbone": "lib/backbone",
         "leaflet": "http://cdn.leafletjs.com/leaflet-0.7.5/leaflet",
         "jquery": "http://code.jquery.com/jquery-1.11.3.min",
+        "chartjs": "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min",
 
         // Utilities:
         "utils": "src/utils",
