@@ -13,7 +13,7 @@ define(["backbone", "underscore", "chartjs", "utils"],
 
                    if (!project) return;
 
-                   this.listenTo(project, "change", this.render);
+                   //this.listenTo(project, "change", this.render);
                },
 
                render: function() {
@@ -34,10 +34,9 @@ define(["backbone", "underscore", "chartjs", "utils"],
                                          function(y) { return "FY" + y; }),
                            datasets: [{
                                label: "Budget",
-                               fillColor: "rgba(220,220,220,0.5)",
-                               strokeColor: "rgba(220,220,220,0.8)",
+                               fillColor: "rgba(0,0,128,0.5)",
+                               strokeColor: "rgba(0,0,128,0.8)",
                                highlightFill: "rgba(220,220,220,0.75)",
-                               highlightStroke: "rgba(220,220,220,1)",
                                data: _.map(years, function(year) {
                                    var b = budget[year];
                                    return b && b.budget || 0;
@@ -47,13 +46,20 @@ define(["backbone", "underscore", "chartjs", "utils"],
 
                drawChart: function(budget, canvas) {
                    var ctx = canvas.getContext("2d"),
-                       cyear = $u.currentYear(),
-                       years = _.range(cyear, cyear+8),
+                       startyear = $u.currentYear()+1,
+                       years = _.range(startyear, startyear+8),
                        data = this.makeData(budget, years);
 
-                   console.log(data);
-
-                   new Chart(ctx).Bar(data);
+                   new Chart(ctx).Bar(data,
+                                      {animationSteps: 20,
+                                       barStrokeWidth: 1,
+                                       scaleLabel: function(o) {
+                                           return $u.prettyAmount(o.value);
+                                       },
+                                       tooltipTemplate: function(o) {
+                                           return o.label +
+                                               ": $" + $u.commas(o.value);
+                                       }});
                }
            });
        });

@@ -586,9 +586,8 @@ a.filter-button {
     padding: 0.5em;
     position: absolute;
     left: 0;
-    top: 25%;
+    top: 15%;
     width: 16em;
-
     transition: left 0.2s ease-out;
 }
 
@@ -673,29 +672,6 @@ a.glossary:hover {
     position: absolute;
     width: 150px;
     z-index: 2;
-}
-
-.chart-bar, .chart-path {
-    fill: rgba(0, 41, 128, 0.65);
-    stroke: navy;
-}
-
-.chart-bar:hover {
-    fill: white;
-}
-
-.chart-point {
-    fill:yellow;
-    stroke: black;
-}
-
-.budget-label {
-    font-size: small;
-    font-weight: bold;
-}
-
-.budget-label-line {
-    stroke: red;
 }
 
 #preview {
