@@ -117,6 +117,40 @@ define(["underscore", "jquery"], function(_, $) {
             return -1;
         },
 
+        /**
+         * Call function fn on an array of the 1st argument of each
+         * array in colls, then on an array of the 2nd arguments,
+         * etc. Stops when any of the arrays is exhausted.
+         *
+         * @param {Function} fn
+         * @param {Array} colls
+         *
+         * @returns {Array} Results of calling fn on the elements of
+         * colls.
+         */
+        zipmap: function(fn, colls) {
+            var out = [],
+                idx = 0;
+
+            outer:
+            while (true) {
+                var args = [], i = 0, coll;
+
+                while ((coll = colls[i++]) !== undefined) {
+                    if (coll[idx] === undefined)
+                        break outer;
+
+                    args.push(coll[idx]);
+                }
+
+                out.push(fn(args));
+
+                idx++;
+            }
+
+            return out;
+        },
+
         promiseLocation: function() {
             var promise = $.Deferred();
 
