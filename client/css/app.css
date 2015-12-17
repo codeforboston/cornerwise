@@ -103,7 +103,8 @@ span.icon {
 }
 
 #logo {
-    background: url(/static/images/cornerwise-logo.png);
+    /* background: url(/static/images/cornerwise-logo.png); */
+    background: url(/static/images/cornerwise-beta-logo.png);
     background-repeat: no-repeat;
     background-size: contain;
     border-radius: 0.5em;
