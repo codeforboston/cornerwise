@@ -15,7 +15,12 @@ from shared.request import make_response
 
 from .models import Proposal, Attribute, Document, Event, Image
 
-def proposal_json(proposal, include_images=True, include_attributes=False,
+default_attributes = [
+    "applicant_name"
+]
+
+def proposal_json(proposal, include_images=True,
+                  include_attributes=default_attributes,
                   include_events=False, include_documents=True):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
     pdict["location"] = {"lat": proposal.location.y,
