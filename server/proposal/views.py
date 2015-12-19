@@ -30,6 +30,8 @@ def proposal_json(proposal, include_images=True, include_attributes=False,
 
     if include_attributes:
         attributes = Attribute.objects.filter(proposal=proposal)
+        if include_attributes is not True:
+            attributes = attributes.filter(handle__in=include_attributes)
         pdict["attributes"] = [a.to_dict() for a in attributes]
 
     if include_events:
