@@ -359,17 +359,27 @@ def add_doc_attributes(doc):
 
     add_doc_events(doc, properties)
 
+
+@celery_app.task(name="proposal.add_doc_events")
 def add_doc_events(doc, properties):
+    if not doc.proposal:
+        return
+
     # Find events and create them:
     events = extract.get_events(doc, properties)
+
+    if not events:
+        return
+
     event = None
     for e in events:
+        event = None
         try:
             event = Event.objects.get(title=e["title"],
                                       date=e["date"])
+
         except Event.DoesNotExist as dne:
-            event = Event(proposal=doc.proposal,
-                          title=e["title"],
+            event = Event(title=e["title"],
                           date=e["date"])
         except KeyError as kerr:
             logger.error("Missing required key in extracted event:",
@@ -377,6 +387,7 @@ def add_doc_events(doc, properties):
 
     if event:
         event.save()
+        event.proposals.add(doc.proposal)
 
     return properties
 
@@ -394,7 +405,8 @@ def process_document(doc):
     (fetch_document.s(doc) |
      celery.group((extract_images.s() | generate_thumbnails.s()),
                   generate_doc_thumbnail.s(),
-                  extract_text.s() | add_doc_attributes.s()))()
+                  extract_text.s() | add_doc_attributes.s(),
+                  add_doc_events.s()))()
 
 
 @celery_app.task(name="proposal.process_documents")
