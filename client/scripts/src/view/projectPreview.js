@@ -50,16 +50,16 @@ define(["backbone", "underscore", "chartjs", "utils"],
                        years = _.range(startyear, startyear+8),
                        data = this.makeData(budget, years);
 
-                   new Chart(ctx).Bar(data,
-                                      {animationSteps: 20,
-                                       barStrokeWidth: 1,
-                                       scaleLabel: function(o) {
-                                           return $u.prettyAmount(o.value);
-                                       },
-                                       tooltipTemplate: function(o) {
-                                           return o.label +
-                                               ": $" + $u.commas(o.value);
-                                       }});
+                   return new Chart(ctx).Bar(data, {
+                       animationSteps: 20,
+                       barStrokeWidth: 1,
+                       scaleLabel: function(o) {
+                           return $u.prettyAmount(o.value);
+                       },
+                       tooltipTemplate: function(o) {
+                           return o.label +
+                               ": $" + $u.commas(o.value);
+                       }});
                }
            });
        });
