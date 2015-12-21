@@ -3,7 +3,7 @@ define(["backbone", "utils"], function(B, $u) {
         template: $u.templateWithId("project-template",
                                     {variable: "project"}),
 
-        className: "project",
+        className: "project info-item",
 
         events: {
             "mouseover": "beginHover",

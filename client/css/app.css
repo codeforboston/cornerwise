@@ -248,6 +248,15 @@ input:focus::-webkit-input-placeholder {
     color: #4EAF48;
 }
 
+body.geolocating #geolocate {
+    color: lightgray;
+    pointer-events: none;
+}
+
+body.geolocating #geolocate:hover {
+    text-decoration: none;
+}
+
 #intro {
     height: 12em;
     overflow: hidden;
@@ -921,10 +930,11 @@ tr.proposal-selected, tr.proposal-hovered {
 }
 
 #alert-container {
+    pointer-events: none;
     position: absolute;
     text-align: center;
     width: 100%;
-    z-index: 10;
+    z-index: 2;
 }
 
 #alert {
@@ -942,6 +952,9 @@ tr.proposal-selected, tr.proposal-hovered {
     top: 0;
 }
 
+body.main #alert.displayed {
+    top: 75px;
+}
 
 
 

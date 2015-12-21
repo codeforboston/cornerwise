@@ -10,9 +10,9 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
                 .listenTo(this.model, "change:refDistance", this.distanceChanged);
         },
 
-        tagName: "tr",
+        tagName: "div",
 
-        className: "proposal-info",
+        className: "proposal-info info-item",
 
         events: {
             "mouseover": "beginHover",
@@ -24,7 +24,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
 
         render: function() {
             var proposal = this.model;
-            this.$el.html(this.template(proposal.toJSON()));
+            this.$el.html(this.template(proposal));
 
             if (proposal.get("excluded")) {
                 this.$el.addClass("excluded");

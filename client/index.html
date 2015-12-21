@@ -9,17 +9,32 @@
     <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
     <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="description" content="Find and explore nearby zoning applications."/>
+    <meta name="keywords" content="civic engagement,code for america,code for boston,,development,planning,planning boardmurban planning,zoning,zoning board" />
+    <!-- OpenGraph -->
+    <meta name="og:type" content="website" />
+    <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
+
 
     <!-- Template for proposals in the proposal table -->
     <script type="text/template" id="proposal-template">
-      <td><%- proposal.address %></td>
-      <td>
-        <b><%- proposal.summary %></b>
-        <br>Case: <%- proposal.caseNumber %></td>
-      <td>
-        <span class="distance"><%= commas(proposal.refDistance) %> feet</span>
-      </td>
+      <div class="icon">
+        <img src="<%- proposal.getThumb() %>"/>
+      </div>
+      <div class="name" title="<%- proposal.get('address') %>">
+        <%- proposal.get('address') %>
+      </div>
+      <div class="case"><%- proposal.get("caseNumber") %></div>
+      <div class="subtitle">
+        <%- proposal.getAttributeValue("applicant_name") || '' %>
+      </div>
+      <div class="summary">
+        <%- proposal.get("summary") %>
+      </div>
+      <div class="distance"><%= commas(proposal.get('refDistance')) %> feet away</div>
     </script>
 
 

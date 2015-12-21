@@ -78,6 +78,8 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "utils"],
                        });
 
                        $(document).trigger("showMain");
+
+                       return loc;
                    }).fail(function() {
                        alert.show("I couldn't find that address.");
                    }).always(function() {

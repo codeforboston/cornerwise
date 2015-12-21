@@ -33,7 +33,7 @@ define(["backbone", "proposal-view", "routes", "jquery"],
                    var view = new ProposalView({model: proposal}).render(),
                        collection = this.collection;
 
-                   this.$("tbody").append(view.el);
+                   this.$(".proposal-list").append(view.el);
                    view.$el.on("click", function() {
                        collection.setSelection([proposal.id]);
                    });
@@ -55,8 +55,7 @@ define(["backbone", "proposal-view", "routes", "jquery"],
                        .listenTo(this.collection, "reset", this.fetchingComplete)
                        .listenTo(this.collection, "sort", this.render);
 
-                   this.$el.append("<thead><tr></tr></thead>");
-                   this.$el.append("<tbody/>");
+                   this.$el.append("<div class='proposal-list'/>");
 
                    this.buildHeader();
 
@@ -71,7 +70,7 @@ define(["backbone", "proposal-view", "routes", "jquery"],
 
                    this.$el
                        .removeClass("loading")
-                       .find("tbody").html("")
+                       .find(".proposal-list").html("")
                        .on("focus", _.bind(this.onFocus, this));
                    var self = this;
                    _.each(change.models, function(p) {
