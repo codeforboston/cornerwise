@@ -67,6 +67,17 @@ define(["underscore", "jquery"], function(_, $) {
         return currency + commas(amount);
     }
 
+    function prettyDistance(ft) {
+        var miles = ft/5280;
+
+        if (miles >= 1) {
+            var m = miles.toFixed(1).replace(/\.0$/, "");
+            return m + " mile" + (miles - 1 < 0.1 ? "" : "s");
+        }
+
+        return commas(ft) + " feet";
+    }
+
     function capitalize(s) {
         return s[0].toUpperCase() + s.slice(1);
     }
@@ -86,7 +97,9 @@ define(["underscore", "jquery"], function(_, $) {
             return n == 1 ? sing : (plur || sing + "s");
         },
 
-        prettyAmount: prettyAmount
+        prettyAmount: prettyAmount,
+
+        prettyDistance: prettyDistance
     };
 
     var $u = {
@@ -197,6 +210,13 @@ define(["underscore", "jquery"], function(_, $) {
          * @returns {string}
          */
         prettyAmount: prettyAmount,
+
+        /**
+         * Present a distance in feet in a human-readable way.
+         *
+         * @param {number} feet Distance in feet
+         */
+        prettyDistance: prettyDistance,
 
         /**
          * Register a default template helper, which will be available
