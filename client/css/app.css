@@ -393,6 +393,29 @@ a.filter-button {
     display: none;
 }
 
+.proposal-selected {
+    background-color: #2a749b !important;
+}
+
+.proposal-info .subtitle {
+    font-size: smaller;
+}
+
+.proposal-info .case {
+    color: crimson;
+    padding-left: 2px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    font-size: small;
+}
+
+.proposal-info .distance {
+    color: #555;
+    float: right;
+    font-size: small;
+}
+
 #data-controls {
     background-color: white;
     border: 1px solid black;
@@ -480,7 +503,7 @@ a.filter-button {
     transform: rotate(90deg);
 }
 
-.project {
+.info-item {
     cursor: pointer;
     height: 80px;
     overflow: hidden;
@@ -491,11 +514,11 @@ a.filter-button {
     background-color: aliceblue;
 }
 
-.project:nth-child(odd) {
+.info-item:nth-child(odd) {
     background-color: aliceblue;
 }
 
-.project .icon {
+.info-item .icon {
     border: 1px solid gray;
     float: left;
     margin-right: 5px;
@@ -504,11 +527,11 @@ a.filter-button {
     width: 60px;
 }
 
-.project .icon img {
+.info-item .icon img {
     height: 100%
 }
 
-.project .name {
+.info-item .name {
     font-weight: 500;
     overflow: hidden;
     padding-top: 5px;
@@ -728,14 +751,6 @@ a.glossary:hover {
     font-size: small;
 }
 
-tr.proposal-info {
-    cursor: pointer;
-}
-
-tr.proposal-info:nth-child(odd) {
-    background-color: aliceblue;
-}
-
 .proposal-info > * {
     padding: 0.2em;
 }
@@ -904,3 +919,32 @@ tr.proposal-selected, tr.proposal-hovered {
         width: 50px;
     }
 }
+
+#alert-container {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    z-index: 10;
+}
+
+#alert {
+    background-color: rgba(240,108,73,0.5);
+    border: 2px solid #ee6c49;
+    display: inline-block;
+    padding: 0.5em;
+    position: relative;
+    top: -50px;
+
+    transition: top 0.2s ease-out;
+}
+
+#alert.displayed {
+    top: 0;
+}
+
+
+
+
+
+
+

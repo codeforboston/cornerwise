@@ -25,6 +25,10 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         maxBounds: [[42.35524578349561, -71.18951797485352],
                     [42.444107964019395, -70.99004745483398]],
 
+        regionName: "Somerville",
+
+        regionBounds: null,
+
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,
                           lng: -71.09950304031372},

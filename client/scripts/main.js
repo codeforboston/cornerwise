@@ -37,6 +37,8 @@ require.config({
         "layers": "src/model/layers",
         "projects": "src/model/projects",
 
+        "alerts": "src/view/alerts",
+
         // Backbone Views:
         "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
