@@ -1,10 +1,12 @@
 postgres:
-  build: docker/postgres
-  hostname: postgres
+  image: mdillon/postgis:9.4-2.1
   ports:
     - "5432:5432"
-  volumes_from:
-    - data
+  volumes:
+    - cornerwise_db:/var/lib/postgresql/9.4/main
+
+redis:
+  image: redis:latest
 
 cornerwise:
   build: .
@@ -17,13 +19,3 @@ cornerwise:
     - PYTHONUNBUFFERED=1
     - REDIS_HOST=redis
     - POSTGRES_HOST=postgres
-  volumes_from:
-    - data
-  volumes:
-    - ./server:/app
-    - ./client:/client
-    - ./data:/data
-    - ./docker-runtime
-
-redis:
-  image: redis:latest
