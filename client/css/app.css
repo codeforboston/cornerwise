@@ -288,6 +288,16 @@ body.geolocating #ref-address-form .go-button {
     height: 100%;
 }
 
+.section .logos {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+}
+
+.logos img {
+    max-height: 40px;
+}
+
 .lede h4 {
     font-variant: small-caps;
     font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
@@ -520,6 +530,8 @@ a.filter-button {
     cursor: pointer;
     height: 80px;
     overflow: hidden;
+    padding-bottom: 5px;
+    padding-top: 5px;
     position: relative;
 }
 
@@ -532,11 +544,10 @@ a.filter-button {
 }
 
 .info-item .icon {
-    border: 1px solid gray;
     float: left;
     margin-right: 5px;
     overflow: hidden;
-    height: 70px;
+    height: 100%;
     width: 60px;
 }
 
