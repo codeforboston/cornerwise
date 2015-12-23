@@ -184,7 +184,7 @@ h3 {
 .input-group .status {
     display: none;
     position: absolute;
-    right: 1.5em;
+    right: 0.2em;
     top: 0.2em;
 }
 
@@ -255,6 +255,10 @@ body.geolocating #geolocate {
 
 body.geolocating #geolocate:hover {
     text-decoration: none;
+}
+
+body.geolocating #ref-address-form .go-button {
+    display: none;
 }
 
 #intro {
