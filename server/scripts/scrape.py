@@ -10,7 +10,8 @@ from urllib.error import HTTPError, URLError
 logger = logging.getLogger(__name__)
 
 LAST_PAGE = 31
-URL_FORMAT = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots?page={:1}"
+URL_BASE = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots"
+URL_FORMAT = URL_BASE + "?page={:1}"
 TITLES = {}
 
 # Utility:
@@ -93,25 +94,25 @@ def get_td_val(td, attr=None):
 def get_row_vals(attrs, tr):
     return {attr: get_td_val(td, attr) for attr, td in zip(attrs, tr.find_all("td"))}
 
-def add_geocode(geocoder, permits):
+def add_geocode(geocoder, proposals):
     """
     Modifies each permit in the list (in place), adding 'lat' and 'long'
     matching the permit address.
     """
-    addrs = ["{0[number]} {0[street]}".format(permit) for permit in permits]
+    addrs = ["{0[number]} {0[street]}".format(proposal) for proposal in proposals]
     locations = geocoder.geocode(addrs)
 
     # Assumes the locations are returned in the same order
-    for permit, location in zip(permits, locations):
+    for proposal, location in zip(proposals, locations):
         loc = location and location.get("location")
         if not loc:
-            logger.error("Skipping permit {id}; geolocation failed.".\
-                         format(id=permit["caseNumber"]))
+            logger.error("Skipping proposal {id}; geolocation failed.".\
+                         format(id=proposal["caseNumber"]))
             continue
 
-        permit["lat"] = loc["lat"]
-        permit["long"] = loc["lng"]
-        permit["score"] = location["properties"].get("score")
+        proposal["lat"] = loc["lat"]
+        proposal["long"] = loc["lng"]
+        proposal["score"] = location["properties"].get("score")
 
 def find_cases(doc):
     table = find_table(doc)
@@ -126,7 +127,9 @@ def find_cases(doc):
     # This is ugly, but there's some baaad data out there:
     for i, tr in enumerate(trs):
         try:
-            cases.append(get_row_vals(attributes, tr))
+            permit = get_row_vals(attributes, tr)
+            permit["source"] = URL_BASE
+            cases.append(permit)
         except Exception as err:
             logger.error("Failed to scrape row {num}: {err}"\
                          .format(num=i, err=err))
@@ -143,6 +146,7 @@ def get_proposals_for_page(page, geocoder=None):
         add_geocode(geocoder, cases)
 
     return cases
+
 
 def get_pages():
     """Returns a generator that retrieves Reports and Decisions pages and

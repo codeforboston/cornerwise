@@ -55,8 +55,8 @@ def create_proposal_from_json(p_dict):
     proposal.summary = p_dict.get("summary")
     proposal.description = p_dict.get("description")
     # This should not be hardcoded
-    proposal.source = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions"
-    proposal.modified = p_dict["updatedDate"]
+    proposal.source = p_dict.get("source")
+    proposal.updated = p_dict["updatedDate"]
 
     # For now, we assume that if there are one or more documents
     # linked in the 'decision' page, the proposal is 'complete'.
@@ -445,6 +445,11 @@ def scrape_reports_and_decisions(since=None, page=None,
             # If there was no last run, the scraper will fetch all
             # proposals.
             since = last_run()
+
+            if not since:
+                latest_proposal = Proposal.objects.latest()
+                if latest_proposal:
+                    since = latest_proposal.updated
 
             if not since:
                 # If there is no record of a previous run, fetch
