@@ -10,6 +10,10 @@ from django.forms.models import model_to_dict
 import utils
 
 class ProposalManager(models.GeoManager):
+    def latest(self):
+        results = self.order_by("-created")
+        return results and results[0]
+
     def between(self, start=None, end=None):
         q = None
 
@@ -24,7 +28,7 @@ class ProposalManager(models.GeoManager):
             else:
                 q = endQ
 
-        return self.objects.filter(q)
+        return self.filter(q)
 
     def build_query(self, params):
         "Construct a query from parameters"
@@ -46,9 +50,11 @@ class Proposal(models.Model):
                                    null=True,
                                    help_text="")
     modified = models.DateTimeField(auto_now=True)
+    # The time when the entry was updated in the source:
+    updated = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
-#    closed = models.DateTimeField(null=True,
-                                  #help_text="The time when this proposal was closed.")
+    # closed = models.DateTimeField(null=True,
+    #                              help_text="The time when this proposal was closed.")
     summary = models.CharField(max_length=256, default="")
     description = models.TextField()
     source = models.URLField(null=True,
