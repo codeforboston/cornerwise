@@ -246,6 +246,30 @@ define(["underscore", "jquery"], function(_, $) {
             return m && decodeURIComponents(m[2]);
         },
 
+        encodeQuery: function(o) {
+            return _.map(o, function(val, k) {
+                return encodeURIComponent(k) + "=" + encodeURIComponent(val);
+            }).join("&");
+        },
+
+        decodeQuery: function(s) {
+            return _.reduce(s.split("&"), function(m, piece) {
+                var ss = piece.split("="),
+                    k = decodeURIComponent(ss[0]),
+                    val = decodeURIComponent(ss[1]);
+
+                if (!m[k]) {
+                    m[k] = val;
+                } else if (_.isString(m[k])) {
+                    m[k] = [m[k], val];
+                } else {
+                    m[k].push(val);
+                }
+
+                return m;
+            }, {});
+        },
+
         /**
          * Like _.template, except that it adds helper functions to the
          * data passed to the resulting template function.
