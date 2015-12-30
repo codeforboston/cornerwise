@@ -4,10 +4,7 @@ define(["backbone", "proposal-view", "routes", "jquery"],
                title: "Proposals",
 
                initialize: function() {
-                   routes.getRouter().on("route:details",
-                                         function(_) {
 
-                                         });
                },
 
                buildHeader: function() {

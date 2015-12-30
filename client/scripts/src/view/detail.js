@@ -15,8 +15,6 @@ define(["backbone", "underscore", "leaflet",
         initialize: function() {
             this.listenTo(this.collection, "change:selected",
                           this.selectionChanged);
-
-            routes.getDispatcher().on("showDetails", _.bind(this.onShow, this));
         },
 
         selectionChanged: function(proposal) {

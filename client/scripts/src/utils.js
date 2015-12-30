@@ -276,7 +276,7 @@ define(["underscore", "jquery"], function(_, $) {
         flattenMap: flattenMap,
 
         encodeQuery: function(o) {
-            return _.map(o, function(val, k) {
+            return _.map(flattenMap(o), function(val, k) {
                 return encodeURIComponent(k) + "=" + encodeURIComponent(val);
             }).join("&");
         },

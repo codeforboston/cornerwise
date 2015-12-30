@@ -102,6 +102,11 @@ define(
 
                 var filtersView = new FiltersView();
 
+                routes.getDispatcher().on("hashState", function(state) {
+                    console.log("hashState", state);
+                });
+                routes.init();
+
                 return {
                     glossary: glossary,
                     map: mapView,
