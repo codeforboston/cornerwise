@@ -82,6 +82,31 @@ define(["underscore", "jquery"], function(_, $) {
         return s[0].toUpperCase() + s.slice(1);
     }
 
+    function setIn(obj, ks, v) {
+            if (ks.length == 0)
+                return v;
+
+            var k = ks[0];
+            obj[k] = setIn(obj[k] || {},
+                           ks.slice(1),
+                           v);
+            return obj;
+    }
+
+    function flattenMap(obj, pref) {
+        pref = pref || "";
+        return _.reduce(obj, function(m, val, key) {
+            if (_.isObject(val) && !_.isFunction(val) &&
+                !_.isArray(val)) {
+                return _.extend(m, flattenMap(val, key + "."));
+            }
+
+            m[pref + key] = val;
+
+            return m;
+        }, {});
+    }
+
     var defaultHelpers = {
         formatDate: function(d) {
             return (d.toLocaleDateString) ?
@@ -246,6 +271,10 @@ define(["underscore", "jquery"], function(_, $) {
             return m && decodeURIComponents(m[2]);
         },
 
+        setIn: setIn,
+
+        flattenMap: flattenMap,
+
         encodeQuery: function(o) {
             return _.map(o, function(val, k) {
                 return encodeURIComponent(k) + "=" + encodeURIComponent(val);
@@ -258,12 +287,17 @@ define(["underscore", "jquery"], function(_, $) {
                     k = decodeURIComponent(ss[0]),
                     val = decodeURIComponent(ss[1]);
 
-                if (!m[k]) {
-                    m[k] = val;
-                } else if (_.isString(m[k])) {
-                    m[k] = [m[k], val];
+                if (k.indexOf(".") > -1) {
+                    var ks = k.split(".");
+                    setIn(m, ks, val);
                 } else {
-                    m[k].push(val);
+                    if (!m[k]) {
+                        m[k] = val;
+                    } else if (_.isString(m[k])) {
+                        m[k] = [m[k], val];
+                    } else {
+                        m[k].push(val);
+                    }
                 }
 
                 return m;
