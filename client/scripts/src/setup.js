@@ -98,14 +98,10 @@ define(
                 // For testing:
                 window.proposals = proposals;
 
+                routes.init();
                 glossary.init();
 
                 var filtersView = new FiltersView();
-
-                routes.getDispatcher().on("hashState", function(state) {
-                    console.log("hashState", state);
-                });
-                routes.init();
 
                 return {
                     glossary: glossary,

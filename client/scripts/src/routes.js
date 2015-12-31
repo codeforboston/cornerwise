@@ -36,8 +36,10 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         onStateChange: function(cb) {
+            var lastState = null;
             this.getDispatcher().on("hashState", function(state) {
-                cb(state);
+                cb(state, lastState);
+                lastState = state;
             });
         },
 
