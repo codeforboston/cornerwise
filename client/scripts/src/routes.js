@@ -17,7 +17,12 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         setHashState: function(o, quiet) {
-            window.location.hash = $u.encodeQuery(o);
+            var query = $u.encodeQuery(o);
+
+            if (query === window.location.hash)
+                return;
+
+            window.location.hash = query;
 
             if (!quiet)
                 this.dispatchEvents(o);
