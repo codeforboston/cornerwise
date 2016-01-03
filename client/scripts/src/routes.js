@@ -19,20 +19,36 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         setHashState: function(o, quiet) {
             var query = $u.encodeQuery(o);
 
+            // No change:
             if (query === B.history.getHash())
-                return;
+                return o;
 
             window.location.hash = query;
 
             if (!quiet)
                 this.dispatchEvents(o);
+
+            return o;
+        },
+
+        changeHash: function(f, quiet) {
+            var hashObject = $u.decodeQuery(B.history.getHash());
+
+            return this.setHashState(f(hashObject), quiet);
         },
 
         setHashKey: function(k, v, quiet) {
             var hashObject = $u.decodeQuery(B.history.getHash());
 
             hashObject[k] = v;
-            this.setHashState(hashObject, quiet);
+            return this.setHashState(hashObject, quiet);
+        },
+
+        clearHashKey: function(k, quiet) {
+            var hashObject = $u.decodeQuery(B.history.getHash());
+
+            delete hashObject[k];
+            return this.setHashState(hashObject, quiet);
         },
 
         triggerHashState: function(o) {
