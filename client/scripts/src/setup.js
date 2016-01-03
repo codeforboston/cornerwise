@@ -83,6 +83,7 @@ define(
                                 .addClass("collapsed")
                                 .removeClass("expanded")
                                 .trigger("collapsed");
+                            return false;
                         })
                     .on("click", "a._expand",
                         function() {
@@ -90,6 +91,7 @@ define(
                                 .removeClass("collapsed")
                                 .addClass("expanded")
                                 .trigger("expanded");
+                            return false;
                         });
 
                 proposals.fetch({dataType: "jsonp"});

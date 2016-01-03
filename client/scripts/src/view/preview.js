@@ -16,7 +16,9 @@ define(["backbone", "routes", "underscore", "config",
                },
 
                showDetails: function(e) {
-                   routes.getDispatcher().trigger("showDetails", this.model.id);
+                   routes.setHashKey("view", "details");
+
+                   return false;
                },
 
                setModel: function(proposal) {
