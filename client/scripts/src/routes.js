@@ -19,7 +19,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         setHashState: function(o, quiet) {
             var query = $u.encodeQuery(o);
 
-            if (query === window.location.hash)
+            if (query === B.history.getHash())
                 return;
 
             window.location.hash = query;
@@ -29,7 +29,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         },
 
         setHashKey: function(k, v, quiet) {
-            var hashObject = $u.decodeQuery(window.location.hash);
+            var hashObject = $u.decodeQuery(B.history.getHash());
 
             hashObject[k] = v;
             this.setHashState(hashObject, quiet);
@@ -40,15 +40,43 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             dispatcher.trigger("hashState", o);
         },
 
-        onStateChange: function(cb) {
-            var lastState = null;
+        watchers: [],
+
+        startWatch: function() {
+            var lastState = {},
+                watchers = this.watchers;
             this.getDispatcher().on("hashState", function(state) {
-                cb(state, lastState);
+                _.each(watchers, function(watcher) {
+                    var callback = watcher[0],
+                        key = watcher[1];
+
+                    if (key) {
+                        if (lastState && lastState[key] === state[key])
+                            return;
+                        callback(state[key], lastState[key]);
+                    } else {
+                        callback(state, lastState);
+                    }
+                });
                 lastState = state;
             });
         },
 
+        /**
+         * @param {String|Function} arg1 If arg2 is present, the key to
+         * watch for changes. Otherwise, callback function.
+         * @param {Function} [arg2] Used as the callback if a key is
+         * provided.
+         *
+         * @callback
+         */
+        onStateChange: function(arg1, arg2) {
+            var watcher = arg2 ? [arg2, arg1] : [arg1];
+            this.watchers.push(watcher);
+        },
+
         init: function() {
+            this.startWatch();
             this.triggerHashState();
 
             var self = this;

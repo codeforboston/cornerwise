@@ -82,26 +82,35 @@ define(["underscore", "jquery"], function(_, $) {
         return s[0].toUpperCase() + s.slice(1);
     }
 
-    function setIn(obj, ks, v) {
-            if (ks.length == 0)
-                return v;
+    function isDigit(s) {
+        return /^[0-9]+$/.test(s);
+    }
 
-            var k = ks[0];
-            obj[k] = setIn(obj[k] || {},
-                           ks.slice(1),
-                           v);
-            return obj;
+    function setIn(obj, ks, v) {
+        if (ks.length == 0)
+            return v;
+
+        var k = ks[0];
+
+        if (isDigit(k))
+            k = parseInt(k);
+
+        obj[k] = setIn(obj[k] || {},
+                       ks.slice(1),
+                       v);
+        return obj;
     }
 
     function flattenMap(obj, pref) {
         pref = pref || "";
         return _.reduce(obj, function(m, val, key) {
-            if (_.isObject(val) && !_.isFunction(val) &&
-                !_.isArray(val)) {
-                return _.extend(m, flattenMap(val, key + "."));
-            }
+            if (!(!key || val === undefined)) {
+                if (_.isObject(val) && !_.isFunction(val)) {
+                    return _.extend(m, flattenMap(val, key + "."));
+                }
 
-            m[pref + key] = val;
+                m[pref + key] = val;
+            }
 
             return m;
         }, {});
@@ -132,6 +141,10 @@ define(["underscore", "jquery"], function(_, $) {
             return function() {
                 return fn.apply(this, _.take(arguments, n));
             };
+        },
+
+        parseInt10: function(n) {
+            return parseInt(n, 10);
         },
 
         capitalize: capitalize,
@@ -189,6 +202,10 @@ define(["underscore", "jquery"], function(_, $) {
             return out;
         },
 
+        /**
+         * @returns {jquery.Deferred} A promise that, when resolved,
+         * returns the coordinates from the user's browser.
+         */
         promiseLocation: function() {
             var promise = $.Deferred();
 
@@ -275,6 +292,11 @@ define(["underscore", "jquery"], function(_, $) {
 
         flattenMap: flattenMap,
 
+        /**
+         * @param {Object} o A map of strings to
+         *
+         * @returns A string encoding the contents of the map
+         */
         encodeQuery: function(o) {
             return _.map(flattenMap(o), function(val, k) {
                 return encodeURIComponent(k) + "=" + encodeURIComponent(val);
@@ -282,6 +304,7 @@ define(["underscore", "jquery"], function(_, $) {
         },
 
         decodeQuery: function(s) {
+            var idxRe = /\[(\d+)\]$/;
             return _.reduce(s.split("&"), function(m, piece) {
                 var ss = piece.split("="),
                     k = decodeURIComponent(ss[0]),
@@ -291,13 +314,7 @@ define(["underscore", "jquery"], function(_, $) {
                     var ks = k.split(".");
                     setIn(m, ks, val);
                 } else {
-                    if (!m[k]) {
-                        m[k] = val;
-                    } else if (_.isString(m[k])) {
-                        m[k] = [m[k], val];
-                    } else {
-                        m[k].push(val);
-                    }
+                    m[k] = val;
                 }
 
                 return m;
