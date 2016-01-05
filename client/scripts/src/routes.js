@@ -26,7 +26,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             window.location.hash = query;
 
             if (!quiet)
-                this.dispatchEvents(o);
+                this.triggerHashState(o);
 
             return o;
         },
@@ -40,7 +40,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         setHashKey: function(k, v, quiet) {
             var hashObject = $u.decodeQuery(B.history.getHash());
 
-            hashObject[k] = v;
+            $u.setIn(hashObject, k.split("."), v);
             return this.setHashState(hashObject, quiet);
         },
 

@@ -269,6 +269,7 @@ define(["underscore", "jquery"], function(_, $) {
          */
         registerHelper: function(name, fn) {
             defaultHelpers[name] = fn;
+            return this;
         },
 
         setCookie: function(name, value, options) {
@@ -329,7 +330,7 @@ define(["underscore", "jquery"], function(_, $) {
          * @param {object} helpers Mapping names to functions
          * @param {object} settings Passed as second argument to _.template
          */
-        template: function(templateString, helpers, settings) {
+        template: function(templateString, settings, helpers) {
             helpers = helpers || defaultHelpers;
 
             if (settings) {
@@ -362,7 +363,7 @@ define(["underscore", "jquery"], function(_, $) {
                 throw new Error("Unknown template: " + id);
             }
             options = options || {};
-            return $u.template(templateString, options.helpers, options);
+            return $u.template(templateString, options, options.helpers);
         }
     };
 
