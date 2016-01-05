@@ -18,6 +18,7 @@ require.config({
         "config": "src/config",
         "local-config": "src/localConfig",
         "routes": "src/routes",
+        "collapsible": "src/collapsible",
         "ref-location": "src/refLocation",
 
         // Leaflet stuff:

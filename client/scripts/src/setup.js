@@ -3,12 +3,12 @@ define(
      "details-view", "minimap-view", "preview-view",
      "projects", "projects-view", "project-preview-view",
      "preview-manager", "tab-view", "layers-view",
-     "filters-view", "glossary", "config", "backbone",
+     "filters-view", "glossary", "collapsible", "config", "backbone",
      "routes", "legal-notice"],
     function($, Proposals, ProposalsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView, LayersView,
-             FiltersView, glossary, config, B, routes) {
+             FiltersView, glossary, collapsible, config, B, routes) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -76,30 +76,13 @@ define(
                     el: "#layers .contents"
                 }).render();
 
-                $(document)
-                    .on("click", "a._collapse",
-                        function() {
-                            $(this).closest("._collapsible")
-                                .addClass("collapsed")
-                                .removeClass("expanded")
-                                .trigger("collapsed");
-                            return false;
-                        })
-                    .on("click", "a._expand",
-                        function() {
-                            $(this).closest("._collapsible")
-                                .removeClass("collapsed")
-                                .addClass("expanded")
-                                .trigger("expanded");
-                            return false;
-                        });
-
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
                 // For testing:
                 window.proposals = proposals;
 
+                collapsible.init();
                 routes.init();
                 glossary.init();
 
