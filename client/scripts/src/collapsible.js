@@ -24,14 +24,14 @@ define(["jquery", "underscore", "routes"], function($, _, routes) {
             $(document)
                 .on("click", "a._collapse",
                     function() {
-                        var id = $(this).attr("id");
+                        var id = this.getAttribute("id");
                         routes.clearHashKey("expand." + id);
 
                         return false;
                     })
                 .on("click", "a._expand",
                     function() {
-                        var id = $(this).attr("id");
+                        var id = this.getAttribute("id");
                         routes.setHashKey("expand." + id, "1");
 
                         return false;

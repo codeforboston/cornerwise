@@ -31,14 +31,20 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             return o;
         },
 
-        changeHash: function(f, quiet) {
-            var hashObject = $u.decodeQuery(B.history.getHash());
+        getState: function() {
+            return $u.decodeQuery(B.history.getHash());
+        },
 
-            return this.setHashState(f(hashObject), quiet);
+        changeHash: function(f, quiet) {
+            return this.setHashState(f(this.getState()), quiet);
+        },
+
+        extendHash: function(o, quiet) {
+            return this.setHashState(_.extend(this.getState(), o), quiet);
         },
 
         setHashKey: function(k, v, quiet) {
-            var hashObject = $u.decodeQuery(B.history.getHash());
+            var hashObject = this.getState();
 
             $u.setIn(hashObject, k.split("."), v);
             return this.setHashState(hashObject, quiet);
@@ -47,7 +53,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         clearHashKey: function(k, quiet) {
             var hashObject = $u.decodeQuery(B.history.getHash());
 
-            delete hashObject[k];
+            $u.setIn(hashObject, k.split("."), undefined);
             return this.setHashState(hashObject, quiet);
         },
 
@@ -59,7 +65,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         watchers: [],
 
         startWatch: function() {
-            var lastState = {},
+            var lastState = null,
                 watchers = this.watchers;
             this.getDispatcher().on("hashState", function(state) {
                 _.each(watchers, function(watcher) {
@@ -67,9 +73,9 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
                         key = watcher[1];
 
                     if (key) {
-                        if (lastState && lastState[key] === state[key])
+                        if (lastState && _.isEqual(lastState[key], state[key]))
                             return;
-                        callback(state[key], lastState[key]);
+                        callback(state[key], lastState && lastState[key]);
                     } else {
                         callback(state, lastState);
                     }
@@ -78,6 +84,8 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             });
         },
 
+
+
         /**
          * @param {String|Function} arg1 If arg2 is present, the key to
          * watch for changes. Otherwise, callback function.
@@ -85,6 +93,8 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
          * provided.
          *
          * @callback
+         * @param {Object} newState
+         * @param {Object} oldState
          */
         onStateChange: function(arg1, arg2) {
             var watcher = arg2 ? [arg2, arg1] : [arg1];
@@ -101,6 +111,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
                 route: {test: _.constant(true)},
                 callback: function(fragment) {
                     var o = $u.decodeQuery(fragment);
+                    self._cachedState = o;
                     self.triggerHashState(o);
                 }
             });

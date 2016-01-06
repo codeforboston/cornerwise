@@ -14,13 +14,15 @@ define(
                 var proposals = new Proposals(),
                     projects = new Projects();
 
-                var showIntro = true;
-
                 // Show introduction?
-                $(document.body).toggleClass("main", !showIntro);
-                if (showIntro) {
+                routes.onStateChange("view", function(view) {
+                    var showIntro = !view || view === "intro";
 
-                }
+                    $(document.body).toggleClass("main", !showIntro);
+                    if (showIntro) {
+
+                    }
+                });
 
                 $(document).on("click", "#explore,#modal", function(e) {
                     $(document).trigger("showMain");

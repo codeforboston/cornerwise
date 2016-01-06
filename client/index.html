@@ -109,6 +109,10 @@
       </div>
     </script>
 
+    <script type="text/template" id="project-details">
+
+    </script>
+
     <script type="text/template" id="project-template">
       <div class="icon">
         <img src="<%- project.thumbnail() %>">
@@ -197,7 +201,7 @@
     </script>
 
   </head>
-  <body>
+  <body class="main">
     <div id="alert-container"><div id="alert"></div></div>
     <div id="map-container">
       <div id="map"></div>
@@ -231,7 +235,7 @@
         <h3>what&rsquo;s being built near&hellip;</h3>
         <div class="input-group big-input">
           <form id="ref-address-form">
-            <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off"/>
+            <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off" autofocus/>
             <img src="/static/images/geolocating.gif" class="status" alt="searching" />
             <button type="submit" class="input-button go-button">go</button>
           </form>

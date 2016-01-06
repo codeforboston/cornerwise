@@ -16,7 +16,8 @@ define(["backbone", "routes", "underscore", "config",
                },
 
                showDetails: function(e) {
-                   routes.setHashKey("view", "details");
+                   routes.extendHash({"view": "details",
+                                      "expand.data": "1"});
 
                    return false;
                },

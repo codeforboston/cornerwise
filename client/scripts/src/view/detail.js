@@ -1,7 +1,7 @@
-define(["backbone", "underscore", "leaflet",
+define(["named-model-view", "underscore", "leaflet",
         "routes", "utils", "config"],
-       function(B, _, L, routes, $u, config) {
-    return B.View.extend({
+       function(NamedModelView, _, L, routes, $u, config) {
+    return NamedModelView.extend({
         tagName: "div",
         className: "proposal-details",
         template: $u.templateWithId("proposal-details",
@@ -15,6 +15,11 @@ define(["backbone", "underscore", "leaflet",
         initialize: function() {
             this.listenTo(this.collection, "change:selected",
                           this.selectionChanged);
+
+            var self = this;
+            routes.onStateChange("view", function(view) {
+                self.setShowing(view === "details");
+            });
         },
 
         selectionChanged: function(proposal) {
@@ -27,7 +32,7 @@ define(["backbone", "underscore", "leaflet",
             proposal.fetchIfNeeded();
 
             if (this.showing)
-                this.render(proposal);
+                this.render();
         },
 
         renderChange: function(proposal) {
@@ -36,11 +41,26 @@ define(["backbone", "underscore", "leaflet",
             if (!_.every(_.keys(proposal.changed), function(k) {
                 return _.contains(["selected", "hovered"], k);
             })) {
-                this.render(proposal);
+                this.render();
             }
         },
 
+        setShowing: function(isShowing) {
+            this.showing = isShowing;
+            return this.render();
+        },
+
         render: function() {
+            if (!this.model)
+                this.showing = false;
+
+            if (!this.showing) {
+                this.$el.hide();
+                return this;
+            }
+
+            this.$el.show();
+
             if (this.minimap)
                 this.minimap.remove();
 
@@ -69,11 +89,12 @@ define(["backbone", "underscore", "leaflet",
                 minimap.addLayer(parcelLayer)
                     .setView(parcelLayer.getBounds().getCenter());
             }
+
+            return this;
         },
 
         hide: function() {
-            this.$el.hide();
-            this.showing = false;
+            return this.setShowing(false);
         },
 
         /**
@@ -82,7 +103,7 @@ define(["backbone", "underscore", "leaflet",
          */
         dismiss: function(e) {
             if (e.target == e.currentTarget)
-                this.hide();
+                routes.clearHashKey("view");
         },
 
         onRoute: function(route, _params) {
@@ -100,19 +121,8 @@ define(["backbone", "underscore", "leaflet",
 
         show: function(proposal) {
             this.model = proposal;
-            // if (proposal && this.model &&
-            //     this.model.get("id") !== proposal.get("id"))
-            // {
-            //     this.setModel(proposal);
-            // }
 
-            if (!proposal)
-                return this.hide();
-
-            this.render();
-            this.$el.show();
-            this.showing = true;
-            return this;
+            return this.setShowing(true);
         }
     });
 });

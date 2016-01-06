@@ -86,6 +86,18 @@ define(["underscore", "jquery"], function(_, $) {
         return /^[0-9]+$/.test(s);
     }
 
+    function diff(o1, o2) {
+        var result = {};
+
+        _.each(o1, function(v, k) {
+
+        });
+
+        _.each(o2, function(v, k) {
+
+        });
+    }
+
     function setIn(obj, ks, v) {
         if (ks.length == 0)
             return v;
@@ -95,9 +107,13 @@ define(["underscore", "jquery"], function(_, $) {
         if (isDigit(k))
             k = parseInt(k);
 
-        obj[k] = setIn(obj[k] || {},
-                       ks.slice(1),
-                       v);
+        if (ks.length === 1 && k === undefined) {
+            delete obj[k];
+        } else {
+            obj[k] = setIn(obj[k] || {},
+                           ks.slice(1),
+                           v);
+        }
         return obj;
     }
 
@@ -149,8 +165,27 @@ define(["underscore", "jquery"], function(_, $) {
 
         capitalize: capitalize,
 
+        diff: diff,
+
         escapeRegex: function(s) {
             return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");
+        },
+
+        /**
+         * Generate an equivalent regular expression for the given glob
+         * string.
+         *
+         * @param {String} patt A glob pattern
+         *
+         * @returns {RegExp}
+         */
+        glob: function(patt) {
+            var re = patt
+                    .replace(/[.+\^$[\]\\(){}|\-]/g, "\\$&")
+                    .replace("*", ".*")
+                    .replace("?", ".");
+
+            return new RegExp(re, "i");
         },
 
         everyPred: function(fs, arg) {

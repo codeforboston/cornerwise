@@ -1,6 +1,13 @@
 define(["backbone", "underscore"],
        function(B) {
            return B.Collection.extend({
+               initialize: function() {
+                   this.selection = [];
+                   this.fullSelection = [];
+
+                   this.on("add", this.onAdd, this);
+               },
+
                /**
                 * @param {number|number[]} selection An id or ids of the
                 * model(s) to select.
@@ -15,17 +22,26 @@ define(["backbone", "underscore"],
                    var deselect = _.difference(this.selection, selection);
                    _.each(deselect,
                           function(id) {
-                              this.get(id).set("selected", false);
+                              var member = this.get(id);
+                              if (member)
+                                  member.set("selected", false);
                           },
                           this);
-                   var select = _.difference(selection, this.selection);
+                   var select = _.difference(selection, this.selection),
+                       pending = [];
                    _.each(select,
                           function(id) {
-                              this.get(id).set("selected", true);
+                              var member = this.get(id);
+                              if (member)
+                                  member.set("selected", true);
+                              else
+                                  pending.push(id);
                           },
                           this);
 
-                   this.selection = selection;
+                   pending = _.union(pending, this.pending);
+                   this.pending = pending;
+                   this.selection = _.difference(selection, pending);
 
                    if (select.length || deselect.length)
                        this.trigger("selection", this, selection);
@@ -34,6 +50,20 @@ define(["backbone", "underscore"],
                    if (deselect.length)
                        this.trigger("selectionRemoved", this, deselect);
 
+                   if (!pending.length)
+                       this.trigger("selectionLoaded", this, pending);
+
+               },
+
+               onAdd: function(model, coll) {
+                   if (_.contains(this.pending, model.id)) {
+                       this.pending = _.without(this.pending, model.id);
+                       this.selection.push(model.id);
+                       this.trigger("selection", this, this.selection);
+
+                       if (!this.pending.length)
+                           this.trigger("selectionLoaded", this, this.pending);
+                   }
                },
 
                addToSelection: function(id) {

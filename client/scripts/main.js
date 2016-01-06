@@ -41,6 +41,8 @@ require.config({
         "alerts": "src/view/alerts",
 
         // Backbone Views:
+        "named-model-view": "src/view/namedModelView",
+        "named-view": "src/view/namedView",
         "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
         "details-view": "src/view/detail",
