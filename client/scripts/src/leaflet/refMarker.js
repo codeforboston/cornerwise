@@ -5,7 +5,7 @@ define(["leaflet", "config"], function(L, config) {
             var fg = L.FeatureGroup.prototype.initialize.call(this, []);
             var icon = L.icon({iconUrl: "/static/images/cornerwise-owl.png",
                                iconRetinaUrl: "/static/images/cornerwise-owl.png",
-                               iconSize: [51, 72]});
+                               iconSize: [51, 68]});
             this.marker = L.marker(refLoc.getPoint(),
                                    {icon: icon}).addTo(this);
             refLoc.on("change", this.locationChange, this);
