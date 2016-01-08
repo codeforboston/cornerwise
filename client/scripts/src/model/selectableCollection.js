@@ -1,12 +1,27 @@
 define(["backbone", "underscore"],
        function(B) {
            /**
-            * A collection that
+            * @constructor
+            * A collection that keeps track of which items are selected.
+            *
+            * Events:
+            * - selection (collection, ids)
+            *   Triggered when the selection changed
+            *   ids: ids of all selected children, including those
+            *   that have not yet been loaded.
+            *
+            * - selectionLoaded (collection, ids, loadedIds)
+            *   Triggered when the entire selection is loaded
+            *   ids: ids of all selected children
             */
-           return B.Collection.extend({
+           var SelectableCollection = B.Collection.extend({
                initialize: function() {
+                   // The ids of the selected members that are loaded
+                   // and available.
                    this.selection = [];
-                   this.fullSelection = [];
+                   // The ids of selected members that are not loaded
+                   // yet.
+                   this.pending = [];
 
                    this.on("add", this.onAdd, this);
                },
@@ -54,7 +69,7 @@ define(["backbone", "underscore"],
                        this.trigger("selectionRemoved", this, deselect);
 
                    if (!pending.length)
-                       this.trigger("selectionLoaded", this, pending);
+                       this.trigger("selectionLoaded", this, selection, pending);
 
                },
 
@@ -65,7 +80,10 @@ define(["backbone", "underscore"],
                        this.trigger("selection", this, this.selection);
 
                        if (!this.pending.length)
-                           this.trigger("selectionLoaded", this, this.pending);
+                           this.trigger("selectionLoaded", this, this.selection,
+                                        [model.id]);
+
+                       model.set("selected", true);
                    }
                },
 
@@ -117,4 +135,6 @@ define(["backbone", "underscore"],
                                 this);
                }
            });
+
+           return SelectableCollection;
        });

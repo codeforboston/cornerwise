@@ -12,7 +12,10 @@ define(
         return {
             start: function() {
                 var proposals = new Proposals(),
-                    projects = new Projects();
+                    projects = new Projects(),
+                    appViews = {
+                        glossary: glossary
+                    };
 
                 // Show introduction?
                 routes.onStateChange("view", function(view, oldView) {
@@ -24,10 +27,10 @@ define(
 
                     $(document.body).toggleClass("main", !showIntro);
 
-                    if (view === "main") {
-                        new MinimapView({
+                    if (view === "main" && !appViews.minimap) {
+                        appViews.minimap = new MinimapView({
                             el: "#minimap",
-                            linkedMap: mapView.map
+                            linkedMap: appViews.mapView.map
                         });
                     }
                 });
@@ -38,17 +41,17 @@ define(
                     return false;
                 });
 
-                var mapView = new MapView({
+                appViews.mapView = new MapView({
                     collection: proposals,
                     el: "#map"
                 });
 
-                var detailsView = new DetailsView({
+                appViews.detailsView = new DetailsView({
                     collection: proposals,
                     el: "#overlay"
                 });
 
-                var tabView = new TabView({
+                appViews.tabView = new TabView({
                     el: "#data",
                     subviews: {
                         "proposals": new ProposalsView({
@@ -60,51 +63,35 @@ define(
                         })
                     }
                 });
-                proposals.on("selection",
-                             function() {
-                                 console.log(arguments);
-                             });
 
-                var proposalPreview = new PreviewView(),
-                    projectPreview = new ProjectPreview(),
-                    previewManager = new PreviewManager({
-                        el: "#preview",
-                        collections: {
-                            proposals: proposals,
-                            projects: projects
-                        },
-                        previewMap: {
-                            projects: projectPreview,
-                            proposals: proposalPreview
-                        },
-                        viewSelection: tabView
-                    });
-
-                var layers = new LayersView({
+                appViews.proposalPreview = new PreviewView();
+                appViews.projectPreview = new ProjectPreview();
+                appViews.previewManager = new PreviewManager({
+                    el: "#preview",
+                    collections: {
+                        proposals: proposals,
+                        projects: projects
+                    },
+                    previewMap: {
+                        projects: appViews.projectPreview,
+                        proposals: appViews.proposalPreview
+                    },
+                    viewSelection: appViews.tabView
+                });
+                appViews.layers = new LayersView({
                     el: "#layers .contents"
                 }).render();
 
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
-                // For testing:
-                window.proposals = proposals;
-
                 collapsible.init();
                 routes.init();
                 glossary.init();
 
-                var filtersView = new FiltersView();
+                //var filtersView = new FiltersView();
 
-                return {
-                    glossary: glossary,
-                    map: mapView,
-                    preview: previewManager,
-                    details: detailsView,
-                    exploreView: tabView,
-                    layersView: layers,
-                    filtersView: filtersView
-                };
+                return appViews;
             }
         };
     });

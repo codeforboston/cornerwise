@@ -47,6 +47,9 @@ define(["backbone", "underscore", "utils"],
                    return this.setHashState(f(this.getState()), quiet);
                },
 
+               /**
+                * @param {Object} o
+                */
                extendHash: function(o, quiet) {
                    return this.setHashState(_.extend(this.getState(), o), quiet);
                },

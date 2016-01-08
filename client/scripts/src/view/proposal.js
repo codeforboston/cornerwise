@@ -26,9 +26,11 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             var proposal = this.model;
             this.$el.html(this.template(proposal));
 
-            if (proposal.get("excluded")) {
+            if (proposal.get("excluded"))
                 this.$el.addClass("excluded");
-            }
+
+            if (proposal.get("selected"))
+                this.$el.addClass("proposal-selected");
 
             return this;
         },
