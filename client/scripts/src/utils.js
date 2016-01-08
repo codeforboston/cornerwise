@@ -117,6 +117,16 @@ define(["underscore", "jquery"], function(_, $) {
         return obj;
     }
 
+    function getIn(obj, ks) {
+        if (ks.length === 0)
+            return obj;
+
+        if (!obj)
+            return undefined;
+
+        return getIn(obj[ks[0]], ks.slice(1));
+    }
+
     function flattenMap(obj, pref) {
         pref = pref || "";
         return _.reduce(obj, function(m, val, key) {
@@ -324,6 +334,7 @@ define(["underscore", "jquery"], function(_, $) {
             return m && decodeURIComponents(m[2]);
         },
 
+        getIn: getIn,
         setIn: setIn,
 
         flattenMap: flattenMap,
