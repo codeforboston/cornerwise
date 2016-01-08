@@ -15,30 +15,32 @@ define(
                     projects = new Projects();
 
                 // Show introduction?
-                routes.onStateChange("view", function(view) {
+                routes.onStateChange("view", function(view, oldView) {
+                    $(document.body)
+                        .removeClass(oldView)
+                        .addClass(view);
+
                     var showIntro = !view || view === "intro";
 
                     $(document.body).toggleClass("main", !showIntro);
-                    if (showIntro) {
 
+                    if (view === "main") {
+                        new MinimapView({
+                            el: "#minimap",
+                            linkedMap: mapView.map
+                        });
                     }
                 });
 
                 $(document).on("click", "#explore,#modal", function(e) {
-                    $(document).trigger("showMain");
+                    routes.setHashKey("view", "main");
+
+                    return false;
                 });
 
                 var mapView = new MapView({
                     collection: proposals,
                     el: "#map"
-                });
-
-                $(document).one("showMain", function() {
-                    $(document.body).addClass("main");
-                    new MinimapView({
-                        el: "#minimap",
-                        linkedMap: mapView.map
-                    });
                 });
 
                 var detailsView = new DetailsView({
@@ -58,6 +60,10 @@ define(
                         })
                     }
                 });
+                proposals.on("selection",
+                             function() {
+                                 console.log(arguments);
+                             });
 
                 var proposalPreview = new PreviewView(),
                     projectPreview = new ProjectPreview(),

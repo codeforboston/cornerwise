@@ -1,6 +1,6 @@
-define(["named-model-view", "underscore", "routes"],
-       function(NamedModelView, _, routes) {
-           return NamedModelView.extend({
+define(["backbone", "underscore", "routes"],
+       function(B, _, routes) {
+           return B.View.extend({
                tagName: "div",
                className: "project-details",
                initialize: function() {

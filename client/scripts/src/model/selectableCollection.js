@@ -1,5 +1,8 @@
 define(["backbone", "underscore"],
        function(B) {
+           /**
+            * A collection that
+            */
            return B.Collection.extend({
                initialize: function() {
                    this.selection = [];
