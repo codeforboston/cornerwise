@@ -86,6 +86,10 @@ define(["underscore", "jquery"], function(_, $) {
         return /^[0-9]+$/.test(s);
     }
 
+    function isSimpleObject(o) {
+        return o.constructor && o.constructor === Object;
+    }
+
     function diff(o1, o2) {
         var result = {};
 
@@ -127,11 +131,22 @@ define(["underscore", "jquery"], function(_, $) {
         return getIn(obj[ks[0]], ks.slice(1));
     }
 
+    function deepMerge(obj1, obj2) {
+        _.each(obj2, function(v, k) {
+            var orig = obj2[k];
+            if (orig && isSimpleObject(v) && isSimpleObject(orig)) {
+                deepMerge(v, orig);
+            } else {
+                obj1[k] = v;
+            }
+        });
+    }
+
     function flattenMap(obj, pref) {
         pref = pref || "";
         return _.reduce(obj, function(m, val, key) {
             if (!(!key || val === undefined)) {
-                if (_.isObject(val) && !_.isFunction(val)) {
+                if (isSimpleObject(val)) {
                     return _.extend(m, flattenMap(val, key + "."));
                 }
 
@@ -337,6 +352,7 @@ define(["underscore", "jquery"], function(_, $) {
         getIn: getIn,
         setIn: setIn,
 
+        deepMerge: deepMerge,
         flattenMap: flattenMap,
 
         /**
