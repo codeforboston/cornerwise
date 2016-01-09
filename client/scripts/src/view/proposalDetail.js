@@ -105,6 +105,7 @@ define(["backbone", "underscore", "leaflet",
                dismiss: function(e) {
                    if (e.target == e.currentTarget)
                        routes.clearHashKey("view");
+                   return false;
                },
 
                onRoute: function(route, _params) {
