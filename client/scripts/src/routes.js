@@ -99,6 +99,13 @@ define(["backbone", "underscore", "utils"],
                    });
                },
 
+               withState: function(cb) {
+                   cb({
+                       getKey: function(k) {
+
+                       }
+                   });
+               },
 
                /**
                 * @param {String|Function} arg1 If arg2 is present, the key to
