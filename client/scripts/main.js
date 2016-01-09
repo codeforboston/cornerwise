@@ -43,11 +43,11 @@ require.config({
         // Backbone Views:
         "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
-        "details-view": "src/view/detail",
+        "details-view": "src/view/proposalDetail",
         "map-view": "src/view/map",
         "minimap-view": "src/view/minimap",
         "preview-manager": "src/view/previewManager",
-        "preview-view": "src/view/preview",
+        "preview-view": "src/view/proposalPreview",
         "project-preview-view": "src/view/projectPreview",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
