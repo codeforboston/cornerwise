@@ -17,17 +17,19 @@ define(["backbone", "underscore", "utils"],
                    return dispatcher;
                },
 
-               setHashState: function(o, quiet) {
+               setHashState: function(o, replace, quiet) {
                    var query = $u.encodeQuery(o);
 
                    // No change:
                    if (query === B.history.getHash())
                        return o;
 
-                   window.location.hash = query;
-
-                   if (!quiet)
-                       this.triggerHashState(o);
+                   if (replace && window.location.replace) {
+                       var url = window.location.toString().split("#")[0];
+                       window.location.replace(url + "#" + query);
+                   } else {
+                       window.location.hash = query;
+                   }
 
                    return o;
                },
@@ -43,31 +45,35 @@ define(["backbone", "underscore", "utils"],
                    return $u.getIn(state, ks);
                },
 
-               changeHash: function(f, quiet) {
-                   return this.setHashState(f(this.getState()), quiet);
+               changeHash: function(f, replace, quiet) {
+                   return this.setHashState(f(this.getState()), replace, quiet);
+               },
+
+               changeHashKey: function(key, f, replace, quiet) {
+                   return this.setHashKey(key, f(this.getKey(key)), replace, quiet);
                },
 
                /**
                 * @param {Object} o
                 */
-               extendHash: function(o, quiet) {
-                   return this.setHashState(_.extend(this.getState(), o), quiet);
+               extendHash: function(o, replace, quiet) {
+                   return this.setHashState(_.extend(this.getState(), o), replace, quiet);
                },
 
-               setHashKey: function(k, v, quiet) {
+               setHashKey: function(k, v, replace, quiet) {
                    var hashObject = this.getState(),
                        ks = _.isArray(k) ? k : k.split(".");
 
                    $u.setIn(hashObject, ks, v);
-                   return this.setHashState(hashObject, quiet);
+                   return this.setHashState(hashObject, replace, quiet);
                },
 
-               clearHashKey: function(k, quiet) {
+               clearHashKey: function(k, replace, quiet) {
                    var hashObject = $u.decodeQuery(B.history.getHash()),
                        ks = _.isArray(k) ? k : k.split(".");
 
                    $u.setIn(hashObject, ks, undefined);
-                   return this.setHashState(hashObject, quiet);
+                   return this.setHashState(hashObject, replace, quiet);
                },
 
                triggerHashState: function(o) {
