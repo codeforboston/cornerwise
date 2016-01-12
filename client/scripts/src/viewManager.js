@@ -1,68 +1,91 @@
-define(["routes"],
-       function(routes) {
+/**
+ * Set up simple primary views to appear and disappear based on the
+ * current value of the application's 'view' key.
+ *
+ * Usage:
+ *  manager.add({ about: ["modal-view", {url: "/path/to/about.html"}] })
+ */
+define(["routes", "underscore", "jquery"],
+       function(routes, _, $) {
            return {
-               init: function(views) {
+               add: function(views) {
                    _.extend(this.views, views);
-                   var self = this;
-                   routes.onStateChange("view",
-                                        function(newKey, oldKey) {
-                                            if (oldKey) {
-q                                                var old = self.constructedViews[oldKey];
-                                                if (old) {
-                                                    if (old.onDismiss && old.onDismiss !== false) {
-                                                        if (old.hide)
-                                                            old.hide();
-                                                        old.trigger("wasHidden");
-                                                    }
-                                                }
+                   this.init();
+               },
 
-                                                var newView = self.getOrConstructView(newKey);
+               init: function() {
+                   if (this._initialized) return;
+                   this._initialized = true;
 
-                                                if (newView) {
-                                                    if (newView.onPresent && newView.onPresent() !== false) {
-                                                        if (newView.show)
-                                                            newView.show();
-                                                        newView.trigger("wasShown");
-                                                    }
-                                                }
-                                            }
-                                        });
+                   var self = this,
+                       key = routes.getKey("view");
+                   routes.onStateChange(
+                       "view",
+                       function(newKey, oldKey) {
+                           key = newKey;
+                           if (oldKey) {
+                               var old = self.constructedViews[oldKey];
+                               if (old) {
+                                   if (!old.onDismiss || old.onDismiss !== false) {
+                                       if (old.hide)
+                                           old.hide();
+                                       old.trigger("wasHidden");
+                                   }
+                               }
+                           }
+
+                           self.getOrConstructView(newKey)
+                               .then(function(newView) {
+                                   // If it took too long to load
+                                   // the module, the key may have
+                                   // changed:
+                                   if (newView && key == newKey) {
+                                       if (!newView.onPresent || newView.onPresent() !== false) {
+                                           if (newView.show)
+                                               newView.show();
+                                           newView.trigger("wasShown");
+                                       }
+                                   }
+                               });
+                       });
                },
 
                getOrConstructView: function(name) {
+                   var promise = $.Deferred();
+
                    if (!this.constructedViews[name]) {
                        var view = this.views[name];
 
                        if (!view)
-                           return null;
+                           promise.reject({reason: "No view for key:" + name});
+
+                       var modName = _.isString(view) ? view :
+                               (_.isArray(view) && _.isString(view[0])) ? view[0] : null;
 
                        if (_.isFunction(view)) {
                            this.constructedViews[name] = new view();
+                       } else if (modName) {
+                           var self = this;
+                           require(["optional!" + modName], function(mod) {
+                               if (_.isString(view)) {
+                                   self.views[name] = mod;
+                                   promise.resolve(new mod());
+                               } else {
+                                   self.views[name] = [mod, view[1]];
+                                   promise.resolve(new mod(view[1]));
+                               }
+                           });
+                           return promise;
                        } else if (_.isArray(view)) {
                            this.constructedViews[name] = new view[0](view[1]);
                        } else if (_.isObject(view)) {
                            this.constructedViews[name] = view;
                        } else {
-                           return null;
+                           return promise.reject({reason: "Invalid view configuration"});
                        }
                    }
 
-                   return this.constructedViews[name];
-               },
-
-               loadViews: function(views) {
-                   _.each(views, function(v, key) {
-                       var modName = _.isString(v) ? v :
-                               (_.isArray(v) && _.isString(v[0])) ? v[0] : null;
-                       if (modName) {
-                           require(["optional!" + v], function(mod) {
-                               if (_.isString(v))
-                                   views[key] = mod;
-                               else
-                                   views[key] = [mod, v[1]];
-                           });
-                       }
-                   });
+                   return promise.resolve(this.constructedViews[name]);
                },
 
                views: {},

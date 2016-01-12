@@ -447,6 +447,7 @@ define(["underscore", "jquery"], function(_, $) {
 
             return function(url, options) {
                 var template = null;
+                options = options || {};
 
                 return function(arg, cb) {
                     if (template) {

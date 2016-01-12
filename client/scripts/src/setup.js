@@ -4,11 +4,12 @@ define(
      "projects", "projects-view", "project-preview-view",
      "preview-manager", "tab-view", "layers-view",
      "filters-view", "glossary", "collapsible", "config", "backbone",
-     "routes", "legal-notice"],
+     "routes", "view-manager", "legal-notice"],
     function($, Proposals, ProposalsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView, LayersView,
-             FiltersView, glossary, collapsible, config, B, routes) {
+             FiltersView, glossary, collapsible, config, B, routes,
+             viewManager) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -40,6 +41,11 @@ define(
 
                     return false;
                 });
+
+                viewManager.add({
+                    "about": ["modal-view", {url: "/static/template/about.html"}]
+                });
+
 
                 appViews.mapView = new MapView({
                     collection: proposals,

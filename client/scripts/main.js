@@ -40,6 +40,10 @@ require.config({
         "alerts": "src/view/alerts",
 
         // Backbone Views:
+        // Generic:
+        "modal-view": "src/view/modalView",
+
+        // Application-specific:
         "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
         "details-view": "src/view/proposalDetail",
@@ -56,6 +60,7 @@ require.config({
         // View managers:
         "collapsible-view": "src/view/collapsible",
         "tab-view": "src/view/tabs",
+        "view-manager": "src/viewManager",
 
         // Additional features:
         "glossary": "src/glossary",

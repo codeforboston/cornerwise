@@ -805,7 +805,7 @@ tr.proposal-selected, tr.proposal-hovered {
     top: 5px;
 }
 
-#overlay {
+#overlay, .modal-container {
     background-color: rgba(0, 0, 0, 0.5);
     overflow-y: auto;
     position: absolute;
@@ -830,7 +830,7 @@ tr.proposal-selected, tr.proposal-hovered {
     float: right;
 }
 
-.details {
+.details, #modal-contents {
     background-color: white;
     border-left: 2px solid black;
     border-right: 2px solid black;
@@ -841,7 +841,9 @@ tr.proposal-selected, tr.proposal-hovered {
     width: 50%;
 }
 
-
+.modal-container.showing {
+    display: block;
+}
 
 .details h4 {
   margin-bottom: 0.1em;
@@ -971,9 +973,3 @@ tr.proposal-selected, tr.proposal-hovered {
 body.main #alert.displayed {
     top: 75px;
 }
-
-
-
-
-
-

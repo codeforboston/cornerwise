@@ -1,5 +1,5 @@
 define(["backbone", "utils"], function(B, $u) {
-    return new B.View.extend({
+    return B.View.extend({
         initialize: function(options) {
             if (options.url)
                 this.template = $u.templateWithUrl(options.url);
@@ -19,7 +19,7 @@ define(["backbone", "utils"], function(B, $u) {
         el: "#modal-contents",
 
         getContainer: function() {
-            this.$el.closest(this.container);
+            return this.$el.closest(this.container);
         },
 
         _update: function() {
@@ -29,13 +29,11 @@ define(["backbone", "utils"], function(B, $u) {
         },
 
         show: function() {
-            this.showShould = true;
+            this.shouldShow = true;
 
             var self = this;
-            this.template(function(html) {
+            this.template(this.model, function(html) {
                 self.$el.html(html);
-                // If the template was loaded asynchronously,
-                // 'shouldShow' may have changed.
                 self._update();
             });
         },
