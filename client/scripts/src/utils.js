@@ -439,7 +439,35 @@ define(["underscore", "jquery"], function(_, $) {
             }
             options = options || {};
             return $u.template(templateString, options, options.helpers);
-        }
+        },
+
+        templateWithUrl: (function() {
+            // Close over idCounter
+            var idCounter = 0;
+
+            return function(url, options) {
+                var template = null;
+
+                return function(arg, cb) {
+                    if (template) {
+                        cb(template(arg));
+                        return;
+                    }
+
+                    var placeholderId = "_template_placeholder_" + (idCounter++);
+
+                    $.get(
+                        url,
+                        function(templateString) {
+                            template = $u.template(templateString,
+                                                   options,
+                                                   options.helpers);
+                            cb(template(arg));
+                        }
+                    );
+                };
+            };
+        })()
     };
 
     return $u;
