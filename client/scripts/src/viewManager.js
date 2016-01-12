@@ -7,18 +7,23 @@ define(["routes"],
                    routes.onStateChange("view",
                                         function(newKey, oldKey) {
                                             if (oldKey) {
-                                                var old = self.constructedViews[oldKey];
+q                                                var old = self.constructedViews[oldKey];
                                                 if (old) {
                                                     if (old.onDismiss && old.onDismiss !== false) {
                                                         if (old.hide)
                                                             old.hide();
+                                                        old.trigger("wasHidden");
                                                     }
                                                 }
 
-                                                var newView = self.constructedViews[newKey];
+                                                var newView = self.getOrConstructView(newKey);
 
-                                                if (!newView) {
-
+                                                if (newView) {
+                                                    if (newView.onPresent && newView.onPresent() !== false) {
+                                                        if (newView.show)
+                                                            newView.show();
+                                                        newView.trigger("wasShown");
+                                                    }
                                                 }
                                             }
                                         });
