@@ -12,12 +12,16 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<<<<<<< HEAD
     <meta name="description" content="Find and explore curernt and future zoning projects near you."/>
     <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning boardmurban planning,zoning,zoning board" />
+=======
+    <meta name="description" content="Find and explore nearby zoning applications."/>
+    <meta name="keywords" content="civic engagement,code for america,code for boston,,development,planning,planning board,urban planning,zoning,zoning board" />
+>>>>>>> origin/master
     <!-- OpenGraph -->
     <meta name="og:type" content="website" />
     <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
-
 
     <!-- Template for proposals in the proposal table -->
     <script type="text/template" id="proposal-template">
@@ -36,7 +40,6 @@
       </div>
       <div class="distance"><%= prettyDistance(proposal.get('refDistance')) %> away</div>
     </script>
-
 
 
     <script type="text/template" id="proposal-details">
@@ -197,7 +200,7 @@
     </script>
 
   </head>
-  <body>
+  <body class="main">
     <div id="alert-container"><div id="alert"></div></div>
     <div id="map-container">
       <div id="map"></div>
@@ -225,13 +228,15 @@
 
     <div id="modal"></div>
 
+    <div class="modal-container"><div id="modal-contents"></div></div>
+
     <div id="search-banner" class="overlay">
       <div id="logo" class="resp-portrait-hide"></div>
       <div class="overlay-contents">
         <h3>what&rsquo;s being built near&hellip;</h3>
         <div class="input-group big-input">
           <form id="ref-address-form">
-            <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off"/>
+            <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off" autofocus/>
             <img src="/static/images/geolocating.gif" class="status" alt="searching" />
             <button type="submit" class="input-button go-button">go</button>
           </form>

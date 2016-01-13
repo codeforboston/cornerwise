@@ -15,6 +15,14 @@ define(["underscore", "jquery"], function(_, $) {
                              klBase + "-active");
     };
 
+    /**
+     * Takes a numeric string s and adds thousands separators.
+     * For example: commas("12345678.3") -> "12,345,678.3"
+     *
+     * @param {String|Number} s A number or numeric string to format.
+     *
+     * @returns {String} A string with commas inserted
+     */
     function commas(s) {
         if (!s) return "";
 
@@ -78,12 +86,27 @@ define(["underscore", "jquery"], function(_, $) {
         return commas(ft) + " feet";
     }
 
+    /**
+     * @param {String} s
+     *
+     * @returns {String} A copy of s with its first character converted
+     * to upper case.
+     */
     function capitalize(s) {
         return s[0].toUpperCase() + s.slice(1);
     }
 
+    /**
+     * @param {String} s
+     *
+     * @returns {Boolean} true if the string only contains digits.
+     */
     function isDigit(s) {
         return /^[0-9]+$/.test(s);
+    }
+
+    function isSimpleObject(o) {
+        return o.constructor && o.constructor === Object;
     }
 
     function setIn(obj, ks, v) {
@@ -95,17 +118,42 @@ define(["underscore", "jquery"], function(_, $) {
         if (isDigit(k))
             k = parseInt(k);
 
-        obj[k] = setIn(obj[k] || {},
-                       ks.slice(1),
-                       v);
+        if (ks.length === 1 && k === undefined) {
+            delete obj[k];
+        } else {
+            obj[k] = setIn(obj[k] || {},
+                           ks.slice(1),
+                           v);
+        }
         return obj;
+    }
+
+    function getIn(obj, ks) {
+        if (ks.length === 0)
+            return obj;
+
+        if (!obj)
+            return undefined;
+
+        return getIn(obj[ks[0]], ks.slice(1));
+    }
+
+    function deepMerge(obj1, obj2) {
+        _.each(obj2, function(v, k) {
+            var orig = obj2[k];
+            if (orig && isSimpleObject(v) && isSimpleObject(orig)) {
+                deepMerge(v, orig);
+            } else {
+                obj1[k] = v;
+            }
+        });
     }
 
     function flattenMap(obj, pref) {
         pref = pref || "";
         return _.reduce(obj, function(m, val, key) {
             if (!(!key || val === undefined)) {
-                if (_.isObject(val) && !_.isFunction(val)) {
+                if (isSimpleObject(val)) {
                     return _.extend(m, flattenMap(val, key + "."));
                 }
 
@@ -151,6 +199,23 @@ define(["underscore", "jquery"], function(_, $) {
 
         escapeRegex: function(s) {
             return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");
+        },
+
+        /**
+         * Generate an equivalent regular expression for the given glob
+         * string.
+         *
+         * @param {String} patt A glob pattern
+         *
+         * @returns {RegExp}
+         */
+        glob: function(patt) {
+            var re = patt
+                    .replace(/[.+\^$[\]\\(){}|\-]/g, "\\$&")
+                    .replace("*", ".*")
+                    .replace("?", ".");
+
+            return new RegExp(re, "i");
         },
 
         everyPred: function(fs, arg) {
@@ -227,6 +292,11 @@ define(["underscore", "jquery"], function(_, $) {
             return promise;
         },
 
+        closeTo: function(n1, n2, tolerance) {
+            return Math.abs(n1 - n2) <= (tolerance || 0.1);
+        },
+
+        // Unit conversions:
         mToFeet: function(m) {
             return m*3.281;
         },
@@ -239,11 +309,8 @@ define(["underscore", "jquery"], function(_, $) {
             return m*3.281/5280;
         },
 
+        // Formatting
         commas: commas,
-
-        currentYear: function() {
-            return (new Date()).getFullYear();
-        },
 
         /**
          * @param {number} amount
@@ -254,11 +321,16 @@ define(["underscore", "jquery"], function(_, $) {
         prettyAmount: prettyAmount,
 
         /**
-         * Present a distance in feet in a human-readable way.
+         * Convert a number to a human-friendly distance string.
          *
          * @param {number} feet Distance in feet
          */
         prettyDistance: prettyDistance,
+
+
+        currentYear: function() {
+            return (new Date()).getFullYear();
+        },
 
         /**
          * Register a default template helper, which will be available
@@ -269,6 +341,7 @@ define(["underscore", "jquery"], function(_, $) {
          */
         registerHelper: function(name, fn) {
             defaultHelpers[name] = fn;
+            return this;
         },
 
         setCookie: function(name, value, options) {
@@ -288,14 +361,17 @@ define(["underscore", "jquery"], function(_, $) {
             return m && decodeURIComponents(m[2]);
         },
 
+        getIn: getIn,
         setIn: setIn,
 
+        deepMerge: deepMerge,
         flattenMap: flattenMap,
 
         /**
          * @param {Object} o A map of strings to
          *
-         * @returns A string encoding the contents of the map
+         * @returns A string encoding the contents of the map.  Nested
+         * maps are flattened with flattenMap.
          */
         encodeQuery: function(o) {
             return _.map(flattenMap(o), function(val, k) {
@@ -329,7 +405,7 @@ define(["underscore", "jquery"], function(_, $) {
          * @param {object} helpers Mapping names to functions
          * @param {object} settings Passed as second argument to _.template
          */
-        template: function(templateString, helpers, settings) {
+        template: function(templateString, settings, helpers) {
             helpers = helpers || defaultHelpers;
 
             if (settings) {
@@ -362,8 +438,37 @@ define(["underscore", "jquery"], function(_, $) {
                 throw new Error("Unknown template: " + id);
             }
             options = options || {};
-            return $u.template(templateString, options.helpers, options);
-        }
+            return $u.template(templateString, options, options.helpers);
+        },
+
+        templateWithUrl: (function() {
+            // Close over idCounter
+            var idCounter = 0;
+
+            return function(url, options) {
+                var template = null;
+                options = options || {};
+
+                return function(arg, cb) {
+                    if (template) {
+                        cb(template(arg));
+                        return;
+                    }
+
+                    var placeholderId = "_template_placeholder_" + (idCounter++);
+
+                    $.get(
+                        url,
+                        function(templateString) {
+                            template = $u.template(templateString,
+                                                   options,
+                                                   options.helpers);
+                            cb(template(arg));
+                        }
+                    );
+                };
+            };
+        })()
     };
 
     return $u;

@@ -10,10 +10,6 @@ define(["backbone", "underscore", "project", "project-view",
                    return results.projects;
                },
 
-               initialize: function() {
-                   this.selection = [];
-               },
-
                projectSelected: function(project, selected) {
                    if (this.selected && this.selected.id !== project.id)
                        this.selected.set("selected", false);

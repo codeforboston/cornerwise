@@ -28,10 +28,6 @@ define(["backbone", "underscore", "jquery", "layers", "utils"],
            return B.View.extend({
                collection: layers,
 
-               events: {
-                   "click": "toggle"
-               },
-
                initialize: function() {
                    //this.listenTo(this.collection, "change",
                },

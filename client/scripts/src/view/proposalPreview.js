@@ -16,7 +16,10 @@ define(["backbone", "routes", "underscore", "config",
                },
 
                showDetails: function(e) {
-                   routes.getDispatcher().trigger("showDetails", this.model.id);
+                   routes.extendHash({"view": "details",
+                                      "expand.data": "1"});
+
+                   return false;
                },
 
                setModel: function(proposal) {

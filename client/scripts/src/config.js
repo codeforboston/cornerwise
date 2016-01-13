@@ -115,6 +115,15 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                     fillOpacity: 1
                 },
                 features: null
+            },
+            {
+                source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/wards.geojson",
+                id: "wards",
+                title: "Wards",
+                color: "purple",
+                shown: false,
+                features: null,
+                template: "<%= title %>"
             }
         ],
 

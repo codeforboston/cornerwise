@@ -1,96 +1,143 @@
-define(["backbone", "underscore", "utils"], function(B, _, $u) {
-    var dispatcher = _.clone(B.Events);
+define(["backbone", "underscore", "utils"],
+       function(B, _, $u) {
+           var dispatcher = _.clone(B.Events);
 
-    var appRouter;
+           var appRouter;
 
-    return {
-        getRouter: function() {
-            return appRouter || this.init();
-        },
+           return {
+               getRouter: function() {
+                   return appRouter || this.init();
+               },
 
-        /**
-         * Returns an event dispatcher that is shared by the entire
-         * application.
-         */
-        getDispatcher: function() {
-            return dispatcher;
-        },
+               /**
+                * Returns an event dispatcher that is shared by the entire
+                * application.
+                */
+               getDispatcher: function() {
+                   return dispatcher;
+               },
 
-        setHashState: function(o, quiet) {
-            var query = $u.encodeQuery(o);
+               setHashState: function(o, replace, quiet) {
+                   var query = $u.encodeQuery(o);
 
-            if (query === B.history.getHash())
-                return;
+                   // No change:
+                   if (query === B.history.getHash())
+                       return o;
 
-            window.location.hash = query;
+                   if (replace && window.location.replace) {
+                       var url = window.location.toString().split("#")[0];
+                       window.location.replace(url + "#" + query);
+                   } else {
+                       window.location.hash = query;
+                   }
 
-            if (!quiet)
-                this.dispatchEvents(o);
-        },
+                   return o;
+               },
 
-        setHashKey: function(k, v, quiet) {
-            var hashObject = $u.decodeQuery(B.history.getHash());
+               getState: function() {
+                   return $u.decodeQuery(B.history.getHash());
+               },
 
-            hashObject[k] = v;
-            this.setHashState(hashObject, quiet);
-        },
+               getKey: function(k) {
+                   var state = this.getState(),
+                       ks = _.isArray(k) ? k : k.split(".");
 
-        triggerHashState: function(o) {
-            o = o || $u.decodeQuery(B.history.getHash());
-            dispatcher.trigger("hashState", o);
-        },
+                   return $u.getIn(state, ks);
+               },
 
-        watchers: [],
+               changeHash: function(f, replace, quiet) {
+                   return this.setHashState(f(this.getState()), replace, quiet);
+               },
 
-        startWatch: function() {
-            var lastState = {},
-                watchers = this.watchers;
-            this.getDispatcher().on("hashState", function(state) {
-                _.each(watchers, function(watcher) {
-                    var callback = watcher[0],
-                        key = watcher[1];
+               changeHashKey: function(key, f, replace, quiet) {
+                   return this.setHashKey(key, f(this.getKey(key)), replace, quiet);
+               },
 
-                    if (key) {
-                        if (lastState && lastState[key] === state[key])
-                            return;
-                        callback(state[key], lastState[key]);
-                    } else {
-                        callback(state, lastState);
-                    }
-                });
-                lastState = state;
-            });
-        },
+               /**
+                * @param {Object} o
+                */
+               extendHash: function(o, replace, quiet) {
+                   return this.setHashState(_.extend(this.getState(), o), replace, quiet);
+               },
 
-        /**
-         * @param {String|Function} arg1 If arg2 is present, the key to
-         * watch for changes. Otherwise, callback function.
-         * @param {Function} [arg2] Used as the callback if a key is
-         * provided.
-         *
-         * @callback
-         */
-        onStateChange: function(arg1, arg2) {
-            var watcher = arg2 ? [arg2, arg1] : [arg1];
-            this.watchers.push(watcher);
-        },
+               setHashKey: function(k, v, replace, quiet) {
+                   var hashObject = this.getState(),
+                       ks = _.isArray(k) ? k : k.split(".");
 
-        init: function() {
-            this.startWatch();
-            this.triggerHashState();
+                   $u.setIn(hashObject, ks, v);
+                   return this.setHashState(hashObject, replace, quiet);
+               },
 
-            var self = this;
-            B.history.start({hashChange: true});
-            B.history.handlers.push({
-                route: {test: _.constant(true)},
-                callback: function(fragment) {
-                    var o = $u.decodeQuery(fragment);
-                    self.triggerHashState(o);
-                }
-            });
+               clearHashKey: function(k, replace, quiet) {
+                   var hashObject = $u.decodeQuery(B.history.getHash()),
+                       ks = _.isArray(k) ? k : k.split(".");
 
-            return appRouter;
-        }
-    };
+                   $u.setIn(hashObject, ks, undefined);
+                   return this.setHashState(hashObject, replace, quiet);
+               },
 
-});
+               triggerHashState: function(o) {
+                   o = o || $u.decodeQuery(B.history.getHash());
+                   dispatcher.trigger("hashState", o);
+               },
+
+               watchers: [],
+
+               startWatch: function() {
+                   var lastState = null,
+                       watchers = this.watchers;
+                   this.getDispatcher().on("hashState", function(state) {
+                       _.each(watchers, function(watcher) {
+                           var callback = watcher[0],
+                               key = watcher[1];
+
+                           if (key) {
+                               var oldVal = $u.getIn(lastState, key),
+                                   newVal = $u.getIn(state, key);
+                               if (lastState && _.isEqual(newVal, oldVal))
+                                   return;
+                               callback(newVal, oldVal);
+                           } else {
+                               callback(state, lastState);
+                           }
+                       });
+                       lastState = state;
+                   });
+               },
+
+               /**
+                * @param {String|Function} arg1 If arg2 is present, the key to
+                * watch for changes. Otherwise, callback function.
+                * @param {Function} [arg2] Used as the callback if a key is
+                * provided.
+                *
+                * @callback
+                * @param {Object} newState If a key is provided, the
+                * key's value
+                * @param {Object} oldState
+                */
+               onStateChange: function(arg1, arg2) {
+                   var watcher = arg2 ? [arg2, _.isArray(arg1) ? arg1 : arg1.split(".")] : [arg1];
+                   this.watchers.push(watcher);
+               },
+
+               init: function() {
+                   this.startWatch();
+                   this.triggerHashState();
+
+                   var self = this;
+                   B.history.start({hashChange: true});
+                   B.history.handlers.push({
+                       route: {test: _.constant(true)},
+                       callback: function(fragment) {
+                           var o = $u.decodeQuery(fragment);
+                           self._cachedState = o;
+                           self.triggerHashState(o);
+                       }
+                   });
+
+                   return appRouter;
+               }
+           };
+
+       });

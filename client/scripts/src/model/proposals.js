@@ -3,9 +3,9 @@
  */
 define(
     ["backbone", "jquery", "underscore", "leaflet",
-     "proposal", "ref-location", "selectable", "config",
-     "utils"],
-    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u) {
+     "proposal", "ref-location", "selectable", "routes",
+     "config", "utils"],
+    function(B, $, _, L, Proposal, refLocation, Selectable, routes, config, $u) {
         return Selectable.extend({
             model: Proposal,
 
@@ -17,7 +17,22 @@ define(
 
             initialize: function() {
                 this.listenTo(refLocation, "change", this.updateRadiusFilter);
-                this.selection = [];
+
+                var self = this;
+                routes.onStateChange(function(state, lastState) {
+                    var ids = state.ps;
+
+                    if (!ids) return;
+
+                    ids = _.map(ids.split(","), $u.parseInt10);
+                    self.setSelection(ids);
+                });
+
+                this.on("selection", function(_, sel) {
+                    routes.setHashKey("ps", sel.join(","), true);
+                });
+
+                return Selectable.prototype.initialize.call(this);
             },
 
             fetch: function(opts) {

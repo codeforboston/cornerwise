@@ -22,7 +22,7 @@ define(["backbone", "jquery", "underscore"],
 
                    var self = this;
                    _.each(options.collections, function(coll, name) {
-                       self.listenTo(coll, "selection", self.render);
+                       self.listenTo(coll, "selectionLoaded", self.render);
                    });
 
                    this.listenTo(options.viewSelection, "viewSelected",

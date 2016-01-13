@@ -18,13 +18,13 @@ require.config({
         "config": "src/config",
         "local-config": "src/localConfig",
         "routes": "src/routes",
+        "collapsible": "src/collapsible",
         "ref-location": "src/refLocation",
 
         // Leaflet stuff:
         "ref-marker": "src/leaflet/refMarker",
         "proposal-marker": "src/leaflet/proposalMarker",
         "info-layer-helper": "src/leaflet/infoLayer",
-        "recentered-map": "src/leaflet/recenteredMap",
 
         // Backbone Models:
         "proposal": "src/model/proposal",
@@ -40,13 +40,17 @@ require.config({
         "alerts": "src/view/alerts",
 
         // Backbone Views:
+        // Generic:
+        "modal-view": "src/view/modalView",
+
+        // Application-specific:
         "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
-        "details-view": "src/view/detail",
+        "details-view": "src/view/proposalDetail",
         "map-view": "src/view/map",
         "minimap-view": "src/view/minimap",
         "preview-manager": "src/view/previewManager",
-        "preview-view": "src/view/preview",
+        "preview-view": "src/view/proposalPreview",
         "project-preview-view": "src/view/projectPreview",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
@@ -56,6 +60,7 @@ require.config({
         // View managers:
         "collapsible-view": "src/view/collapsible",
         "tab-view": "src/view/tabs",
+        "view-manager": "src/viewManager",
 
         // Additional features:
         "glossary": "src/glossary",

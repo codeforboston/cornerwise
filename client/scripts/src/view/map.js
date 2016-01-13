@@ -1,14 +1,14 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
         "ref-location", "ref-marker", "proposal-marker", "layers",
-        "info-layer-helper", "recentered-map"],
+        "info-layer-helper", "routes", "utils"],
        function(B, config, L, $, _, refLocation, RefMarker,
-                ProposalMarker, infoLayers, info, RecenteredMap) {
+                ProposalMarker, infoLayers, info, routes, $u) {
     return B.View.extend({
         initialize: function() {
-            var //map = new RecenteredMap(this.el),
-            map = L.map(this.el, {zoomControl: false,
-                                  minZoom: 13,
-                                  maxBounds: config.maxBounds}),
+            var map = L.map(this.el,
+                            {zoomControl: false,
+                             minZoom: 13,
+                             maxBounds: config.maxBounds}),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
@@ -27,6 +27,14 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.zoningLayer = zoningLayer;
 
             map.on("moveend", _.bind(this.updateMarkers, this));
+            map.on("moveend", function() {
+                var center = map.getCenter();
+                routes.extendHash({
+                    lat: center.lat,
+                    lng: center.lng,
+                    zoom: map.getZoom()
+                });
+            });
 
             // Map from case numbers to L.Markers
             this.caseMarker = {};
@@ -41,7 +49,32 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 .listenTo(refLocation, "change", this.placeReferenceMarker)
                 .listenTo(infoLayers, "change", this.layersChanged);
 
+            routes.onStateChange(_.bind(this.stateChanged, this));
+
             return this;
+        },
+
+        stateChanged: function(newState) {
+            var map = this.map;
+            if (!map) return;
+
+            var lat = parseFloat(newState.lat),
+                lng = parseFloat(newState.lng),
+                zoom = parseInt(newState.zoom);
+
+            var currentCenter = map.getCenter(),
+                currentZoom = map.getZoom();
+
+            if (zoom !== currentZoom ||
+                !$u.closeTo(lat, currentCenter.lat, 0.0000000000001) ||
+                !$u.closeTo(lng, currentCenter.lng, 0.0000000000001)) {
+
+                lat = lat || currentCenter.lat;
+                lng = lng || currentCenter.lng;
+                zoom = zoom || currentZoom;
+
+                map.setView([lat, lng], zoom);
+            }
         },
 
         // Layer ordering (bottom -> top):
