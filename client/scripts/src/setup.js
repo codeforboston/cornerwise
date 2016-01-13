@@ -4,12 +4,12 @@ define(
      "projects", "projects-view", "project-preview-view",
      "preview-manager", "tab-view", "layers-view",
      "filters-view", "glossary", "collapsible", "config", "backbone",
-     "routes", "view-manager", "legal-notice"],
+     "routes", "view-manager", "ref-location", "legal-notice"],
     function($, Proposals, ProposalsView, MapView, DetailsView,
              MinimapView, PreviewView, Projects, ProjectsView,
              ProjectPreview, PreviewManager, TabView, LayersView,
              FiltersView, glossary, collapsible, config, B, routes,
-             viewManager) {
+             viewManager, refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -36,12 +36,20 @@ define(
                     }
                 });
 
+                refLocation.on("change:setMethod", function(_, method) {
+                    var view = routes.getKey("view");
+                    if (method !== "auto" && (!view || view === "intro")) {
+                        routes.setHashKey("view", "main");
+                    }
+                });
+
                 $(document).on("click", "#explore,#modal", function(e) {
                     routes.setHashKey("view", "main");
 
                     return false;
                 });
 
+                // Configure modal views here!
                 viewManager.add({
                     "about": ["modal-view", {url: "/static/template/about.html"}]
                 });
@@ -95,7 +103,7 @@ define(
                 routes.init();
                 glossary.init();
 
-                //var filtersView = new FiltersView();
+                appViews.filtersView = new FiltersView();
 
                 return appViews;
             }

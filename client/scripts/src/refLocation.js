@@ -51,8 +51,6 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "utils"],
                                setMethod: "geolocate"
                            });
 
-                           $(document).trigger("showMain");
-
                            return loc;
                        })
                        .always(function() {

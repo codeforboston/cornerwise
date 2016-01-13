@@ -37,6 +37,7 @@ define(
                         .find(".error-reason").text("Could not locate that address!");
                 });
 
+                e.preventDefault();
                 return false;
             },
 
@@ -65,7 +66,10 @@ define(
              * location.
              */
             geolocate: function(e) {
-                return refLocation.setFromBrowser().then(this.reverseGeocodeAddress);
+                refLocation.setFromBrowser().then(this.reverseGeocodeAddress);
+
+                e.preventDefault();
+                return false;
             },
 
             clearInputs: function(e) {
@@ -73,6 +77,9 @@ define(
                 // Verify that the value is sensible:
 
                 refLocation.set("radius", null);
+
+                e.preventDefault();
+                return false;
             },
 
             toggleGeolocating: function(loc, isGeolocating) {
