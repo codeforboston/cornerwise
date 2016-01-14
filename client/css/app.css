@@ -690,10 +690,12 @@ a.layer-info {
     background-color: navy;
     border-radius: 5px;
     color: white;
+    cursor: help;
     display: inline-block;
     font-size: small;
     font-style: italic;
     font-weight: bold;
+    margin-left: 5px;
     text-align: center;
     width: 15px;
 
@@ -712,6 +714,10 @@ a.layer-info .info {
     padding: 0.5em;
     width: 15em;
     position: absolute;
+}
+
+a.layer-info:focus, a.layer-info:hover {
+    z-index: 3;
 }
 
 a.layer-info:focus .info,
@@ -999,8 +1005,7 @@ tr.proposal-selected, tr.proposal-hovered {
     display: inline-block;
     padding: 0.5em;
     position: relative;
-    top: -10px;
-
+    top: -100px;
     transition: top 0.2s ease-out;
 }
 
