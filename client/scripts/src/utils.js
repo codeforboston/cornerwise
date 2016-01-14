@@ -57,13 +57,13 @@ define(["underscore", "jquery"], function(_, $) {
 
         if (amount >= 10000) {
             if (amount < 1000000) {
-                mag = "k";
+                mag = "K";
                 amount /= 1000;
             } else if (amount < 1000000000) {
-                mag = "m";
+                mag = "M";
                 amount /= 1000000;
             } else {
-                mag = "b";
+                mag = "B";
                 amount /= 1000000000;
             }
 
@@ -81,6 +81,18 @@ define(["underscore", "jquery"], function(_, $) {
         if (miles >= 1) {
             var m = miles.toFixed(1).replace(/\.0$/, "");
             return m + " mile" + (miles - 1 < 0.1 ? "" : "s");
+        } else if (miles >= 0.25) {
+            var denom, num;
+            if (miles > 0.5) {
+                denom = Math.round(1/(1-miles));
+                num = Math.round(miles*denom);
+
+            } else {
+                denom = Math.round(1/miles);
+                num = 1;
+            }
+
+            return "~" + num + "/" + denom + " mile";
         }
 
         return commas(ft) + " feet";
