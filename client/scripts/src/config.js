@@ -55,10 +55,10 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "/static/scripts/src/layerdata/somerville.geojson",
                 style: {
-                    stroke: 0.1,
+                    weight: 3,
                     color: "#397f34",
                     fillColor: "#397f34",
-                    fillOpacity: 0.2
+                    fillOpacity: 0.05
                 }
             }
         ],
@@ -68,7 +68,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 source: "/static/scripts/src/layerdata/glx.geojson",
                 id: "glx",
                 title: "Green Line Extension",
-                info: "",
+                info: "The Green Line Extension plans to bring light rail services to areas of Somerville and Medford currently underserved by the MBTA.",
                 template:
                 ('<strong><%= title %></strong>' +
                  '<br>Scheduled Opening: ' +
@@ -97,7 +97,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
-                // info: "Unofficial",
+                info: "These neighborhood boundaries are unofficial and approximate.",
                 title: "Neighborhood Boundaries",
                 color: "blue",
                 shown: false,
