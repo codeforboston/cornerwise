@@ -636,7 +636,7 @@ a.filter-button {
     position: absolute;
     left: 0;
     top: 15%;
-    width: 16em;
+    width: 17em;
     transition: left 0.2s ease-out;
 }
 
@@ -664,12 +664,12 @@ a.filter-button {
 }
 
 #layers.collapsed {
-    left: -17em;
+    left: -18em;
 }
 
 #layers .controls {
     position: absolute;
-    left: 17em;
+    left: 18em;
     width:  30px;
     height:  30px;
 }
@@ -684,6 +684,39 @@ a.color {
     display: inline-block;
     height: 0.5em;
     width: 0.5em;
+}
+
+a.layer-info {
+    background-color: navy;
+    border-radius: 5px;
+    color: white;
+    display: inline-block;
+    font-size: small;
+    font-style: italic;
+    font-weight: bold;
+    text-align: center;
+    width: 15px;
+
+    position: relative;
+}
+
+a.layer-info .info {
+    background-color: white;
+    color: black;
+    font-style: normal;
+    font-weight: 100;
+    display: none;
+    text-align: justify;
+    top: 0;
+    left: 15px;
+    padding: 0.5em;
+    width: 15em;
+    position: absolute;
+}
+
+a.layer-info:focus .info,
+a.layer-info:hover .info {
+    display: block;
 }
 
 #preview {
@@ -711,13 +744,18 @@ a.glossary:hover {
     font-weight: 500;
 }
 
-.definition {
+.definition, .layer-info .info {
     background-color: white;
     border: 2px solid green;
     border-radius: 5px;
+    font-weight: 100;
+    padding: 0.5em;
+}
+
+.definition {
+    
     bottom: 0;
     left: 110%;
-    padding: 0.5em;
     position: absolute;
     width: 150px;
     z-index: 2;
@@ -961,7 +999,7 @@ tr.proposal-selected, tr.proposal-hovered {
     display: inline-block;
     padding: 0.5em;
     position: relative;
-    top: -50px;
+    top: -10px;
 
     transition: top 0.2s ease-out;
 }

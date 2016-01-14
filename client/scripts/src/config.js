@@ -68,6 +68,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 source: "/static/scripts/src/layerdata/glx.geojson",
                 id: "glx",
                 title: "Green Line Extension",
+                info: "",
                 template:
                 ('<strong><%= title %></strong>' +
                  '<br>Scheduled Opening: ' +
@@ -87,7 +88,8 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "/static/scripts/src/layerdata/community_path.geojson",
                 id: "cp",
-                title: "Community Path",
+                info: "The Somerville Community Path is a paved bike and walking path. It begins at Davis Square, where it connects to the Cambridge Linear Path, and ends at Lowell Street. Once extended, it will end at NorthPoint, Cambridge.",
+                title: "Community Path Extension",
                 color: "orange",
                 shown: false,
                 features: null
@@ -95,6 +97,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
+                // info: "Unofficial",
                 title: "Neighborhood Boundaries",
                 color: "blue",
                 shown: false,

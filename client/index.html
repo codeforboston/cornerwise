@@ -185,13 +185,23 @@
 
     <script type="text/template" id="layer-item-template">
       <input type="checkbox"
-             name="<%- layer.id %>"
-             id="<%- layer.id %>-layer"
-             <% if (layer.shown) { %>checked<% } %>/>
-      <label class="title" for="<%- layer.id %>-layer">
-        <%- layer.title %>
+             name="<%- layer.get('id') %>"
+             id="<%- layer.get('id') %>-layer"
+             <% if (layer.get('shown')) { %>checked<% } %>/>
+      <label class="title" for="<%- layer.get('id') %>-layer">
+        <%- layer.get('title') %>
       </label>
-      <a href="#" class="color" style="background-color: <%- layer.color %>"/>
+      <a class="color" style="background-color: <%- layer.get('color') %>"/>
+      <%
+         if (layer.get("info")) {
+      %>
+      <a class="layer-info">
+        i
+        <div class="info"><%- layer.get("info") %></div>
+      </a>
+      <%
+         }
+         %>
     </script>
 
   </head>
