@@ -81,7 +81,7 @@ define(["underscore", "jquery"], function(_, $) {
         if (miles >= 1) {
             var m = miles.toFixed(1).replace(/\.0$/, "");
             return m + " mile" + (miles - 1 < 0.1 ? "" : "s");
-        } else if (miles >= 0.25) {
+        } else if (miles >= 0.2) {
             var denom, num;
             if (miles > 0.5) {
                 denom = Math.round(1/(1-miles));
@@ -92,7 +92,7 @@ define(["underscore", "jquery"], function(_, $) {
                 num = 1;
             }
 
-            return "~" + num + "/" + denom + " mile";
+            return "about <sup>" + num + "</sup>&frasl;<sub>" + denom + "</sub> mile";
         }
 
         return commas(ft) + " feet";
