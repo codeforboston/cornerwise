@@ -2,8 +2,6 @@ define(["backbone", "underscore", "leaflet",
         "routes", "utils", "config"],
        function(B, _, L, routes, $u, config) {
            return B.View.extend({
-               // template: $u.templateWithId("proposal-details",
-               //                             {variable: "proposal"}),
                template: $u.templateWithUrl("/static/template/proposalDetail.html",
                                             {variable: "proposal"}),
                viewName: "details",

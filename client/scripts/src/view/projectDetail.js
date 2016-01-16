@@ -1,8 +1,6 @@
 define(["backbone", "underscore", "routes", "utils"],
        function(B, _, routes, $u) {
            return B.View.extend({
-               tagName: "div",
-               className: "project-details details-container",
                template: $u.templateWithUrl("/static/template/projectDetail.html",
                                             {variable: "project"}),
 
