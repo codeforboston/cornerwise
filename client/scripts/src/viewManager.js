@@ -33,7 +33,7 @@ define(["routes", "underscore", "jquery"],
                var self = this,
                    key = routes.getKey(name);
                routes.onStateChange(
-                   "view",
+                   name,
                    function(newKey, oldKey) {
                        key = newKey;
                        if (oldKey) {
