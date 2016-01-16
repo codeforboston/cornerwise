@@ -1,4 +1,6 @@
 import csv, os, re, sys
+from datetime import datetime
+from dateutil import tz
 from decimal import Decimal
 
 from django.contrib.gis.geos import Point
@@ -42,7 +44,8 @@ def rows_import(rows):
                 # Use placeholder for case number
                 project.proposals.create(case_number="CP %i" % i,
                                          address=address_line[0],
-                                         location=point)
+                                         location=point,
+                                         updated=datetime.now(tz.tzlocal()))
 
         i += 1
 
