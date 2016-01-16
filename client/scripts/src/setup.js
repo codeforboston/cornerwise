@@ -28,10 +28,11 @@ define(
 
                     $(document.body).toggleClass("main", !showIntro);
 
-                    if (view === "main" && !appViews.minimap) {
+                    if (!showIntro && !appViews.minimap) {
                         appViews.minimap = new MinimapView({
                             el: "#minimap",
-                            linkedMap: appViews.mapView.map
+                            linkedMap: appViews.mapView.map,
+                            selection: proposals
                         });
                     }
                 });

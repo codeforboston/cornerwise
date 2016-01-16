@@ -1,8 +1,15 @@
-define(["backbone", "config"],
-       function(B, config) {
+define(["backbone", "leaflet", "underscore", "config"],
+       function(B, L, _, config) {
            return B.View.extend({
+               markerStyle: {
+                   color: "black",
+                   fillColor: "#4FB8F7",
+                   fillOpacity: 1,
+                   radius: 2
+               },
                initialize: function(options) {
                    var linked = options.linkedMap,
+                       selection = options.selection,
                        resetButton = this.$el.siblings(".reset");
 
                    if (!linked) return;
@@ -40,7 +47,30 @@ define(["backbone", "config"],
                    resetButton.on("click",
                                   function(e) {
                                       linked.fitBounds(config.bounds);
+
+                                      return false;
                                   });
+
+                   if (selection) {
+                       var markers = [], style = this.markerStyle;
+                       selection.on("selectionLoaded",
+                                    function(_sel, ids) {
+                                        _.each(markers,
+                                               map.removeLayer,
+                                               map);
+                                        _.each(ids, function(id) {
+                                            var model = selection.get(id),
+                                                loc = model.get("location");
+
+                                            if (loc) {
+                                                markers.push(
+                                                    L.circleMarker(
+                                                        loc, style)
+                                                        .addTo(map));
+                                            }
+                                        });
+                                    });
+                   }
 
                    $.getJSON("/static/scripts/src/layerdata/somerville.geojson")
                        .done(function(features) {
