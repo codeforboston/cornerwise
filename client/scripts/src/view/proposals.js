@@ -28,11 +28,11 @@ define(["backbone", "proposal-view", "routes", "jquery"],
 
                proposalAdded: function(proposal) {
                    var view = new ProposalView({model: proposal}).render(),
-                       collection = this.collection;
+                       self = this;
 
                    this.$(".proposal-list").append(view.el);
                    view.$el.on("click", function() {
-                       collection.setSelection([proposal.id]);
+                       self.collection.setSelection([proposal.id]);
                    });
                },
 
@@ -56,7 +56,7 @@ define(["backbone", "proposal-view", "routes", "jquery"],
 
                    this.buildHeader();
 
-                   this.collection.each(this.proposalAdded);
+                   this.collection.each(this.proposalAdded, this);
                    this._built = true;
                },
 

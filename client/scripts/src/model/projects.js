@@ -6,6 +6,8 @@ define(["backbone", "underscore", "project", "project-view",
 
                url: "/project/list",
 
+               hashParam: "pj",
+
                parse: function(results) {
                    return results.projects;
                },

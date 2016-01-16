@@ -65,7 +65,20 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
         },
 
         fetchIfNeeded: function() {
-            return !this._fetched && this.fetch();
+            var promise = $.Deferred();
+            if (!this._fetched)
+                this.fetch({
+                    success: function(m) {
+                        promise.resolve(m);
+                    },
+                    error: function() {
+                        promise.reject();
+                    }
+                });
+            else
+                promise.resolve(this);
+
+            return promise;
         },
 
         loadParcel: function(proposal) {

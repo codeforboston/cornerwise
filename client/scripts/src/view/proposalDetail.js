@@ -2,46 +2,39 @@ define(["backbone", "underscore", "leaflet",
         "routes", "utils", "config"],
        function(B, _, L, routes, $u, config) {
            return B.View.extend({
-               tagName: "div",
-               className: "proposal-details",
-               template: $u.templateWithId("proposal-details",
-                                           {variable: "proposal"}),
+               // template: $u.templateWithId("proposal-details",
+               //                             {variable: "proposal"}),
+               template: $u.templateWithUrl("/static/template/proposalDetail.html",
+                                            {variable: "proposal"}),
                viewName: "details",
 
                events: {
-                   "click a.close": "hide",
+                   "click a.close": "dismiss",
                    "click": "dismiss"
                },
 
                initialize: function() {
-                   this.listenTo(this.collection, "change:selected",
-                                 this.selectionChanged);
+                   this.collection.on("selectionLoaded",
+                                      this.selectionLoaded,
+                                      this);
+                   this.model = this.collection.getSelection()[0];
+               },
 
+               selectionLoaded: function(coll, ids) {
+                   var proposal = coll.get(ids[0]);
+                   this.model = proposal;
+                   this.render();
                    var self = this;
-                   routes.onStateChange("view", function(view) {
-                       self.setShowing(view === "details");
+                   proposal.fetchIfNeeded().then(function(model) {
+                       self.render();
                    });
                },
 
-               selectionChanged: function(proposal) {
-                   if (this.model) {
-                       this.stopListening(this.model);
-                   }
-
-                   this.model = proposal;
-                   this.listenTo(proposal, "change", this.renderChange);
-                   proposal.fetchIfNeeded();
-
-                   if (this.showing)
-                       this.render();
-               },
-
                renderChange: function(proposal) {
-                   // Don't re-render if the selection/hover status was the
-                   // only change.
-                   if (!_.every(_.keys(proposal.changed), function(k) {
-                       return _.contains(["selected", "hovered"], k);
-                   })) {
+                   if (!_.every(_.keys(proposal.changed, function(k) {
+
+                       return k === "selected" || k === "hovered";
+                   }))) {
                        this.render();
                    }
                },
@@ -52,10 +45,7 @@ define(["backbone", "underscore", "leaflet",
                },
 
                render: function() {
-                   if (!this.model)
-                       this.showing = false;
-
-                   if (!this.showing) {
+                   if (!this.showing || !this.model) {
                        this.$el.hide();
                        return this;
                    }
@@ -65,37 +55,36 @@ define(["backbone", "underscore", "leaflet",
                    if (this.minimap)
                        this.minimap.remove();
 
-                   var html = this.template(this.model.toJSON());
+                   var self = this;
+                   this.template(
+                       this.model.toJSON(),
+                       function(html) {
+                           self.$el.html(html);
 
-                   this.$el.html(html);
+                           var minimap =
+                                   self.minimap =
+                                   L.map(self.$(".minimap")[0],
+                                         {attributionControl: false,
+                                          dragging: false,
+                                          touchZoom: false,
+                                          scrollWheelZoom: false,
+                                          boxZoom: false,
+                                          zoomControl: false,
+                                          layers: [L.tileLayer(config.tilesURL)],
+                                          center: self.model.get("location"),
+                                          zoom: 17});
 
-                   var minimap =
-                           this.minimap =
-                           L.map(this.$(".minimap")[0],
-                                 {attributionControl: false,
-                                  dragging: false,
-                                  touchZoom: false,
-                                  scrollWheelZoom: false,
-                                  boxZoom: false,
-                                  zoomControl: false,
-                                  layers: [L.tileLayer(config.tilesURL)],
-                                  center: this.model.get("location"),
-                                  zoom: 17});
+                           var parcel = self.model.get("parcel");
 
-                   var parcel = this.model.get("parcel");
-
-                   if (parcel) {
-                       var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
-                       parcelLayer.setStyle(config.parcelStyle);
-                       minimap.addLayer(parcelLayer)
-                           .setView(parcelLayer.getBounds().getCenter());
-                   }
+                           if (parcel) {
+                               var parcelLayer = L.GeoJSON.geometryToLayer(parcel);
+                               parcelLayer.setStyle(config.parcelStyle);
+                               minimap.addLayer(parcelLayer)
+                                   .setView(parcelLayer.getBounds().getCenter());
+                           }
+                       });
 
                    return this;
-               },
-
-               hide: function() {
-                   return this.setShowing(false);
                },
 
                /**
@@ -104,13 +93,8 @@ define(["backbone", "underscore", "leaflet",
                 */
                dismiss: function(e) {
                    if (e.target == e.currentTarget)
-                       routes.clearHashKey("view");
+                       routes.setHashKey("view", "main");
                    return false;
-               },
-
-               onRoute: function(route, _params) {
-                   if (route !== "details")
-                       this.hide();
                },
 
                onShow: function(id) {
@@ -121,9 +105,11 @@ define(["backbone", "underscore", "leaflet",
                    }
                },
 
-               show: function(proposal) {
-                   this.model = proposal;
+               hide: function() {
+                   return this.setShowing(false);
+               },
 
+               show: function() {
                    return this.setShowing(true);
                }
            });

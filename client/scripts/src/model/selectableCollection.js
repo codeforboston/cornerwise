@@ -1,5 +1,5 @@
-define(["backbone", "underscore"],
-       function(B) {
+define(["backbone", "underscore", "routes", "utils"],
+       function(B, _, routes, $u) {
            /**
             * @constructor
             * A collection that keeps track of which items are selected.
@@ -24,6 +24,20 @@ define(["backbone", "underscore"],
                    this.pending = [];
 
                    this.on("add", this.onAdd, this);
+
+                   if (this.hashParam) {
+                       var self = this;
+                       routes.onStateChange(this.hashParam, function(ids, oldIds) {
+                           if (!ids) return;
+
+                           ids = _.map(ids.split(","), $u.parseInt10);
+                           self.setSelection(ids);
+                       });
+
+                       this.on("selection", function(self, sel) {
+                           routes.setHashKey(self.hashParam, sel.join(","), true);
+                       });
+                   }
                },
 
                /**
@@ -91,6 +105,8 @@ define(["backbone", "underscore"],
                    this.setSelection(id, true);
                },
 
+
+
                getSelectedIndex: function() {
                    var id = this.selection[0];
 
@@ -130,9 +146,7 @@ define(["backbone", "underscore"],
                 * @return {Proposal[]}
                 */
                getSelection: function() {
-                   return _.map(this.selection,
-                                function(id) { return this.get(id); },
-                                this);
+                   return _.map(this.selection, this.get, this);
                }
            });
 

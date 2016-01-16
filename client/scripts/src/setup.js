@@ -1,15 +1,15 @@
 define(
     ["jquery", "proposals", "proposals-view", "map-view",
-     "details-view", "minimap-view", "preview-view",
-     "projects", "projects-view", "project-preview-view",
-     "preview-manager", "tab-view", "layers-view",
-     "filters-view", "glossary", "collapsible", "config", "backbone",
-     "routes", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, ProposalsView, MapView, DetailsView,
-             MinimapView, PreviewView, Projects, ProjectsView,
-             ProjectPreview, PreviewManager, TabView, LayersView,
-             FiltersView, glossary, collapsible, config, B, routes,
-             viewManager, refLocation) {
+     "minimap-view", "preview-view", "projects", "projects-view",
+     "project-preview-view", "preview-manager", "tab-view",
+     "layers-view", "filters-view", "glossary", "collapsible",
+     "config", "backbone", "routes", "view-manager", "ref-location",
+     "legal-notice"],
+    function($, Proposals, ProposalsView, MapView, MinimapView,
+             PreviewView, Projects, ProjectsView, ProjectPreview,
+             PreviewManager, TabView, LayersView, FiltersView,
+             glossary, collapsible, config, B, routes, ViewManager,
+             refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -50,19 +50,21 @@ define(
                 });
 
                 // Configure modal views here!
-                viewManager.add({
-                    "about": ["modal-view", {url: "/static/template/about.html"}]
+                // See viewManager.js for documentation and examples.
+                new ViewManager({
+                    "about": ["modal-view", {url: "/static/template/about.html"}],
+                    "projectDetails": ["project-details-view",
+                                       {collection: projects,
+                                        el: "#overlay"}],
+                    "details": ["details-view",
+                                {collection: proposals,
+                                 el: "#overlay"}]
                 });
 
 
                 appViews.mapView = new MapView({
                     collection: proposals,
                     el: "#map"
-                });
-
-                appViews.detailsView = new DetailsView({
-                    collection: proposals,
-                    el: "#overlay"
                 });
 
                 appViews.tabView = new TabView({
