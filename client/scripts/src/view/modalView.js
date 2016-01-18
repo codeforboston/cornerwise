@@ -12,7 +12,7 @@ define(["backbone", "utils"], function(B, $u) {
                 throw new Error("You must initialize a modal view with a URL or template.");
 
             this.showingClass = options.showingClass || "showing";
-            this.container = options.container || ".modal-container";
+            this.container = options.container || "#modal";
             this.shouldShow = false;
         },
 

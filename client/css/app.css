@@ -24,7 +24,7 @@ h4 {
   margin: 1.14rem 0 0.912rem 0;
 }
 
-#modal {
+#event-eater {
     position: absolute;
     top: 0;
     left: 0;
@@ -32,7 +32,7 @@ h4 {
     right: 0;
 }
 
-body.main #modal {
+body.main #event-eater {
     display: none;
 }
 
@@ -847,7 +847,7 @@ tr.proposal-selected, tr.proposal-hovered {
     top: 5px;
 }
 
-#overlay, .modal-container {
+#overlay, #modal {
     background-color: rgba(0, 0, 0, 0.5);
     overflow-y: auto;
     position: absolute;
@@ -872,18 +872,28 @@ tr.proposal-selected, tr.proposal-hovered {
     float: right;
 }
 
+.details {
+    margin-right: 35%;
+    margin-left: 5%;
+    width: 50%;
+}
+
 .details, #modal-contents {
     background-color: white;
     border-left: 2px solid black;
     border-right: 2px solid black;
-    margin-right: 35%;
-    margin-left: 5%;
     padding: 15px;
-    margin-top: 3.5rem;
-    width: 50%;
+    margin-top: 4rem;
 }
 
-.modal-container.showing {
+#modal-contents {
+    height: 90%;
+    margin-left: 15%;
+    margin-right: 15%;
+    width: 70%;
+}
+
+#modal.showing {
     display: block;
 }
 
