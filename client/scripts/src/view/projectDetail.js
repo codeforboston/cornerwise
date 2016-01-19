@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "routes", "utils"],
-       function(B, _, routes, $u) {
+define(["backbone", "underscore", "utils"],
+       function(B, _, $u) {
            return B.View.extend({
                template: $u.templateWithUrl("/static/template/projectDetail.html",
                                             {variable: "project"}),
@@ -41,10 +41,6 @@ define(["backbone", "underscore", "routes", "utils"],
                        });
 
                    return this;
-               },
-
-               dismiss: function(e) {
-                   routes.clearHashKey("view");
                },
 
                show: function() {
