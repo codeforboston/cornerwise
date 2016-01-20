@@ -53,7 +53,11 @@ define(
                 // Configure modal views here!
                 // See viewManager.js for documentation and examples.
                 new ViewManager({
+                    // Simple view that will load the about page from a
+                    // static URL into a modal overlay.
                     "about": ["modal-view", {url: "/static/template/about.html"}],
+                    "events": ["modal-view",
+                               {url: "/static/template/eventBrowser.html"}],
                     "projectDetails": ["project-details-view",
                                        {collection: projects,
                                         el: "#overlay"}],

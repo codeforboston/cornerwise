@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "chartjs", "utils"],
-       function(B, _, Chart, $u) {
+define(["backbone", "underscore", "budget", "utils"],
+       function(B, _, budget, $u) {
            return B.View.extend({
                template: $u.templateWithId("project-preview-template",
                                            {variable: "project"}),
@@ -21,45 +21,14 @@ define(["backbone", "underscore", "chartjs", "utils"],
 
                    if (!project) {
                        this.$el.html("");
-                       return;
+                       return this;
                    }
 
                    this.$el.show().html(this.template(project));
 
-                   this.drawChart(project.get("budget"), this.$("canvas")[0]);
-               },
+                   budget.drawChart(project.get("budget"), this.$("canvas")[0]);
 
-               makeData: function(budget, years) {
-                   return {labels: _.map(years,
-                                         function(y) { return "FY" + y; }),
-                           datasets: [{
-                               label: "Budget",
-                               fillColor: "rgba(0,0,128,0.5)",
-                               strokeColor: "rgba(0,0,128,0.8)",
-                               highlightFill: "rgba(220,220,220,0.75)",
-                               data: _.map(years, function(year) {
-                                   var b = budget[year];
-                                   return b && b.budget || 0;
-                               })
-                           }]};
-               },
-
-               drawChart: function(budget, canvas) {
-                   var ctx = canvas.getContext("2d"),
-                       startyear = $u.currentYear()+1,
-                       years = _.range(startyear, startyear+8),
-                       data = this.makeData(budget, years);
-
-                   return new Chart(ctx).Bar(data, {
-                       animationSteps: 20,
-                       barStrokeWidth: 1,
-                       scaleLabel: function(o) {
-                           return $u.prettyAmount(o.value);
-                       },
-                       tooltipTemplate: function(o) {
-                           return o.label +
-                               ": $" + $u.commas(o.value);
-                       }});
+                   return this;
                }
            });
        });

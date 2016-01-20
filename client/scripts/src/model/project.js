@@ -45,6 +45,7 @@ define(["backbone", "underscore"],
                    if (!this._totalBudget) {
                        var budgets = this.get("budget");
 
+                       // Cache the result of the calculation
                        this._totalBudget =
                            _.reduce(budgets,
                                     function(acc, b) {
@@ -66,6 +67,14 @@ define(["backbone", "underscore"],
 
                yearStart: function() {
                    return _.min(_.map(_.keys(this.get("budget")), parse10Int));
+               },
+
+               getFundingSourceGroups: function() {
+                   return _.groupBy(this.get("budget"), "funding_source");
+               },
+
+               getFundingSources: function() {
+                   return _.uniq(_.without(_.pluck(this.get("budget"), "funding_source"), ""));
                }
            });
        });

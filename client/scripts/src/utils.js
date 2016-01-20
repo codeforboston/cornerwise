@@ -108,6 +108,13 @@ define(["underscore", "jquery"], function(_, $) {
         return s[0].toUpperCase() + s.slice(1);
     }
 
+    function pluralize(n, s, pl) {
+        pl = pl || s + (s.slice(-1).match(/(sh|[xs])$/) ? "es" : "s");
+
+        return n == 1 ? s : pl;
+    }
+
+
     /**
      * @param {String} s
      *
@@ -187,9 +194,7 @@ define(["underscore", "jquery"], function(_, $) {
 
         commas: commas,
 
-        pluralize: function(n, sing, plur) {
-            return n == 1 ? sing : (plur || sing + "s");
-        },
+        pluralize: pluralize,
 
         prettyAmount: prettyAmount,
 
@@ -373,7 +378,22 @@ define(["underscore", "jquery"], function(_, $) {
             return m && decodeURIComponents(m[2]);
         },
 
+        /**
+         * Traverse a map using a sequence of keys and return the nested
+         * value.
+         *
+         * @param {Object} obj A map
+         * @param {Array} ks An array of keys
+         *
+         * @returns obj[ks[0]][ks[1]]...[ks[n]] or null
+         */
         getIn: getIn,
+        /**
+         * Change a key in a nested map
+         *
+         * @param {Object} obj
+         * @param {Array} ks
+         */
         setIn: setIn,
 
         deepMerge: deepMerge,
@@ -453,34 +473,27 @@ define(["underscore", "jquery"], function(_, $) {
             return $u.template(templateString, options, options.helpers);
         },
 
-        templateWithUrl: (function() {
-            // Close over idCounter
-            var idCounter = 0;
+        templateWithUrl: function(url, options) {
+            var template = null;
+            options = options || {};
 
-            return function(url, options) {
-                var template = null;
-                options = options || {};
+            return function(arg, cb) {
+                if (template) {
+                    cb(template(arg));
+                    return;
+                }
 
-                return function(arg, cb) {
-                    if (template) {
+                $.get(
+                    url,
+                    function(templateString) {
+                        template = $u.template(templateString,
+                                               options,
+                                               options.helpers);
                         cb(template(arg));
-                        return;
                     }
-
-                    var placeholderId = "_template_placeholder_" + (idCounter++);
-
-                    $.get(
-                        url,
-                        function(templateString) {
-                            template = $u.template(templateString,
-                                                   options,
-                                                   options.helpers);
-                            cb(template(arg));
-                        }
-                    );
-                };
+                );
             };
-        })()
+        }
     };
 
     return $u;

@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "utils"],
-       function(B, _, $u) {
+define(["backbone", "underscore", "budget", "utils"],
+       function(B, _, budget, $u) {
            return B.View.extend({
                template: $u.templateWithUrl("/static/template/projectDetail.html",
                                             {variable: "project"}),
@@ -8,7 +8,6 @@ define(["backbone", "underscore", "utils"],
                    this.collection.on("selection", this.onSelection, this);
                    this.collection.on("selectionLoaded", this.onSelectionLoaded, this);
                    this.model = this.collection.getSelection()[0];
-
                },
 
                onSelection: function(_coll, _ids) {
@@ -38,6 +37,10 @@ define(["backbone", "underscore", "utils"],
                        this.model,
                        function(html) {
                            self.$el.html(html);
+
+                           if (self.model.get("budget"))
+                               budget.drawChart(self.model.get("budget"),
+                                                self.$("canvas")[0]);
                        });
 
                    return this;
