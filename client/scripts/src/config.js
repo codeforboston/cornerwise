@@ -56,9 +56,9 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 source: "/static/scripts/src/layerdata/somerville.geojson",
                 style: {
                     weight: 3,
-                    color: "#397f34",
-                    fillColor: "#397f34",
-                    fillOpacity: 0.05
+                    color: "#4fb8f7",
+                    fillColor: "#4fb8f7",
+                    fillOpacity: 0.15
                 }
             }
         ],
