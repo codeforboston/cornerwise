@@ -52,7 +52,7 @@ define(["backbone", "chartjs", "utils"],
 
                drawChart: function(budgets, canvas, options) {
                    var ctx = canvas.getContext("2d"),
-                       start = $u.currentYear()+1,
+                       start = $u.currentYear(),
                        years = _.range(start, start+8),
                        data = this.makeData(budgets, years, options);
 

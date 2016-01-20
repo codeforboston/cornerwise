@@ -92,7 +92,7 @@
         <div id="details-minimap"></div>
 
         <div class="controls">
-          <a class="more" href="#">View more&hellip;</a>
+          <a class="more" href="#view=details">View more&hellip;</a>
           <a class="calendar" aria-label="View related event" href="#">
             <img src="/static/images/calendar.png">
           </a>
@@ -108,8 +108,10 @@
         Making the City’s streets and sidewalks safe and accessible to everyone is a top priority. Given Somerville’s density, city streets and sidewalks are heavily utilized and thus require frequent maintenance.
       </div>
 
-      <strong>Budget:</strong>
       <canvas class="budget-chart" height="200" width="300"></canvas>
+      <div class="controls">
+        <a class="more" href="#view=projectDetails">View More&hellip;</a>
+      </div>
     </script>
 
     <script type="text/template" id="layer-item-template">
@@ -177,7 +179,7 @@
         </div>
       </div>
       <a id="geolocate" href="#">Near Me</a>
-      <a id="explore" href="#view=main" class="_setview" data-goto="main">Explore the Data</a>
+      <a id="explore" href="#view=main">Explore the Data</a>
     </div>
 
     <div id="menu">
@@ -210,7 +212,7 @@
         </ul>
 
         <div class="more">
-          <a href="#view=about" class="_setview" data-goto="about">Learn more</a>
+          <a href="#view=about">Learn more</a>
         </div>
       </div>
       <div class="section">

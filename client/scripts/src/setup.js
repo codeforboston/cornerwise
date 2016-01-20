@@ -44,10 +44,23 @@ define(
                     }
                 });
 
-                $(document).on("click", "._setview", function(e) {
-                    routes.setHashKey("view", $(this).data("goto") || "main");
+                $(document).on("click", "a,._setview", function(e) {
+                    if (e.currentTarget != e.target)
+                        return true;
 
-                    return false;
+                    var goto = $(this).data("goto"),
+                        href = $(this).attr("href"),
+                        m = /[#&]view=([^&]+)/i.exec(href);
+
+                    goto = goto || m && m[1];
+
+                    if (goto) {
+                        routes.setHashKey("view", goto);
+
+                        return false;
+                    }
+
+                    return true;
                 });
 
                 // Configure modal views here!

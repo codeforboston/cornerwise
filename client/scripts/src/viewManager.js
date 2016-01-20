@@ -77,6 +77,11 @@ define(["routes", "underscore", "jquery"],
                        var modName = _.isString(view) ? view :
                                (_.isArray(view) && _.isString(view[0])) ? view[0] : null;
 
+                       promise.done(function(view) {
+                           if (view.onFirstShow)
+                               view.onFirstShow();
+                       });
+
                        if (_.isFunction(view)) {
                            this.constructedViews[name] = new view();
                        } else if (modName) {

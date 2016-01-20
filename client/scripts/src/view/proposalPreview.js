@@ -7,19 +7,6 @@ define(["backbone", "routes", "underscore", "config",
 
                setElement: function(elt) {
                    B.View.prototype.setElement.call(this, elt);
-                   this.$el.on("click", "a.more",
-                               _.bind(this.showDetails, this));
-               },
-
-               events: {
-                   "click a._details": "showDetails"
-               },
-
-               showDetails: function(e) {
-                   routes.extendHash({"view": "details",
-                                      "expand.data": "1"});
-
-                   return false;
                },
 
                setModel: function(proposal) {

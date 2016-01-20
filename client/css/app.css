@@ -54,7 +54,7 @@ body.main #event-eater {
 }
 
 #minimap-container {
-    border: 2px solid black;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
     display: none;
     position: absolute;
     bottom: 2%;
@@ -442,7 +442,7 @@ a.filter-button {
 
 #data-controls {
     background-color: white;
-    border: 1px solid black;
+    border: 1px solid gray;
     border-right: none;
     left: -4.5em;
     padding: 0.5em;
@@ -470,7 +470,8 @@ a.filter-button {
 
 #data {
     background-color: #ffffff;
-    border: 1px solid black;
+    border: 1px solid gray;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
     height: 60%;
     padding: 0.5em;
     position: absolute;
@@ -489,7 +490,7 @@ a.filter-button {
 
 .tabs a {
     background-color: #f9f9f9;
-    border: 1px solid black;
+    border: 1px solid gray;
     border-radius: 5px 5px 0 0;
     color:black;
     font-weight: bold;
@@ -626,26 +627,27 @@ a.filter-button {
 .chart-label {
     font-size: small;
     font-weight: bold;
-
 }
 
 #layers {
     background-color: white;
-    border: 1px solid black;
+    border: 1px solid gray;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
     padding: 0.5em;
     position: absolute;
     left: 0;
-    top: 15%;
+    top: 25%;
     width: 17em;
     transition: left 0.2s ease-out;
 }
 
 #layers .controls {
     background-color: white;
-    border: 1px solid black;
+    border: 1px solid gray;
     border-left: none;
-    padding-bottom: 0.5em;
-    padding-right: 0.5em;
+    padding: 0.5em;
+    padding-top: 0;
 }
 
 
@@ -868,7 +870,7 @@ tr.proposal-selected, tr.proposal-hovered {
     margin-top: -20px;
 }
 
-.details .close {
+.details .close, #modal-contents .close {
     font-size: small;
     float: right;
 }
