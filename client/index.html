@@ -162,7 +162,7 @@
 
     <!-- This element prevents interactions with the map and other
          controls while the user is viewing, e.g., the intro screen. -->
-    <div id="event-eater"></div>
+    <div class="_setview" data-goto="main"></div>
 
     <div id="search-banner" class="overlay">
       <div id="logo" class="resp-portrait-hide"></div>
@@ -176,9 +176,8 @@
           </form>
         </div>
       </div>
-      <a id= "aboutme" href="#">About</a>
       <a id="geolocate" href="#">Near Me</a>
-      <a id="explore" href="#">Explore the Data</a>
+      <a id="explore" href="#view=main" class="_setview" data-goto="main">Explore the Data</a>
     </div>
 
     <div id="menu">
@@ -211,7 +210,7 @@
         </ul>
 
         <div class="more">
-          <a href="#">Learn more</a>
+          <a href="#view=about" class="_setview" data-goto="about">Learn more</a>
         </div>
       </div>
       <div class="section">

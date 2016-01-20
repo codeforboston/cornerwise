@@ -147,6 +147,7 @@ span.icon {
     right: 0;
     text-align: center;
     top: 100px;
+    z-index: 2;
 
     transition: top 0.2s linear;
 }

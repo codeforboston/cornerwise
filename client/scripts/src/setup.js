@@ -44,8 +44,8 @@ define(
                     }
                 });
 
-                $(document).on("click", "#explore,#event-eater,#modal", function(e) {
-                    routes.setHashKey("view", "main");
+                $(document).on("click", "._setview", function(e) {
+                    routes.setHashKey("view", $(this).data("goto") || "main");
 
                     return false;
                 });
