@@ -95,6 +95,15 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 features: null
             },
             {
+                source: "/static/scripts/src/layerdata/MBTABus88.geojson",
+                id: "88mbta",
+                info: "The 88 bus route",
+                title: "MBTABus88",
+                color: "pink",
+                shown: false,
+                features: null
+            },
+            {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
                 info: "These neighborhood boundaries are unofficial and approximate.",
