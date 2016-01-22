@@ -6,33 +6,34 @@ define(["backbone", "underscore", "leaflet",
                                             {variable: "proposal"}),
                viewName: "details",
 
-               events: {
-                   "click a.close": "dismiss",
-                   "click": "dismiss"
-               },
-
                initialize: function() {
                    this.collection.on("selectionLoaded",
                                       this.selectionLoaded,
+                                      this);
+                   this.collection.on("selectionRemoved",
+                                      this.selectionRemoved,
                                       this);
                    this.model = this.collection.getSelection()[0];
                },
 
                selectionLoaded: function(coll, ids) {
                    var proposal = coll.get(ids[0]);
+                   proposal.on("change", this.renderChange, this);
                    this.model = proposal;
                    this.render();
-                   var self = this;
-                   proposal.fetchIfNeeded().then(function(model) {
-                       self.render();
-                   });
+
+                   proposal.fetchIfNeeded();
+               },
+
+               selectionRemoved: function(coll, ids) {
+                   var proposal = coll.get(ids[0]);
+                   proposal.off("change", this.renderChange, this);
                },
 
                renderChange: function(proposal) {
-                   if (!_.every(_.keys(proposal.changed, function(k) {
-
+                   if (!_.every(_.keys(proposal.changed), function(k) {
                        return k === "selected" || k === "hovered";
-                   }))) {
+                   })) {
                        this.render();
                    }
                },
@@ -83,16 +84,6 @@ define(["backbone", "underscore", "leaflet",
                        });
 
                    return this;
-               },
-
-               /**
-                * If the user clicks on the #overlay element itself (i.e., the
-                * grayed-out margins), hide the details view.
-                */
-               dismiss: function(e) {
-                   if (e.target == e.currentTarget)
-                       routes.setHashKey("view", "main");
-                   return false;
                },
 
                onShow: function(id) {

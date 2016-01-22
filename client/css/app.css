@@ -98,6 +98,10 @@ span.icon {
     font-size: xx-large;
 }
 
+.leaflet-control-container {
+    display: none;
+}
+
 .leaflet-top .leaflet-control {
     margin-top: 80px !important;
 }
@@ -1026,4 +1030,8 @@ tr.proposal-selected, tr.proposal-hovered {
 
 body.main #alert.displayed {
     top: 75px;
+}
+
+body.main .leaflet-control-container {
+    display: block;
 }

@@ -1,7 +1,19 @@
 define(["backbone", "chartjs", "utils"],
        function(B, Chart, $u) {
+           var colors = {
+               red: [255, 0, 0],
+               green: [0, 255, 0],
+               blue: [0, 0, 255],
+               seagreen: [143, 188, 143],
+               pink: [255,  20, 147],
+               indigo: [ 75,   0, 130],
+               turquoise: [64, 224, 208],
+               burlywood: [222, 184, 135]
+           };
+
            return {
-               colors: [],
+               colors: [colors.seagreen, colors.burlywood, colors.indigo,
+                        colors.red, colors.pink],
 
                makeData: function(budgets, years, options) {
                    options = options || {};

@@ -440,10 +440,9 @@ define(["underscore", "jquery"], function(_, $) {
         template: function(templateString, settings, helpers) {
             helpers = helpers || defaultHelpers;
 
-            if (settings) {
-                var varName = settings.variable;
+            var varName = settings && settings.variable;
+            if (varName)
                 delete settings.variable;
-            }
 
             var temp = _.template(templateString, settings);
 
@@ -454,7 +453,7 @@ define(["underscore", "jquery"], function(_, $) {
                     data = d;
                 }
 
-                return temp(_.extend(data, helpers));
+                return temp(_.extend({}, data, helpers));
             };
         },
 

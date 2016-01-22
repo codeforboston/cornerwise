@@ -38,8 +38,10 @@ define(["routes", "underscore", "jquery"],
                        key = newKey;
                        if (oldKey) {
                            var old = self.constructedViews[oldKey];
-                           if (old && old.hide)
+                           if (old && old.hide) {
                                old.hide();
+                               old.undelegateEvents();
+                           }
                        }
 
                        self.getOrConstructView(newKey)
@@ -50,6 +52,7 @@ define(["routes", "underscore", "jquery"],
                                if (newView && key == newKey &&
                                    newView.show) {
                                    newView.show();
+                                   newView.delegateEvents();
                                }
                            });
                    });

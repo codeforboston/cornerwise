@@ -15,6 +15,8 @@ define(
                 var proposals = new Proposals(),
                     projects = new Projects(),
                     appViews = {
+                        proposals: proposals,
+                        projects: projects,
                         glossary: glossary
                     };
 
@@ -44,36 +46,20 @@ define(
                     }
                 });
 
-                $(document).on("click", "a,._setview", function(e) {
-                    if (e.currentTarget != e.target)
-                        return true;
-
-                    var goto = $(this).data("goto"),
-                        href = $(this).attr("href"),
-                        m = /[#&]view=([^&]+)/i.exec(href);
-
-                    goto = goto || m && m[1];
-
-                    if (goto) {
-                        routes.setHashKey("view", goto);
-
-                        return false;
-                    }
-
-                    return true;
-                });
-
                 // Configure modal views here!
                 // See viewManager.js for documentation and examples.
                 new ViewManager({
                     // Simple view that will load the about page from a
-                    // static URL into a modal overlay.
+                    // static URL into a modal overlay when the 'view'
+                    // parameter in the hash.
                     "about": ["modal-view", {url: "/static/template/about.html"}],
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
                     "projectDetails": ["project-details-view",
                                        {collection: projects,
                                         el: "#overlay"}],
+                    "projectSummary": ["projects-summary-view",
+                                       {collection: projects}],
                     "details": ["details-view",
                                 {collection: proposals,
                                  el: "#overlay"}]

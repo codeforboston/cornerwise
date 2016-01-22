@@ -22,20 +22,37 @@ define(["backbone", "utils"], function(B, $u) {
             return this.$el.closest(this.container);
         },
 
+        getContext: function() {
+            return {model: this.model,
+                    collection: this.collection};
+        },
+
         _update: function() {
             this.getContainer()
                 .toggleClass(this.showingClass, this.shouldShow)
                 .toggle(this.shouldShow);
+
+            if (this.shouldShow && this.wasRendered)
+                this.wasRendered();
+        },
+
+        render: function() {
+            if (this.shouldShow) {
+                var self = this;
+                this.template(
+                    this.getContext(),
+                    function(html) {
+                        self.$el.html(html);
+                        self._update();
+                    });
+            }
+
+            return this;
         },
 
         show: function() {
             this.shouldShow = true;
-
-            var self = this;
-            this.template(this.model, function(html) {
-                self.$el.html(html);
-                self._update();
-            });
+            this.render();
         },
 
         hide: function() {
