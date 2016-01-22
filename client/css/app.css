@@ -84,8 +84,6 @@ body.main #event-eater {
     display: none;
 }
 
-
-
 #menu {
     position: absolute;
     padding: 0.5em;
@@ -183,7 +181,7 @@ h3 {
     border: none;
     font-size: small;
     padding: 0.4em;
-    width: 80%;
+    width: 85%;
 }
 
 .input-group .status {
@@ -202,11 +200,14 @@ body.geolocating #ref-address-form .status {
     height: 35px;
     font-size: large;
     padding: 0;
+    padding-left: 0.5em;
 }
 
 .overlay .input-group {
     background-color:transparent;
-    border: 1px solid white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 3px rgba(180,180,180,1);
 }
 
 .overlay .input {
