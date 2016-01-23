@@ -105,18 +105,19 @@ span.icon {
 }
 
 #logo {
-    /* background: url(/static/images/cornerwise-logo.png); */
-    background: url(/static/images/cornerwise-beta-logo.png);
+    background: rgba(10,10,10,0.8) url(/static/images/cornerwise-beta-logo.png);
     background-repeat: no-repeat;
     background-size: contain;
+    border: 5px solid #2b2b2b;
     border-radius: 0.5em;
-    display: none;
-    height: 100px;
     position: absolute;
     top: 0.5em;
     left: 1em;
-    width: 200px;
+    height: 50px;
+    width: 175px;
     z-index: 2;
+
+    transition: border 0.2s linear, background-color 0.5s linear;
 }
 
 #logo img {
@@ -345,6 +346,8 @@ body.main #data,
 body.main #preview,
 body.main #minimap-container,
 body.main #logo {
+    background-color: transparent;
+    border: none;
     display: block;
 }
 
@@ -1034,6 +1037,12 @@ body.main #alert.displayed {
 }
 
 body.main .leaflet-control-container {
+    display: block;
+}
+
+/* Projects Summary */
+.projects-summary canvas {
+    margin: auto;
     display: block;
 }
 

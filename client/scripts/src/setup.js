@@ -1,11 +1,11 @@
 define(
     ["jquery", "proposals", "proposals-view", "map-view",
-     "minimap-view", "preview-view", "projects", "projects-view",
+     "preview-view", "projects", "projects-view",
      "project-preview-view", "preview-manager", "tab-view",
      "layers-view", "filters-view", "glossary", "collapsible",
      "config", "backbone", "routes", "view-manager", "ref-location",
      "legal-notice"],
-    function($, Proposals, ProposalsView, MapView, MinimapView,
+    function($, Proposals, ProposalsView, MapView,
              PreviewView, Projects, ProjectsView, ProjectPreview,
              PreviewManager, TabView, LayersView, FiltersView,
              glossary, collapsible, config, B, routes, ViewManager,
@@ -29,14 +29,6 @@ define(
                     var showIntro = !view || view === "intro";
 
                     $(document.body).toggleClass("main", !showIntro);
-
-                    if (!showIntro && !appViews.minimap) {
-                        appViews.minimap = new MinimapView({
-                            el: "#minimap",
-                            linkedMap: appViews.mapView.map,
-                            selection: proposals
-                        });
-                    }
                 });
 
                 refLocation.on("change:setMethod", function(_, method) {
