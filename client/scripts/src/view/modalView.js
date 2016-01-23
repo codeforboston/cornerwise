@@ -1,4 +1,4 @@
-define(["backbone", "utils"], function(B, $u) {
+define(["backbone", "jquery", "utils"], function(B, $, $u) {
     return B.View.extend({
         initialize: function(options) {
             if (options.url)
@@ -31,6 +31,8 @@ define(["backbone", "utils"], function(B, $u) {
             this.getContainer()
                 .toggleClass(this.showingClass, this.shouldShow)
                 .toggle(this.shouldShow);
+
+            $(document.body).toggleClass("modal", this.shouldShow);
 
             if (this.shouldShow && this.wasRendered)
                 this.wasRendered();
