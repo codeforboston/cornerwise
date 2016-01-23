@@ -1036,3 +1036,44 @@ body.main #alert.displayed {
 body.main .leaflet-control-container {
     display: block;
 }
+
+/* Events Browser */
+.selected-event {
+    padding-left: 2em;
+    padding-right: 2em;
+    border: 1px solid darkgray;
+}
+
+.selected-event h3 {
+    margin-left: -1em;
+}
+
+.selected-event .date {
+    font-weight: bold;
+}
+
+ul.model-list {
+    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+    list-style: none;
+    padding: 0;
+}
+
+.model-list li {
+    padding: 0.5em;
+    border-top: 1px solid darkgray;
+/*     border-top: 1px solid lightgray; */
+}
+
+.model-list .list-head {
+    background-color: lightgray;
+    font-weight: 500;
+}
+
+.event-list {
+    list-style: none;
+    padding: 0;
+}
+
+.event-list h4 {
+    font-size: medium;
+}
