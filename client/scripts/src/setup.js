@@ -1,14 +1,13 @@
 define(
-    ["jquery", "proposals", "proposals-view", "map-view",
-     "preview-view", "projects", "projects-view",
-     "project-preview-view", "preview-manager", "tab-view",
-     "layers-view", "filters-view", "glossary", "collapsible",
-     "config", "backbone", "routes", "view-manager", "ref-location",
+    ["jquery", "proposals", "proposals-view", "map-view", "projects",
+     "projects-view", "info-view", "proposal-info-view",
+     "project-info-view", "layers-view", "filters-view", "glossary",
+     "collapsible", "config", "routes", "view-manager", "ref-location",
      "legal-notice"],
     function($, Proposals, ProposalsView, MapView,
-             PreviewView, Projects, ProjectsView, ProjectPreview,
-             PreviewManager, TabView, LayersView, FiltersView,
-             glossary, collapsible, config, B, routes, ViewManager,
+             Projects, ProjectsView, InfoView, ProposalInfoView,
+             ProjectInfoView, LayersView, FiltersView,
+             glossary, collapsible, config, routes, ViewManager,
              refLocation) {
         return {
             start: function() {
@@ -20,7 +19,6 @@ define(
                         glossary: glossary
                     };
 
-                // Show introduction?
                 routes.onStateChange("view", function(view, oldView) {
                     $(document.body)
                         .removeClass(oldView)
@@ -47,14 +45,21 @@ define(
                     "about": ["modal-view", {url: "/static/template/about.html"}],
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
-                    "projectDetails": ["project-details-view",
-                                       {collection: projects,
-                                        el: "#overlay"}],
                     "projectSummary": ["projects-summary-view",
-                                       {collection: projects}],
-                    "details": ["details-view",
-                                {collection: proposals,
-                                 el: "#overlay"}]
+                                       {collection: projects}]
+                });
+
+                new InfoView({
+                    el: "#info",
+                    startExpanded: routes.getKey("x") === "1",
+                    views: {
+                        "proposal": new ProposalInfoView(),
+                        "project": new ProjectInfoView()
+                    },
+                    collections: {
+                        "proposal": proposals,
+                        "project": projects
+                    }
                 });
 
 
@@ -63,33 +68,6 @@ define(
                     el: "#map"
                 });
 
-                appViews.tabView = new TabView({
-                    el: "#data",
-                    subviews: {
-                        "proposals": new ProposalsView({
-                            collection: proposals
-                        }),
-                        "projects": new ProjectsView({
-                            collection: projects,
-                            proposals: proposals
-                        })
-                    }
-                });
-
-                appViews.proposalPreview = new PreviewView();
-                appViews.projectPreview = new ProjectPreview();
-                appViews.previewManager = new PreviewManager({
-                    el: "#preview",
-                    collections: {
-                        proposals: proposals,
-                        projects: projects
-                    },
-                    previewMap: {
-                        projects: appViews.projectPreview,
-                        proposals: appViews.proposalPreview
-                    },
-                    viewSelection: appViews.tabView
-                });
                 appViews.layers = new LayersView({
                     el: "#layers .contents"
                 }).render();

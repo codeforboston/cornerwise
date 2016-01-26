@@ -40,8 +40,8 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
             if (!attrs.documents)
                 attrs.documents = [];
-            if (!attrs.attributes)
-                attrs.attributes = [];
+            
+            attrs.attributes = _.indexBy(attrs.attributes || [], "handle");
 
             return attrs;
         },
@@ -116,24 +116,21 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
         },
 
         getAttribute: function(handle) {
-            var found = null;
-
-            $.each(this.get("attributes"), function(idx, attr) {
-                if (attr.handle === handle) {
-                    found = attr;
-                    return false;
-                }
-
-                return true;
-            });
-
-            return found;
+            return this.get("attributes")[handle];
         },
 
         getAttributeValue: function(handle) {
             var attr = this.getAttribute(handle);
 
             return attr && attr.value;
+        },
+
+        getAttributeValues: function(handles) {
+            return _.map(handles, this.getAttributeValue, this);
+        },
+
+        getAttributes: function(handles) {
+            return _.map(handles, this.getAttribute, this);
         },
 
         /**

@@ -13,6 +13,12 @@ define(["backbone", "underscore", "routes", "utils"],
             * - selectionLoaded (collection, ids, loadedIds)
             *   Triggered when the entire selection is loaded
             *   ids: ids of all selected children
+            *
+            * - selectionRemoved (collection, ids, selectedIds)
+            *   ids: ids of all deselected children
+            *   selectedIds: ids of selected children
+            *
+            * - selectionAdded (collection, ids)
             */
            var SelectableCollection = B.Collection.extend({
                initialize: function() {
@@ -80,7 +86,7 @@ define(["backbone", "underscore", "routes", "utils"],
                    if (select.length)
                        this.trigger("selectionAdded", this, select);
                    if (deselect.length)
-                       this.trigger("selectionRemoved", this, deselect);
+                       this.trigger("selectionRemoved", this, deselect, select);
 
                    if (!pending.length)
                        this.trigger("selectionLoaded", this, selection, pending);
@@ -104,7 +110,6 @@ define(["backbone", "underscore", "routes", "utils"],
                addToSelection: function(id) {
                    this.setSelection(id, true);
                },
-
 
 
                getSelectedIndex: function() {
@@ -147,6 +152,10 @@ define(["backbone", "underscore", "routes", "utils"],
                 */
                getSelection: function() {
                    return _.map(this.selection, this.get, this);
+               },
+
+               getSelectionIds: function() {
+                   return this.selection;
                }
            });
 

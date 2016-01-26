@@ -66,7 +66,7 @@
     </script>
 
     <script type="text/template" id="proposal-preview-template">
-      <div>
+      <div class="proposal-preview">
         <img src="<%- proposal.getThumb() %>" class="thumb"/>
         <h3 class="address"><%- proposal.get("address") %></h3>
         <div class="case-number"><%- proposal.get("caseNumber") %></div>
@@ -133,6 +133,11 @@
       <%
          }
          %>
+    </script>
+
+    <script type="text/template" id="info-template">
+      Some general information about the current view should appear
+      here.
     </script>
 
   </head>
@@ -225,32 +230,21 @@
       </div>
     </div>
 
-    <div id="controls" class="overlay">
-      <div class="section">
-        <h3>FILTER</h3>
-        <a href="#" class="filter-button">Project Type</a>
-        <a href="#" class="filter-button">Something Else</a>
-        <a href="#" class="filter-button">Impact</a>
+    <div id="info" class="overlay empty">
+      <div class="dragarea">
+        <div class="dragger">More</div>
       </div>
-      <div class="section">
-
-      </div>
-      <div id="signup" class="section">
-        <!-- <span class="resp-portrait-hide"> -->
-        <!--   Sign up for alerts near this address: -->
-        <!-- </span> -->
-        <a id="subscribe" class="big button">SUBSCRIBE</a>
-        <!-- <div class="input-group"> -->
-
-        <!-- <input class="input" type="text" name="address" placeholder="enter email" /> -->
-        <!-- <button class="input-button go-button">go</button> -->
-        <!-- </div> -->
+      <a href="#" class="close">&times;</a>
+      <div class="content">
+        Hello, world!
       </div>
     </div>
 
-    <script src="https://use.typekit.net/wpe7mmw.js"></script>
-    <script type="text/javascript">
-      try{Typekit.load({ async: true });}catch(e){}
-    </script>
+    <div id="modal" class="_setview" data-goto="main"><div id="modal-contents"></div></div>
+
+    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
+    <!-- <script type="text/javascript"> -->
+    <!--   try{Typekit.load({ async: true });}catch(e){} -->
+    <!-- </script> -->
   </body>
 </html>

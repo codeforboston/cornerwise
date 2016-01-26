@@ -46,18 +46,18 @@ require.config({
         // Application-specific:
         "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
-        "details-view": "src/view/proposalDetail",
         "map-view": "src/view/map",
         "minimap-view": "src/view/minimap",
         "preview-manager": "src/view/previewManager",
-        "preview-view": "src/view/proposalPreview",
-        "project-details-view": "src/view/projectDetail",
-        "project-preview-view": "src/view/projectPreview",
+        "proposal-info-view": "src/view/proposalInfo",
+        "project-info-view": "src/view/projectInfo",
+        "projects-summary-view": "src/view/projectsSummary",
         "budget": "src/view/budget",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
         "layers-view": "src/view/layers",
         "filters-view": "src/view/filters",
+        "info-view": "src/view/infoView",
 
         // View managers:
         "collapsible-view": "src/view/collapsible",

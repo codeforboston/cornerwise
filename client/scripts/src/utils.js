@@ -440,6 +440,7 @@ define(["underscore", "jquery"], function(_, $) {
         template: function(templateString, settings, helpers) {
             helpers = helpers || defaultHelpers;
 
+            settings = _.clone(settings);
             var varName = settings && settings.variable;
             if (varName)
                 delete settings.variable;
@@ -448,7 +449,7 @@ define(["underscore", "jquery"], function(_, $) {
 
             return function(data) {
                 if (varName) {
-                    var d = {};
+                    var d = {options: settings};
                     d[varName] = data;
                     data = d;
                 }

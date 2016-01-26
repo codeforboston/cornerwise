@@ -139,7 +139,7 @@ span.icon {
 }
 
 .overlay {
-    background-color: #2b2b2b;
+    background-color: rgba(43, 43, 43, 0.98);
     color: white;
     overflow: hidden;
 }
@@ -328,14 +328,8 @@ body.geolocating #ref-address-form .go-button {
     line-height: 5em;
 }
 
-#controls {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    position: absolute;
-    height: 0;
-
-    transition: height 0.2s linear;
+#info {
+    
 }
 
 body.main #explore {
@@ -364,9 +358,6 @@ body.main #search-banner h3 {
     display: none;
 }
 
-body.main #controls {
-/*     height: 7em; */
-}
 
 .overlay-contents {
     transition: padding 0.2s linear;
@@ -827,6 +818,7 @@ a.glossary:hover {
 
 .legal-notice {
     font-size: small;
+    margin-bottom: 1em;
 }
 
 .proposal-info > * {
@@ -878,18 +870,12 @@ tr.proposal-selected, tr.proposal-hovered {
     margin-top: -20px;
 }
 
-.details .close, #modal-contents .close {
+#modal-contents .close {
     font-size: small;
     float: right;
 }
 
-.details {
-    margin-right: 35%;
-    margin-left: 5%;
-    width: 50%;
-}
-
-.details, #modal-contents {
+#modal-contents {
     background-color: white;
     border-left: 2px solid black;
     border-right: 2px solid black;
@@ -908,74 +894,118 @@ tr.proposal-selected, tr.proposal-hovered {
     display: block;
 }
 
+#info {
+    padding: 1em;
+    padding-left: 4em;
+    padding-right: 4em;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: visible;
+    position: absolute;
+    height: 0;
+    max-height: 500px;
+    min-height: 150px;
+
+    transition: height 0.2s linear;
+}
+
+body.main #info {
+     height: auto;
+}
+
+#info .dragarea {
+    position: absolute;
+    top: -1.5em;
+    left: 0;
+    right: 0;
+}
+
+#info._disable_height_transition {
+    transition: none;
+}
+
+.dragarea .dragger {
+    background-color: #4EAF48;
+    cursor: -webkit-grab;
+    padding: 0.5em;
+    text-align: center;
+    width: 100px;
+    margin: auto;
+}
+
+#info .close {
+    color: #4EAF48;
+    font-size: xx-large;
+    position: absolute;
+    right: 1em;
+    top: 0em;
+}
+
+
+#info a {
+    color: white;
+}
+
+#info a .definition {
+    color: black;
+}
+
+#info .sidebar {
+    float: right;
+    margin-left: 4em;
+    width: 300px;
+}
+
+#info .main-thumb {
+    
+    max-height: 150px;
+    max-width: 300px;
+}
+
 .details h4 {
-  margin-bottom: 0.1em;
+    font-size: x-large;
+    font-weight: 400;
+    margin-bottom: 0.3em;
 }
 
 .details .case-number {
-  color: green;
-  font-style: italic;
-  text-align: right;
+    display: none;
+}
+
+#info .documents {
+    padding-left: 1em;
+}
+
+#info a.document {
+    color: #4EAF48;
+    display: block;
+}
+
+.attribute th, .attribute td {
+    padding-bottom: 1em;
 }
 
 .attribute th {
+    font-size: small;
+    font-weight: 500;
+    padding: 0.2em;
+    padding-right: 1em;
     text-align: left;
+    text-transform: uppercase;
     vertical-align: top;
 }
 
-.details .section {
-  border-top: 2px solid lightgray;
-  margin-top: 10px;
-  padding-top: 10px;
-  position: relative;
+.attribute td {
+    font-size: smaller;
 }
 
-.section-title {
-    background-color: rgba(255, 255, 255, 0.75);
-    color: gray;
-    font-variant: small-caps;
-    padding: 0.2em;
-    position: absolute;
-    right: 0;
-    top: 0;
+#info .images {
+    float: right;
 }
 
-.details .document {
-    display: inline-block;
-    width: 25%;
-    padding: 3px;
-    text-align: center;
-}
-
-.details.document:hover {
-    border: 1px solid #aaa;
-    border-radius: 3px;
-}
-
-.document .thumb {
-    box-shadow: -1px 1px 2px black;
-    height: 75px;
-    margin: 3px;
-    transition: transform 0.05s linear;
-}
-
-.document .dummy-thumb {
-    background-color: white;
-    border-radius: 3px;
-    color: lightgray;
-    display: inline-block;
-    font-size: x-large;
-    font-variant: small-caps;
-    line-height: 75px;
-    text-align: center;
-    width: 60px;
-}
-
-.document:hover .thumb {
-    transform: scale(1.5);
-    transform-origin: 50% 100%;
-    -webkit-transform: scale(1.4);
-    -webkit-transform-origin: 50% 100%;
+#info.empty .dragarea {
+    display: none;
 }
 
 .images .thumb {
@@ -1086,3 +1116,4 @@ ul.model-list {
 .event-list h4 {
     font-size: medium;
 }
+
