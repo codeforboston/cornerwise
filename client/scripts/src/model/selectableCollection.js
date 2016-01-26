@@ -156,6 +156,73 @@ define(["backbone", "underscore", "routes", "utils"],
 
                getSelectionIds: function() {
                    return this.selection;
+               },
+
+               // Filters:
+
+               /**
+                * Applies each of the functions in the array fs to the
+                * proposals in the collection. If any of the functions
+                * returns false, the Proposal will be updated: its "excluded"
+                * attribute will be set to true.
+                *
+                * @param {Array} fs
+                */
+               applyFilters: function(fs) {
+                   var count = this.length;
+                   this.each(function(proposal) {
+                       var excluded = proposal.get("excluded"),
+                           shouldExclude = !$u.everyPred(fs, proposal);
+
+                       // Is the proposal already excluded, and should it be?
+                       if (excluded !== shouldExclude) {
+                           proposal.set("excluded", shouldExclude);
+                       }
+                       if (shouldExclude) --count;
+                   });
+
+                   this.trigger("filtered", count);
+               },
+
+               // A map of string filter names to functions
+               activeFilters: {},
+
+               // Reapply all of the active filters.
+               refresh: function() {
+                   this.applyFilters(_.values(this.activeFilters));
+               },
+
+               addFilter: function(name, f) {
+                   this.activeFilters[name] = f;
+                   this.refresh();
+               },
+
+               removeFilter: function(name) {
+                   delete this.activeFilters[name];
+                   this.refresh();
+               },
+
+
+               /**
+                * @param {String} name
+                * @param {Boolean} desc true to sort descending
+                */
+               sortByField: function(name, desc) {
+                   var order = desc ? -1 : 1;
+                   this.sortField = name;
+                   this.order = order;
+
+                   if (!name) {
+                       this.comparator = false;
+                   } else {
+                       this.comparator = function(p1, p2) {
+                           var v1 = p1.get(name),
+                               v2 = p2.get(name);
+
+                           return order * ((v1 > v2) ? 1 : (v2 > v1) ? -1 : 0);
+                       };
+                       this.sort();
+                   }
                }
            });
 
