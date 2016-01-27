@@ -31,20 +31,19 @@ define(
                 return _.isArray(results) ? results : results.proposals;
             },
 
+            filterByText: function(s) {
+                this.filterByRegex($u.escapeRegex(s));
+            },
 
-            filterByDescription: function(regex) {
+
+            filterByRegex: function(regex) {
                 if (regex) {
                     this.addFilter("search", function(proposal) {
-                        return !!(regex.exec(proposal.get("description")));
+                        return !!(regex.exec(proposal.get("address")));
                     });
                 } else {
                     this.removeFilter("search");
                 }
-            },
-
-            filterByDescriptionString: function(s) {
-                var r = s && new RegExp(s.replace(/([?.*\\()[])/g, "\\$1"), "i");
-                this.filterByDescription(r);
             },
 
             filterByRadius: function(refPoint, radius) {

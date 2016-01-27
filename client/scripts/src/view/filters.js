@@ -12,15 +12,18 @@ define(
             },
 
             initialize: function() {
-                this.listenTo(refLocation, "change:radius", this.updateRadius)
-                    .listenTo(refLocation, "change:geolocating", this.toggleGeolocating);
+                this.listenTo(refLocation, "change:radius",
+                              this.updateRadius)
+                    .listenTo(refLocation, "change:geolocating",
+                              this.toggleGeolocating);
             },
 
             events: {
                 "submit #ref-address-form": "submitAddress",
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
-                "click #reset": "clearInputs"
+                "click #reset": "clearInputs",
+                "change #filter-text": "filterText"
             },
 
             submitAddress: function(e) {
@@ -85,6 +88,10 @@ define(
             toggleGeolocating: function(loc, isGeolocating) {
                 $(document.body)
                     .toggleClass("geolocating", isGeolocating);
+            },
+
+            filterText: function(e) {
+                this.collection.filterByText(this.value);
             }
         });
     });

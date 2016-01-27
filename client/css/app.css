@@ -145,6 +145,7 @@ span.icon {
 }
 
 #search-banner {
+    overflow: visible;
     position: absolute;
     left: 0;
     right: 0;
@@ -153,6 +154,13 @@ span.icon {
     z-index: 2;
 
     transition: top 0.2s linear;
+}
+
+#filter-controls {
+    background-color: #265E9D;
+    height: 0.5em;
+    display: none;
+    text-align: right;
 }
 
 h3 {
@@ -253,6 +261,12 @@ input:focus::-webkit-input-placeholder {
 
 #geolocate {
     color: #4EAF48;
+    display: block;
+    font-size: medium;
+    right: -200px;
+    top: 10px;;
+    position: absolute;
+    width: 200px;
 }
 
 body.geolocating #geolocate {
@@ -328,9 +342,6 @@ body.geolocating #ref-address-form .go-button {
     line-height: 5em;
 }
 
-#info {
-    
-}
 
 body.main #explore {
     display: none;
@@ -371,17 +382,36 @@ body.main #search-banner .overlay-contents {
     transition: width 0.2s linear;
 }
 
-a.filter-button {
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: -2px 2px 5px black;
-    color:black;
-    display: inline-block;
-    margin: 0 0.5em;
-    padding: 5px;
-    text-align: center;
-    width: 5em;
+body.main #filter-controls {
+    display: block;
 }
+
+#filter-controls.expanded .filters {
+    background-color: #265E9D;
+    display: block;
+    padding: 0.5em;
+}
+
+#filter-controls .filters {
+    display: none;
+}
+
+.filters .input-group {
+    display: inline-block;
+    margin-right: 2em;
+    width: 250px;
+}
+
+.show-filters {
+    background-color: #265E9D;
+    color: white;
+    padding: 0.5em;
+    padding-top: 0;
+    position: relative;
+    top: 0.5em;
+    right: 2em;
+}
+
 
 .zoomed-proposal-marker {
     background-color: #eee;
@@ -402,7 +432,6 @@ a.filter-button {
     max-height: 100%;
     max-width: 100% !important;
 }
-
 
 #data.collapsed {
     width: 0;
@@ -439,74 +468,8 @@ a.filter-button {
     font-size: small;
 }
 
-#data-controls {
-    background-color: white;
-    border: 1px solid gray;
-    border-right: none;
-    left: -4.5em;
-    padding: 0.5em;
-    position: absolute;
-    width: 3.5em;
-    top: 1em;
-}
-
-#data.collapsed #data-controls {
-    left: -6em;
-    width: 5em;
-}
-
 #expand-data {
     display: none;
-}
-
-#data.collapsed #collapse-data {
-    display: none;
-}
-
-#data.collapsed #expand-data {
-    display: block;
-}
-
-#data {
-    background-color: #ffffff;
-    border: 1px solid gray;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-    height: 60%;
-    padding: 0.5em;
-    position: absolute;
-    top: 15%;
-    right: 0;
-    width: 35%;
-
-    transition: width 0.2s ease-in;
-}
-
-#data .tabs {
-    position: absolute;
-    top: -22px;
-    width: 250px;
-}
-
-.tabs a {
-    background-color: #f9f9f9;
-    border: 1px solid gray;
-    border-radius: 5px 5px 0 0;
-    color:black;
-    font-weight: bold;
-    padding-top: 0.2em;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-}
-
-.tabs a.selected {
-    background-color: white;
-    border-bottom: none;
-}
-
-#data .tab-pane {
-    height: 100%;
-    width: 100%;
-    overflow: auto;
 }
 
 .pane {
@@ -557,6 +520,7 @@ a.filter-button {
 }
 
 .info-item .name {
+    color: #4EAF48;
     font-weight: 500;
     overflow: hidden;
     padding-top: 5px;
@@ -910,6 +874,10 @@ tr.proposal-selected, tr.proposal-hovered {
     transition: height 0.2s linear;
 }
 
+body.main #info.collapsed {
+    display:  none;
+}
+
 body.main #info {
      height: auto;
 }
@@ -942,7 +910,6 @@ body.main #info {
     top: 0em;
 }
 
-
 #info a {
     color: white;
 }
@@ -954,13 +921,36 @@ body.main #info {
 #info .sidebar {
     float: right;
     margin-left: 4em;
-    width: 300px;
+    width: 250px;
+}
+
+.main-thumb-container {
+    text-align: center;_.
 }
 
 #info .main-thumb {
-    
     max-height: 150px;
-    max-width: 300px;
+    max-width: 250px;
+}
+
+#info .prev-button, #info .next-button {
+    font-size: 36pt;
+    line-height: 225px;
+    position: absolute;
+    bottom: 0;
+}
+
+#info .prev-button:hover, #info .next-button:hover {
+    color: #4EAF48;
+    text-decoration: none;
+}
+
+#info .prev-button {
+    left: 0.5em;
+}
+
+#info .next-button {
+    right: 0.5em;
 }
 
 .details h4 {
@@ -1097,7 +1087,7 @@ ul.model-list {
     padding: 0;
 }
 
-.model-list li {
+ul.model-list li {
     padding: 0.5em;
     border-top: 1px solid darkgray;
 /*     border-top: 1px solid lightgray; */
@@ -1117,3 +1107,17 @@ ul.model-list {
     font-size: medium;
 }
 
+
+#list-view {
+    background-color: white;
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#list-view.showing {
+    display: block;
+}

@@ -16,7 +16,9 @@ from shared.request import make_response
 from .models import Proposal, Attribute, Document, Event, Image
 
 default_attributes = [
-    "applicant_name"
+    "applicant_name",
+    "legal_notice",
+    "dates_of_public_hearing"
 ]
 
 def proposal_json(proposal, include_images=True,
@@ -163,3 +165,15 @@ def download_document(req, pk):
         pass
 
     return FileResponse(doc.document)
+
+
+@make_response()
+def list_events(req):
+    events = Event.objects.all().order_by("")
+
+    return {"events": []}
+
+
+@make_response()
+def view_event(req):
+    pass

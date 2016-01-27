@@ -30,6 +30,7 @@ define(["backbone", "underscore", "utils"],
                    this.defaultView = options.defaultView;
                    this.expanded = !!options.startExpanded;
                    this.threshold = options.threshold || 250;
+                   this.shouldShow = false;
 
                    _.each(options.views, function(view) {
                        view.setElement(this.$(".content"));
@@ -48,11 +49,13 @@ define(["backbone", "underscore", "utils"],
 
                    if (this.defaultView)
                        this.defaultView.setElement(this.$(".content"));
-
-                   this.$(".dragarea")
-                       .on("mousedown touchstart", _.bind(this.onMousedown, this));
-                   this.$(".close")
-                       .on("click", _.bind(this.onClick, this));
+                   
+                   this.$el
+                       .on("mousedown touchstart", ".dragarea",
+                           _.bind(this.onMousedown, this))
+                       .on("click", ".close", _.bind(this.onClick, this))
+                       .on("click", ".prev-button", _.bind(this.onNav, this, -1))
+                       .on("click", ".next-button", _.bind(this.onNav, this, 1));
                },
 
                render: function() {
@@ -186,12 +189,36 @@ define(["backbone", "underscore", "utils"],
                    return false;
                },
 
+               onNav: function(dir) {
+                   var coll = this.collections[this.active];
+
+                   if (coll) {
+                       if (dir < 0) {
+                           coll.selectPrev();
+                       } else if (dir > 0) {
+                           coll.selectNext();
+                       }
+
+                       return false;
+                   }
+
+                   return true;
+               },
+
                modelChanged: function(model) {
                    if (_.every(_.keys(model.changed),
                                _.partial(_.contains, ["selected", "hovered"])))
                        return;
 
                    this.render();
+               },
+
+               toggle: function(shouldShow) {
+                   this.shouldShow = shouldShow;
+                   this.$el.toggleClass("collapsed", !shouldShow);
+
+                   if (shouldShow)
+                       this.render();
                }
            });
        });

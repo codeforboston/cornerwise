@@ -140,8 +140,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     }
 
                     if (change.changed.selected) {
-                        // self.map.setView(marker.getLatLng(),
-                        //                  {animate: false});
+                         self.map.setView(marker.getLatLng(),
+                                          self.map.getZoom(),
+                                          {animate: false});
                     } else if (change.changed.zoomed) {
                         if (self.map.getZoom() < 18)
                             self.map.setView(marker.get("location"), 17,

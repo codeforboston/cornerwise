@@ -1,14 +1,9 @@
 define(
-    ["jquery", "proposals", "proposals-view", "map-view", "projects",
-     "projects-view", "info-view", "proposal-info-view",
-     "project-info-view", "layers-view", "filters-view", "glossary",
-     "collapsible", "config", "routes", "view-manager", "ref-location",
-     "legal-notice"],
-    function($, Proposals, ProposalsView, MapView,
-             Projects, ProjectsView, InfoView, ProposalInfoView,
-             ProjectInfoView, LayersView, FiltersView,
-             glossary, collapsible, config, routes, ViewManager,
-             refLocation) {
+    ["jquery", "proposals", "map-view", "projects", "info-view", "proposal-info-view", "project-info-view", "proposal-view", "project-view", "layers-view", "filters-view", "glossary", "collapsible", "config", "routes", "view-manager", "ref-location", "legal-notice"],
+    function($, Proposals, MapView, Projects, InfoView, ProposalInfoView,
+             ProjectInfoView, ProposalItemView, ProjectItemView,
+             LayersView, FiltersView, glossary,
+             collapsible, config, routes, ViewManager, refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -46,10 +41,16 @@ define(
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
                     "projectSummary": ["projects-summary-view",
-                                       {collection: projects}]
+                                       {collection: projects}],
+                    "list": ["list-view",
+                             {collections: {proposals: proposals},
+                              subviews: {proposals: ProposalItemView},
+                              active: "proposals"}]
                 });
 
-                new InfoView({
+                console.log(ProposalItemView);
+
+                var infoView = new InfoView({
                     el: "#info",
                     startExpanded: routes.getKey("x") === "1",
                     views: {
@@ -61,6 +62,12 @@ define(
                         "project": projects
                     }
                 });
+                appViews.info = infoView;
+
+                routes.onStateChange("view",
+                                     function(newKey) {
+                                         infoView.toggle(newKey == "main");
+                                     });
 
 
                 appViews.mapView = new MapView({
@@ -79,7 +86,9 @@ define(
                 routes.init();
                 glossary.init();
 
-                appViews.filtersView = new FiltersView();
+                appViews.filtersView = new FiltersView({
+                    collection: proposals
+                });
 
                 return appViews;
             }

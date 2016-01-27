@@ -1,14 +1,14 @@
 define(["backbone", "underscore", "budget", "utils"],
        function(B, _, budget, $u) {
            return B.View.extend({
-               previewTemplate: $u.templateWithId(
-                   "project-preview-template",
+               previewTemplate: $u.templateWithUrl(
+                   "/static/template/projectDetail.html",
                    {variable: "project"}),
 
                detailsTemplate: $u.templateWithUrl(
                    "/static/template/projectDetail.html",
-                   {variable: "project"}),
-
+                   {variable: "project",
+                    expanded: true}),
 
                show: function(project, expanded) {
                    var template = expanded ?

@@ -241,13 +241,10 @@ define(["underscore", "jquery"], function(_, $) {
             });
         },
 
-        findIndex: function(coll, f) {
-            for (var i = 0, l = coll.length; i < l; i++) {
-                if (f(coll[i]))
-                    return i;
+        idIs: function(val) {
+            return function(model) {
+                return mode.id == val;
             }
-
-            return -1;
         },
 
         /**

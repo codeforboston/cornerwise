@@ -116,35 +116,44 @@ define(["backbone", "underscore", "routes", "utils"],
                    var id = this.selection[0];
 
                    return id ?
-                       $u.findIndex(this.models, function(m) {
+                       _.findIndex(this.models, function(m) {
                            return m.id == id;
                        }) : -1;
+               },
+
+               selectRelative: function(dir) {
+                   var fs = _.values(this.activeFilters);
+
+                   if (fs.length) {
+                       var models = this.getFiltered(fs),
+                           id = this.selection[0],
+                           idx = _.findIndex(models, $u.idIs(id));
+
+                       model = models[idx+dir] ||
+                           dir < 0 ? _.last(models) : _.first(models);
+                   } else {
+                       var idx = this.getSelectedIndex();
+
+                       model = this.at(idx+dir) || this.at(dir < 0 ? -1 : 0);
+                   }
+
+                   if (model)
+                       this.setSelection(model.id);
+                   return model;
                },
 
                /*
                 * @returns {?Model}
                 */
                selectNext: function() {
-                   var model = this.at(this.getSelectedIndex()+1) ||
-                           this.at(0);
-
-                   if (this.model)
-                       this.setSelection(model.id);
-
-                   return model;
+                   this.selectRelative(1);
                },
 
                /*
                 * @returns {?Model}
                 */
                selectPrev: function() {
-                   var id = this.getSelectedIndex(),
-                       model = this.at(id == -1 ? -1 : id-1);
-
-                   if (model)
-                       this.setSelection(model.id);
-
-                   return model;
+                   this.selectRelative(-1);
                },
 
                /**
@@ -169,19 +178,25 @@ define(["backbone", "underscore", "routes", "utils"],
                 * @param {Array} fs
                 */
                applyFilters: function(fs) {
-                   var count = this.length;
-                   this.each(function(proposal) {
-                       var excluded = proposal.get("excluded"),
-                           shouldExclude = !$u.everyPred(fs, proposal);
+                   return this.filter(function(model) {
+                       var excluded = model.get("excluded"),
+                           shouldExclude = !$u.everyPred(fs, model);
 
-                       // Is the proposal already excluded, and should it be?
+                       // Is the model already excluded, and should it be?
                        if (excluded !== shouldExclude) {
-                           proposal.set("excluded", shouldExclude);
+                           model.set("excluded", shouldExclude);
                        }
-                       if (shouldExclude) --count;
-                   });
 
-                   this.trigger("filtered", count);
+                       return !shouldExclude;
+                   });
+               },
+
+               getFiltered: function(fs) {
+                   if (!fs) fs = _.values(this.activeFilters);
+
+                   return this.filter(function(model) {
+                       return $u.everyPred(fs, model);
+                   });
                },
 
                // A map of string filter names to functions
@@ -189,7 +204,8 @@ define(["backbone", "underscore", "routes", "utils"],
 
                // Reapply all of the active filters.
                refresh: function() {
-                   this.applyFilters(_.values(this.activeFilters));
+                   var ms = this.applyFilters(_.values(this.activeFilters));
+                   this.trigger("filtered", ms.length);
                },
 
                addFilter: function(name, f) {
