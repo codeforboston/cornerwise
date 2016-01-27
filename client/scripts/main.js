@@ -48,7 +48,6 @@ require.config({
         "proposal-view": "src/view/proposal",
         "map-view": "src/view/map",
         "minimap-view": "src/view/minimap",
-        "preview-manager": "src/view/previewManager",
         "proposal-info-view": "src/view/proposalInfo",
         "project-info-view": "src/view/projectInfo",
         "projects-summary-view": "src/view/projectsSummary",
