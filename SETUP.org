@@ -98,11 +98,15 @@
 
       If you see an error that says something like:
 
-         ~Are you trying to connect to a TLS-enabled daemon without TLS?~
+        ~Are you trying to connect to a TLS-enabled daemon without TLS?~
 
       Run: ~eval $(docker-machine env dev)~
 
       And try the ~docker~ command again.
+
+      If you are still having a trouble:
+       Run: ~docker-machine stop dev~
+       Run: ~docker-machine start dev~
 
     - ~sh /app/start.sh~
 
