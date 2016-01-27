@@ -98,9 +98,16 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 source: "/static/scripts/src/layerdata/MBTABus88.geojson",
                 id: "mbtabus88",
                 info: "Somervile bus routes",
-                title: "MbtaBus",
-                color: "pink",
+                title: "Mbta Bus Routes",
+                color: "black",
                 shown: false,
+                marker: {
+                    type: "circle",
+                    color: "black",
+                    fillColor: "white",
+                    radius: 5,
+                    fillOpacity: 1
+                },
                 features: null
             },
             {
