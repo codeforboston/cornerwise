@@ -12,15 +12,13 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
 
-            window.cwmap = map;
-
-            map.fitBounds(config.bounds);
+            this.map = map;
+            this.resetBounds();
 
             map.addLayer(layer);
             map.addLayer(parcelLayer);
             map.addLayer(zoningLayer);
 
-            this.map = map;
             this.addBaseLayers(config.baseLayers);
             this.parcelLayer = parcelLayer;
             this.zoningLayer = zoningLayer;
@@ -218,6 +216,28 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                                      {animate: false});
                 }
             }
+        },
+
+        resetBounds: function() {
+            this.map.fitBounds(config.bounds);
+        },
+
+        // Fit the map view to the proposals matching the active filters.
+        fitToCollection: function() {
+            var coll = this.collection;
+
+            if (!coll.getFiltered) return;
+
+            var bounds = L.latLngBounds(_.map(coll.getFiltered(),
+                                              function(model) {
+                                                  return model.get("location");
+                                              }));
+            this.map.fitBounds(bounds, {padding: [5, 5]});
+        },
+
+        setShouldFit: function(shouldFit) {
+            this.shouldFit = shouldFit;
+
         },
 
         zoomToRefLocation: function() {

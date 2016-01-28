@@ -2,20 +2,39 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location",
-     "utils", "arcgis"],
+    ["backbone", "underscore", "jquery", "ref-location", "utils", "arcgis",
+     "routes"],
 
-    function(B, _, $, refLocation, $u, arcgis, CollapsibleView) {
+    function(B, _, $, refLocation, $u, arcgis, routes) {
         return B.View.extend({
             el: function() {
                 return document.body;
             },
 
-            initialize: function() {
+            initialize: function(options) {
+                this.mapView = options.mapView;
                 this.listenTo(refLocation, "change:radius",
                               this.updateRadius)
                     .listenTo(refLocation, "change:geolocating",
                               this.toggleGeolocating);
+
+                var self = this;
+                routes.onStateChange("fc", function(fc) {
+                    self.toggle(fc === "1");
+                });
+                routes.onStateChange("ftr", function(ftr, oldFtr) {
+                    if (ftr === "1") {
+                        self.mapView.resetBounds();
+                    } else if (oldFtr === "1") {
+                        self.mapView.fitToCollection();
+                    }
+                });
+            },
+
+            toggle: function(shouldShow) {
+                $("#filter-controls")
+                    .toggleClass("expanded", shouldShow)
+                    .toggleClass("collapsed", !shouldShow);
             },
 
             events: {
@@ -23,7 +42,8 @@ define(
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
                 "click #reset": "clearInputs",
-                "change #filter-text": "filterText"
+                "change #filter-text": "filterText",
+                "change #fit-results": "fitResults"
             },
 
             submitAddress: function(e) {
@@ -91,7 +111,15 @@ define(
             },
 
             filterText: function(e) {
-                this.collection.filterByText(this.value);
+                this.collection.filterByText(e.target.value);
+            },
+
+            fitResults: function(e) {
+                if (e.target.checked) {
+                    routes.setHashKey("ftr", "1");
+                } else {
+                    routes.clearHashKey("ftr");
+                }
             }
         });
     });

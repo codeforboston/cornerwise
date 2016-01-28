@@ -243,7 +243,7 @@ define(["underscore", "jquery"], function(_, $) {
 
         idIs: function(val) {
             return function(model) {
-                return mode.id == val;
+                return model.id == val;
             }
         },
 

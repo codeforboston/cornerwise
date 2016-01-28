@@ -32,14 +32,15 @@ define(
             },
 
             filterByText: function(s) {
-                this.filterByRegex($u.escapeRegex(s));
+                var re = new RegExp($u.escapeRegex(s), "i");
+                this.filterByRegex(re);
             },
-
 
             filterByRegex: function(regex) {
                 if (regex) {
                     this.addFilter("search", function(proposal) {
-                        return !!(regex.exec(proposal.get("address")));
+                        return regex.exec(proposal.get("address")) ||
+                            regex.exec(proposal.getAttributeValue("legal_notice"));
                     });
                 } else {
                     this.removeFilter("search");

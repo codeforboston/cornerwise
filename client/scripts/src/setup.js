@@ -48,8 +48,6 @@ define(
                               active: "proposals"}]
                 });
 
-                console.log(ProposalItemView);
-
                 var infoView = new InfoView({
                     el: "#info",
                     startExpanded: routes.getKey("x") === "1",
@@ -79,6 +77,11 @@ define(
                     el: "#layers .contents"
                 }).render();
 
+                appViews.filtersView = new FiltersView({
+                    collection: proposals,
+                    mapView: appViews.mapView
+                });
+
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
@@ -86,9 +89,6 @@ define(
                 routes.init();
                 glossary.init();
 
-                appViews.filtersView = new FiltersView({
-                    collection: proposals
-                });
 
                 return appViews;
             }

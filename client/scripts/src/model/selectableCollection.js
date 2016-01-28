@@ -191,13 +191,17 @@ define(["backbone", "underscore", "routes", "utils"],
                    });
                },
 
-               getFiltered: function(fs) {
-                   if (!fs) fs = _.values(this.activeFilters);
-
-                   return this.filter(function(model) {
-                       return $u.everyPred(fs, model);
-                   });
+               getFiltered: function() {
+                   return this.where({excluded: false});
                },
+
+               // getFiltered: function(fs) {
+               //     if (!fs) fs = _.values(this.activeFilters);
+
+               //     return this.filter(function(model) {
+               //         return $u.everyPred(fs, model);
+               //     });
+               // },
 
                // A map of string filter names to functions
                activeFilters: {},

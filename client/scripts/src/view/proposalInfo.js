@@ -19,6 +19,7 @@ define(["backbone", "routes", "underscore", "config",
 
                    this.model = proposal;
 
+                   if (expanded) proposal.fetch();
                    template(proposal,
                             function(html) {
                                 if (self.model.id == proposal.id)

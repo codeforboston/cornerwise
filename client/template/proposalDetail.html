@@ -26,8 +26,7 @@
   <div class="documents">
     <% _.each(documents.slice(0, 10), function(doc) { %>
     <a class="document" href="<%= doc.url %>" target="_blank">
-      🀆
-      <%- doc.title %>
+      🀆&nbsp;&nbsp;<%- doc.title %>
     </a>
     <% }); %>
   </div>
@@ -81,9 +80,7 @@
      if (images && images.length) { %>
   <div class="images">
     <% _.each(images.slice(0, 10), function(img) { %>
-    <a class="thumb-link" href="<%= img.src %>" target="_blank">
-      <img class="thumb" src="<%= img.thumb || img.src %>"/>
-    </a>
+    <a class="thumb-link" href="<%= img.src %>" target="_blank"> <img class="thumb" src="<%= img.thumb || img.src %>"/> </a>
     <% }); %>
   </div>
   <% } %>

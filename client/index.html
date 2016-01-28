@@ -176,7 +176,7 @@
       <div id="overlay"></div>
     </div>
 
-    <div id="layers" class="collapsed _collapsible">
+    <div id="layers" class="collapsed _collapsible" style="display: none">
       <div class="controls">
         <a href="#" class="_expand when-collapsed"></a>
         <a href="#" class="_collapse when-expanded"></a>
@@ -205,7 +205,7 @@
       </div>
       <a id="explore" href="#view=main">Explore the Data</a>
 
-      <div id="filter-controls" class="">
+      <div id="filter-controls" class="collapsed">
         <div class="filters">
           <div class="input-group">
             <input class="input" type="text" name="filter-text"
@@ -213,8 +213,12 @@
                    id="filter-text"/>
           </div>
           <label>
-            Include Closed&nbsp;&nbsp;
+            Include Closed&nbsp;
             <input name="include-closed" type="checkbox"/>
+          </label>
+          &mdash;
+          <label>
+            Fit Map <input id="fit-results" type="checkbox">
           </label>
         </div>
         <a href="#fc=1" class="show-filters">
@@ -263,8 +267,8 @@
       <div class="dragarea">
         <div class="dragger">More</div>
       </div>
-      <a href="#" class="close">&times;</a>
       <div class="content"> </div>
+      <a href="#" class="close">&times;</a>
     </div>
 
     <div id="modal" class="_setview" data-goto="main">

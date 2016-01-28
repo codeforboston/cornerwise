@@ -101,7 +101,7 @@ span.icon {
 }
 
 .leaflet-top .leaflet-control {
-    margin-top: 80px !important;
+    margin-top: 150px !important;
 }
 
 #logo {
@@ -393,6 +393,17 @@ body.main #filter-controls {
 }
 
 #filter-controls .filters {
+    height: 2.5em;
+    margin-bottom: -0.2em;
+    overflow: hidden;
+
+    transition: height 0.2s linear;
+}
+#filter-controls.collapsed .filters {
+    height: 0;
+}
+
+#filter-controls.collapsed .filters * {
     display: none;
 }
 
@@ -402,11 +413,16 @@ body.main #filter-controls {
     width: 250px;
 }
 
+.filters label {
+    font-size: smaller;
+}
+
 .show-filters {
     background-color: #265E9D;
     color: white;
+    font-size: small;
     padding: 0.5em;
-    padding-top: 0;
+    padding-top: 0.5em;
     position: relative;
     top: 0.5em;
     right: 2em;
@@ -918,19 +934,28 @@ body.main #info {
     color: black;
 }
 
+#info {
+    padding-right: 300px;
+}
+
 #info .sidebar {
-    float: right;
-    margin-left: 4em;
+    padding-right: 3em;
+    padding-top: 2.5em;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
     width: 250px;
 }
 
 .main-thumb-container {
-    text-align: center;_.
+    text-align: center;
+    margin-bottom: 0.5em;
 }
 
 #info .main-thumb {
     max-height: 150px;
-    max-width: 250px;
+    max-width: 200px;
 }
 
 #info .prev-button, #info .next-button {
@@ -977,7 +1002,7 @@ body.main #info {
 }
 
 .attribute th {
-    font-size: small;
+    font-size: x-small;
     font-weight: 500;
     padding: 0.2em;
     padding-right: 1em;
@@ -990,18 +1015,32 @@ body.main #info {
     font-size: smaller;
 }
 
-#info .images {
-    float: right;
-}
-
 #info.empty .dragarea {
     display: none;
 }
 
+a.thumb-link {
+    border: 1px solid #777;
+    border-radius: 5px;
+    float: left;
+    margin: 0.2em;
+    padding: 0.2em;
+    height: 80px;
+    width: 80px;
+    text-align: center;
+    vertical-align: middle;
+
+    transition: border-color 0.1s linear;
+}
+
+a.thumb-link:hover {
+    border: 1px solid goldenrod;
+}
+
 .images .thumb {
     display: inline-block;
-    max-height: 100px;
-    max-width: 100px;
+    max-height: 80px;
+    max-width: 80px;
     padding-bottom: 5px;
 }
 
