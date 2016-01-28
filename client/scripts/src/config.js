@@ -154,13 +154,6 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             color: "orange"
         },
 
-        minimapRectStyle: {
-            stroke: true,
-            weight: 2,
-            color: "#ff0000",
-            fill: true
-        },
-
         // Esri:
         clientId: "jYLY7AeA1U9xDiWu",
         clientSecret: "64a66909ff724a0a9928838ef4462909"
