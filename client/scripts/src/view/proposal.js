@@ -47,7 +47,7 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             this.$el.toggleClass("proposal-hovered", hovered);
         },
 
-        selectedChanged: function (proposal, selected) {
+        selectedChanged: function(proposal, selected) {
             this.$el.toggleClass("proposal-selected", selected);
             if (selected) {
                 var parent = this.$el.parent(),

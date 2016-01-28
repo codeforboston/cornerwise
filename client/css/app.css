@@ -380,7 +380,7 @@ body.nointro #search-banner .overlay-contents {
     transition: width 0.2s linear;
 }
 
-body.nointro #filter-controls {
+body.main #filter-controls {
     display: block;
 }
 
@@ -476,36 +476,23 @@ body.main .main-mode, body.list .list-mode {
     font-size: smaller;
 }
 
-.proposal-info .case {
-    color: crimson;
-    padding-left: 2px;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    font-size: small;
-}
-
 .proposal-info .distance {
     color: #555;
-    float: right;
+    display: inline-block;
     font-size: small;
 }
 
-#expand-data {
-    display: none;
-}
-
-.pane {
-    display: none;
-}
-
-.pane.showing {
-    display: block;
+.info-item .case {
+    color: maroon;
+    display: inline-block;
+    font-size: small;
 }
 
 .info-item {
+    border-bottom: 2px solid lightgray;
     cursor: pointer;
-    height: 80px;
+    margin: 1em;
+    margin-left: 2em;
     overflow: hidden;
     padding-bottom: 5px;
     padding-top: 5px;
@@ -516,30 +503,29 @@ body.main .main-mode, body.list .list-mode {
     background-color: aliceblue;
 }
 
-.info-item:nth-child(odd) {
-    background-color: aliceblue;
-}
-
 .info-item .icon {
-    float: left;
-    margin-right: 5px;
+    float: right;
+    margin-left: 2em;
+    margin-right: 1em;
     overflow: hidden;
-    height: 100%;
-    width: 60px;
+    height: 200px;
+    width: 200px;
+    text-align: center;
 }
 
-.info-item .icon img {
-    height: 60%
+.icon img {
+    max-height: 100%;
+    max-width: 100%;
 }
 
 .info-item .name {
     color: #4EAF48;
+    font-size: larger;
     font-weight: 500;
     overflow: hidden;
     padding-top: 5px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: 70%;
 }
 
 .department {
@@ -689,7 +675,7 @@ a.glossary:hover {
     left: 110%;
     position: absolute;
     width: 15em;
-    z-index: 2;
+    z-index: 4;
 }
 
 #preview {
@@ -756,25 +742,6 @@ tr.proposal-selected, tr.proposal-hovered {
     color: white;
 }
 
-.permit-name {
-    font-weight: bold;
-}
-
-.permit-desc {
-    font-size: smaller;
-}
-
-.permit-info .distance {
-    font-style: italic;
-}
-
-.permit-details {
-    padding: 2px;
-    postion: absolute;
-    right: 5px;
-    top: 5px;
-}
-
 #overlay, #modal {
     background-color: rgba(0, 0, 0, 0.5);
     overflow-y: auto;
@@ -826,21 +793,17 @@ tr.proposal-selected, tr.proposal-hovered {
     bottom: 0;
     left: 0;
     right: 0;
-    overflow: visible;
+    overflow: hidden;
     position: absolute;
     height: 0;
     max-height: 500px;
     min-height: 150px;
-
     transition: height 0.2s linear;
 }
 
-body.main #info.collapsed {
-    display:  none;
-}
-
 body.main #info {
-     height: auto;
+    height: auto;
+    overflow: visible;
 }
 
 #info .dragarea {
@@ -1040,7 +1003,7 @@ body.nointro #alert.displayed {
     top: 75px;
 }
 
-body.nointro .leaflet-control-container {
+body.main .leaflet-control-container {
     display: block;
 }
 
@@ -1091,15 +1054,15 @@ ul.model-list li {
     font-size: medium;
 }
 
-
 #list-view {
     background-color: white;
     display: none;
     position: absolute;
     left: 0;
     right: 0;
-    top: 0;
+    top: 60px;
     bottom: 0;
+    overflow-y: auto;
 }
 
 #list-view.showing {

@@ -26,6 +26,8 @@
       <div class="name" title="<%- proposal.get('address') %>">
         <%- proposal.get('address') %>
       </div>
+      <div class="case"><%- proposal.get("caseNumber") %></div>
+      <div class="distance"><%= prettyDistance(proposal.get('refDistance')) %> away</div>
       <%
          var notice = proposal.getAttributeValue("legal_notice");
 
@@ -48,14 +50,12 @@
         </tr>
       </table>
 
-      <div class="case"><%- proposal.get("caseNumber") %></div>
       <div class="subtitle">
         <%- proposal.getAttributeValue("applicant_name") || '' %>
       </div>
       <div class="summary">
         <%- proposal.get("summary") %>
       </div>
-      <div class="distance"><%= prettyDistance(proposal.get('refDistance')) %> away</div>
     </script>
 
     <script type="text/template" id="project-template">
@@ -164,7 +164,7 @@
     </script>
 
   </head>
-  <body class="">
+  <body>
     <div id="alert-container"><div id="alert"></div></div>
     <div id="map-container">
       <div id="map"></div>
@@ -283,9 +283,9 @@
 
     <div id="list-view"></div>
 
-    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
-    <!-- <script type="text/javascript"> -->
-    <!--   try{Typekit.load({ async: true });}catch(e){} -->
-    <!-- </script> -->
+    <script src="https://use.typekit.net/wpe7mmw.js"></script>
+    <script type="text/javascript">
+      try{Typekit.load({ async: true });}catch(e){}
+    </script>
   </body>
 </html>
