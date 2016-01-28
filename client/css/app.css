@@ -449,18 +449,6 @@ body.main #filter-controls {
     max-width: 100% !important;
 }
 
-#data.collapsed {
-    width: 0;
-}
-
-#data.collapsed:hover {
-    width: 0.5em;
-}
-
-#data.collapsed .tabs, #data.collapsed .tabs-pane {
-    display: none;
-}
-
 .proposal-selected {
     background-color: #4FB8F7 !important;
 }
@@ -494,16 +482,6 @@ body.main #filter-controls {
 
 .pane.showing {
     display: block;
-}
-
-#data .toggler {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid black;
-    color: black;
-    left: -70px;
-    padding: 5px;
-    position: relative;
-    transform: rotate(90deg);
 }
 
 .info-item {
@@ -606,58 +584,6 @@ body.main #filter-controls {
 .chart-label {
     font-size: small;
     font-weight: bold;
-}
-
-#layers {
-    background-color: white;
-    border: 1px solid gray;
-    border-radius: 5px;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-    padding: 0.5em;
-    position: absolute;
-    left: 0;
-    top: 25%;
-    width: 17em;
-    transition: left 0.2s ease-out;
-}
-
-#layers .controls {
-    background-color: white;
-    border: 1px solid gray;
-    border-left: none;
-    padding: 0.5em;
-    padding-top: 0;
-}
-
-
-#layers ._expand, #layers ._collapse {
-    display: inline-block;
-    height: 35px;
-    width: 35px;
-}
-
-#layers ._expand {
-    background: no-repeat center/80% url(/static/images/layers.png);
-}
-
-#layers ._collapse {
-    background: no-repeat center/80%  url(/static/images/close.png);
-}
-
-#layers.collapsed {
-    left: -18em;
-}
-
-#layers .controls {
-    position: absolute;
-    left: 18em;
-    width:  30px;
-    height:  30px;
-}
-
-#layers ul {
-    list-style: none;
-    padding-left: 1em;
 }
 
 a.color {
