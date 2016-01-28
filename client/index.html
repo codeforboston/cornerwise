@@ -164,7 +164,7 @@
     </script>
 
   </head>
-  <body class="main">
+  <body class="">
     <div id="alert-container"><div id="alert"></div></div>
     <div id="map-container">
       <div id="map"></div>
@@ -205,6 +205,8 @@
       </div>
       <a id="explore" href="#view=main">Explore the Data</a>
 
+      <!-- Filter controls will be appear below the title bar when the intro is
+      complete. -->
       <div id="filter-controls" class="collapsed">
         <div class="filters">
           <div class="input-group">
@@ -221,9 +223,13 @@
             Fit Map <input id="fit-results" type="checkbox">
           </label>
         </div>
-        <a href="#fc=1" class="show-filters">
-          Filter Proposals
-        </a>
+        <a href="#fc=1" class="toggle-filters when-collapsed">Filter Results</a>
+        <a href="#fc=0" class="toggle-filters when-expanded">Hide</a>
+      </div>
+
+      <div id="mode-controls">
+        <a class="mode main-mode" href="#view=list">LIST</a>
+        <a class="mode list-mode" href="#view=main">MAP</a>
       </div>
     </div>
 

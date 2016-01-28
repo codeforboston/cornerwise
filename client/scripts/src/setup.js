@@ -21,7 +21,7 @@ define(
 
                     var showIntro = !view || view === "intro";
 
-                    $(document.body).toggleClass("main", !showIntro);
+                    $(document.body).toggleClass("nointro", !showIntro);
                 });
 
                 refLocation.on("change:setMethod", function(_, method) {

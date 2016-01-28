@@ -32,7 +32,7 @@ h4 {
     right: 0;
 }
 
-body.main #event-eater {
+body.nointro #event-eater {
     display: none;
 }
 
@@ -343,29 +343,27 @@ body.geolocating #ref-address-form .go-button {
 }
 
 
-body.main #explore {
+body.nointro #explore {
     display: none;
 }
 
-body.main #data,
-body.main #preview,
-body.main #minimap-container,
-body.main #logo {
+
+body.nointro #logo {
     background-color: transparent;
     border: none;
     display: block;
 }
 
-body.main #intro {
+body.nointro #intro {
     height: 0;
 }
 
 
-body.main #search-banner {
+body.nointro #search-banner {
     top: 0;
 }
 
-body.main #search-banner h3 {
+body.nointro #search-banner h3 {
     display: none;
 }
 
@@ -374,7 +372,7 @@ body.main #search-banner h3 {
     transition: padding 0.2s linear;
 }
 
-body.main #search-banner .overlay-contents {
+body.nointro #search-banner .overlay-contents {
     padding: 0;
     margin-left: 0;
     width: 50%;
@@ -382,7 +380,7 @@ body.main #search-banner .overlay-contents {
     transition: width 0.2s linear;
 }
 
-body.main #filter-controls {
+body.nointro #filter-controls {
     display: block;
 }
 
@@ -417,7 +415,7 @@ body.main #filter-controls {
     font-size: smaller;
 }
 
-.show-filters {
+.toggle-filters {
     background-color: #265E9D;
     color: white;
     font-size: small;
@@ -428,6 +426,27 @@ body.main #filter-controls {
     right: 2em;
 }
 
+#mode-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+#mode-controls .mode {
+    background-color: #4EAF48;
+    color: white;
+    margin: 0.5em;
+    width: 50px;
+    height: 50px;
+}
+
+.mode {
+    display: none;
+}
+
+body.main .main-mode, body.list .list-mode {
+    display: block;
+}
 
 .zoomed-proposal-marker {
     background-color: #eee;
@@ -1017,11 +1036,11 @@ a.thumb-link:hover {
     top: 0;
 }
 
-body.main #alert.displayed {
+body.nointro #alert.displayed {
     top: 75px;
 }
 
-body.main .leaflet-control-container {
+body.nointro .leaflet-control-container {
     display: block;
 }
 
