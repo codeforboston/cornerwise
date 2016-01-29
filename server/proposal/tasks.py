@@ -4,6 +4,7 @@ import shutil
 import subprocess
 from urllib import parse, request
 
+from dateutil.parser import parse as dt_parse
 import celery
 from celery.utils.log import get_task_logger
 
@@ -11,11 +12,12 @@ from djcelery.models import PeriodicTask
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db import transaction
-from django.db.utils import IntegrityError
+from django.db.utils import DataError, IntegrityError
 
 from .models import Proposal, Attribute, Event, Document, Image
 from utils import extension, normalize
 from . import extract
+from . import utils as proposal_utils
 from cornerwise import celery_app
 from scripts import scrape, arcgis, gmaps, street_view
 from scripts.images import is_interesting, make_thumbnail
@@ -33,7 +35,9 @@ def last_run():
 
 
 def create_proposal_from_json(p_dict):
-    "Constructs a Proposal from a dictionary."
+    """
+    Constructs a Proposal from a dictionary.  If an existing proposal has a
+    matching case number, update it from p_dict."""
     try:
         proposal = Proposal.objects.get(case_number=p_dict["caseNumber"])
 
@@ -52,17 +56,12 @@ def create_proposal_from_json(p_dict):
         # create a Proposal.
         return
 
-    proposal.summary = p_dict.get("summary")
+    proposal.summary = p_dict.get("summary", "")
     proposal.description = p_dict.get("description")
     # This should not be hardcoded
     proposal.source = p_dict.get("source")
     proposal.updated = p_dict["updatedDate"]
-
-    # For now, we assume that if there are one or more documents
-    # linked in the 'decision' page, the proposal is 'complete'.
-    # Note that we don't have insight into whether the proposal was
-    # approved!
-    proposal.complete = bool(p_dict["decisions"]["links"])
+    proposal.complete = p["complete"]
 
     proposal.save()
 
@@ -88,14 +87,21 @@ def create_proposal_from_json(p_dict):
 
 
 @celery_app.task(name="proposal.fetch_document")
-def fetch_document(doc, force=False):
+def fetch_document(doc):
     """Copy the given document (proposal.models.Document) to a local
     directory.
     """
-    if not force and doc.document and os.path.exists(doc.document.path):
-        return
-
     url = doc.url
+
+    if os.path.exists(doc.document.path):
+        # Has the document been updated?
+        updated = proposal_utils.last_modified(doc.url)
+        # No?  Then we're good.
+        if updated <= doc.published:
+            return
+
+        # TODO Special handling of updated documents
+
     url_components = parse.urlsplit(url)
     ext = extension(os.path.basename(url_components.path))
     filename = "download.%s" % ext
@@ -115,6 +121,8 @@ def fetch_document(doc, force=False):
 
         if file_published:
             doc.published = file_published
+        elif "Last-Modified" in resp.headers:
+            doc.published = dt_parse(resp.headers["Last-Modified"])
 
         doc.save()
 
@@ -231,6 +239,8 @@ def add_street_view(proposal):
         url = street_view.street_view_url(location, api_key,
                                           secret=secret)
         try:
+            # Check that there is not already a Street View image associated
+            # with this proposal:
             if not proposal.images\
                            .filter(source="google_street_view")\
                            .exists():
@@ -241,6 +251,8 @@ def add_street_view(proposal):
                 return image
         except IntegrityError as ie:
             logger.warning("Image with that URL already exists")
+        except DataError as de:
+            logger.warning("Image could not be saved.  Was the URL too long?")
 
     else:
         logger.warning("Add a local_settings file with your Google API key.")

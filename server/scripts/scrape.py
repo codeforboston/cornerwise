@@ -7,6 +7,8 @@ import re
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 
+import pytz
+
 logger = logging.getLogger(__name__)
 
 LAST_PAGE = 31
@@ -65,9 +67,10 @@ def get_links(elt):
 def dates_field(td):
     return get_date(default_field(td))
 
-def datetime_field(td):
-    return datetime.strptime(default_field(td),
-                             "%m/%d/%Y - %I:%M%p")
+def datetime_field(td, tz=pytz.timezone("US/Eastern")):
+    dt = datetime.strptime(default_field(td),
+                           "%m/%d/%Y - %I:%M%p")
+    return tz.localize(dt).astimezone(pytz.utc)
 
 def links_field(td):
     return {"links": get_links(td)}
@@ -114,6 +117,7 @@ def add_geocode(geocoder, proposals):
         proposal["long"] = loc["lng"]
         proposal["score"] = location["properties"].get("score")
 
+
 def find_cases(doc):
     table = find_table(doc)
     titles = col_names(table)
@@ -129,6 +133,12 @@ def find_cases(doc):
         try:
             permit = get_row_vals(attributes, tr)
             permit["source"] = URL_BASE
+
+            # For now, we assume that if there are one or more documents
+            # linked in the 'decision' page, the proposal is 'complete'.
+            # Note that we don't have insight into whether the proposal was
+            # approved!
+            permit["complete"] = bool(permit["decisions"]["links"])
             cases.append(permit)
         except Exception as err:
             logger.error("Failed to scrape row {num}: {err}"\
@@ -140,6 +150,7 @@ def find_cases(doc):
 def get_proposals_for_page(page, geocoder=None):
     html = get_page(page)
     doc = BeautifulSoup(html, "html.parser")
+    logger.info("Scraping page {num}".format(num=page))
     cases = find_cases(doc)
 
     if geocoder:

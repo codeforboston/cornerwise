@@ -49,6 +49,7 @@ class Proposal(models.Model):
                                    default="Somerville, MA",
                                    null=True,
                                    help_text="")
+    # The time when the proposal was last saved:
     modified = models.DateTimeField(auto_now=True)
     # The time when the entry was updated in the source:
     updated = models.DateTimeField()
@@ -60,6 +61,8 @@ class Proposal(models.Model):
     source = models.URLField(null=True,
                              help_text="The data source for the proposal.")
     status = models.CharField(max_length=64)
+
+
     complete = models.BooleanField(default=False)
 
     # To enable geo queries
