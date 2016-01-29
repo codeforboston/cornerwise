@@ -156,7 +156,12 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
 
         // Esri:
         clientId: "jYLY7AeA1U9xDiWu",
-        clientSecret: "64a66909ff724a0a9928838ef4462909"
+        clientSecret: "64a66909ff724a0a9928838ef4462909",
+
+        // Map of handles to names
+        attributeNames: {
+
+        }
     };
 
     if (localConfig) {

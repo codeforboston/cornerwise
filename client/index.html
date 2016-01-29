@@ -20,14 +20,17 @@
 
     <!-- Template for proposals in the proposal table -->
     <script type="text/template" id="proposal-template">
-      <div class="icon">
-        <img src="<%- proposal.getThumb() %>"/>
-      </div>
+      <div class="icon"><img src="<%- proposal.getThumb() %>"/></div>
       <div class="name" title="<%- proposal.get('address') %>">
         <%- proposal.get('address') %>
       </div>
       <div class="case"><%- proposal.get("caseNumber") %></div>
+      &bull;
       <div class="distance"><%= prettyDistance(proposal.get('refDistance')) %> away</div>
+      <div class="dates">
+        Last updated <span class="updated"><%= prettyDate(proposal.get("updated")) %></span>
+      </div>
+
       <%
          var notice = proposal.getAttributeValue("legal_notice");
 
@@ -222,7 +225,9 @@
           <label>
             Fit Map <input id="fit-results" type="checkbox">
           </label>
+          <div id="filter-attributes"></div>
         </div>
+
         <a href="#fc=1" class="toggle-filters when-collapsed">Filter Results</a>
         <a href="#fc=0" class="toggle-filters when-expanded">Hide</a>
       </div>

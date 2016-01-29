@@ -10,6 +10,7 @@ require.config({
 
         // Utilities:
         "utils": "src/utils",
+        "locale": "src/localization",
 
         // APIs:
         "arcgis": "src/api/arcgis",

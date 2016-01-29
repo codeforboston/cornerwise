@@ -2,6 +2,7 @@ body {
     font-family: proxima-nova, "Avenir", sans-serif;
     height: 100%;
     width: 100%;
+    overflow:  hidden;
 }
 
 a {
@@ -183,6 +184,16 @@ h3 {
     margin: 0.3em;
     padding: 0.1em;
     position: relative;
+}
+
+.input-group label {
+    border-right: 1px solid rgba(255,255,255,0.5);
+    font-weight: bold;
+    padding-right: 0.5em;
+}
+
+.input-group label + .input {
+    width: 50%
 }
 
 .input-group .input {
@@ -380,7 +391,7 @@ body.nointro #search-banner .overlay-contents {
     transition: width 0.2s linear;
 }
 
-body.main #filter-controls {
+body.main #filter-controls, body.list #filter-controls {
     display: block;
 }
 
@@ -403,6 +414,14 @@ body.main #filter-controls {
 
 #filter-controls.collapsed .filters * {
     display: none;
+}
+
+#filter-controls.collapsed #filter-attributes {
+    display: none;
+}
+
+#filter-attributes {
+    float: left;
 }
 
 .filters .input-group {
@@ -480,6 +499,11 @@ body.main .main-mode, body.list .list-mode {
     color: #555;
     display: inline-block;
     font-size: small;
+}
+
+
+.updated {
+    font-weight: 500;
 }
 
 .info-item .case {
