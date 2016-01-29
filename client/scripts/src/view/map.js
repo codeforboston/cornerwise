@@ -51,6 +51,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             return this;
         },
 
+        getMap: function() {
+            return this.map;
+        },
+
+        // Synchronize the map bounds with the lat, lng, and zoom values in the
+        // location hash.
         stateChanged: function(newState) {
             var map = this.map;
             if (!map) return;

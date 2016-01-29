@@ -2,19 +2,26 @@
  * ProposalsCollection
  */
 define(
-    ["backbone", "jquery", "underscore", "leaflet",
-     "proposal", "ref-location", "selectable", "routes",
-     "config", "utils"],
+    ["backbone", "jquery", "underscore", "leaflet", "proposal", "ref-location",
+     "selectable", "routes", "config", "utils"],
     function(B, $, _, L, Proposal, refLocation, Selectable, routes, config, $u) {
         return Selectable.extend({
             model: Proposal,
 
-            url: config.pzURL,
+            url: function() {
+                return config.pzURL +
+                    (_.isEmpty(this.query) ? "" : $u.encodeQuery(this.query));
+            },
+
+            parse: function(response) {
+                return response.proposals;
+            },
 
             comparator: false,
 
             selection: null,
 
+            // Used by Selectable:
             hashParam: "ps",
 
             initialize: function() {
@@ -27,16 +34,16 @@ define(
                 return B.Collection.prototype.fetch.call(this, opts);
             },
 
-            parse: function(results) {
-                return _.isArray(results) ? results : results.proposals;
-            },
+            query: {},
 
             filterByText: function(s) {
                 var re = new RegExp($u.escapeRegex(s), "i");
-                this.filterByRegex(re);
+                this._filterByRegex(re);
+
+                this.query.q = s;
             },
 
-            filterByRegex: function(regex) {
+            _filterByRegex: function(regex) {
                 if (regex) {
                     this.addFilter("search", function(proposal) {
                         return regex.exec(proposal.get("address")) ||
@@ -46,24 +53,6 @@ define(
                     this.removeFilter("search");
                 }
             },
-
-            filterByRadius: function(refPoint, radius) {
-                if (refPoint && radius) {
-                    this.addFilter("radius", function(proposal) {
-                        var location = proposal.get("location");
-
-                        return location &&
-                            L.latLng(location).distanceTo(refPoint) <= radius;
-                    });
-                } else {
-                    this.removeFilter("radius");
-                }
-            },
-
-            clearRadiusFilter: function() {
-                this.removeFilter("radius");
-            },
-
 
             /**
              * @param {L.LatLngBounds} viewBox Proposals that lie within
@@ -76,6 +65,14 @@ define(
 
                     return location && viewBox.contains(location);
                 });
+
+                this.query.bounds = [viewBox.getWest(), viewBox.getSouth(),
+                                     viewBox.getEast(), viewBox.getNorth()].join(",");
+            },
+
+            clearViewBoxFilter: function() {
+                this.removeFilter(viewBox);
+                delete this.query.bounds;
             },
 
             /*
@@ -101,14 +98,6 @@ define(
                 }
             },
 
-            updateRadiusFilter: function(loc) {
-                var r = loc.getRadiusMeters();
-                if (r) {
-                    this.filterByRadius(loc.getPoint(), r);
-                } else {
-                    this.clearRadiusFilter();
-                }
-            },
 
             // Returns a LatLngBounds object for the proposals that are
             // not excluded.

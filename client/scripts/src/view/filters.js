@@ -3,9 +3,9 @@
  */
 define(
     ["backbone", "underscore", "jquery", "ref-location", "utils", "arcgis",
-     "routes"],
+     "routes", "config"],
 
-    function(B, _, $, refLocation, $u, arcgis, routes) {
+    function(B, _, $, refLocation, $u, arcgis, routes, config) {
         return B.View.extend({
             el: function() {
                 return document.body;
@@ -19,9 +19,13 @@ define(
                               this.toggleGeolocating);
 
                 var self = this;
+
+                // Show the filter controls?
                 routes.onStateChange("fc", function(fc) {
                     self.toggle(fc === "1");
                 });
+
+                // Fit to results?
                 routes.onStateChange("ftr", function(ftr, oldFtr) {
                     if (ftr === "1") {
                         self.mapView.resetBounds();
@@ -29,6 +33,8 @@ define(
                         self.mapView.fitToCollection();
                     }
                 });
+
+                routes.onStateChange("fa", _.bind(this.showAttributeFilters, this));
             },
 
             toggle: function(shouldShow) {
@@ -114,12 +120,40 @@ define(
                 this.collection.filterByText(e.target.value);
             },
 
+            // Event handler for "Fit to Results"
             fitResults: function(e) {
                 if (e.target.checked) {
                     routes.setHashKey("ftr", "1");
                 } else {
                     routes.clearHashKey("ftr");
                 }
+            },
+
+            // Display the active attribute filters by constructing UI elements.
+            showAttributeFilters: function(attrs) {
+                var $con = $("#filter-attributes");
+
+                $con.html("");
+
+                _.each(attrs, function(val, handle) {
+                    var name = config.attributeNames[handle] || $u.fromUnder(handle);
+
+                    $("<div class='input-group'>" +
+                      "<label>" + _.escape(name) + "</label> " +
+                      "<input class='input' type='text' value='" +
+                      _.escape(val) + "'/></div>").appendTo($con);
+                });
+            },
+
+            // Filter the collection to only include models that lie within the
+            // visible bounds.
+            filterOnBounds: function() {
+                this.collection.filterByViewBox(
+                    this.mapView.getMap().getBounds()); 
+            },
+
+            clearBoundsFilter: function() {
+                this.collection.clearViewBoxFilter();
             }
         });
     });
