@@ -7,8 +7,7 @@ from datetime import datetime
 from dateutil.parser import parse as date_parse
 from utils import pushback_iter
 
-import os
-import re
+import os, pytz, re
 
 
 empty_line = re.compile(r"\s*\n$")
@@ -197,19 +196,21 @@ def staff_report_properties(doc):
 # Decision Documents
 def find_vote(decision):
     """
-    From the decision text,
+    From the decision text, perform a very crude pattern match that extracts the
+    vote (for/against).
     """
     patt = re.compile(r"voted (\d+-\d+)", re.I)
     m = re.search(patt, decision)
 
     if m:
-        return m.group(1)
+        return m.group(1).split("-")
 
     return None, None
 
 decision_section_matchers = [
     skip_match(r"CITY HALL", 2),
-    make_matcher(r"(ZBA DECISION|DESCRIPTION):?", group=1, fn=str.lower),
+    make_matcher(r"(ZBA DECISION|DESCRIPTION|PLANNING BOARD DECISION):?",
+                 value="properties"),
     make_matcher(r"DECISION:", value="decision"),
     top_section_matcher
 ]
@@ -223,7 +224,8 @@ def decision_properties(doc):
     Document."""
     sections = decision_sections(doc)
     props = {}
-    props.update(properties(sections["zba decision"]))
+    if "properties" in sections:
+        props.update(properties(sections["properties"]))
 
     vote = find_vote(" ".join(sections["decision"]))
     if vote:
@@ -297,6 +299,9 @@ def doc_type(doc):
 
     return ""
 
+def get_decision(prop):
+    pass
+
 def get_properties(doc):
     # TODO: Dispatch on the document's field and/or title
     # (doc.field is the name of the column in which the document was found)
@@ -321,6 +326,8 @@ def split_event(desc):
 
     if dt == now:
         return None
+
+    dt = pytz.timezone("US/Eastern").localize(dt)
 
     if len(tokens) > 0:
         event_desc = tokens[0].strip()
