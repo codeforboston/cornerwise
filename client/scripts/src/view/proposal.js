@@ -6,18 +6,12 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
         initialize: function() {
             this.listenTo(this.model, "change:excluded", this.excludedChanged)
                 .listenTo(this.model, "change:selected", this.selectedChanged)
-                .listenTo(this.model, "change:hovered", this.hoveredChanged)
                 .listenTo(this.model, "change:refDistance", this.distanceChanged);
         },
 
         tagName: "div",
 
         className: "proposal-info info-item",
-
-        events: {
-            "mouseover": "beginHover",
-            "mouseout": "endHover"
-        },
 
         template: $u.templateWithId("proposal-template",
                                     {variable: "proposal"}),
@@ -43,10 +37,6 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
             }
         },
 
-        hoveredChanged: function(proposal, hovered) {
-            this.$el.toggleClass("proposal-hovered", hovered);
-        },
-
         selectedChanged: function(proposal, selected) {
             this.$el.toggleClass("proposal-selected", selected);
             if (selected) {
@@ -66,14 +56,6 @@ define(["backbone", "underscore", "utils"], function(B, _, $u) {
 
         distanceChanged: function(proposal, refDistance) {
             this.$(".distance").html($u.commas(refDistance) + " feet");
-        },
-
-        beginHover: function(){
-            this.model.set({"hovered": true});
-        },
-
-        endHover: function(){
-            this.model.set({"hovered": false});
         }
     });
 });
