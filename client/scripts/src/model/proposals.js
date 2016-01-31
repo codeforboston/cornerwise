@@ -3,8 +3,8 @@
  */
 define(
     ["backbone", "jquery", "underscore", "leaflet", "proposal", "ref-location",
-     "selectable", "routes", "config", "utils"],
-    function(B, $, _, L, Proposal, refLocation, Selectable, routes, config, $u) {
+     "selectable", "config", "utils"],
+    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u) {
         return Selectable.extend({
             model: Proposal,
 
@@ -23,16 +23,6 @@ define(
 
             // Used by Selectable:
             hashParam: "ps",
-
-            initialize: function() {
-                this.listenTo(refLocation, "change", this.updateRadiusFilter);
-
-                return Selectable.prototype.initialize.call(this);
-            },
-
-            fetch: function(opts) {
-                return B.Collection.prototype.fetch.call(this, opts);
-            },
 
             query: {},
 
