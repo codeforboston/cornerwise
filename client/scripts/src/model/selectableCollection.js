@@ -40,9 +40,20 @@ define(["backbone", "underscore", "routes", "utils"],
                            self.setSelection(ids);
                        });
 
+                       routes.onStateChange("sort",
+                                            function(sortBy) {
+                                                var desc = sortBy[0] === "-";
+
+                                                self._sortByField(
+                                                    desc ? sortBy.substring(1)
+                                                        : sortBy,
+                                                    desc);
+                                            });
+
                        this.on("selection", function(self, sel) {
                            routes.setHashKey(self.hashParam, sel.join(","), true);
                        });
+
                    }
                },
 
@@ -227,7 +238,7 @@ define(["backbone", "underscore", "routes", "utils"],
                 * @param {String} name
                 * @param {Boolean} desc true to sort descending
                 */
-               sortByField: function(name, desc) {
+               _sortByField: function(name, desc) {
                    var order = desc ? -1 : 1;
                    this.sortField = name;
                    this.order = order;
@@ -243,6 +254,12 @@ define(["backbone", "underscore", "routes", "utils"],
                        };
                        this.sort();
                    }
+               },
+
+               sortByField: function(name, desc) {
+                   this._sortByField(name, desc);
+
+                   routes.setHashKey("sort", (desc ? "-" : "") + name);
                }
            });
 
