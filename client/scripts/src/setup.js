@@ -45,8 +45,10 @@ define(
                     "projectSummary": ["projects-summary-view",
                                        {collection: projects}],
                     "list": ["list-view",
-                             {collections: {proposals: proposals},
-                              subviews: {proposals: ProposalItemView},
+                             {collections: {proposals: proposals,
+                                            projects: projects},
+                              subviews: {proposals: ProposalItemView,
+                                         projects: ProjectItemView},
                               active: "proposals"}]
                 });
 
