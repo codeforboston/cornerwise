@@ -19,7 +19,6 @@ require.config({
         "config": "src/config",
         "local-config": "src/localConfig",
         "routes": "src/routes",
-        "collapsible": "src/collapsible",
         "ref-location": "src/refLocation",
 
         // Leaflet stuff:
@@ -61,7 +60,6 @@ require.config({
         "list-view": "src/view/list",
 
         // View managers:
-        "collapsible-view": "src/view/collapsible",
         "tab-view": "src/view/tabs",
         "view-manager": "src/viewManager",
 

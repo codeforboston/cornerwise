@@ -1,11 +1,11 @@
 define(
     ["jquery", "proposals", "map-view", "projects", "info-view",
     "proposal-info-view", "project-info-view", "proposal-view", "project-view",
-     "layers-view", "filters-view", "glossary", "collapsible", "config", "routes",
+     "layers-view", "filters-view", "glossary", "config", "routes",
      "view-manager", "ref-location", "legal-notice"],
     function($, Proposals, MapView, Projects, InfoView, ProposalInfoView,
              ProjectInfoView, ProposalItemView, ProjectItemView, LayersView, FiltersView,
-             glossary, collapsible, config, routes, ViewManager, refLocation) {
+             glossary, config, routes, ViewManager, refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -89,7 +89,6 @@ define(
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
-                collapsible.init();
                 routes.init();
                 glossary.init();
 
