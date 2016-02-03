@@ -265,13 +265,13 @@ input:focus::-webkit-input-placeholder {
 }
 
 #explore {
-    color: #4EAF48;
+    color: #54C9D3;
     display: block;
     padding-bottom: 1.2em;
 }
 
 #geolocate {
-    color: #4EAF48;
+    color: #54C9D3;
     display: block;
     font-size: medium;
     right: -200px;
