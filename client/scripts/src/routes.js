@@ -3,6 +3,9 @@ define(["backbone", "underscore", "utils"],
            var dispatcher = _.clone(B.Events),
                routes =
                    {
+                       /** @private */
+                       _cachedState: null,
+
                        /**
                         * Returns an event dispatcher that is shared by the entire
                         * application.
@@ -11,6 +14,15 @@ define(["backbone", "underscore", "utils"],
                            return dispatcher;
                        },
 
+                       /**
+                        * Replaces the current state of the application with a
+                        * new one specified by o.
+                        *
+                        * @param {Object} o The new state to use
+                        * @param {boolean} replace If true, do not create a new
+                        * entry in the history.  If the user navigates back, it
+                        * will skip over the current state.
+                        */
                        setHashState: function(o, replace, quiet) {
                            var query = $u.encodeQuery(o);
 
@@ -39,6 +51,15 @@ define(["backbone", "underscore", "utils"],
                            return $u.getIn(state, ks);
                        },
 
+                       /**
+                        * @callback stateCallback
+                        * @param {Object} state
+                        * 
+                        * @param {stateCallback} f
+                        * @param {bool} replace
+                        *
+                        * @returns {Object}
+                        */
                        changeHash: function(f, replace, quiet) {
                            return this.setHashState(f(this.getState()), replace, quiet);
                        },

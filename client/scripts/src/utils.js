@@ -168,7 +168,7 @@ define(["underscore", "jquery", "locale"],
            }
 
            function setIn(obj, ks, v) {
-               if (ks.length == 0)
+               if (ks.length === 0)
                    return v;
 
                var k = ks[0];
@@ -291,7 +291,7 @@ define(["underscore", "jquery", "locale"],
                idIs: function(val) {
                    return function(model) {
                        return model.id == val;
-                   }
+                   };
                },
 
                /**
@@ -482,7 +482,8 @@ define(["underscore", "jquery", "locale"],
                 * @param {object} settings Passed as second argument to _.template
                 */
                template: function(templateString, settings, helpers) {
-                   helpers = helpers || defaultHelpers;
+                   helpers = _.extend({}, helpers);
+                   helpers.__proto__ = defaultHelpers;
 
                    settings = _.clone(settings);
                    var varName = settings && settings.variable;
@@ -506,6 +507,9 @@ define(["underscore", "jquery", "locale"],
                 * @param {string} id Element ID of the template element in the
                 * DOM.
                 * @param {object} options
+                * @param o
+                *
+                * @return {Function}
                 */
                templateWithId: function(id, options) {
                    var templateString = $("#" + id).text();
@@ -517,6 +521,11 @@ define(["underscore", "jquery", "locale"],
                    return $u.template(templateString, options, options.helpers);
                },
 
+               /**
+                * @param {string} url
+                * @param {object} options
+                * @param options.helpers 
+                */
                templateWithUrl: function(url, options) {
                    var template = null;
                    options = options || {};
