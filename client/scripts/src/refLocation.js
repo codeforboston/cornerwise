@@ -72,7 +72,8 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "utils"],
                            lat: loc[0],
                            lng: loc[1],
                            altitude: null,
-                           setMethod: "address"
+                           setMethod: "address",
+                           address: addr
                        });
 
                        $(document).trigger("showMain");

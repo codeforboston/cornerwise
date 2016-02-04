@@ -20,13 +20,20 @@
 
     <!-- Template for proposals in the proposal table -->
     <script type="text/template" id="proposal-template">
-      <div class="icon"><img src="<%- proposal.getThumb() %>"/></div>
+        <div class="thumbnail">
+            <img src="<%- proposal.getThumb() %>"/>
+            <a href="#">Show on Map</a>
+        </div>
       <div class="name" title="<%- proposal.get('address') %>">
         <%- proposal.get('address') %>
       </div>
       <div class="case"><%- proposal.get("caseNumber") %></div>
       &bull;
-      <div class="distance"><%= prettyDistance(proposal.get('refDistance')) %> away</div>
+      <div class="distance">
+          <%= prettyDistance(proposal.get('refDistance')) %> away
+          from
+          <%= refLocationButton() %>
+      </div>
       <div class="dates">
         Last updated <span class="updated"><%= prettyDate(proposal.get("updated")) %></span>
       </div>
@@ -62,16 +69,20 @@
     </script>
 
     <script type="text/template" id="project-template">
-      <div class="icon">
+      <div class="thumbnail">
         <img src="<%- project.thumbnail() %>">
       </div>
       <div class="name" title="<%- project.get('name') %>">
         <%- project.get("name") %>
       </div>
       <div class="category" title="<%- project.get('category') %>">
-        <img src="<%- project.categoryIcon() %>"/>
+          <img class="icon" src="<%- project.categoryIcon() %>"
+               title="<%- project.get('category') %>"/>
+          <%- project.get("category") %>
       </div>
-      <div class="department"><%- project.get("department") %></div>
+      <div class="department">
+          <%- project.departmentName() %>
+      </div>
       <div class="time-span"></div>
       <div class="status">
         <div class="<%- project.get('approved') ? 'approved' : 'pending' %>"/>
@@ -179,11 +190,8 @@
       <div id="overlay"></div>
     </div>
 
-    <div id="layers" class="collapsed _collapsible" style="display: none">
-      <div class="controls">
-        <a href="#" class="_expand when-collapsed"></a>
-        <a href="#" class="_collapse when-expanded"></a>
-      </div>
+    <div id="layers">
+        <div class="header" >Layers</div>
       <div class="contents">
 
       </div>
@@ -288,7 +296,7 @@
 
     <div id="list-view"></div>
 
-    <script src="https://use.typekit.net/wpe7mmw.js"></script>
+    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
     <script type="text/javascript">
       try{Typekit.load({ async: true });}catch(e){}
     </script>

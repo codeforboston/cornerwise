@@ -33,6 +33,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         refPointDefault: {lat: 42.387545768736246,
                           lng: -71.09950304031372},
         refMarkerColor: "red",
+        refPointName: "City Hall",
 
         defaultProposalThumb: "/static/images/marker-normal@2x.png",
 

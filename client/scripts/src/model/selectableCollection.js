@@ -42,6 +42,9 @@ define(["backbone", "underscore", "routes", "utils"],
 
                        routes.onStateChange("sort",
                                             function(sortBy) {
+                                                if (!sortBy)
+                                                    return;
+
                                                 var desc = sortBy[0] === "-";
 
                                                 self._sortByField(

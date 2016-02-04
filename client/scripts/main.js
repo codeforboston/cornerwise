@@ -51,7 +51,6 @@ require.config({
         "proposal-info-view": "src/view/proposalInfo",
         "project-info-view": "src/view/projectInfo",
         "projects-summary-view": "src/view/projectsSummary",
-        "budget": "src/view/budget",
         "projects-view": "src/view/projects",
         "project-view": "src/view/project",
         "layers-view": "src/view/layers",
@@ -64,6 +63,7 @@ require.config({
         "view-manager": "src/viewManager",
 
         // Additional features:
+        "budget": "src/view/budget",
         "glossary": "src/glossary",
         "legal-notice": "src/legalNotice",
 
