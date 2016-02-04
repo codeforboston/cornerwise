@@ -165,11 +165,10 @@ GEO_REGION = "Somerville, MA"
 GEOCODER = "arcgis"
 
 # Load select environment variables into settings:
-_G = globals()
 for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",
                "ARCGIS_CLIENT_ID", "ARCGIS_CLIENT_SECRET",
                "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET"]:
-    _G[envvar] = os.environ.get(envvar, "")
+    globals()[envvar] = os.environ.get(envvar, "")
 
 try:
     # Allow user's local settings to shadow shared settings:
