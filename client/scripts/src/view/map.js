@@ -48,6 +48,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             routes.onStateChange(_.bind(this.stateChanged, this));
 
+
+            // this.listenTo(this.collection, "selectionLoaded",
+            //               this.selectionChanged);
+
             return this;
         },
 
@@ -78,6 +82,16 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                 map.setView([lat, lng], zoom);
             }
+        },
+
+        selectionChanged: function(proposals, ids) {
+            var models = _.map(ids, proposals.get, proposals),
+                bounds = L.latLngBounds(
+                    _.map(models,
+                          function(model) {
+                              return model.get("location");
+                          }));
+            this.map.setView(bounds.getCenter());
         },
 
         // Layer ordering (bottom -> top):
@@ -142,16 +156,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                     } else {
                         marker.addTo(self.zoningLayer);
                     }
-
-                    if (change.changed.selected) {
-                         self.map.setView(marker.getLatLng(),
-                                          self.map.getZoom(),
-                                          {animate: false});
-                    } else if (change.changed.zoomed) {
-                        if (self.map.getZoom() < 18)
-                            self.map.setView(marker.get("location"), 17,
-                                             {animate: false});
-                    }
                 });
 
             // Hide or show parcel outlines:
@@ -174,6 +178,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 this.parcelLayer.removeLayer(parcelLayer);
             }
         },
+
+
 
         /* Getting information about the markers. */
         getMarkerForPermit: function(permit) {
@@ -228,22 +234,26 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.map.fitBounds(config.bounds);
         },
 
+        fitToModels: function(models) {
+            var bounds = L.latLngBounds(_.map(models,
+                                              function(model) {
+                                                  return model.get("location");
+                                              }));
+            this.map.fitBounds(bounds, {paddingTopLeft: [5, 20],
+                                        paddingBottomRight: [5, 40]});
+        },
+
         // Fit the map view to the proposals matching the active filters.
         fitToCollection: function() {
             var coll = this.collection;
 
             if (!coll.getFiltered) return;
-
-            var bounds = L.latLngBounds(_.map(coll.getFiltered(),
-                                              function(model) {
-                                                  return model.get("location");
-                                              }));
-            this.map.fitBounds(bounds, {padding: [5, 5]});
+            this.fitToModels(coll.getFiltered());
         },
 
         setShouldFit: function(shouldFit) {
             this.shouldFit = shouldFit;
-
+            // ??
         },
 
         zoomToRefLocation: function() {

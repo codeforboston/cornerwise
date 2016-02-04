@@ -1,61 +1,80 @@
 /*
+ 
  * View representing a proposal in the proposals list.
  */
-define(["backbone", "underscore", "utils"], function(B, _, $u) {
-    return B.View.extend({
-        initialize: function() {
-            this.listenTo(this.model, "change:excluded", this.excludedChanged)
-                .listenTo(this.model, "change:selected", this.selectedChanged)
-                .listenTo(this.model, "change:refDistance", this.distanceChanged);
-        },
+define(["backbone", "underscore", "utils", "ref-location", "config"],
+       function(B, _, $u, refLocation, config) {
+           var proposalHelpers = {
+               refLocationButton: function() {
+                   var setMethod = refLocation.get("setMethod");
 
-        tagName: "div",
+                   return [
+                       "<a class='ref-loc' href='#'>",
+                       setMethod == "geolocate" ?
+                           "Current Location" :
+                           setMethod == "address" ?
+                           _.escape(refLocation.get("address")) :
+                           config.refPointName,
+                       "</a>"
+                   ].join("");
+               }
+           };
 
-        className: "proposal-info info-item",
+           return B.View.extend({
+               initialize: function() {
+                   this.listenTo(this.model, "change:excluded", this.excludedChanged)
+                       .listenTo(this.model, "change:selected", this.selectedChanged)
+                       .listenTo(this.model, "change:refDistance", this.distanceChanged);
+               },
 
-        template: $u.templateWithId("proposal-template",
-                                    {variable: "proposal"}),
+               tagName: "div",
 
-        render: function() {
-            var proposal = this.model;
-            this.$el.html(this.template(proposal));
+               className: "proposal-info info-item",
 
-            if (proposal.get("excluded"))
-                this.$el.addClass("excluded");
+               template: $u.templateWithId("proposal-template",
+                                           {variable: "proposal",
+                                            helpers: proposalHelpers}),
 
-            if (proposal.get("selected"))
-                this.$el.addClass("proposal-selected");
+               render: function() {
+                   var proposal = this.model;
+                   this.$el.html(this.template(proposal));
 
-            return this;
-        },
+                   if (proposal.get("excluded"))
+                       this.$el.addClass("excluded");
 
-        excludedChanged: function(proposal, shouldExclude) {
-            if (shouldExclude) {
-                this.$el.addClass("excluded");
-            } else {
-                this.$el.removeClass("excluded");
-            }
-        },
+                   if (proposal.get("selected"))
+                       this.$el.addClass("selected");
 
-        selectedChanged: function(proposal, selected) {
-            this.$el.toggleClass("proposal-selected", selected);
-            if (selected) {
-                var parent = this.$el.parent(),
-                    topOffset = parent.scrollTop(),
-                    botOffset = topOffset + parent.height(),
-                    eltTop = this.el.offsetTop,
-                    eltBottom = eltTop + this.$el.height();
+                   return this;
+               },
 
-                if (eltTop > botOffset || eltBottom < topOffset) {
-                    parent.animate({
-                        scrollTop: eltTop - 30
-                    }, 200);
-                }
-            }
-        },
+               excludedChanged: function(proposal, shouldExclude) {
+                   if (shouldExclude) {
+                       this.$el.addClass("excluded");
+                   } else {
+                       this.$el.removeClass("excluded");
+                   }
+               },
 
-        distanceChanged: function(proposal, refDistance) {
-            this.$(".distance").html($u.commas(refDistance) + " feet");
-        }
-    });
-});
+               selectedChanged: function(proposal, selected) {
+                   this.$el.toggleClass("selected", selected);
+                   if (selected) {
+                       var parent = this.$el.parent(),
+                           topOffset = parent.scrollTop(),
+                           botOffset = topOffset + parent.height(),
+                           eltTop = this.el.offsetTop,
+                           eltBottom = eltTop + this.$el.height();
+
+                       if (eltTop > botOffset || eltBottom < topOffset) {
+                           parent.animate({
+                               scrollTop: eltTop - 30
+                           }, 200);
+                       }
+                   }
+               },
+
+               distanceChanged: function(proposal, refDistance) {
+                   this.$(".distance").html($u.commas(refDistance) + " feet");
+               }
+           });
+       });

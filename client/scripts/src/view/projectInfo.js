@@ -13,14 +13,15 @@ define(["backbone", "underscore", "budget", "utils"],
                show: function(project, expanded) {
                    var template = expanded ?
                            this.detailsTemplate :
-                           this.previewTemplate;
+                           this.previewTemplate,
+                       self = this;
 
                    template(project,
                             function(html) {
-                                this.$el.show().html(html);
+                                self.$el.show().html(html);
 
                                 budget.drawChart(project.get("budget"),
-                                                 this.$("canvas")[0]);
+                                                 self.$("canvas")[0]);
                             });
 
                    return this;
