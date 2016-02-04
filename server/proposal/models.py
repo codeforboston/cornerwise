@@ -62,6 +62,9 @@ class Proposal(models.Model):
                              help_text="The data source for the proposal.")
     status = models.CharField(max_length=64)
 
+    # A proposal can be associated with a Project:
+    project = models.ForeignKey("project.Project", blank=True, null=True)
+
 
     complete = models.BooleanField(default=False)
 

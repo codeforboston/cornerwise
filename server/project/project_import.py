@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil import tz
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.gis.geos import Point
 
 from .models import *
@@ -42,13 +43,20 @@ def rows_import(rows):
                 address_line = address.split("\n")
 
                 # Use placeholder for case number
-                project.proposals.create(case_number="CP %i" % i,
-                                         address=address_line[0],
-                                         location=point,
-                                         updated=datetime.now(tz.tzlocal()))
+                Proposal.objects.create(case_number="CP %i" % i,
+                                        address=address_line[0],
+                                        location=point,
+                                        region_name=settings.GEO_REGION,
+                                        source="projects",
+                                        project=project,
+                                        updated=datetime.now(tz.tzlocal()))
 
         i += 1
 
 def csv_import(infile):
     with open(infile, "r") as f:
         rows_import(csv.DictReader(f))
+
+
+def cleanup_proposals():
+    pass

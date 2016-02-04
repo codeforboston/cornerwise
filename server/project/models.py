@@ -19,8 +19,6 @@ class Project(models.Model):
                                 db_index=True)
     approved = models.BooleanField(db_index=True)
 
-    proposals = models.ManyToManyField("proposal.Proposal")
-
     def to_dict(self, include_budget=True):
         d = model_to_dict(self)
 
