@@ -1,3 +1,13 @@
 <div class="model-list">
+    <div class="list-controls" >
+        <%
+        var models = collection.getFiltered(),
+        n = models.length;
+        %>
+
+        Sort By
+        <a href="#sort=refDistance" class="sort-button">Distance</a>
+        <a href="#sort=-updated" class="sort-button" >Last Updated</a>
+    </div>
     <div class="contents"></div> 
 </div>

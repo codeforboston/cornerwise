@@ -1,0 +1,21 @@
+<div class="minilist">
+    <%
+    var models = collection.getFiltered(),
+    param = collection.hashParam,
+    n = models.length;
+    %>
+    Showing <strong class="matches" ><%- n %></strong> matching <%- pluralize(n, collection.getModelName()) %>
+    <hr/>
+    <div class="matches" >
+    <% models.slice(0, 16).map(function(model) { %>
+        <a class="brief-model" href="#<%- param %>=<%- model.id %>" >
+            <%= model.getName() %>
+        </a>
+    <% }); %>
+        <% if (n > 16) { %>
+        <div>
+            And <%- (n-16) %> more
+        </div>
+        <% } %>
+    </div>
+</div>

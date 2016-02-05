@@ -1,4 +1,5 @@
 define(["backbone", "utils", "underscore", "routes"],
+       // TODO: Use the collection manager here?
        function(B, $u, _, routes) {
            var ListView = B.View.extend({
                template: $u.templateWithUrl(
@@ -27,8 +28,11 @@ define(["backbone", "utils", "underscore", "routes"],
 
                onFirstShow: function() {
                    _.each(this.collections, function(coll, name) {
-                       this.listenTo(coll, "add", _.partial(this.modelAdded, name))
-                           .listenTo(coll, "sort", _.bind(this.wasSorted, this, name));
+                       var callback = _.partial(this.wasSorted, name);
+                       this.listenTo(coll, "sort", callback)
+                           .listenTo(coll, "filtered", callback)
+                           .listenTo(coll, "addedFiltered", callback)
+                           .listenTo(coll, "removedFiltered", callback);
                    }, this);
                },
 
@@ -62,7 +66,7 @@ define(["backbone", "utils", "underscore", "routes"],
                                  function(html) {
                                      self.$el.addClass("showing")
                                          .html(html);
-                                     coll.each(function(model) {
+                                     _.each(coll.getFiltered(), function(model) {
                                          self.modelAdded(name, model, coll);
                                      });
                                  });

@@ -26,12 +26,14 @@ define(["backbone", "underscore", "utils"],
 
                initialize: function(options) {
                    this.views = options.views;
+                   this.collectionManager = options.collectionManager;
                    this.collections = options.collections;
                    this.defaultView = options.defaultView;
                    this.expanded = !!options.startExpanded;
                    this.threshold = options.threshold || 250;
                    this.shouldShow = false;
 
+                   // TODO: Need a better way to manage access to the shared element:
                    _.each(options.views, function(view) {
                        view.setElement(this.$(".content"));
                    }, this);
@@ -64,17 +66,19 @@ define(["backbone", "underscore", "utils"],
                        view = this.views[name] || this.defaultView,
                        models = coll ? coll.getSelection() : [];
 
-                   this.$el.removeClass("loading");
+                   this.$el.removeClass("loading empty");
 
                    if (!name || !models.length) {
-                       this.$el.addClass("empty");
+                       this.$el.addClass("default");
                        if (this.defaultView) {
                            this.defaultView.render();
-                       } else {
+                       } else if (this.defaultTemplate) {
                            this.$(".content").html(this.defaultTemplate());
+                       } else {
+                           this.$el.addClass("empty");
                        }
                    } else {
-                       this.$el.removeClass("empty");
+                       this.$el.removeClass("default");
                        if (view.showMulti && models.length > 1) {
                            view.showMulti(models, this.expanded);
                        } else {

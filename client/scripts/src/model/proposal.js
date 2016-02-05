@@ -2,10 +2,6 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
     return B.Model.extend({
         urlRoot: "/proposal/view",
 
-        getType: function() {
-            return "proposal";
-        },
-
         initialize: function() {
                  this.listenTo(refLocation, "change", this.recalculateDistance)
                 .listenTo(this, "change:hovered", this.loadParcel)
@@ -106,6 +102,10 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                 });
         },
 
+        getName: function() {
+            return this.get("address");
+        },
+
         getThumb: function() {
             var images = this.get("images");
 
@@ -199,5 +199,8 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
         select: function() {
             this.set({selected: true});
         }
+    }, {
+        // Class properties:
+        modelName: "proposal"
     });
 });

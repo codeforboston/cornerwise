@@ -1,10 +1,6 @@
 define(
-    ["jquery", "proposals", "map-view", "projects", "info-view",
-    "proposal-info-view", "project-info-view", "proposal-view", "project-view",
-     "layers-view", "filters-view", "glossary", "config", "routes",
-     "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, MapView, Projects, InfoView, ProposalInfoView,
-             ProjectInfoView, ProposalItemView, ProjectItemView, LayersView, FiltersView,
+    ["jquery", "proposals", "projects", "map-view", "proposal-view", "project-view", "glossary", "config", "routes", "view-manager", "ref-location", "legal-notice"],
+    function($, Proposals, Projects, MapView, ProposalItemView, ProjectItemView,
              glossary, config, routes, ViewManager, refLocation) {
         return {
             start: function() {
@@ -52,24 +48,31 @@ define(
                               active: "proposals"}]
                 });
 
-                var infoView = new InfoView({
-                    el: "#info",
-                    startExpanded: routes.getKey("x") === "1",
-                    views: {
-                        "proposal": new ProposalInfoView(),
-                        "project": new ProjectInfoView()
-                    },
-                    collections: {
-                        "proposal": proposals,
-                        "project": projects
-                    }
-                });
-                appViews.info = infoView;
+                require(["info-view", "proposal-info-view", "project-info-view",
+                         "minilist-view"],
+                        function(InfoView, ProposalInfoView, ProjectInfoView, MiniListView) {
+                            var infoView = new InfoView({
+                                el: "#info",
+                                startExpanded: routes.getKey("x") === "1",
+                                defaultView: new MiniListView({
+                                    collection: proposals
+                                }),
+                                views: {
+                                    "proposal": new ProposalInfoView(),
+                                    "project": new ProjectInfoView()
+                                },
+                                collections: {
+                                    "proposal": proposals,
+                                    "project": projects
+                                }
+                            });
+                            appViews.info = infoView;
 
-                routes.onStateChange("view",
-                                     function(newKey) {
-                                         infoView.toggle(newKey == "main");
-                                     });
+                            routes.onStateChange("view",
+                                                 function(newKey) {
+                                                     infoView.toggle(newKey == "main");
+                                                 });
+                        });
 
 
                 appViews.mapView = new MapView({
@@ -77,21 +80,26 @@ define(
                     el: "#map"
                 });
 
-                appViews.layers = new LayersView({
-                    el: "#layers .contents"
-                }).render();
+                require(["layers-view"],
+                        function(LayersView) {
+                            appViews.layers = new LayersView({
+                                el: "#layers .contents"
+                            }).render();
+                        });
 
-                appViews.filtersView = new FiltersView({
-                    collection: proposals,
-                    mapView: appViews.mapView
-                });
+                require(["filters-view"],
+                        function(FiltersView) {
+                            appViews.filtersView = new FiltersView({
+                                collection: proposals,
+                                mapView: appViews.mapView
+                            });
+                        });
 
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
                 routes.init();
                 glossary.init();
-
 
                 return appViews;
             }

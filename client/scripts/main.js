@@ -36,6 +36,7 @@ require.config({
         "proposals": "src/model/proposals",
         "layers": "src/model/layers",
         "projects": "src/model/projects",
+        "collection-manager": "src/model/collectionManager",
 
         "alerts": "src/view/alerts",
 
@@ -57,6 +58,7 @@ require.config({
         "filters-view": "src/view/filters",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
+        "minilist-view": "src/view/minilist",
 
         // View managers:
         "tab-view": "src/view/tabs",

@@ -19,6 +19,14 @@ define(["backbone", "underscore", "routes", "utils"],
             *   selectedIds: ids of selected children
             *
             * - selectionAdded (collection, ids)
+            *
+            * - filtered (collection, models)
+            *   Triggered when filters are applied
+            *
+            * - addedFiltered (model, collection)
+            *   A model was added that matches the active filters
+            *
+            * - removedFiltered (model, collection)
             */
            var SelectableCollection = B.Collection.extend({
                initialize: function() {
@@ -29,7 +37,8 @@ define(["backbone", "underscore", "routes", "utils"],
                    // yet.
                    this.pending = [];
 
-                   this.on("add", this.onAdd, this);
+                   this.on("add", this.onAdd, this)
+                       .on("remove", this.onRemove, this);
 
                    if (this.hashParam) {
                        var self = this;
@@ -47,17 +56,21 @@ define(["backbone", "underscore", "routes", "utils"],
 
                                                 var desc = sortBy[0] === "-";
 
-                                                self._sortByField(
+                                                self.sortByField(
                                                     desc ? sortBy.substring(1)
                                                         : sortBy,
                                                     desc);
                                             });
 
+                       // TODO: Move this to a collection manager?
                        this.on("selection", function(self, sel) {
                            routes.setHashKey(self.hashParam, sel.join(","), true);
                        });
-
                    }
+               },
+
+               getModelName: function() {
+                   return this.model.modelName || "model";
                },
 
                /**
@@ -108,6 +121,7 @@ define(["backbone", "underscore", "routes", "utils"],
                },
 
                onAdd: function(model, coll) {
+                   // Check if the added model is one we're waiting for:
                    if (_.contains(this.pending, model.id)) {
                        this.pending = _.without(this.pending, model.id);
                        this.selection.push(model.id);
@@ -119,6 +133,14 @@ define(["backbone", "underscore", "routes", "utils"],
 
                        model.set("selected", true);
                    }
+
+                   if (this.matchesFilters(model))
+                       this.trigger("addedFiltered", model, coll);
+               },
+
+               onRemove: function(model, coll) {
+                   if (this.matchesFilters(model))
+                       this.trigger("removedFiltered", model, coll);
                },
 
                addToSelection: function(id) {
@@ -205,17 +227,15 @@ define(["backbone", "underscore", "routes", "utils"],
                    });
                },
 
+               matchesFilters: function(model) {
+                   var fs = _.values(this.activeFilters);
+
+                   return $u.everyPred(fs, model);
+               },
+
                getFiltered: function() {
                    return this.where({excluded: false});
                },
-
-               // getFiltered: function(fs) {
-               //     if (!fs) fs = _.values(this.activeFilters);
-
-               //     return this.filter(function(model) {
-               //         return $u.everyPred(fs, model);
-               //     });
-               // },
 
                // A map of string filter names to functions
                activeFilters: {},
@@ -223,7 +243,7 @@ define(["backbone", "underscore", "routes", "utils"],
                // Reapply all of the active filters.
                refresh: function() {
                    var ms = this.applyFilters(_.values(this.activeFilters));
-                   this.trigger("filtered", ms.length);
+                   this.trigger("filtered", this, ms);
                },
 
                addFilter: function(name, f) {
@@ -236,12 +256,13 @@ define(["backbone", "underscore", "routes", "utils"],
                    this.refresh();
                },
 
+               // Sorting
 
                /**
                 * @param {String} name
                 * @param {Boolean} desc true to sort descending
                 */
-               _sortByField: function(name, desc) {
+               sortByField: function(name, desc) {
                    var order = desc ? -1 : 1;
                    this.sortField = name;
                    this.order = order;
@@ -257,12 +278,6 @@ define(["backbone", "underscore", "routes", "utils"],
                        };
                        this.sort();
                    }
-               },
-
-               sortByField: function(name, desc) {
-                   this._sortByField(name, desc);
-
-                   routes.setHashKey("sort", (desc ? "-" : "") + name);
                }
            });
 

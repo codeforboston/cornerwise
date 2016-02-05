@@ -820,6 +820,18 @@ body.main #info {
     transition: none;
 }
 
+#info.default .dragger {
+    display: none;
+}
+
+.brief-model {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 10em;
+}
+
 .dragarea .dragger {
     background-color: #4EAF48;
     cursor: -webkit-grab;
@@ -1005,6 +1017,7 @@ a.thumb-link:hover {
 #layers {
     background-color: white;
     border-radius: 5px;
+    display: none;
     font-size: small;
     top: 250px;
     opacity: 0.7;
@@ -1013,6 +1026,10 @@ a.thumb-link:hover {
     z-index: 2;
 
 /*     transition: opacity 0.2s linear; */
+}
+
+body.main #layers {
+    display: block;
 }
 
 #layers:hover {
@@ -1112,4 +1129,17 @@ ul.model-list li {
 
 #list-view.showing {
     display: block;
+}
+
+#list-view .list-controls {
+    padding: 1.5em;
+}
+
+.sort-button {
+    background-color: #265E9D;
+    border: 1px solid black;
+    border-radius: 10px;
+    color: white;
+    margin: 0.5em;
+    padding: 0.3em;
 }
