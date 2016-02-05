@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.contrib.gis.geos.polygon import Polygon
+from django.contrib.gis.geos import Point
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
@@ -11,14 +13,14 @@ from functools import reduce
 from itertools import chain
 import re
 
-from shared.request import make_response
+from shared.request import make_response, ErrorResponse
 
 from .models import Proposal, Attribute, Document, Event, Image
 
 default_attributes = [
     "applicant_name",
     "legal_notice",
-    "dates_of_public_hearing"
+    "dates_of_public_hearing" 
 ]
 
 def proposal_json(proposal, include_images=True,
@@ -32,8 +34,11 @@ def proposal_json(proposal, include_images=True,
         pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
 
     if include_images:
-        pdict["images"] = [img.to_dict() for img in \
-                           proposal.images.order_by("-priority")]
+        images = proposal.images.order_by("-priority")
+        if isinstance(include_images, int):
+            images = images[0:1]
+        
+        pdict["images"] = [img.to_dict() for img in images]
 
     if include_attributes:
         attributes = Attribute.objects.filter(proposal=proposal)
@@ -43,6 +48,8 @@ def proposal_json(proposal, include_images=True,
 
     if include_events:
         pdict["events"] = [e.to_dict for e in proposal.events.all()]
+
+    # TODO: fulltext query
 
     return pdict
 
@@ -86,12 +93,25 @@ def build_proposal_query(d):
     subqueries = {}
     ids = build_attributes_query(d) or []
 
-    pids = d.get("id")
-    if pids:
-        ids = re.split(r"\s*,\s*", pids)
+    if "id" in d:
+        ids = re.split(r"\s*,\s*", d["id"])
 
     if ids:
         subqueries["pk__in"] = ids
+
+    if "region" in d:
+        subqueries["region"] = d["region"]
+
+    if "source" in d:
+        subqueries["source"] = d["source"]
+
+    if "project" in d:
+        if d["project"] == "null":
+            subqueries["project__isnull"] = True
+        elif d["project"] == "all":
+            subqueries["project__isnull"] = False
+        else:
+            subqueries["project"] = d["project"]
 
     bounds = d.get("bounds")
     if bounds:
@@ -123,9 +143,21 @@ def build_proposal_query(d):
 
 @make_response()
 def active_proposals(req):
-    proposals = Proposal.objects.filter(build_proposal_query(req.GET))
+    proposal_query = Proposal.objects.filter(build_proposal_query(req.GET))
+    paginator = Paginator(proposal_query, per_page=50)
 
-    return {"proposals": list(map(proposal_json, proposals))}
+    page = req.GET.get("page")
+    try:
+        proposals = paginator.page(page)
+    except PageNotAnInteger:
+        proposals = paginator.page(1)
+    except EmptyPage as err:
+        raise ErrorResponse("No such page", {"page": page}, err=err)
+
+    return {"proposals": list(map(proposal_json, proposals)),
+            #"count": proposals.paginator.count,
+            "page": proposals.number,
+            "total_pages": proposals.paginator.num_pages}
 
 
 @make_response()
