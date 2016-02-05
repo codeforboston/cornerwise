@@ -125,10 +125,16 @@ define(["underscore", "jquery", "locale"],
 
                format = format || "s";
 
-               if (format === "s") {
+               if (format == "s") {
+                   return [d.getMonth()+1,
+                           d.getDate(),
+                           d.getFullYear().toString().slice(2)].join("/");
+               } else if (format === "m") {
                    return [locale.monthNames[d.getMonth()],
                            ordinal(d.getDate())].join(" ");
                }
+
+               return "";
            }
 
            /**
