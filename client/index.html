@@ -22,7 +22,7 @@
     <script type="text/template" id="proposal-template">
         <div class="thumbnail">
             <img src="<%- proposal.getThumb() %>"/>
-            <a href="#">Show on Map</a>
+            <a href="#view=main&ps=<%- proposal.id %>">Show on Map</a>
         </div>
       <div class="name" title="<%- proposal.get('address') %>">
         <%- proposal.get('address') %>

@@ -1,12 +1,16 @@
-define(["backbone", "utils", "underscore", "routes"],
+define(["backbone", "jquery", "utils", "underscore", "appState"],
        // TODO: Use the collection manager here?
-       function(B, $u, _, routes) {
+       function(B, $, $u, _, appState) {
            var ListView = B.View.extend({
                template: $u.templateWithUrl(
                    "/static/template/list.html",
                    {variable: "collection"}),
 
                el: "#list-view",
+
+               events: {
+                   "click .sort-button": "changeSort"
+               },
 
                initialize: function(options) {
                    if (!_.isEqual(_.keys(options.collections),
@@ -21,7 +25,7 @@ define(["backbone", "utils", "underscore", "routes"],
                    this.subviews = options.subviews;
 
                    var self = this;
-                   routes.onStateChange("c", function(coll) {
+                   appState.onStateChange("c", function(coll) {
                        self.switchCollection(coll);
                    });
                },
@@ -30,9 +34,7 @@ define(["backbone", "utils", "underscore", "routes"],
                    _.each(this.collections, function(coll, name) {
                        var callback = _.partial(this.wasSorted, name);
                        this.listenTo(coll, "sort", callback)
-                           .listenTo(coll, "filtered", callback)
-                           .listenTo(coll, "addedFiltered", callback)
-                           .listenTo(coll, "removedFiltered", callback);
+                           .listenTo(coll, "filtered", callback);
                    }, this);
                },
 
@@ -44,10 +46,35 @@ define(["backbone", "utils", "underscore", "routes"],
                    }
                },
 
+               changeSort: function(e) {
+                   var button = $(e.target),
+                       field = button.data("sort"),
+                       isDesc = button.is(".sorted.desc");
+
+                   appState.setHashKey("sort", (isDesc ? "" : "-") + field);
+                   return false;
+               },
+
+               updateSortButtons: function(newSort) {
+                   var desc = newSort[0] == "-",
+                       field = desc ? newSort.slice(1) : newSort;
+
+                   this.$(".sort-button")
+                       .each(function(button) {
+                           if ($(this).data("sort") == field) {
+                               $(this)
+                                   .addClass("sorted")
+                                   .toggleClass("desc", desc);
+                           } else {
+                               $(this).removeClass("sorted desc");
+                           }
+                       });
+               },
+
                /*
                 * @param {String} name Name of the collection that was sorted. 
                 */
-               wasSorted: function(name) {
+               wasSorted: function(name, coll) {
                    if (this.activeCollection !== name)
                        return;
 
@@ -61,6 +88,7 @@ define(["backbone", "utils", "underscore", "routes"],
                    var name = this.activeCollection,
                        coll = this.collections[name],
                        self = this;
+                   console.log("rendering list");
 
                    this.template(coll,
                                  function(html) {

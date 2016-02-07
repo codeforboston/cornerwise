@@ -1,8 +1,8 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
         "ref-location", "ref-marker", "proposal-marker", "layers",
-        "info-layer-helper", "routes", "utils"],
+        "info-layer-helper", "appState", "utils"],
        function(B, config, L, $, _, refLocation, RefMarker,
-                ProposalMarker, infoLayers, info, routes, $u) {
+                ProposalMarker, infoLayers, info, appState, $u) {
     return B.View.extend({
         initialize: function() {
             var map = L.map(this.el,
@@ -26,7 +26,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             map.on("moveend", _.bind(this.updateMarkers, this));
             map.on("moveend", function() {
                 var center = map.getCenter();
-                routes.extendHash({
+                appState.extendHash({
                     lat: center.lat,
                     lng: center.lng,
                     zoom: map.getZoom()
@@ -46,7 +46,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 .listenTo(refLocation, "change", this.placeReferenceMarker)
                 .listenTo(infoLayers, "change", this.layersChanged);
 
-            routes.onStateChange(_.bind(this.stateChanged, this));
+            appState.onStateChange(_.bind(this.stateChanged, this));
 
 
             // this.listenTo(this.collection, "selectionLoaded",

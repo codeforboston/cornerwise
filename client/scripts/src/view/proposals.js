@@ -1,5 +1,5 @@
-define(["backbone", "proposal-view", "routes", "jquery"],
-       function(B, ProposalView, routes, $) {
+define(["backbone", "proposal-view", "appState", "jquery"],
+       function(B, ProposalView, appState, $) {
            return B.View.extend({
                title: "Proposals",
 

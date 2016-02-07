@@ -1,5 +1,5 @@
-define(["backbone", "layer", "config", "underscore", "routes"],
-       function(B, Layer, config, _, routes ) {
+define(["backbone", "layer", "config", "underscore", "appState"],
+       function(B, Layer, config, _, appState ) {
            // Construct a Backbone model for each of the layers:
            var layerModels = _.map(config.layers, function(info) {
                return new Layer(info);
@@ -8,7 +8,7 @@ define(["backbone", "layer", "config", "underscore", "routes"],
            // Return a singleton collection
            var layers = new B.Collection(layerModels);
 
-           routes.onStateChange("lys", function(ids) {
+           appState.onStateChange("lys", function(ids) {
                var idList = ids ? ids.split(",") : [];
 
                layers.each(function(layer) {
@@ -24,7 +24,7 @@ define(["backbone", "layer", "config", "underscore", "routes"],
            layers.on("change:shown", function(layer, isShown) {
                if (!layer.id) return;
 
-               routes.changeHashKey("lys", function(ids) {
+               appState.changeHashKey("lys", function(ids) {
                    var idList = ids ? ids.split(",") : [],
                        inList = _.contains(idList, layer.id);
 

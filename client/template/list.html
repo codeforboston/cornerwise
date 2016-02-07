@@ -2,12 +2,23 @@
     <div class="list-controls" >
         <%
         var models = collection.getFiltered(),
-        n = models.length;
+        n = models.length,
+        sort = collection.sortField,
+        desc = collection.desc,
+        sortClass = function(n) { return n == sort ? 'sorted ' + (desc ? 'desc' : '') : ''; };
         %>
 
         Sort By
-        <a href="#sort=refDistance" class="sort-button">Distance</a>
-        <a href="#sort=-updated" class="sort-button" >Last Updated</a>
+        <a href="#"
+           class="button sort-button <%= sortClass('refDistance') %>"
+           data-sort="refDistance">
+            Distance
+        </a>
+        <a href="#"
+           class="button sort-button <%= sortClass('updated') %>"
+           data-sort="updated">
+            Last Updated
+        </a>
     </div>
     <div class="contents"></div> 
 </div>

@@ -3,9 +3,9 @@
  */
 define(
     ["backbone", "underscore", "jquery", "ref-location", "utils", "arcgis",
-     "routes", "config"],
+     "appState", "config"],
 
-    function(B, _, $, refLocation, $u, arcgis, routes, config) {
+    function(B, _, $, refLocation, $u, arcgis, appState, config) {
         return B.View.extend({
             el: function() {
                 return document.body;
@@ -21,12 +21,12 @@ define(
                 var self = this;
 
                 // Show the filter controls?
-                routes.onStateChange("fc", function(fc) {
+                appState.onStateChange("fc", function(fc) {
                     self.toggle(fc === "1");
                 });
 
                 // Fit to results?
-                routes.onStateChange("ftr", function(ftr, oldFtr) {
+                appState.onStateChange("ftr", function(ftr, oldFtr) {
                     if (ftr === "1") {
                         self.mapView.resetBounds();
                     } else if (oldFtr === "1") {
@@ -34,7 +34,7 @@ define(
                     }
                 });
 
-                routes.onStateChange("fa", _.bind(this.showAttributeFilters, this));
+                appState.onStateChange("fa", _.bind(this.showAttributeFilters, this));
             },
 
             toggle: function(shouldShow) {
@@ -123,9 +123,9 @@ define(
             // Event handler for "Fit to Results"
             fitResults: function(e) {
                 if (e.target.checked) {
-                    routes.setHashKey("ftr", "1");
+                    appState.setHashKey("ftr", "1");
                 } else {
-                    routes.clearHashKey("ftr");
+                    appState.clearHashKey("ftr");
                 }
             },
 

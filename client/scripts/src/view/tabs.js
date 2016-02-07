@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "jquery", "routes"],
-       function(B, _, $, routes) {
+define(["backbone", "underscore", "jquery", "appState"],
+       function(B, _, $, appState) {
            return B.View.extend({
                initialize: function(options) {
                    // Object mapping titles -> views
@@ -7,7 +7,7 @@ define(["backbone", "underscore", "jquery", "routes"],
                    this.tabId = tabId;
                    this.subviews = options.subviews || {};
                    this.selected =
-                       tabId && routes.getKey(["tab", tabId]) ||
+                       tabId && appState.getKey(["tab", tabId]) ||
                        _.keys(this.subviews)[0];
                    this.panes = this.findPanes();
                    this.renderTabs();
@@ -15,7 +15,7 @@ define(["backbone", "underscore", "jquery", "routes"],
 
                    if (tabId) {
                        var self = this;
-                       routes.onStateChange(["tab", tabId],
+                       appState.onStateChange(["tab", tabId],
                                             function(newTab) {
                                                 if (newTab &&
                                                     newTab !== self.selected) {
@@ -63,7 +63,7 @@ define(["backbone", "underscore", "jquery", "routes"],
 
                    this.selected = key;
                    if (this.tabId)
-                       routes.setHashKey(["tab", this.tabId], key);
+                       appState.setHashKey(["tab", this.tabId], key);
                    this.$(".tab.selected").removeClass("selected");
                    tab.addClass("selected");
                    this.render();

@@ -125,20 +125,6 @@ span.icon {
     width: 150px;
 }
 
-.button {
-    background-color: #2D642B;
-    border-radius: 0.5em;
-    color: white;
-    padding: 0.5em;
-}
-
-.button:hover {
-    background-color: white;
-    box-shadow: 0 0 4px #2b2b2b inset;
-    color: #2b2b2b;
-    text-decoration: none;
-}
-
 .overlay {
     background-color: rgba(43, 43, 43, 0.98);
     color: white;
@@ -789,6 +775,7 @@ a.glossary:hover {
 }
 
 #info {
+    display: none;
     padding: 1em;
     padding-left: 4em;
     padding-right: 4em;
@@ -798,14 +785,15 @@ a.glossary:hover {
     overflow: hidden;
     position: absolute;
     height: 0;
-    max-height: 500px;
-    min-height: 150px;
-
+    
     transition: max-height 0.2s linear;
 }
 
 body.main #info {
+    display: block;
     height: auto;
+    max-height: 500px;
+    min-height: 150px;
     overflow: visible;
 }
 
@@ -987,8 +975,8 @@ a.thumb-link:hover {
         background: url(/static/images/cornerwise-owl.png);
         background-repeat: no-repeat;
         background-size: contain;
-        height: 80%;
-        width: 50px;
+        border: 3px solid black;
+        width: 40px;
     }
 }
 
@@ -1132,14 +1120,38 @@ ul.model-list li {
 }
 
 #list-view .list-controls {
+    background-color: #eee;
+    box-shadow: 0 0 5px 0 darkgray inset;
     padding: 1.5em;
+    padding-bottom: 1em;
 }
 
-.sort-button {
-    background-color: #265E9D;
+.button {
+    background-color: aliceblue;
     border: 1px solid black;
     border-radius: 10px;
-    color: white;
+    color: black;
+    font-size: smaller;
+    font-weight: 500;
     margin: 0.5em;
     padding: 0.3em;
+}
+
+.button:hover {
+    border: 1px solid black;
+    box-shadow: 0 0 2px black;
+    text-decoration: none;
+}
+
+.button.sorted {
+    background-color: #265E9D;
+    color: white;
+}
+
+.button.sorted:after {
+    content: "\25b4";
+}
+
+.button.sorted.desc:after {
+    content: "\25be";
 }

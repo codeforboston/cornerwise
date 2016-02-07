@@ -1,7 +1,7 @@
 define(["backbone", "underscore", "utils"],
        function(B, _, $u) {
            var dispatcher = _.clone(B.Events),
-               routes =
+               appState =
                    {
                        /** @private */
                        _cachedState: null,
@@ -144,15 +144,15 @@ define(["backbone", "underscore", "utils"],
                                var goto = $(this).data("goto");
 
                                if (goto) {
-                                   routes.setHashKey("view", goto);
+                                   appState.setHashKey("view", goto);
 
                                    return false;
                                } else {
                                    var href = $(this).attr("href"),
-                                       hash = href[0] == "#" && href.slice(1);
+                                       hash = href && href[0] == "#" && href.slice(1);
 
                                    if (hash) {
-                                       routes.extendHash($u.decodeQuery(hash));
+                                       appState.extendHash($u.decodeQuery(hash));
 
                                        return false;
                                    }
@@ -181,6 +181,6 @@ define(["backbone", "underscore", "utils"],
                        }
                    };
 
-           return routes;
+           return appState;
 
        });

@@ -1,7 +1,7 @@
 define(
-    ["jquery", "proposals", "projects", "map-view", "proposal-view", "project-view", "glossary", "config", "routes", "view-manager", "ref-location", "legal-notice"],
+    ["jquery", "proposals", "projects", "map-view", "proposal-view", "project-view", "glossary", "config", "appState", "view-manager", "ref-location", "legal-notice"],
     function($, Proposals, Projects, MapView, ProposalItemView, ProjectItemView,
-             glossary, config, routes, ViewManager, refLocation) {
+             glossary, config, appState, ViewManager, refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -12,7 +12,7 @@ define(
                         glossary: glossary
                     };
 
-                routes.onStateChange("view", function(view, oldView) {
+                appState.onStateChange("view", function(view, oldView) {
                     $(document.body)
                         .removeClass(oldView)
                         .addClass(view);
@@ -23,9 +23,9 @@ define(
                 });
 
                 refLocation.on("change:setMethod", function(_, method) {
-                    var view = routes.getKey("view");
+                    var view = appState.getKey("view");
                     if (method !== "auto" && (!view || view === "intro")) {
-                        routes.setHashKey("view", "main");
+                        appState.setHashKey("view", "main");
                     }
                 });
 
@@ -53,7 +53,7 @@ define(
                         function(InfoView, ProposalInfoView, ProjectInfoView, MiniListView) {
                             var infoView = new InfoView({
                                 el: "#info",
-                                startExpanded: routes.getKey("x") === "1",
+                                startExpanded: appState.getKey("x") === "1",
                                 defaultView: new MiniListView({
                                     collection: proposals
                                 }),
@@ -68,7 +68,7 @@ define(
                             });
                             appViews.info = infoView;
 
-                            routes.onStateChange("view",
+                            appState.onStateChange("view",
                                                  function(newKey) {
                                                      infoView.toggle(newKey == "main");
                                                  });
@@ -98,8 +98,12 @@ define(
                 proposals.fetch({dataType: "jsonp"});
                 projects.fetch({dataType: "jsonp"});
 
-                routes.init();
+                appState.init();
                 glossary.init();
+                $(document).on("click", "a.ref-loc", function(e) {
+                    $("#ref-address-form input").focus().select();
+                    return false;
+                });
 
                 return appViews;
             }

@@ -18,7 +18,7 @@ require.config({
         // Application: //
         "config": "src/config",
         "local-config": "src/localConfig",
-        "routes": "src/routes",
+        "appState": "src/appState",
         "ref-location": "src/refLocation",
 
         // Leaflet stuff:

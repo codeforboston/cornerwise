@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "routes"],
-       function(B, _, routes) {
+define(["backbone", "underscore", "appState"],
+       function(B, _, appState) {
            /**
             * 
             */
@@ -12,12 +12,12 @@ define(["backbone", "underscore", "routes"],
                    this.collections = options.collections;
                    this.activeCollection =
                        options.activeCollection ||
-                       routes.getKey("c") ||
+                       appState.getKey("c") ||
                        _.keys(options.collections)[0];
 
                    var self = this;
 
-                   routes.onStateChange(function(newState, oldState) {
+                   appState.onStateChange(function(newState, oldState) {
                        // Check if the active collection has changed:
                        if (newState.c !== oldState.c) {
                            self.setActiveCollection(newState.c);

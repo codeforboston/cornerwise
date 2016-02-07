@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "routes", "utils"],
-       function(B, _, routes, $u) {
+define(["backbone", "underscore", "appState", "utils"],
+       function(B, _, appState, $u) {
            /**
             * @constructor
             * A collection that keeps track of which items are selected.
@@ -42,14 +42,14 @@ define(["backbone", "underscore", "routes", "utils"],
 
                    if (this.hashParam) {
                        var self = this;
-                       routes.onStateChange(this.hashParam, function(ids, oldIds) {
+                       appState.onStateChange(this.hashParam, function(ids, oldIds) {
                            if (!ids) return;
 
                            ids = _.map(ids.split(","), $u.parseInt10);
                            self.setSelection(ids);
                        });
 
-                       routes.onStateChange("sort",
+                       appState.onStateChange("sort",
                                             function(sortBy) {
                                                 if (!sortBy)
                                                     return;
@@ -64,7 +64,7 @@ define(["backbone", "underscore", "routes", "utils"],
 
                        // TODO: Move this to a collection manager?
                        this.on("selection", function(self, sel) {
-                           routes.setHashKey(self.hashParam, sel.join(","), true);
+                           appState.setHashKey(self.hashParam, sel.join(","), true);
                        });
                    }
                },
@@ -265,7 +265,7 @@ define(["backbone", "underscore", "routes", "utils"],
                sortByField: function(name, desc) {
                    var order = desc ? -1 : 1;
                    this.sortField = name;
-                   this.order = order;
+                   this.desc = desc;
 
                    if (!name) {
                        this.comparator = false;

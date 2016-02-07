@@ -23,16 +23,16 @@
  * to observe.
  *
  */
-define(["routes", "underscore", "jquery"],
-       function(routes, _, $) {
+define(["appState", "underscore", "jquery"],
+       function(appState, _, $) {
            function ViewManager(views, name) {
                name = name || "view";
                this.views = views || {};
                this.constructedViews = {};
 
                var self = this,
-                   key = routes.getKey(name);
-               routes.onStateChange(
+                   key = appState.getKey(name);
+               appState.onStateChange(
                    name,
                    function(newKey, oldKey) {
                        key = newKey;

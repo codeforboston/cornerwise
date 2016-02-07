@@ -1,6 +1,6 @@
-define(["backbone", "routes", "underscore", "config",
+define(["backbone", "appState", "underscore", "config",
         "utils"],
-       function(B, routes, _, config, $u) {
+       function(B, appState, _, config, $u) {
            return B.View.extend({
                previewTemplate: $u.templateWithUrl(
                    "/static/template/proposalDetail.html",
