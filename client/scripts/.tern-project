@@ -1,4 +1,9 @@
 {
+    "libs": [
+        "browser",
+        "jquery",
+        "underscore"
+    ],
     "plugins": {
         "requirejs": {
             "baseURL": "./",
