@@ -49,19 +49,6 @@ define(["backbone", "underscore", "appState", "utils"],
                            self.setSelection(ids);
                        });
 
-                       appState.onStateChange("sort",
-                                            function(sortBy) {
-                                                if (!sortBy)
-                                                    return;
-
-                                                var desc = sortBy[0] === "-";
-
-                                                self.sortByField(
-                                                    desc ? sortBy.substring(1)
-                                                        : sortBy,
-                                                    desc);
-                                            });
-
                        // TODO: Move this to a collection manager?
                        this.on("selection", function(self, sel) {
                            appState.setHashKey(self.hashParam, sel.join(","), true);
@@ -152,23 +139,22 @@ define(["backbone", "underscore", "appState", "utils"],
                    var id = this.selection[0];
 
                    return id ?
-                       _.findIndex(this.models, function(m) {
-                           return m.id == id;
-                       }) : -1;
+                       _.findIndex(this.models, $u.idIs(id)) : -1;
                },
 
                selectRelative: function(dir) {
-                   var fs = _.values(this.activeFilters);
+                   var fs = _.values(this.activeFilters), idx;
 
                    if (fs.length) {
                        var models = this.getFiltered(fs),
-                           id = this.selection[0],
-                           idx = _.findIndex(models, $u.idIs(id));
+                           id = this.selection[0];
+
+                       idx = _.findIndex(models, $u.idIs(id));
 
                        model = models[idx+dir] ||
                            dir < 0 ? _.last(models) : _.first(models);
                    } else {
-                       var idx = this.getSelectedIndex();
+                       idx = this.getSelectedIndex();
 
                        model = this.at(idx+dir) || this.at(dir < 0 ? -1 : 0);
                    }
@@ -259,6 +245,12 @@ define(["backbone", "underscore", "appState", "utils"],
                // Sorting
 
                /**
+                * A map of fieldName -> comparator function
+                * 
+                */
+               comparators: {},
+               
+               /**
                 * @param {String} name
                 * @param {Boolean} desc true to sort descending
                 */
@@ -269,6 +261,11 @@ define(["backbone", "underscore", "appState", "utils"],
 
                    if (!name) {
                        this.comparator = false;
+                   } else if (this.comparators[name]) {
+                       var cmp = this.comparators[name];
+                       this.comparator = desc ?
+                           (function(v1, v2) { return -cmp(); }) : cmp;
+                       this.sort();
                    } else {
                        this.comparator = function(p1, p2) {
                            var v1 = p1.get(name),
