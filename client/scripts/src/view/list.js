@@ -1,4 +1,5 @@
-define(["backbone", "jquery", "utils", "underscore", "appState"],
+define(["backbone", "jquery", "utils", "underscore", 
+        "appState"],
        // TODO: Use the collection manager here?
        function(B, $, $u, _, appState) {
            var ListView = B.View.extend({
@@ -13,37 +14,24 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
                },
 
                initialize: function(options) {
-                   if (!_.isEqual(_.keys(options.collections),
-                                  _.keys(options.subviews))) {
-                       throw new Error("You must have a matching subview " +
-                                       "for each collection.");
-                   }
+                   console.assert(
+                       _.isEqual(options.manager.getCollectionNames(),
+                                 _.keys(options.subviews)),
+                       "You must have a matching subview for each " +
+                           "collection.");
 
-                   this.collections = options.collections;
-                   this.activeCollection = options.active ||
-                       _.keys(options.collections)[0];
+                   this.manager = options.manager;
                    this.subviews = options.subviews;
 
-                   var self = this;
-                   appState.onStateChange("c", function(coll) {
-                       self.switchCollection(coll);
-                   });
+                   this.listenTo(this.manager, "activeCollection", this.render);
                },
 
                onFirstShow: function() {
-                   _.each(this.collections, function(coll, name) {
-                       var callback = _.partial(this.wasSorted, name);
-                       this.listenTo(coll, "sort", callback)
-                           .listenTo(coll, "filtered", callback);
-                   }, this);
-               },
-
-               switchCollection: function(name) {
-                   if (name !== this.activeCollection &&
-                      this.collections[name]) {
-                       this.activeCollection = name;
-                       this.render();
-                   }
+                   var cm = this.manager;
+                   this.listenTo(cm, "sort", this.render)
+                       .listenTo(cm, "filtered", this.render)
+                       .listenTo(cm, "change", this.modelChanged)
+                       .listenTo(cm, "add", this.modelAdded);
                },
 
                changeSort: function(e) {
@@ -55,44 +43,35 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
                    return false;
                },
 
-               updateSortButtons: function(newSort) {
-                   var desc = newSort[0] == "-",
-                       field = desc ? newSort.slice(1) : newSort;
+               modelChanged: function(name, model) {
+                   var activeSort = this.manager.getCollection().sortField;
+                   if (activeSort &&
+                       _.contains(_.keys(model.changed), activeSort)) {
+                       this.render();
+                   } else {
+                       var view = this.subviewCache[model.id];
 
-                   this.$(".sort-button")
-                       .each(function(button) {
-                           if ($(this).data("sort") == field) {
-                               $(this)
-                                   .addClass("sorted")
-                                   .toggleClass("desc", desc);
-                           } else {
-                               $(this).removeClass("sorted desc");
-                           }
-                       });
-               },
-
-               /*
-                * @param {String} name Name of the collection that was sorted. 
-                */
-               wasSorted: function(name, coll) {
-                   if (this.activeCollection !== name)
-                       return;
-
-                   this.render();
+                       if (view) {
+                           if (view.modelChanged)
+                               view.modelChanged(model);
+                           else
+                               view.render();
+                       }
+                   }
                },
 
                /**
                 * @returns {ListView} 
                 */
                render: function() {
-                   var name = this.activeCollection,
-                       coll = this.collections[name],
+                   var coll = this.manager.getCollection(),
+                       name = this.manager.getCollectionName(),
                        self = this;
-                   console.log("rendering list");
-
+                   this.subviewCache = {};
                    this.template(coll,
                                  function(html) {
-                                     self.$el.addClass("showing")
+                                     self.$el.toggleClass("showing",
+                                                          self.shouldShow)
                                          .html(html);
                                      _.each(coll.getFiltered(), function(model) {
                                          self.modelAdded(name, model, coll);
@@ -102,14 +81,18 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
                    return this;
                },
 
+               /**
+                * Run when a collection is re-rendered or when a model is added
+                * to the active collection.
+                *
+                * @param {String} name of the active collection
+                * @param {B.Model} model The added model
+                * @param {B.Collection} coll The active collection
+                */
                modelAdded: function(name, model, coll) {
-                   if (name !== this.activeCollection ||
-                       !this.shouldShow) {
-                       return;
-                   }
-
                    var view = new this.subviews[name]({model: model});
                    this.$(".contents").append(view.el);
+                   this.subviewCache[model.id] = view;
                    view.render();
                },
 

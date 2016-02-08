@@ -1,11 +1,17 @@
 define(
-    ["jquery", "proposals", "projects", "map-view", "proposal-view", "project-view", "glossary", "config", "appState", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, Projects, MapView, ProposalItemView, ProjectItemView,
+    ["jquery", "proposals", "projects", "collection-manager", "map-view", "proposal-view", "project-view", "glossary", "config", "appState", "view-manager", "ref-location", "legal-notice"],
+    function($, Proposals, Projects, CollectionManager, MapView, ProposalItemView, ProjectItemView,
              glossary, config, appState, ViewManager, refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
                     projects = new Projects(),
+                    cm = new CollectionManager({
+                        collections: {
+                            proposals: proposals,
+                            projects: projects
+                        }
+                    }),
                     appViews = {
                         proposals: proposals,
                         projects: projects,
@@ -45,6 +51,7 @@ define(
                                             projects: projects},
                               subviews: {proposals: ProposalItemView,
                                          projects: ProjectItemView},
+                              manager: cm,
                               active: "proposals"}]
                 });
 
