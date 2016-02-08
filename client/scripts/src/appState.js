@@ -113,7 +113,7 @@ define(["backbone", "underscore", "utils"],
                                            return;
                                        callback(newVal, oldVal);
                                    } else {
-                                       callback(state, lastState);
+                                       callback(state, lastState || {});
                                    }
                                });
                                lastState = state;
