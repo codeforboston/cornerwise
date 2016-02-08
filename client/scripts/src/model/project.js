@@ -13,6 +13,10 @@ define(["backbone", "underscore"],
                    "T&I": "Transportation and Infrastructure"
                },
 
+               defaults: {
+                   excluded: false
+               },
+
                parse: function(attrs) {
                    _.each(attrs.budget, function(item) {
                        item.budget = parseFloat(item.budget);
