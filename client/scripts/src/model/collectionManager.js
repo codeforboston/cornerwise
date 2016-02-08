@@ -1,7 +1,8 @@
 define(["backbone", "underscore", "appState"],
        function(B, _, appState) {
            /**
-            * 
+            * The collection manager keeps track of the active collection and
+            * passes messages about the app state to that collection.
             */
            var CollectionManager = B.Collection.extend({
                /**
@@ -10,10 +11,11 @@ define(["backbone", "underscore", "appState"],
                 */
                initialize: function(options) {
                    this.collections = options.collections;
-                   this.activeCollection =
+                   var name =
                        options.activeCollection ||
                        appState.getKey("c") ||
                        _.keys(options.collections)[0];
+                   this.setActiveCollection(name);
 
                    var self = this;
 
@@ -42,23 +44,30 @@ define(["backbone", "underscore", "appState"],
                    return this.activeCollection;
                },
 
+               getCollectionNames: function() {
+                   return _.keys(this.collections);
+               },
+
                setActiveCollection: function(name) {
                    if (name == this.activeCollection)
                        return;
 
                    var coll = this.collections[name],
-                       old = this.getActiveCollection();
+                       old = this.collections[this.activeCollection];
 
                    if (coll) {
                        this.activeCollection = name;
                        this.trigger("activeCollection", name, coll, old);
                        this.stopListening(old);
-                       this.listenTo(coll, "all", this.forwardCollectionEvents);
+                       this.listenTo(coll, "all",
+                                     this._forwardCollectionEvents);
                    }
                },
 
-               forwardCollectionEvents: function() {
-                   this.trigger.apply(this, arguments);
+               _forwardCollectionEvents: function(event) {
+                   var args = _.drop(arguments, 1),
+                       name = this.activeCollection;
+                   this.trigger.apply(this, [event, name].concat(args));
                },
 
                isSelectionEmpty: function() {
