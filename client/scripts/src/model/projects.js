@@ -8,6 +8,11 @@ define(["backbone", "underscore", "project", "project-view",
 
                hashParam: "pj",
 
+               sortFields: [
+                   {name: "Department",
+                    field: "department"}
+               ],
+
                parse: function(results) {
                    return results.projects;
                },

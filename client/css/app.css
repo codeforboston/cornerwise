@@ -496,6 +496,7 @@ body.main .main-mode, body.list .list-mode {
     background-color: #efefef;
     border: 1px solid #ccc;
     border-radius: 4px;
+    margin-left: 0.1em;
     padding: 0.1em;
 }
 
@@ -804,6 +805,7 @@ body.main #info {
     right: 0;
 }
 
+/* Applied while the user is dragging */
 #info._disable_height_transition {
     transition: none;
 }
@@ -1124,6 +1126,14 @@ ul.model-list li {
     box-shadow: 0 0 5px 0 darkgray inset;
     padding: 1.5em;
     padding-bottom: 1em;
+}
+
+.results-info {
+    float: right;
+    font-size: small;
+    position: relative;
+    right: 7em;
+    top: -0.5em;
 }
 
 .button {

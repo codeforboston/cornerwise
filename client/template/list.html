@@ -3,22 +3,25 @@
         <%
         var models = collection.getFiltered(),
         n = models.length,
+        typeName = collection.getModelName(),
         sort = collection.sortField,
         desc = collection.desc,
         sortClass = function(n) { return n == sort ? 'sorted ' + (desc ? 'desc' : '') : ''; };
         %>
 
-        Sort By
+        Sort By:
+
+        <% _.each(collection.sortFields, function(field) { %>
         <a href="#"
-           class="button sort-button <%= sortClass('refDistance') %>"
-           data-sort="refDistance">
-            Distance
+           class="button sort-button <%= sortClass(field.field) %>"
+           data-sort="<%- field.field %>">
+            <%- field.name %>
         </a>
-        <a href="#"
-           class="button sort-button <%= sortClass('updated') %>"
-           data-sort="updated">
-            Last Updated
-        </a>
+        <% }) %>
+
+        <div class="results-info">
+            Matched <%- n %> <%- pluralize(n, typeName) %>
+        </div>
     </div>
-    <div class="contents"></div> 
+    <div class="contents"></div>
 </div>

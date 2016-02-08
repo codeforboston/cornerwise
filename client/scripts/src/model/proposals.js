@@ -26,6 +26,15 @@ define(
 
             query: {},
 
+            sortFields: [
+                {name: "Distance",
+                 field: "refDistance",
+                 desc: false},
+                {name: "Last Updated",
+                 field: "updated",
+                 desc: true}
+            ],
+
             filterByText: function(s) {
                 var re = new RegExp($u.escapeRegex(s), "i");
                 this._filterByRegex(re);
