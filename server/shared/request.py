@@ -1,16 +1,19 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render_to_response
-from django.template.loader import render_to_string
 
-import logging, json, re
+import logging
+import json
+import re
 
 logger = logging.getLogger("logger")
+
 
 class ErrorResponse(Exception):
     def __init__(self, message, data=None, status=401, err=None):
         super(Exception, self).__init__(self, message)
-        self.data = data or { "error": message }
+        self.data = {"error": message}
+        self.data.update(data)
         self.status = status
         self.exception = err
 
@@ -46,7 +49,6 @@ def make_response(template=None, error_template="error.html"):
                 response = HttpResponse(body, status=status)
                 response["Content-Type"] = "application/javascript"
                 return response
-
 
             accepts = req.META["HTTP_ACCEPT"]
             typestring, _ = accepts.split(";", 1)
