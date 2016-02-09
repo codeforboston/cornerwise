@@ -794,8 +794,8 @@ body.main #info {
     display: block;
     height: auto;
     max-height: 500px;
-    min-height: 150px;
     overflow: visible;
+    padding-bottom: 2em;
 }
 
 #info .dragarea {
@@ -816,10 +816,16 @@ body.main #info {
 
 .brief-model {
     display: inline-block;
+    font-size: smaller;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 10em;
+}
+
+a.brief-model:hover {
+    color: #54C9D3 !important;
+    text-decoration: none;
 }
 
 .dragarea .dragger {
