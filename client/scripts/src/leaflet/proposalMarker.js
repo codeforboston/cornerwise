@@ -12,8 +12,8 @@ define(["leaflet", "underscore"],
 
            function getIcon(proposal) {
                // Generate an L.icon for a given proposal's parameters
-               var isHovered = proposal.get("hovered"),
-                   isSelected = proposal.get("selected"),
+               var isHovered = proposal.get("_hovered"),
+                   isSelected = proposal.get("_selected"),
 
                    png = getMarkerPng(isHovered, isSelected);
 
@@ -37,10 +37,14 @@ define(["leaflet", "underscore"],
                    var self = this;
                    proposal
                        .on("change:location", _.bind(this.locationChanged, this))
-                       .on("change:hovered", _.bind(this.updateIcon, this))
-                       .on("change:selected", _.bind(this.updateIcon, this));
+                       .on("change:_hovered", _.bind(this.updateIcon, this))
+                       .on("change:_selected", _.bind(this.updateIcon, this));
 
                    return this;
+               },
+
+               getModel: function() {
+                   return this.proposal;
                },
 
                locationChanged: function(proposal, loc) {

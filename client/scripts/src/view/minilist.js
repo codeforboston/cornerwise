@@ -3,6 +3,7 @@ define(["backbone", "utils"],
            var MiniListView = B.View.extend({
                template: $u.templateWithUrl("/static/template/minilist.html"),
                initialize: function(options) {
+                   var manager = this.manager = options.manager;
                    var coll = this.collection = options.collection;
 
                    if (!coll)
@@ -10,28 +11,27 @@ define(["backbone", "utils"],
 
                    this.listenTo(coll, "filtered", this.render)
                        .listenTo(coll, "addedFiltered", this.render)
-                       .listenTo(coll, "removedFiltered", this.render);
+                       .listenTo(coll, "removedFiltered", this.render)
+                       .listenTo(coll, "change:_visible", this.render)
+                       .listenTo(window, "resize", this.onWindowResized);
                },
 
-               onSelection: function(collection, ids) {
-                   this.loading = true;
-                   this.render();
-               },
+               onWindowResized: function() {
 
-               onSelectionLoaded: function(collection, ids) {
-                   this.loading = false;
-                   this.render();
                },
 
                render: function() {
-                   var $el = this.$el;
+                   var $el = this.$el,
+                       data = {
+                           models: this.collection.getVisible(),
+                           name: this.collection.getModelName(),
+                           param: this.collection.hashParam,
+                           showCount: 16
+                       };
 
-                   this.template({
-                       collection: this.collection,
-                       name: name},
-                            function(html) {
-                                $el.html(html);
-                            });
+                   this.template(data, function(html) {
+                       $el.html(html);
+                   });
                }
            });
 

@@ -4,18 +4,22 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
         initialize: function() {
                  this.listenTo(refLocation, "change", this.recalculateDistance)
-                .listenTo(this, "change:hovered", this.loadParcel)
-                .listenTo(this, "change:selected", this.loadParcel);
+                .listenTo(this, "change:_hovered", this.loadParcel)
+                .listenTo(this, "change:_selected", this.loadParcel);
         },
 
         defaults: function() {
             return {
-                hovered: false,
-                selected: false,
+                _hovered: false,
+                _selected: false,
 
-                // excluded will change to true when the permit fails
+                // _excluded will change to true when the permit fails
                 // the currently applied filter(s).
-                excluded: false,
+                _excluded: false,
+
+                // Cached calculation; true if the proposal marker lies within
+                // the bounds of the visible map area.
+                _visible: true,
                 // GeoJSON representing the shape of the corresponding
                 // tax parcel, if one is found.
                 parcel: null
@@ -194,10 +198,6 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
         recalculateDistance: function() {
             var dist = this.set("refDistance", this.getDistanceToRef());
-        },
-
-        select: function() {
-            this.set({selected: true});
         }
     }, {
         // Class properties:

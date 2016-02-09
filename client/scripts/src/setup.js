@@ -62,6 +62,7 @@ define(
                                 el: "#info",
                                 startExpanded: appState.getKey("x") === "1",
                                 defaultView: new MiniListView({
+                                    manager: cm,
                                     collection: proposals
                                 }),
                                 views: {

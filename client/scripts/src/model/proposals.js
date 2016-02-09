@@ -101,7 +101,7 @@ define(
             // Returns a LatLngBounds object for the proposals that are
             // not excluded.
             getBounds: function() {
-                return L.latLngBounds(_.map(this.where({excluded: false}),
+                return L.latLngBounds(_.map(this.getFiltered(),
                                             function(p) {
                                                 return p.get("location");
                                             }));

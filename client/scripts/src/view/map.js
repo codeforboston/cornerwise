@@ -120,10 +120,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             marker
                 .on("mouseover", function(e) {
-                    proposal.set({hovered: true});
+                    proposal.set({_hovered: true});
                 })
                 .on("mouseout", function(e) {
-                    proposal.set({hovered: false});
+                    proposal.set({_hovered: false});
                 })
                 .on("click", function(e) {
                     proposals.setSelection(proposal.id);
@@ -147,7 +147,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         // Triggered when a child permit changes
         changed: function(change) {
             var self = this,
-                excluded = change.get("excluded");
+                excluded = change.get("_excluded");
 
             this.getMarkerForPermit(change)
                 .done(function(marker) {
@@ -160,7 +160,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             // Hide or show parcel outlines:
             var parcelLayer = this.parcelLayers[change.get("caseNumber")];
-            if (change.get("selected") || change.get("hovered")) {
+            if (change.get("_selected") || change.get("_hovered")) {
                 if (!parcelLayer) {
                     var parcel = change.get("parcel");
 
@@ -173,13 +173,11 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                 this.parcelLayer.addLayer(parcelLayer);
             } else if (parcelLayer &&
-                       (change.changed.selected === false ||
-                        change.changed.hovered === false)) {
+                       (change.changed._selected === false ||
+                        change.changed._hovered === false)) {
                 this.parcelLayer.removeLayer(parcelLayer);
             }
         },
-
-
 
         /* Getting information about the markers. */
         getMarkerForPermit: function(permit) {
@@ -189,24 +187,27 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             return marker ? promise.resolve(marker) : promise.fail();
         },
 
+        /**
+         * 
+         */
         updateMarkers: function() {
             var map = this.map,
-                pLayer = this.zoningLayer;
+                pLayer = this.zoningLayer,
+                bounds = map.getBounds(),
+                zoom = map.getZoom();
 
-            if (map.getZoom() >= 17) {
-                var bounds = map.getBounds();
+            _.each(this.caseMarker, function(marker) {
+                var inBounds = bounds.contains(marker.getLatLng());
+                marker.getModel().set("_visible", inBounds);
 
-                _.each(this.caseMarker, function(marker) {
-                    if (!bounds.contains(marker.getLatLng()))
+                if (zoom >= 17) {
+                    if (!inBounds)
                         return;
-
-                    marker.setZoomed(map.getZoom() - 17);
-                });
-            } else {
-                _.each(this.caseMarker, function(marker) {
+                    marker.setZoomed(zoom - 17);
+                } else {
                     marker.unsetZoomed();
-                });
-            }
+                }
+            });
         },
 
         // Store a reference to the reference marker

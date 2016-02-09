@@ -211,7 +211,7 @@ define(["backbone", "underscore", "utils"],
 
                modelChanged: function(model) {
                    if (_.every(_.keys(model.changed),
-                               _.partial(_.contains, ["selected", "hovered"])))
+                               function(k) { return k[0] == "_"; }))
                        return;
 
                    this.render();

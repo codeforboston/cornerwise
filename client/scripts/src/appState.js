@@ -136,7 +136,14 @@ define(["backbone", "underscore", "utils"],
                            this.watchers.push(watcher);
                        },
 
-                       setupLinks: function() {
+                       /**
+                        * Run at initialization.  Any link with an href of the
+                        * form #param=value&... (etc.), when clicked, will cause
+                        * the parameters and values to be merged with the
+                        * current hash state, and the application will update
+                        * accordingly.
+                        */
+                       _setupLinks: function() {
                            $(document).on("click", "a,._setview", function(e) {
                                if (e.currentTarget != e.target)
                                    return true;
@@ -166,7 +173,7 @@ define(["backbone", "underscore", "utils"],
                        init: function() {
                            this.startWatch();
                            this.triggerHashState();
-                           this.setupLinks();
+                           this._setupLinks();
 
                            var self = this;
                            B.history.start({hashChange: true});

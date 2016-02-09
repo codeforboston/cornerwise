@@ -1,20 +1,18 @@
 <div class="minilist">
     <%
-    var models = collection.getFiltered(),
-    param = collection.hashParam,
-    n = models.length;
+    var n = models.length;
     %>
-    Showing <strong class="matches" ><%- n %></strong> matching <%- pluralize(n, collection.getModelName()) %>
-    <hr/>
+    
+    <%- n %> visible:
     <div class="matches" >
-    <% models.slice(0, 16).map(function(model) { %>
+    <% models.slice(0, showCount).map(function(model) { %>
         <a class="brief-model" href="#<%- param %>=<%- model.id %>" >
             <%= model.getName() %>
         </a>
     <% }); %>
-        <% if (n > 16) { %>
+        <% if (n > showCount) { %>
         <div>
-            And <%- (n-16) %> more
+            And <%- (n-showCount) %> more
         </div>
         <% } %>
     </div>

@@ -14,7 +14,7 @@ define(["backbone", "underscore"],
                },
 
                defaults: {
-                   excluded: false
+                   _excluded: false
                },
 
                parse: function(attrs) {

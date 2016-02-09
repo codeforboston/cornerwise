@@ -194,19 +194,19 @@ define(["backbone", "underscore", "appState", "utils"],
                /**
                 * Applies each of the functions in the array fs to the
                 * proposals in the collection. If any of the functions
-                * returns false, the Proposal will be updated: its "excluded"
+                * returns false, the Proposal will be updated: its "_excluded"
                 * attribute will be set to true.
                 *
                 * @param {Array} fs
                 */
                applyFilters: function(fs) {
                    return this.filter(function(model) {
-                       var excluded = model.get("excluded"),
+                       var excluded = model.get("_excluded"),
                            shouldExclude = !$u.everyPred(fs, model);
 
                        // Is the model already excluded, and should it be?
                        if (excluded !== shouldExclude) {
-                           model.set("excluded", shouldExclude);
+                           model.set("_excluded", shouldExclude);
                        }
 
                        return !shouldExclude;
@@ -220,7 +220,12 @@ define(["backbone", "underscore", "appState", "utils"],
                },
 
                getFiltered: function() {
-                   return this.where({excluded: false});
+                   return this.where({_excluded: false});
+               },
+
+               getVisible: function() {
+                   return this.where({_excluded: false,
+                                      _visible: true});
                },
 
                // A map of string filter names to functions
