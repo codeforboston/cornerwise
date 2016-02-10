@@ -1,98 +1,133 @@
 {
   "type": "FeatureCollection",
   "features": [
-      {
-
-            "type": "Feature",
-            "properties": {
-                "title": "Clarendon Hill Busway "
-
-            },
-            "geometry": {
-                "coordinates": [
-                    -71.1320985,
-                    42.4059273
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "title": "Broadway @ Holland St"
-            },
-            "geometry": {
-                "coordinates": [
-                    -71.1293355,
-                    42.4032411
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "title": "Holland St @ Dover St"
-            },
-            "geometry": {
-                "coordinates": [
-                    -71.1253559,
-                    42.397175
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "title": "Highland Ave @ Cedar St"
-            },
-            "geometry": {
-                "coordinates": [
-                    -71.1146068,
-                    42.3922125
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "title": "Highland Ave @ School St"
-            },
-            "geometry": {
-                "coordinates": [
-                    -71.1009109,
-                    42.3868313
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "title": "O'brien Hwy @ Medford St"
-            },
-            "geometry": {
-                "coordinates": [
-                  -71.0763554,
-                    42.369704
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "title": "Lechmere Station"
-            },
-            "geometry": {
-                "coordinates": [
-                    -71.0763554, 
-                    42.369704
-                ],
-                "type": "Point"
-            }
-        }
-    ]
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Clarendon Hill Busway "
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1320985,
+          42.4059273
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Broadway @ Holland St"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1293355,
+          42.4032411
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Holland St @ Dover St"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1253559,
+          42.397175
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Highland Ave @ Cedar St"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1146068,
+          42.3922125
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Highland Ave @ School St"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1009109,
+          42.3868313
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "O'brien Hwy @ Medford St"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.0763554,
+          42.369704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Lechmere Station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.0763554,
+          42.369704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -71.07583522796631,
+            42.3706250259125
+          ],
+          [
+            -71.08901023864746,
+            42.377314613944506
+          ],
+          [
+            -71.09016895294188,
+            42.38178451019475
+          ],
+          [
+            -71.091628074646,
+            42.383718196490655
+          ],
+          [
+            -71.1229133605957,
+            42.39665017350661
+          ],
+          [
+            -71.12737655639648,
+            42.403115162876546
+          ],
+          [
+            -71.13226890563965,
+            42.40609390438587
+          ]
+        ]
+      }
+    }
+  ]
 }
