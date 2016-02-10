@@ -1,0 +1,70 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Davis Square Busway "
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1320985,
+          42.4059273
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Highland Ave @ School St "
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1293355,
+          42.4032411
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Sullivan Station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1253559,
+          42.397175
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Assembly Sq Mall Opp Bed Bath & Beyond "
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1146068,
+          42.3922125
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Wellington Station Busway "
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.1009109,
+          42.3868313
+        ]
+      }
+    }
+  ]
+}
