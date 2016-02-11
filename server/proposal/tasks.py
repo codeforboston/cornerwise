@@ -18,8 +18,9 @@ from .models import Proposal, Attribute, Event, Document, Image
 from utils import extension, normalize
 from . import extract
 from . import utils as proposal_utils
+from .importers.register import Importers
 from cornerwise import celery_app
-from scripts import scrape, arcgis, gmaps, street_view
+from scripts import arcgis, gmaps, street_view
 from scripts.images import is_interesting, make_thumbnail
 from shared import files_metadata
 
@@ -58,10 +59,9 @@ def create_proposal_from_json(p_dict):
 
     proposal.summary = p_dict.get("summary", "")
     proposal.description = p_dict.get("description")
-    # This should not be hardcoded
     proposal.source = p_dict.get("source")
     proposal.updated = p_dict["updatedDate"]
-    proposal.complete = p["complete"]
+    proposal.complete = p_dict["complete"]
 
     proposal.save()
 
@@ -245,13 +245,13 @@ def add_street_view(proposal):
                            .filter(source="google_street_view")\
                            .exists():
                 image = proposal.images.create(url=url,
-                                           skip_cache=True,
+                                               skip_cache=True,
                                                source="google_street_view",
                                                priority=1)
                 return image
-        except IntegrityError as ie:
+        except IntegrityError:
             logger.warning("Image with that URL already exists")
-        except DataError as de:
+        except DataError:
             logger.warning("Image could not be saved.  Was the URL too long?")
 
     else:
@@ -437,8 +437,7 @@ def process_proposals(proposals):
 
 @celery_app.task(name="proposal.scrape_reports_and_decisions")
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, page=None,
-                                 coder_type=settings.GEOCODER):
+def scrape_reports_and_decisions(since=None, coder_type=settings.GEOCODER):
     """
     Task that scrapes the reports and decisions page
     """
@@ -450,27 +449,26 @@ def scrape_reports_and_decisions(since=None, page=None,
         geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
                                       settings.ARCGIS_CLIENT_SECRET)
 
-    if page is not None:
-        proposals_json = scrape.get_proposals_for_page(page, geocoder)
-    else:
+    if not since:
+        # If there was no last run, the scraper will fetch all
+        # proposals.
+        since = last_run()
+
         if not since:
-            # If there was no last run, the scraper will fetch all
-            # proposals.
-            since = last_run()
+            latest_proposal = Proposal.objects.latest()
+            if latest_proposal:
+                since = latest_proposal.updated
 
-            if not since:
-                latest_proposal = Proposal.objects.latest()
-                if latest_proposal:
-                    since = latest_proposal.updated
+        if not since:
+            # If there is no record of a previous run, fetch
+            # proposals posted since the previous Monday.
+            now = datetime.now().replace(hour=0, minute=0,
+                                         second=0, microsecond=0)
+            since = now - timedelta(days=7 + now.weekday())
 
-            if not since:
-                # If there is no record of a previous run, fetch
-                # proposals posted since the previous Monday.
-                now = datetime.now().replace(hour=0, minute=0,
-                                             second=0, microsecond=0)
-                since = now - timedelta(days=7 + now.weekday())
-
-        proposals_json = scrape.get_proposals_since(dt=since, geocoder=geocoder)
+    proposals_json = []
+    for importer in Importers:
+        proposals_json += importer.updated_since(since, geocoder)
 
     proposals = []
 

@@ -1,7 +1,5 @@
 from bs4 import BeautifulSoup
-from datetime import datetime
 from itertools import takewhile
-import json
 import logging
 import re
 from urllib.request import urlopen
@@ -9,24 +7,24 @@ from urllib.error import HTTPError, URLError
 
 import pytz
 
+from . import helpers
+
 logger = logging.getLogger(__name__)
 
-LAST_PAGE = 31
 URL_BASE = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots"
 URL_FORMAT = URL_BASE + "?page={:1}"
+
+# Give the attributes a custom name:
 TITLES = {}
 
-# Utility:
-def to_camel(s):
-    "Converts a string s to camelCase."
-    return re.sub(r"[\s\-_](\w)", lambda m: m.group(1).upper(), s.lower())
 
 def attribute_for_title(title):
     """
     Convert the title (e.g., in a <th></th>) to its corresponding
     attribute in the output maps.
     """
-    return TITLES.get(title, to_camel(title))
+    return TITLES.get(title, helpers.to_camel(title))
+
 
 # TODO: Return None or error if the response is not successful
 def get_page(page=1, url_format=URL_FORMAT):
@@ -38,8 +36,6 @@ def get_page(page=1, url_format=URL_FORMAT):
     f.close()
     return html
 
-def find_table(doc):
-    return doc.select_one("table.views-table")
 
 def detect_last_page(doc):
     anchor = doc.select_one("li.pager-last a")
@@ -50,67 +46,48 @@ def detect_last_page(doc):
 
     return 0
 
-## Field helpers:
-def link_info(a):
-    return {
-        "title": a.get_text().strip(),
-        "url": a["href"]
-    }
 
-def get_date(d):
-    return datetime.strptime(d, '%b %d, %Y')
+## Field helpers:
 
 def get_links(elt):
     "Return information about the <a> element descendants of elt."
-    return [link_info(a) for a in elt.find_all("a") if a["href"]]
+    return [helpers.link_info(a) for a in elt.find_all("a") if a["href"]]
 
-def dates_field(td):
-    return get_date(default_field(td))
-
-def datetime_field(td, tz=pytz.timezone("US/Eastern")):
-    dt = datetime.strptime(default_field(td),
-                           "%m/%d/%Y - %I:%M%p")
-    return tz.localize(dt).astimezone(pytz.utc)
-
-def links_field(td):
-    return {"links": get_links(td)}
 
 def default_field(td):
     return td.get_text().strip()
 
 field_processors = {
-    "reports": links_field,
-    "decisions": links_field,
-    "other": links_field,
-    "firstHearingDate": dates_field,
-    "updatedDate": datetime_field
+    "reports": helpers.links_field,
+    "decisions": helpers.links_field,
+    "other": helpers.links_field,
+    "firstHearingDate": helpers.dates_field,
+    "updatedDate": helpers.datetime_field
 }
 
-def col_names(table):
-    tr = table.select_one("thead > tr")
-    return [th.get_text().strip() for th in tr.find_all("th")]
+
 
 def get_td_val(td, attr=None):
     processor = field_processors.get(attr, default_field)
     return processor(td)
 
-def get_row_vals(attrs, tr):
-    return {attr: get_td_val(td, attr) for attr, td in zip(attrs, tr.find_all("td"))}
+
 
 def add_geocode(geocoder, proposals):
     """
     Modifies each permit in the list (in place), adding 'lat' and 'long'
     matching the permit address.
     """
-    addrs = ["{0[number]} {0[street]}".format(proposal) for proposal in proposals]
+    addrs = ["{0[number]} {0[street]}".format(proposal) for proposal in
+             proposals]
     locations = geocoder.geocode(addrs)
 
     # Assumes the locations are returned in the same order
     for proposal, location in zip(proposals, locations):
         loc = location and location.get("location")
         if not loc:
-            logger.error("Skipping proposal {id}; geolocation failed.".\
-                         format(id=proposal["caseNumber"]))
+            logger.error("Skipping proposal {id}; geolocation failed."
+                         .format(id=proposal["caseNumber"]))
             continue
 
         proposal["lat"] = loc["lat"]
@@ -119,8 +96,8 @@ def add_geocode(geocoder, proposals):
 
 
 def find_cases(doc):
-    table = find_table(doc)
-    titles = col_names(table)
+    table = helpers.find_table(doc)
+    titles = helpers.col_names(table)
     attributes = [attribute_for_title(t) for t in titles]
 
     tbody = table.find("tbody")
@@ -131,7 +108,7 @@ def find_cases(doc):
     # This is ugly, but there's some baaad data out there:
     for i, tr in enumerate(trs):
         try:
-            permit = get_row_vals(attributes, tr)
+            permit = helpers.get_row_vals(attributes, tr)
             permit["source"] = URL_BASE
 
             # For now, we assume that if there are one or more documents
@@ -141,7 +118,7 @@ def find_cases(doc):
             permit["complete"] = bool(permit["decisions"]["links"])
             cases.append(permit)
         except Exception as err:
-            logger.error("Failed to scrape row {num}: {err}"\
+            logger.error("Failed to scrape row {num}: {err}"
                          .format(num=i, err=err))
             continue
     return cases
@@ -177,7 +154,8 @@ def get_pages():
             break
 
         except URLError as err:
-            logger.warn("Failed to retrieve URL for page %d.", i)
+            logger.warn("Failed to retrieve URL for page %d.", i,
+                        err)
             break
 
         doc = BeautifulSoup(html, "html.parser")
@@ -191,6 +169,7 @@ def get_pages():
         if i > last_page:
             break
 
+
 def get_cases(gen=None):
     "Returns a generator that produces cases."
     if not gen:
@@ -199,6 +178,7 @@ def get_cases(gen=None):
     for doc in gen:
         for case in find_cases(doc):
             yield case
+
 
 def get_proposals_since(dt=None,
                         stop_at_case=None,
@@ -231,3 +211,10 @@ def get_proposals_since(dt=None,
         add_geocode(geocoder, all_cases)
 
     return all_cases
+
+
+class Importer(object):
+    region_name = "Somerville, MA"
+
+    def updated_since(self, dt, geocoder=None):
+        return get_proposals_since(dt, geocoder=geocoder)

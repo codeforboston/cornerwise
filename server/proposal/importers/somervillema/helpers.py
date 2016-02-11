@@ -12,7 +12,6 @@ def link_info(a):
         "url": a["href"]
     }
 
-
 def get_date(d):
     return datetime.strptime(d, '%b %d, %Y')
 

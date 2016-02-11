@@ -2,9 +2,6 @@ import os
 
 from celery import Celery
 
-from scripts import scrape
-
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cornerwise.settings')
 from django.conf import settings
 
