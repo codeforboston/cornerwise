@@ -48,8 +48,8 @@ def create_proposal_from_json(p_dict):
     except Proposal.DoesNotExist:
         proposal = Proposal(case_number=p_dict["caseNumber"])
 
-    proposal.address = "{} {}".format(p_dict["number"],
-                                      p_dict["street"])
+    proposal.address = proposal["address"]
+
     try:
         proposal.location = Point(p_dict["long"], p_dict["lat"])
     except KeyError:
@@ -60,6 +60,7 @@ def create_proposal_from_json(p_dict):
     proposal.summary = p_dict.get("summary", "")
     proposal.description = p_dict.get("description")
     proposal.source = p_dict.get("source")
+    proposal.region_name = p_dict.get("region_name")
     proposal.updated = p_dict["updatedDate"]
     proposal.complete = p_dict["complete"]
 

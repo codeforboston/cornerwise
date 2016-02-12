@@ -75,8 +75,8 @@ def get_td_val(td, attr=None):
 
 def add_geocode(geocoder, proposals):
     """
-    Modifies each permit in the list (in place), adding 'lat' and 'long'
-    matching the permit address.
+    Modifies each proposal in the list (in place), adding 'lat' and 'long'
+    matching the proposal address.
     """
     addrs = ["{0[number]} {0[street]}".format(proposal) for proposal in
              proposals]
@@ -108,15 +108,18 @@ def find_cases(doc):
     # This is ugly, but there's some baaad data out there:
     for i, tr in enumerate(trs):
         try:
-            permit = helpers.get_row_vals(attributes, tr)
-            permit["source"] = URL_BASE
+            proposal = helpers.get_row_vals(attributes, tr)
+            proposal["address"] = "{} {}".format(proposal["number"],
+                                                 proposal["street"])
+            proposal["source"] = URL_BASE
+            proposal["region_name"] = "Somerville, MA"
 
             # For now, we assume that if there are one or more documents
             # linked in the 'decision' page, the proposal is 'complete'.
             # Note that we don't have insight into whether the proposal was
             # approved!
-            permit["complete"] = bool(permit["decisions"]["links"])
-            cases.append(permit)
+            proposal["complete"] = bool(proposal["decisions"])
+            cases.append(proposal)
         except Exception as err:
             logger.error("Failed to scrape row {num}: {err}"
                          .format(num=i, err=err))
