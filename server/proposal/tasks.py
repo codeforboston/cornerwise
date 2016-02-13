@@ -84,6 +84,10 @@ def create_proposal_from_json(p_dict):
 
                 doc.save()
 
+    for attr_name, attr_val in p_dict.get("attributes"):
+        proposal.attributes.create(name=attr_name,
+                                   text_value=attr_val)
+
     return proposal
 
 
