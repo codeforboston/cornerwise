@@ -184,10 +184,8 @@
     </div>
 
     <div id="layers">
-        <div class="header" >Layers</div>
-      <div class="contents">
-
-      </div>
+        <a class="expand" aria-label="Layers"></a>
+        <div class="contents"> </div>
     </div>
 
     <!-- This element prevents interactions with the map and other
@@ -195,51 +193,52 @@
     <div id="event-eater" class="_setview" data-goto="main"></div>
 
     <div id="search-banner" class="overlay">
-
-      <div class="overlay-contents">
-        <h3>what&rsquo;s being built near&hellip;</h3>
-        <div class="input-group big-input">
-          <form id="ref-address-form">
-            <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off" autofocus/>
-            <img src="/static/images/geolocating.gif" class="status" alt="searching" />
-            <button type="submit" class="input-button go-button">go</button>
-            <a id="geolocate" href="#">Use Current Location</a>
-          </form>
+        <div id="logo" class="resp-portrait-hide">
+            
         </div>
-      </div>
-      <a id="explore" href="#view=main">Explore the Data</a>
+        <div class="overlay-contents">
+            <h3>what&rsquo;s being built near&hellip;</h3>
+            <div class="input-group big-input">
+                <form id="ref-address-form">
+                    <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off" autofocus/>
+                    <img src="/static/images/geolocating.gif" class="status" alt="searching" />
+                    <button type="submit" class="input-button go-button">go</button>
+                    <a id="geolocate" href="#">Use Current Location</a>
+                </form>
+            </div>
+        </div>
+        <a id="explore" href="#view=main">Explore the Data</a>
 
-      <!-- Filter controls will be appear below the title bar when the intro is
-      complete. -->
-      <div id="filter-controls" class="collapsed">
-        <div class="filters">
-          <div class="input-group">
-            <input class="input" type="text" name="filter-text"
-                   placeholder="Search" autocomplete="off"
-                   id="filter-text"/>
-          </div>
-          <label>
-            Include Closed&nbsp;
-            <input name="include-closed" type="checkbox"/>
-          </label>
-          &mdash;
-          <label>
-            Fit Map <input id="fit-results" type="checkbox">
-          </label>
-          <div id="filter-attributes"></div>
+        <!-- Filter controls will be appear below the title bar when the intro is
+             complete. -->
+        <div id="filter-controls" class="collapsed">
+            <div class="filters">
+                <div class="input-group">
+                    <input class="input" type="text" name="filter-text"
+                           placeholder="Search" autocomplete="off"
+                           id="filter-text"/>
+                </div>
+                <label>
+                    Include Closed&nbsp;
+                    <input name="include-closed" type="checkbox"/>
+                </label>
+                &mdash;
+                <label>
+                    Fit Map <input id="fit-results" type="checkbox">
+                </label>
+                <div id="filter-attributes"></div>
+            </div>
+
+            <a href="#fc=1" class="toggle-filters when-collapsed">Filter Results</a>
+            <a href="#fc=0" class="toggle-filters when-expanded">Hide</a>
         </div>
 
-        <a href="#fc=1" class="toggle-filters when-collapsed">Filter Results</a>
-        <a href="#fc=0" class="toggle-filters when-expanded">Hide</a>
-      </div>
-
-      <div id="mode-controls">
-        <a class="mode main-mode" href="#view=list">LIST</a>
-        <a class="mode list-mode" href="#view=main">MAP</a>
-      </div>
+        <div id="mode-controls">
+            <a class="mode main-mode" href="#view=list">LIST</a>
+            <a class="mode list-mode" href="#view=main">MAP</a>
+        </div>
     </div>
 
-    <div id="logo" class="resp-portrait-hide"></div>
 
     <div id="intro" class="overlay">
       <div class="section">
