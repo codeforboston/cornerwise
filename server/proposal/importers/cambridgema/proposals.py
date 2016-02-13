@@ -13,6 +13,10 @@ def under_to_title(s):
     return " ".join(word.capitalize() for word in re.split(r"_+", s))
 
 
+def no_data(s):
+    return re.match(r"(n/?a|no change|same)", s, re.I)
+
+
 def make_request(domain, resource_id, token, fmt="json",
                  soql=None):
     if soql:
@@ -47,18 +51,22 @@ class Importer(object):
         self.api_key = api_key
         self.resource_id = resource
 
-    def updated_since(self, dt):
-        soql = "SELECT * WHERE applicationdate >= '{dt}' OR decisiondate >= '{dt}"\
-            .format(dt=dt.isoformat())
-
+    def query(self, soql):
         req = make_request(self.domain, self.resource_id, self.api_key,
                            soql=soql)
         json = get_json(req)
         return map(self.process_json, json)
 
+    def updated_since(self, dt):
+        soql = ("SELECT * WHERE applicationdate >= "
+                "'{dt}' OR decisiondate >= '{dt}'")\
+                .format(dt=dt.isoformat())
+        return self.query(soql)
+
     copy_keys = {
         "caseNumber": "plan_number",
-        "status": "status"
+        "status": "status",
+        "summary": "summary_for_publication"
     }
     remap_attributes = {
         "Legal Notice": "description",
@@ -66,20 +74,30 @@ class Importer(object):
         "Reason": "reason_for_petition_other"
     }
 
-    def process_json(self, json):
+    def process_json(self, pjson):
         """
-        Process a single 
+        Process a single proposal into a JSON.
         """
         proposal = {}
 
         for kp, kj in self.copy_keys.items():
-            proposal[kp] = json[kj]
+            if kj in pjson:
+                proposal[kp] = pjson[kj]
 
         proposal["region_name"] = "Cambridge, MA"
         proposal["source"] = "data.cambridgema.gov"
 
-        proposal["attributes"] = {pk: json[k] for pk, k in
-                                  self.remap_attributes.items()}
+        if "location" in pjson and not pjson["location"]["needs_recoding"]:
+            location = pjson["location"]
+            try:
+                human_address = json.loads(location["human_address"])
+                proposal["address"] = human_address["address"]
+                proposal["long"] = float(location["longitude"])
+                proposal["lat"] = float(location["latitude"])
+            except:
+                proposal["location"] = None
 
+        proposal["attributes"] = [(pk, pjson.get(k)) for pk, k in
+                                  self.remap_attributes.items()]
 
         return proposal
