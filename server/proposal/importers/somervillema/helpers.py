@@ -1,5 +1,8 @@
 from datetime import datetime
 import re
+import pytz
+from functools import partial
+
 
 def to_camel(s):
     "Converts a string s to camelCase."
@@ -12,8 +15,18 @@ def link_info(a):
         "url": a["href"]
     }
 
+
 def get_date(d):
     return datetime.strptime(d, '%b %d, %Y')
+
+
+def get_datetime(datestring, tzinfo=None):
+    dt = datetime.strptime(datestring,
+                           "%m/%d/%Y - %I:%M%p")
+    if tzinfo:
+        return tzinfo.localize(dt)
+
+    return dt
 
 
 def get_links(elt):
@@ -26,9 +39,14 @@ def dates_field(td):
     return get_date(default_field(td))
 
 
-def datetime_field(td):
-    return datetime.strptime(default_field(td),
-                             "%m/%d/%Y - %I:%M%p")
+def datetime_field(td, tzinfo=None):
+    return get_datetime(default_field(td), tzinfo)
+
+
+def datetime_field_tz(tz):
+    if isinstance(tz, str):
+        tz = pytz.timezone(tz)
+    return partial(datetime_field, tzinfo=tz)
 
 
 def links_field(td):

@@ -1,11 +1,10 @@
 from bs4 import BeautifulSoup
 from itertools import takewhile
 import logging
+import pytz
 import re
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
-
-import pytz
 
 from . import helpers
 
@@ -62,15 +61,14 @@ field_processors = {
     "decisions": helpers.links_field,
     "other": helpers.links_field,
     "firstHearingDate": helpers.dates_field,
-    "updatedDate": helpers.datetime_field
+    "updatedDate": helpers.datetime_field_tz("US/Eastern")
 }
 
 
-
 def get_td_val(td, attr=None):
+    import pdb; pdb.set_trace()
     processor = field_processors.get(attr, default_field)
     return processor(td)
-
 
 
 def add_geocode(geocoder, proposals):
@@ -108,7 +106,8 @@ def find_cases(doc):
     # This is ugly, but there's some baaad data out there:
     for i, tr in enumerate(trs):
         try:
-            proposal = helpers.get_row_vals(attributes, tr)
+            proposal = helpers.get_row_vals(attributes, tr,
+                                            processors=field_processors)
             proposal["address"] = "{} {}".format(proposal["number"],
                                                  proposal["street"])
             proposal["source"] = URL_BASE
@@ -218,6 +217,10 @@ def get_proposals_since(dt=None,
 
 class Importer(object):
     region_name = "Somerville, MA"
+    tz = pytz.timezone("US/Eastern")
 
     def updated_since(self, dt, geocoder=None):
+        if not dt.tzinfo:
+            dt = self.tz.localize(dt)
+        
         return get_proposals_since(dt, geocoder=geocoder)
