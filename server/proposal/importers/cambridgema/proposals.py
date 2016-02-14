@@ -57,7 +57,7 @@ class Importer(object):
         json = get_json(req)
         return map(self.process_json, json)
 
-    def updated_since(self, dt):
+    def updated_since(self, dt, **kwargs):
         soql = ("SELECT * WHERE applicationdate >= "
                 "'{dt}' OR decisiondate >= '{dt}'")\
                 .format(dt=dt.isoformat())
