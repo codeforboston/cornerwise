@@ -26,37 +26,40 @@ if [ -n "$1" ]; then
 fi
 
 
-# TODO: Do a proper fix for this
+if pid=$(cat $pid_file); then
+    if kill $pid 2>/dev/null; then
+        echo "Killed running server (pid: $pid)";
+    elif kill -0 $pid 2>/dev/null; then
+        echo "Could not kill the running server (pid: $pid)"
+        exit 1
+    fi
 
-# Kill running servers:
-ps a | grep [r]unserver | awk '{print $1}' | xargs kill
-
-# if pid=$(cat $pid_file); then
-#     if kill $pid 2>/dev/null; then
-#         echo "Killed running server (pid: $pid)";
-#     elif kill -0 $pid 2>/dev/null; then
-#         echo "Could not kill the running server (pid: $pid)"
-#         exit 1
-#     fi
-
-#     # Either we've killed the process, or the pid file was out of date
-#     rm -f $pid_file
-# fi;
+    # Either we've killed the process, or the pid file was out of date
+    rm -f $pid_file
+fi;
 
 # Prefer Python 3:
 PYTHON_BIN=$(which python3 || which python)
+
 echo "Applying any outstanding migrations"
 $PYTHON_BIN $APP_ROOT/manage.py migrate
-echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
-
-$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err || exit $?
-
-# Force Celery to run as root
-export C_FORCE_ROOT=1
 
 # Start Celery:
 if [ "$DJANGO_MODE" != "production" ]; then
     celery_opts=" --autoreload"
 fi
+echo "Starting celery worker and celerybeat"
+# Force Celery to run as root
+export C_FORCE_ROOT=1
+$PYTHON_BIN $APP_ROOT/manage.py celeryd_detach -B $celery_opts
 
-$PYTHON_BIN $APP_ROOT/manage.py celery worker $celery_opts
+echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
+$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err &
+
+if (($?)); then
+    echo "I encountered an error while trying to start Django."
+    exit 1;
+fi
+
+
+
