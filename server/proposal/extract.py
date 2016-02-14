@@ -7,11 +7,11 @@ from datetime import datetime
 from dateutil.parser import parse as date_parse
 from utils import pushback_iter
 
-import os, pytz, re
-
+import re
 
 empty_line = re.compile(r"\s*\n$")
 property_pattern = re.compile(r"^([a-z]+(\s+[a-z]+)*): (.*)(\n|$)", re.I)
+
 
 def properties(lines):
     properties = {}
@@ -129,6 +129,7 @@ def generate_sections(lines, matchers):
 
     yield section_name, section
 
+
 def make_sections(lines, matchers):
     """Partition the contents of a file into sections using the given list
     of matchers.
@@ -154,6 +155,7 @@ def get_lines(doc):
 
     return lines
 
+
 staff_report_section_matchers = [
     skip_match(r"CITY HALL", 2),
     skip_match(r"Page \d+ of \d+"),
@@ -164,16 +166,17 @@ staff_report_section_matchers = [
                  fn=str.lower)
 ]
 
-def staff_report_sections(doc):
-    lines = get_lines(doc)
+
+def staff_report_sections(doc_json):
+    lines = doc_json["lines"]
     return make_sections(lines, staff_report_section_matchers)
 
 
-def staff_report_properties(doc):
+def staff_report_properties(doc_json):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
     """
-    sections = staff_report_sections(doc)
+    sections = staff_report_sections(doc_json)
     props = {}
 
     props.update(properties(sections["header"]))
@@ -190,14 +193,13 @@ def staff_report_properties(doc):
             if v:
                 props[pname] = "\n".join(paragraphize(v))
 
-
     return props
+
 
 # Decision Documents
 def find_vote(decision):
-    """
-    From the decision text, perform a very crude pattern match that extracts the
-    vote (for/against).
+    """From the decision text, perform a very crude pattern match that extracts
+    the vote (for/against).
     """
     patt = re.compile(r"voted (\d+-\d+)", re.I)
     m = re.search(patt, decision)
@@ -215,14 +217,16 @@ decision_section_matchers = [
     top_section_matcher
 ]
 
-def decision_sections(doc):
-    lines = get_lines(doc)
+
+def decision_sections(doc_json):
+    lines = doc_json["lines"]
     return make_sections(lines, decision_section_matchers)
 
-def decision_properties(doc):
+
+def decision_properties(doc_json):
     """Extract a dictionary of properties from the contents of a Decision
     Document."""
-    sections = decision_sections(doc)
+    sections = decision_sections(doc_json)
     props = {}
     if "properties" in sections:
         props.update(properties(sections["properties"]))
@@ -291,29 +295,29 @@ def legal_notice_properties(notice):
     return sought
 
 
-def doc_type(doc):
-    if doc.field == "reports" and re.match(r"staff report", doc.title, re.I):
+def doc_type(doc_json):
+    if doc_json["field"] == "reports" and re.match(r"staff report",
+                                                   doc_json["title"], re.I):
         return "report"
-    elif re.match(r"decision", doc.title, re.I):
+    elif re.match(r"decision", doc_json["title"], re.I):
         return "decision"
 
     return ""
 
+
 def get_decision(prop):
     pass
 
-def get_properties(doc):
-    # TODO: Dispatch on the document's field and/or title
-    # (doc.field is the name of the column in which the document was found)
 
+def get_properties(doc_json):
     # Eventually, we'll want to introduce a pluggable property
     # extraction interface, so that other cities and formats can be
     # supported.
-    dtype = doc_type(doc)
+    dtype = doc_type(doc_json)
     if dtype == "report":
-        return staff_report_properties(doc)
+        return staff_report_properties(doc_json)
     elif dtype == "decision":
-        return decision_properties(doc)
+        return decision_properties(doc_json)
     else:
         return {}
 

@@ -26,6 +26,7 @@ from shared import files_metadata
 
 logger = get_task_logger(__name__)
 
+
 def last_run():
     "Determine the date and time of the last run of the task."
     try:
@@ -48,7 +49,7 @@ def create_proposal_from_json(p_dict):
     except Proposal.DoesNotExist:
         proposal = Proposal(case_number=p_dict["caseNumber"])
 
-    proposal.address = proposal["address"]
+    proposal.address = p_dict["address"]
 
     try:
         proposal.location = Point(p_dict["long"], p_dict["lat"])
@@ -84,7 +85,7 @@ def create_proposal_from_json(p_dict):
 
                 doc.save()
 
-    for attr_name, attr_val in p_dict.get("attributes"):
+    for attr_name, attr_val in p_dict.get("attributes", []):
         proposal.attributes.create(name=attr_name,
                                    text_value=attr_val)
 
@@ -98,7 +99,7 @@ def fetch_document(doc):
     """
     url = doc.url
 
-    if os.path.exists(doc.document.path):
+    if doc.document and os.path.exists(doc.document.path):
         # Has the document been updated?
         updated = proposal_utils.last_modified(doc.url)
         # No?  Then we're good.
@@ -316,6 +317,7 @@ def fetch_image(image):
 
     return image
 
+
 @celery_app.task(name="proposal.generate_thumbnail")
 def generate_thumbnail(image, replace=False):
     """Generate an image thumbnail.
@@ -326,7 +328,7 @@ def generate_thumbnail(image, replace=False):
     :returns: Thumbnail path"""
 
     thumbnail_path = image.thumbnail and image.thumbnail.name
-    if os.path.exists(thumbnail_path):
+    if thumbnail_path and os.path.exists(thumbnail_path):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
     else:
         if not image.image:
@@ -349,7 +351,8 @@ def generate_thumbnail(image, replace=False):
 @celery_app.task(name="proposal.add_doc_attributes")
 @transaction.atomic
 def add_doc_attributes(doc):
-    properties = extract.get_properties(doc)
+    doc_json = proposal_utils.doc_info(doc)
+    properties = extract.get_properties(doc_json)
 
     for name, value in properties.items():
         logger.info("Adding %s attribute", name)
@@ -359,7 +362,7 @@ def add_doc_attributes(doc):
         try:
             attr = Attribute.objects.get(proposal=doc.proposal,
                                          handle=handle)
-        except Attribute.DoesNotExist as _:
+        except Attribute.DoesNotExist:
             attr = Attribute(proposal=doc.proposal,
                              name=name,
                              handle=normalize(name),
@@ -375,6 +378,8 @@ def add_doc_attributes(doc):
         attr.save()
 
     add_doc_events(doc, properties)
+
+    return doc
 
 
 @celery_app.task(name="proposal.add_doc_events")
@@ -395,7 +400,8 @@ def add_doc_events(doc, properties):
             event = Event.objects.get(title=e["title"],
                                       date=e["date"])
 
-        except Event.DoesNotExist as dne:
+        except Event.DoesNotExist:
+            # Create a new event:
             event = Event(title=e["title"],
                           date=e["date"])
         except KeyError as kerr:
@@ -422,8 +428,7 @@ def process_document(doc):
     (fetch_document.s(doc) |
      celery.group((extract_images.s() | generate_thumbnails.s()),
                   generate_doc_thumbnail.s(),
-                  extract_text.s() | add_doc_attributes.s(),
-                  add_doc_events.s()))()
+                  extract_text.s() | add_doc_attributes.s()))()
 
 
 @celery_app.task(name="proposal.process_documents")
@@ -488,6 +493,7 @@ def scrape_reports_and_decisions(since=None, coder_type=settings.GEOCODER):
                          p_dict)
 
     return proposals
+
 
 def run_tasks():
     return (scrape_reports_and_decisions.s() |
