@@ -17,13 +17,19 @@ class Project(models.Model):
                                   db_index=True,)
     category = models.CharField(max_length=20,
                                 db_index=True)
+    region_name = models.CharField(max_length=128,
+                                   default="Somerville, MA")
+    description = models.TextField(default="")
+    justification = models.TextField(default="")
+    website = models.URLField(null=True)
     approved = models.BooleanField(db_index=True)
 
     def to_dict(self, include_budget=True):
         d = model_to_dict(self)
 
         if include_budget:
-            d["budget"] = {bi.year: bi.to_dict() for bi in self.budgetitem_set.all()}
+            d["budget"] = {bi.year: bi.to_dict() for bi in
+                           self.budgetitem_set.all()}
 
         return d
 
