@@ -1,3 +1,5 @@
+import copy
+from decimal import Decimal
 import json
 import re
 from urllib import parse
@@ -28,7 +30,6 @@ def get_json(req):
 
 class Importer(object):
     domain = "data.somervillema.gov"
-    region_name = "Somerville, MA"
 
     def __init__(self, api_key, resource="wz6k-gm5k"):
         self.api_key = api_key
@@ -38,12 +39,18 @@ class Importer(object):
         "name": "project",
         "description": "project_description",
         "justification": "project_justification",
-        "department": "department"
+        "department": "department",
+        "category": "type",
+        "funding_source": "funding_source",
+    }
+
+    constant_fields = {
+        "region_name": "Somerville, MA"
     }
 
     @classmethod
     def process_json(kls, pjson):
-        project = {}
+        project = copy.copy(kls.constant_fields)
 
         for project_key, json_key in kls.copy_keys.items():
             project[project_key] = pjson.get(json_key)
@@ -51,7 +58,7 @@ class Importer(object):
         project["approved"] = bool(re.match(r"approved", pjson["status"], re.I))
 
         budget_keys = ((k, re.match(r"^_(\d+)$", k)) for k in pjson.keys())
-        project["budget"] = {int(m.group(1)): pjson[k]
+        project["budget"] = {int(m.group(1)): Decimal(pjson[k])
                              for k, m in budget_keys if m}
 
         return project
