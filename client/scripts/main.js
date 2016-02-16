@@ -1,4 +1,3 @@
-'use strict';
 require.config({
     paths: {
         // Dependencies:

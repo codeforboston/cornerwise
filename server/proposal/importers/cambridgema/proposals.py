@@ -58,6 +58,8 @@ class Importer(object):
         return map(self.process_json, json)
 
     def updated_since(self, dt, **kwargs):
+        # Some Socrata data sets support the :updated_at meta field, if they're
+        # added using a tool that doesn't replace the entire dataset.
         soql = ("SELECT * WHERE applicationdate >= "
                 "'{dt}' OR decisiondate >= '{dt}'")\
                 .format(dt=dt.isoformat())

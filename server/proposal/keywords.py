@@ -22,6 +22,7 @@ def group_true(pred, l):
     if group:
         yield group
 
+
 def is_noun_phrase(tagged):
     """
     :param tagged: An iterable of tagged words (i.e., (word, tag) tuples)
@@ -47,6 +48,7 @@ def remove_subphrases(tagged):
 def join_words(tagged):
     return " ".join(tw[0] for tw in tagged)
 
+
 def keywords(text):
     """
     :param text: a text string to be evaluated
@@ -56,6 +58,7 @@ def keywords(text):
     tokenized = nltk.word_tokenize(text)
     tagged = nltk.pos_tag(tokenized)
     return list(map(join_words, noun_phrases(tagged)))
+
 
 def setup():
     "Install required NLTK corpora"
