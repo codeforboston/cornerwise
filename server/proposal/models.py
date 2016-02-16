@@ -1,13 +1,13 @@
-import os, redis
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
 import utils
+
 
 class ProposalManager(models.GeoManager):
     def latest(self):
@@ -37,6 +37,7 @@ class ProposalManager(models.GeoManager):
     def for_parcel(self, parcel):
         return self.filter(location__within=parcel.shape)
 
+
 class Proposal(models.Model):
     case_number = models.CharField(max_length=64,
                                    unique=True,
@@ -45,7 +46,6 @@ class Proposal(models.Model):
                                help_text="Street address")
     location = models.PointField(help_text="The latitude and longitude")
     region_name = models.CharField(max_length=128,
-                                   # Hardcode this for now
                                    default="Somerville, MA",
                                    null=True,
                                    help_text="")
@@ -54,8 +54,6 @@ class Proposal(models.Model):
     # The time when the entry was updated in the source:
     updated = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
-    # closed = models.DateTimeField(null=True,
-    #                              help_text="The time when this proposal was closed.")
     summary = models.CharField(max_length=256, default="")
     description = models.TextField()
     source = models.URLField(null=True,
@@ -64,7 +62,6 @@ class Proposal(models.Model):
 
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True)
-
 
     complete = models.BooleanField(default=False)
 
@@ -77,6 +74,63 @@ class Proposal(models.Model):
 
     def document_for_field(self, field):
         return self.document_set.filter(field=field)
+
+    @classmethod
+    def create_proposal_from_json(kls, p_dict):
+        """
+        Constructs a Proposal from a dictionary.  If an existing proposal has a
+        matching case number, update it from p_dict."""
+        try:
+            proposal = kls.objects.get(case_number=p_dict["caseNumber"])
+
+            # TODO: We should track changes to a proposal's status over
+            # time. This may mean full version-control, with something
+            # like django-reversion, or with a hand-rolled alternative.
+        except kls.DoesNotExist:
+            proposal = kls(case_number=p_dict["caseNumber"])
+
+        proposal.address = p_dict["address"]
+
+        try:
+            proposal.location = Point(p_dict["long"], p_dict["lat"])
+        except KeyError:
+            # If the dictionary does not have an associated location, do not
+            # create a Proposal.
+            return
+
+        proposal.summary = p_dict.get("summary", "")
+        proposal.description = p_dict.get("description")
+        proposal.source = p_dict.get("source")
+        proposal.region_name = p_dict.get("region_name")
+        proposal.updated = p_dict["updatedDate"]
+        proposal.complete = p_dict["complete"]
+
+        proposal.save()
+
+        # Create associated documents:
+        for field, val in p_dict.items():
+            if not isinstance(val, dict) or not val.get("links"):
+                continue
+
+            for link in val["links"]:
+                try:
+                    doc = proposal.document_set.get(url=link["url"])
+                except Document.DoesNotExist:
+                    doc = Document(proposal=proposal)
+
+                    doc.url = link["url"]
+                    doc.title = link["title"]
+                    doc.field = field
+                    doc.published = p_dict["updatedDate"]
+
+                    doc.save()
+
+        for attr_name, attr_val in p_dict.get("attributes", []):
+            proposal.attributes.create(name=attr_name,
+                                       text_value=attr_val)
+
+        return proposal
+
 
 class Attribute(models.Model):
     """

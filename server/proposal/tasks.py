@@ -10,7 +10,6 @@ from celery.utils.log import get_task_logger
 
 from djcelery.models import PeriodicTask
 from django.conf import settings
-from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.utils import DataError, IntegrityError
 
@@ -34,62 +33,6 @@ def last_run():
         return scrape_task.last_run_at
     except PeriodicTask.DoesNotExist:
         return None
-
-
-def create_proposal_from_json(p_dict):
-    """
-    Constructs a Proposal from a dictionary.  If an existing proposal has a
-    matching case number, update it from p_dict."""
-    try:
-        proposal = Proposal.objects.get(case_number=p_dict["caseNumber"])
-
-        # TODO: We should track changes to a proposal's status over
-        # time. This may mean full version-control, with something
-        # like django-reversion, or with a hand-rolled alternative.
-    except Proposal.DoesNotExist:
-        proposal = Proposal(case_number=p_dict["caseNumber"])
-
-    proposal.address = p_dict["address"]
-
-    try:
-        proposal.location = Point(p_dict["long"], p_dict["lat"])
-    except KeyError:
-        # If the dictionary does not have an associated location, do not
-        # create a Proposal.
-        return
-
-    proposal.summary = p_dict.get("summary", "")
-    proposal.description = p_dict.get("description")
-    proposal.source = p_dict.get("source")
-    proposal.region_name = p_dict.get("region_name")
-    proposal.updated = p_dict["updatedDate"]
-    proposal.complete = p_dict["complete"]
-
-    proposal.save()
-
-    # Create associated documents:
-    for field, val in p_dict.items():
-        if not isinstance(val, dict) or not val.get("links"):
-            continue
-
-        for link in val["links"]:
-            try:
-                doc = proposal.document_set.get(url=link["url"])
-            except Document.DoesNotExist:
-                doc = Document(proposal=proposal)
-
-                doc.url = link["url"]
-                doc.title = link["title"]
-                doc.field = field
-                doc.published = p_dict["updatedDate"]
-
-                doc.save()
-
-    for attr_name, attr_val in p_dict.get("attributes", []):
-        proposal.attributes.create(name=attr_name,
-                                   text_value=attr_val)
-
-    return proposal
 
 
 @celery_app.task(name="proposal.fetch_document")
@@ -119,6 +62,7 @@ def fetch_document(doc):
     pathdir = os.path.dirname(path)
     os.makedirs(pathdir, exist_ok=True)
 
+    logger.info("Fetching Document #%i", doc.pk)
     with request.urlopen(url) as resp, open(path, "wb") as out:
         shutil.copyfileobj(resp, out)
         doc.document = path
@@ -157,7 +101,7 @@ the path of the text document.
     status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
 
     if status:
-        logger.error("Failed to extract text from {doc}".\
+        logger.error("Failed to extract text from {doc}".
                      format(doc=path))
         # TODO: Correct way to signal a 'hard' failure that will break
         # this chain of subtasks.
@@ -285,7 +229,7 @@ def generate_doc_thumbnail(doc):
 
     proc = subprocess.Popen(["pdftoppm", "-jpeg", "-singlefile",
                              "-scale-to", "200", path, out_prefix],
-                              stderr=subprocess.PIPE)
+                            stderr=subprocess.PIPE)
     _, err = proc.communicate()
 
     if proc.returncode:
@@ -445,9 +389,9 @@ def process_proposals(proposals):
     add_street_view.map(proposals)
 
 
-@celery_app.task(name="proposal.scrape_reports_and_decisions")
+@celery_app.task(name="proposal.fetch_proposals")
 @transaction.atomic
-def scrape_reports_and_decisions(since=None, coder_type=settings.GEOCODER):
+def fetch_proposals(since=None, coder_type=settings.GEOCODER):
     """
     Task that scrapes the reports and decisions page
     """
@@ -478,12 +422,15 @@ def scrape_reports_and_decisions(since=None, coder_type=settings.GEOCODER):
 
     proposals_json = []
     for importer in Importers:
-        proposals_json += importer.updated_since(since, geocoder)
+        found = importer.updated_since(since, geocoder)
+        logger.info("Fetched %i proposals from %s",
+                    len(found), importer.__name__)
+        proposals_json += found
 
     proposals = []
 
     for p_dict in proposals_json:
-        p = create_proposal_from_json(p_dict)
+        p = Proposal.create_proposal_from_json(p_dict)
 
         if p:
             p.save()
@@ -495,6 +442,7 @@ def scrape_reports_and_decisions(since=None, coder_type=settings.GEOCODER):
     return proposals
 
 
-def run_tasks():
-    return (scrape_reports_and_decisions.s() |
+@celery_app.task(name="proposal.pull_updates")
+def pull_updates():
+    return (fetch_proposals.s() |
             process_document.s())()

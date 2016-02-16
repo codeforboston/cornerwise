@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+# For celery:
+from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -138,13 +140,12 @@ DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
 BROKER_URL = os.environ.get("REDIS_HOST", "redis://")
 
-## Persist task results to the database
+# Persist task results to the database
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 
-from datetime import timedelta
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
-        "task": "proposal.scrape_reports_and_decisions",
+        "task": "proposal.pull_updates",
         "schedule": timedelta(days=1),
     }
 }
@@ -155,7 +156,7 @@ ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
 ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
 
 GEO_BOUNDS = [42.371861543730496, -71.13338470458984, # northwest
-              42.40393908425197, -71.0679817199707];  # southeast
+              42.40393908425197, -71.0679817199707]  # southeast
 
 # The 'fit-width' of image thumbnails:
 THUMBNAIL_DIM = (300, 300)
