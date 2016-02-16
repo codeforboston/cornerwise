@@ -1,5 +1,5 @@
 from cornerwise import celery_app
-from scripts import socrata
+from .models import Project
 from .importers.register import Importers
 
 import logging
@@ -17,4 +17,11 @@ def pull_updates(since=None):
 
     for importer in Importers:
         projects += importer.updated_since(since)
+
+    created = []
+
+    for project in projects:
+        created.append(Project.create_from_dict(project))
+
+    return created
     

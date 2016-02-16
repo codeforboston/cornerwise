@@ -33,6 +33,25 @@ class Project(models.Model):
 
         return d
 
+    @classmethod
+    def create_from_dict(kls, d):
+        project = kls(name=d["name"],
+                      department=d["department"],
+                      category=d["category"],
+                      region_name=d["region_name"],
+                      description=d["description"],
+                      justification=d["justification"],
+                      approved=d["approved"])
+
+        project.save()
+
+        for year, amount in d["budget"].items():
+            project.budgetitem_set.create(year=year,
+                                          budget=amount,
+                                          funding_source=d["funding_source"])
+
+        return project
+
 
 class BudgetItem(models.Model):
     project = models.ForeignKey(Project)
