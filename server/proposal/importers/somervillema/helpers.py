@@ -50,7 +50,9 @@ def datetime_field_tz(tz):
 
 
 def links_field(td):
-    return {"links": get_links(td)}
+    links = get_links(td)
+    if links:
+        return {"links": get_links(td)}
 
 
 def default_field(td):
