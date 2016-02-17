@@ -259,7 +259,7 @@ input:focus::-webkit-input-placeholder {
 }
 
 #geolocate {
-    color: black;
+    color: white;
     display: block;
     font-size: medium;
     right: -200px;
