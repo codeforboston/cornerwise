@@ -146,9 +146,10 @@ span.icon {
 }
 
 #filter-controls {
-    background-color: #265E9D;    height: 0.5em;
+    background-color: rgba(43, 43, 43, 0.98);
+    height: 0.5em;
     display: none;
-    text-align: right;
+    text-align: left;
 }
 
 h3 {
@@ -392,12 +393,11 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 #filter-controls .filters {
-    background-color: #265E9D;
+    background-color: rgba(43, 43, 43, 0.98);
     height: 2.5em;
     margin-bottom: -0.2em;
     overflow: hidden;
     box-shadow: 0 2px 3px rgba(180,180,180,1);
-
     transition: height 0.2s linear;
 }
 #filter-controls.collapsed .filters {
@@ -427,14 +427,14 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 .toggle-filters {
-    background-color: #265E9D;
+    background-color: rgba(43, 43, 43, 0.98);
     color: white;
     font-size: small;
     padding: 0.5em;
     padding-top: 0.5em;
     position: relative;
     top: 0.5em;
-    right: 2em;
+    left: 2em;
 }
 
 #mode-controls {
@@ -1138,12 +1138,13 @@ ul.model-list li {
     box-shadow: 0 0 5px 0 darkgray inset;
     padding: 1.5em;
     padding-bottom: 1em;
+    text-align: right;
 }
 
 .results-info {
     float: right;
     font-size: small;
-    position: relative;
+    /* position: relative; */
     right: 7em;
     top: -0.5em;
 }
