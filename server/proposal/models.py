@@ -177,6 +177,9 @@ class Event(models.Model):
     description = models.TextField()
     proposals = models.ManyToManyField(Proposal, related_name="proposals")
 
+    def to_dict(self):
+        return model_to_dict(self, exclude=["proposals"])
+
 
 class Document(models.Model):
     """

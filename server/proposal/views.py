@@ -1,27 +1,25 @@
 from django.conf import settings
 from django.contrib.gis.geos.polygon import Polygon
-from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.cache import cache_page
+from django.shortcuts import get_object_or_404
 
 from collections import defaultdict
 from functools import reduce
-from itertools import chain
 import re
 
 from shared.request import make_response, ErrorResponse
 
-from .models import Proposal, Attribute, Document, Event, Image
+from .models import Proposal, Attribute, Document, Event
 
 default_attributes = [
     "applicant_name",
     "legal_notice",
-    "dates_of_public_hearing" 
+    "dates_of_public_hearing"
 ]
+
 
 def proposal_json(proposal, include_images=True,
                   include_attributes=default_attributes,
@@ -35,9 +33,9 @@ def proposal_json(proposal, include_images=True,
 
     if include_images:
         images = proposal.images.order_by("-priority")
-        if isinstance(include_images, int):
-            images = images[0:1]
-        
+        if isinstance(include_images, int) and include_images is not True:
+            images = images[0:include_images]
+
         pdict["images"] = [img.to_dict() for img in images]
 
     if include_attributes:
@@ -89,6 +87,7 @@ query_params = {
     "address": "address"
 }
 
+
 def build_proposal_query(d):
     subqueries = {}
     ids = build_attributes_query(d) or []
@@ -131,7 +130,7 @@ def build_proposal_query(d):
     if event:
         try:
             subqueries["event"] = int(event)
-        except ValueError as verr:
+        except ValueError:
             pass
 
     for k in d:
@@ -155,7 +154,7 @@ def active_proposals(req):
         raise ErrorResponse("No such page", {"page": page}, err=err)
 
     return {"proposals": list(map(proposal_json, proposals)),
-            #"count": proposals.paginator.count,
+            # "count": proposals.paginator.count,
             "page": proposals.number,
             "total_pages": proposals.paginator.num_pages}
 
@@ -174,7 +173,8 @@ def view_proposal(req, pk=None):
 
     proposal = get_object_or_404(Proposal, pk=pk)
 
-    return proposal_json(proposal, include_attributes=True)
+    return proposal_json(proposal, include_attributes=True,
+                         include_images=True)
 
 
 # Document views
@@ -203,9 +203,13 @@ def download_document(req, pk):
 def list_events(req):
     events = Event.objects.all().order_by("")
 
-    return {"events": []}
+    return {"events": [event.to_dict() for event in events]}
 
 
 @make_response()
-def view_event(req):
-    pass
+def view_event(req, pk=None):
+    if not pk:
+        pk = req.GET.get("pk")
+
+    event = get_object_or_404(Event, pk=pk)
+    return event.to_dict()
