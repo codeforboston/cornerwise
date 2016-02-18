@@ -71,7 +71,7 @@ define(["leaflet", "underscore"],
                    this.setIcon(L.divIcon({
                        className: "zoomed-proposal-marker",
                        iconSize: size,
-                       html: "<img src='" + images[0].thumb + "'/>"
+                       html: "<img src='" + proposal.getThumb() + "'/>"
                    }));
 
                    this.zoomed = true;
