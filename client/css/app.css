@@ -146,7 +146,7 @@ span.icon {
 }
 
 #filter-controls {
-    background-color: #265E9D;    height: 0.5em;
+    background-color: rgba(43, 43, 43, 0.98);    height: 0.5em;
     display: none;
     text-align: right;
 }
@@ -392,7 +392,7 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 #filter-controls .filters {
-    background-color: #265E9D;
+    background-color: rgba(43, 43, 43, 0.98);
     height: 2.5em;
     margin-bottom: -0.2em;
     overflow: hidden;
