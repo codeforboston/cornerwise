@@ -165,6 +165,9 @@ THUMBNAIL_DIM = (300, 300)
 GEO_REGION = "Somerville, MA"
 GEOCODER = "arcgis"
 
+# Email address and name for emails:
+EMAIL_ADDRESS = "Cornerwise <cornerwise@somervillema.gov>"
+
 # Load select environment variables into settings:
 for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",
                "ARCGIS_CLIENT_ID", "ARCGIS_CLIENT_SECRET",
