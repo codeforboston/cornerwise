@@ -61,6 +61,17 @@ class Importer(object):
         project["budget"] = {int(m.group(1)): Decimal(pjson[k])
                              for k, m in budget_keys if m}
 
+        try:
+            address = pjson["address"]
+            human_address = json.loads(address["human_address"])
+            project["address"] = {
+                "lat": address["latitude"],
+                "lng": address["longitude"],
+                "address": human_address["address"]
+            }
+        except:
+            project["address"] = None
+
         return project
 
     def updated_since(self, dt=None):
