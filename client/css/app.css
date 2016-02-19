@@ -260,14 +260,15 @@ input:focus::-webkit-input-placeholder {
 }
 
 #geolocate {
-    color: white;
+    background: url(/static/images/geolocate-button.png);
     display: block;
     font-size: medium;
-    right: -200px;
+    right: -40px;
     top: 10px;
     position: absolute;
     text-decoration: underline;
-    width: 200px;
+    height: 25px;
+    width: 25px;
 }
 
 body.geolocating #geolocate {
