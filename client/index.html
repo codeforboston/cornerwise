@@ -92,6 +92,9 @@
       <div class="budget">
         <%- prettyAmount(project.totalBudget()) %>
       </div>
+      <div class="description" >
+          <%- project.get("description") %>
+      </div>
     </script>
 
     <script type="text/template" id="proposal-preview-template">
