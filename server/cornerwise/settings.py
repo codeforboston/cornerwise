@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 # For celery:
-from datetime import timedelta
+from celery.schedules import crontab
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -141,13 +141,20 @@ DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 BROKER_URL = os.environ.get("REDIS_HOST", "redis://")
 
 # Persist task results to the database
-CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
         "task": "proposal.pull_updates",
-        "schedule": timedelta(days=1),
-    }
+        # Run daily at midnight:
+        "schedule": crontab(minute=0, hour=0)
+    },
+
+    "update-projects": {
+        "task": "project.pull_updates",
+        # Run on Mondays at midnight:
+        "schedule": crontab(minute=0, hour=0, day_of_week="monday")
+    },
 }
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 60
@@ -155,8 +162,8 @@ CELERYD_TASK_SOFT_TIME_LIMIT = 60
 ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
 ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
 
-GEO_BOUNDS = [42.371861543730496, -71.13338470458984, # northwest
-              42.40393908425197, -71.0679817199707]  # southeast
+GEO_BOUNDS = [42.371861543730496, -71.13338470458984,  # northwest
+              42.40393908425197, -71.0679817199707]    # southeast
 
 # The 'fit-width' of image thumbnails:
 THUMBNAIL_DIM = (300, 300)

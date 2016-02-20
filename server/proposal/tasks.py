@@ -391,7 +391,8 @@ def process_proposals(proposals):
 
 @celery_app.task(name="proposal.fetch_proposals")
 @transaction.atomic
-def fetch_proposals(since=None, coder_type=settings.GEOCODER):
+def fetch_proposals(since=None, coder_type=settings.GEOCODER,
+                    importers=Importers):
     """
     Task that scrapes the reports and decisions page
     """
@@ -421,10 +422,16 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER):
             since = now - timedelta(days=7 + now.weekday())
 
     proposals_json = []
-    for importer in Importers:
-        found = importer.updated_since(since, geocoder)
+    for importer in importers:
+        importer_name = type(importer).__name__
+        try:
+            found = importer.updated_since(since, geocoder)
+        except Exception as err:
+            logger.warning("Error in importer:", importer_name, err)
+            continue
+
         logger.info("Fetched %i proposals from %s",
-                    len(found), importer.__name__)
+                    len(found), type(importer).__name__)
         proposals_json += found
 
     proposals = []

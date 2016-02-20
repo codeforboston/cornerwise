@@ -4,7 +4,7 @@ from .importers.register import Importers
 
 import logging
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @celery_app.task(name="project.pull_updates")
@@ -24,4 +24,3 @@ def pull_updates(since=None):
         created.append(Project.create_from_dict(project))
 
     return created
-    

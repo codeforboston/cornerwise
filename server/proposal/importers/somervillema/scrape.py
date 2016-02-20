@@ -66,7 +66,6 @@ field_processors = {
 
 
 def get_td_val(td, attr=None):
-    import pdb; pdb.set_trace()
     processor = field_processors.get(attr, default_field)
     return processor(td)
 
@@ -120,8 +119,8 @@ def find_cases(doc):
             proposal["complete"] = bool(proposal["decisions"])
             cases.append(proposal)
         except Exception as err:
-            logger.error("Failed to scrape row {num}: {err}"
-                         .format(num=i, err=err))
+            logger.error("Failed to scrape row", i, tr)
+            logger.error(err)
             continue
     return cases
 
