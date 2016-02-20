@@ -25,8 +25,8 @@ if [ -n "$1" ]; then
     port="$1"
 fi
 
-
-if pid=$(cat $pid_file); then
+if [ -f $pid_file ]; then
+    pid=$(cat $pid_file)
     if kill $pid 2>/dev/null; then
         echo "Killed running server (pid: $pid)";
     elif kill -0 $pid 2>/dev/null; then
@@ -59,8 +59,16 @@ $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$se
 echo "Starting celery beat and worker"
 # Force Celery to run as root
 export C_FORCE_ROOT=1
+
+celerybeat_pid_file="$APP_ROOT/celerybeat.pid" 
+if [ -f "$celerybeat_pid_file" ]; then
+    if kill $(cat $celerybeat_pid_file) 2>/dev/null; then
+        echo "Killed running celerybeat."
+    fi
+fi
+
 $PYTHON_BIN $APP_ROOT/manage.py celerybeat --detach || (echo "celery beat failed!" && exit 1)
-$PYTHON_BIN $APP_ROOT/manage.py celery worker -B $celery_opts
+$PYTHON_BIN $APP_ROOT/manage.py celery worker $celery_opts
 
 if (($?)); then
     echo "I encountered an error while trying to start Django."
