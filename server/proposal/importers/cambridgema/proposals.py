@@ -1,3 +1,4 @@
+import dateutil
 from urllib import parse
 from urllib.request import Request, urlopen
 import json
@@ -43,7 +44,7 @@ def get_json(req):
     return json_response
 
 
-class Importer(object):
+class CambridgeImporter(object):
     region_name = "Cambridge, MA"
     domain = "data.cambridgema.gov"
 

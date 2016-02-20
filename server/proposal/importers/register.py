@@ -6,9 +6,9 @@ from . import somervillema
 socrata_token = getattr(settings, "SOCRATA_APP_TOKEN", None)
 
 Importers = [
-    somervillema.Importer()
+    somervillema.SomervilleImporter()
 ]
 
 if socrata_token:
     from . import cambridgema
-    Importers.append(cambridgema.Importer(socrata_token))
+    Importers.append(cambridgema.CambridgeImporter(socrata_token))

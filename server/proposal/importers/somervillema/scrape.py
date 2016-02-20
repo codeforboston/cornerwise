@@ -46,7 +46,7 @@ def detect_last_page(doc):
     return 0
 
 
-## Field helpers:
+# Field helpers:
 
 def get_links(elt):
     "Return information about the <a> element descendants of elt."
@@ -119,7 +119,8 @@ def find_cases(doc):
             proposal["complete"] = bool(proposal["decisions"])
             cases.append(proposal)
         except Exception as err:
-            logger.error("Failed to scrape row", i, tr)
+            tr_string = " ".join(tr.stripped_strings)
+            logger.error("Failed to scrape row", i, tr_string)
             logger.error(err)
             continue
     return cases
@@ -214,12 +215,12 @@ def get_proposals_since(dt=None,
     return all_cases
 
 
-class Importer(object):
+class SomervilleImporter(object):
     region_name = "Somerville, MA"
     tz = pytz.timezone("US/Eastern")
 
     def updated_since(self, dt, geocoder=None):
         if not dt.tzinfo:
             dt = self.tz.localize(dt)
-        
+
         return get_proposals_since(dt, geocoder=geocoder)
