@@ -9,6 +9,11 @@ def to_camel(s):
     return re.sub(r"[\s\-_](\w)", lambda m: m.group(1).upper(), s.lower())
 
 
+def to_under(s):
+    "Converts a whitespace-separated string to underscore-separated."
+    return re.sub(r"\s+", "_", s.lower())
+
+
 def link_info(a):
     return {
         "title": a.get_text().strip(),
@@ -65,7 +70,7 @@ def get_td_value(td, attr=None, processors={}):
 
 
 def get_row_vals(attrs, tr, processors={}):
-    return {attr: get_td_value(td, attr, processors=processors) \
+    return {attr: get_td_value(td, attr, processors=processors)
             for attr, td in zip(attrs, tr.find_all("td"))}
 
 
@@ -78,7 +83,7 @@ def find_table(doc):
     return doc.select_one("table.views-table")
 
 
-def get_data(doc, get_attribute=to_camel, processors={}):
+def get_data(doc, get_attribute=to_under, processors={}):
     table = find_table(doc)
     titles = col_names(table)
     attributes = [get_attribute(t) for t in titles]

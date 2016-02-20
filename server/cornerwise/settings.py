@@ -151,6 +151,13 @@ CELERYBEAT_SCHEDULE = {
         "schedule": crontab(minute=0, hour=0)
     },
 
+    # Uncomment this to automatically process any unprocessed documents every
+    # day.  (Documents are supposed to be processed immediately.)
+    # "update-documents": {
+    #     "task": "proposal.process_documents",
+    #     "schedule": crontab(minute=0, hour=0)
+    # },
+
     "update-projects": {
         "task": "project.pull_updates",
         # Run on Mondays at midnight:

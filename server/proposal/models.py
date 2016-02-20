@@ -81,13 +81,13 @@ class Proposal(models.Model):
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict."""
         try:
-            proposal = kls.objects.get(case_number=p_dict["caseNumber"])
+            proposal = kls.objects.get(case_number=p_dict["case_number"])
 
             # TODO: We should track changes to a proposal's status over
             # time. This may mean full version-control, with something
             # like django-reversion, or with a hand-rolled alternative.
         except kls.DoesNotExist:
-            proposal = kls(case_number=p_dict["caseNumber"])
+            proposal = kls(case_number=p_dict["case_number"])
 
         proposal.address = p_dict["address"]
 
@@ -102,7 +102,7 @@ class Proposal(models.Model):
         proposal.description = p_dict.get("description")
         proposal.source = p_dict.get("source")
         proposal.region_name = p_dict.get("region_name")
-        proposal.updated = p_dict["updatedDate"]
+        proposal.updated = p_dict["updated_date"]
         proposal.complete = p_dict["complete"]
 
         proposal.save()
@@ -121,7 +121,7 @@ class Proposal(models.Model):
                     doc.url = link["url"]
                     doc.title = link["title"]
                     doc.field = field
-                    doc.published = p_dict["updatedDate"]
+                    doc.published = p_dict["updated_date"]
 
                     doc.save()
 

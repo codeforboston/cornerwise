@@ -1,4 +1,5 @@
-import dateutil
+from dateutil.parser import parse as date_parse
+import pytz
 from urllib import parse
 from urllib.request import Request, urlopen
 import json
@@ -89,6 +90,11 @@ class CambridgeImporter(object):
 
         proposal["region_name"] = "Cambridge, MA"
         proposal["source"] = "data.cambridgema.gov"
+
+        tz = pytz.timezone("US/Eastern")
+        updated_naive = pjson.get("decisiondate",
+                                  pjson["applicationdate"])
+        proposal["updated_date"] = tz.localize(updated_naive)
 
         if "location" in pjson and not pjson["location"]["needs_recoding"]:
             location = pjson["location"]

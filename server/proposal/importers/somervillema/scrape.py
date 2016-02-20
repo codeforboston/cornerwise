@@ -22,7 +22,7 @@ def attribute_for_title(title):
     Convert the title (e.g., in a <th></th>) to its corresponding
     attribute in the output maps.
     """
-    return TITLES.get(title, helpers.to_camel(title))
+    return TITLES.get(title, helpers.to_under(title))
 
 
 # TODO: Return None or error if the response is not successful
@@ -30,7 +30,7 @@ def get_page(page=1, url_format=URL_FORMAT):
     "Returns the HTML content of the given Reports and Decisions page."
     url = url_format.format(page)
     f = urlopen(url)
-    logger.info("Fetching page {}".format(page))
+    logger.info("Fetching page %i", page)
     html = f.read()
     f.close()
     return html
@@ -60,8 +60,8 @@ field_processors = {
     "reports": helpers.links_field,
     "decisions": helpers.links_field,
     "other": helpers.links_field,
-    "firstHearingDate": helpers.dates_field,
-    "updatedDate": helpers.datetime_field_tz("US/Eastern")
+    "first_hearing_date": helpers.dates_field,
+    "updated_date": helpers.datetime_field_tz("US/Eastern")
 }
 
 
@@ -184,7 +184,7 @@ def get_cases(gen=None):
 
 def get_proposals_since(dt=None,
                         stop_at_case=None,
-                        date_column="updatedDate",
+                        date_column="updated_date",
                         geocoder=None):
     """Page through the Reports and Decisions page, scraping the proposals
     until the submission date is less than or equal to the given date.
@@ -203,6 +203,9 @@ def get_proposals_since(dt=None,
     :returns: A list of dicts representing scraped cases.
 
     """
+    if not dt.tzinfo:
+        dt = pytz.timezone("US/Eastern").localize(dt)
+
     def guard(case):
         return (not dt or case[date_column] > dt) and \
             (not stop_at_case or case["caseNumber"] != stop_at_case)

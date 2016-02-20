@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from itertools import chain
 import os
 import shutil
 import subprocess
@@ -101,8 +102,7 @@ the path of the text document.
     status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
 
     if status:
-        logger.error("Failed to extract text from {doc}".
-                     format(doc=path))
+        logger.error("Failed to extract text from %s", path)
         # TODO: Correct way to signal a 'hard' failure that will break
         # this chain of subtasks.
     else:
@@ -202,10 +202,11 @@ def add_street_view(proposal):
         except IntegrityError:
             logger.warning("Image with that URL already exists")
         except DataError:
-            logger.warning("Image could not be saved.  Was the URL too long?")
+            logger.error("Image could not be saved.  Was the URL too long?")
 
     else:
-        logger.warning("Add a local_settings file with your Google API key.")
+        logger.warn("Add a local_settings file with your Google API key " +
+                    "to add Street View images.")
 
 
 @celery_app.task(name="proposal.generate_doc_thumbnail")
@@ -351,7 +352,7 @@ def add_doc_events(doc, properties):
             event = Event(title=e["title"],
                           date=e["date"])
         except KeyError as kerr:
-            logger.error("Missing required key in extracted event:",
+            logger.error("Missing required key in extracted event: %s",
                          kerr.args)
 
     if event:
@@ -388,7 +389,13 @@ def process_documents(docs=None):
 @celery_app.task(name="proposal.process_proposals")
 def process_proposals(proposals):
     "Perform additional processing on proposals."
-    add_street_view.map(proposals)
+    process_documents.map(chain.from_iterable(p.document_set.all()
+                                              for p in proposals))
+
+    # Create a Google Street View image for each proposal:
+    add_street_view.map(proposals)()
+
+    return proposals
 
 
 @celery_app.task(name="proposal.fetch_proposals")
@@ -427,9 +434,9 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
     for importer in importers:
         importer_name = type(importer).__name__
         try:
-            found = importer.updated_since(since, geocoder)
+            found = list(importer.updated_since(since, geocoder))
         except Exception as err:
-            logger.warning("Error in importer:", importer_name, err)
+            logger.warning("Error in importer: %s - %s", importer_name, err)
             continue
 
         logger.info("Fetched %i proposals from %s",
@@ -454,4 +461,4 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
 @celery_app.task(name="proposal.pull_updates")
 def pull_updates():
     return (fetch_proposals.s() |
-            process_documents.s())()
+            process_proposals.s())()
