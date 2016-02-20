@@ -24,3 +24,8 @@ def pull_updates(since=None):
         created.append(Project.create_from_dict(project))
 
     return created
+
+
+@celery_app.task(name="project.heartbeat")
+def heartbeat():
+    logger.info("Heartbeat")

@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 # For celery:
 from celery.schedules import crontab
+from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -154,6 +155,11 @@ CELERYBEAT_SCHEDULE = {
         "task": "project.pull_updates",
         # Run on Mondays at midnight:
         "schedule": crontab(minute=0, hour=0, day_of_week="monday")
+    },
+
+    "heartbeat": {
+        "task": "project.heartbeat",
+        "schedule": timedelta(minutes=10)
     },
 }
 
