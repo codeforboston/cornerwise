@@ -1,1 +1,1 @@
-from .proposals import Importer
+from .proposals import CambridgeImporter

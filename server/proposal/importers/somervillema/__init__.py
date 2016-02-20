@@ -1,4 +1,4 @@
-from .scrape import Importer
+from .scrape import SomervilleImporter
 
 # TODO: EventImporter class
 
