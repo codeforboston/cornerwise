@@ -331,8 +331,10 @@ def add_doc_events(doc, properties):
     if not doc.proposal:
         return
 
+    doc_json = proposal_utils.doc_info(doc)
+
     # Find events and create them:
-    events = extract.get_events(doc, properties)
+    events = extract.get_events(doc_json, properties)
 
     if not events:
         return
@@ -452,4 +454,4 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
 @celery_app.task(name="proposal.pull_updates")
 def pull_updates():
     return (fetch_proposals.s() |
-            process_document.s())()
+            process_documents.s())()
