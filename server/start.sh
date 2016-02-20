@@ -46,15 +46,21 @@ $PYTHON_BIN $APP_ROOT/manage.py migrate
 
 # Start Celery:
 if [ "$DJANGO_MODE" != "production" ]; then
-    celery_opts=" --autoreload"
+    # The --autoreload option results in very high CPU usage on
+    # my machine...
+
+    #celery_opts=" --autoreload --loglevel=INFO"
+    celery_opts=" --loglevel=INFO"
 fi
-echo "Starting celery worker and celerybeat"
-# Force Celery to run as root
-export C_FORCE_ROOT=1
-$PYTHON_BIN $APP_ROOT/manage.py celeryd_detach -B $celery_opts
 
 echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
 $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err &
+
+echo "Starting celery beat and worker"
+# Force Celery to run as root
+export C_FORCE_ROOT=1
+$PYTHON_BIN $APP_ROOT/manage.py celerybeat --detach || (echo "celery beat failed!" && exit 1)
+$PYTHON_BIN $APP_ROOT/manage.py celery worker -B $celery_opts
 
 if (($?)); then
     echo "I encountered an error while trying to start Django."
