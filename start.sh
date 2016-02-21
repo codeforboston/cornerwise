@@ -245,6 +245,8 @@ else
         env_opts="$env_opts -e $setting"
     done
 
+    env_opts="$env_opts -e GOOGLE_APPLICATION_CREDENTIALS=/app/google_credentials.json"
+
     if [ -f $env_file ]; then
         env_opts="$env_opts --env-file=$env_file"
     fi

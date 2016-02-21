@@ -18,3 +18,4 @@ TAGS
 *.pfx
 local/
 .tern-port
+google_credentials.json
