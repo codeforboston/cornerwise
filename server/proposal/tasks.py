@@ -68,6 +68,8 @@ def fetch_document(doc):
         shutil.copyfileobj(resp, out)
         doc.document = path
 
+        logger.info("Copied Document #%i to %s", doc.pk, path)
+
         file_published = files_metadata.published_date(path)
 
         if file_published:
@@ -106,6 +108,8 @@ the path of the text document.
         # TODO: Correct way to signal a 'hard' failure that will break
         # this chain of subtasks.
     else:
+        logger.info("Extracted text from Document #%i to %s.",
+                    doc.pk, doc.fulltext)
         # Do stuff with the contents of the file.
         # Possibly perform some rudimentary scraping?
         doc.fulltext = text_path
@@ -238,6 +242,7 @@ def generate_doc_thumbnail(doc):
                      path, err)
         raise Exception("Failed for document %s" % doc.pk)
     else:
+        logger.info("Generated thumbnail for '%s'", docfile)
         thumb_path = out_prefix + os.path.extsep + "jpg"
         doc.thumbnail = thumb_path
         doc.save()
@@ -287,6 +292,8 @@ def generate_thumbnail(image, replace=False):
             logger.error(err)
             return
 
+        logger.info("Generate thumbnail for Image #%i: %s", image.pk,
+                    thumbnail_path)
         image.thumbnail = thumbnail_path
         image.save()
 
@@ -446,13 +453,13 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
     proposals = []
 
     for p_dict in proposals_json:
-        p = Proposal.create_proposal_from_json(p_dict)
+        (_, p) = Proposal.create_or_update_proposal_from_dict(p_dict)
 
         if p:
             p.save()
             proposals.append(p)
         else:
-            logger.error("Could not create proposal from dictionary:",
+            logger.error("Could not create proposal from dictionary: %s",
                          p_dict)
 
     return proposals

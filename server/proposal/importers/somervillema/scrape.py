@@ -81,7 +81,7 @@ def add_geocode(geocoder, proposals):
 
     # Assumes the locations are returned in the same order
     for proposal, location in zip(proposals, locations):
-        loc = location and location.get("location")
+        loc = location and location.get("location", None)
         if not loc:
             logger.error("Skipping proposal {id}; geolocation failed."
                          .format(id=proposal["caseNumber"]))
@@ -119,8 +119,8 @@ def find_cases(doc):
             proposal["complete"] = bool(proposal["decisions"])
             cases.append(proposal)
         except Exception as err:
-            tr_string = " ".join(tr.stripped_strings)
-            logger.error("Failed to scrape row", i, tr_string)
+            tr_string = " | ".join(tr.stripped_strings)
+            logger.error("Failed to scrape row %i: %s", i, tr_string)
             logger.error(err)
             continue
     return cases

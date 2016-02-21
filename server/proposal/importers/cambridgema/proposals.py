@@ -68,7 +68,7 @@ class CambridgeImporter(object):
         return self.query(soql)
 
     copy_keys = {
-        "caseNumber": "plan_number",
+        "case_number": "plan_number",
         "status": "status",
         "summary": "summary_for_publication"
     }
@@ -77,6 +77,9 @@ class CambridgeImporter(object):
         "Type": "type",
         "Reason": "reason_for_petition_other"
     }
+
+    def match_complete(self, s):
+        return bool(re.match(r"(approved|denied|withdrawn)", s, re.I))
 
     def process_json(self, pjson):
         """
@@ -92,9 +95,12 @@ class CambridgeImporter(object):
         proposal["source"] = "data.cambridgema.gov"
 
         tz = pytz.timezone("US/Eastern")
-        updated_naive = pjson.get("decisiondate",
-                                  pjson["applicationdate"])
+        updated_datestr = pjson.get("decisiondate",
+                                    pjson["applicationdate"])
+        updated_naive = date_parse(updated_datestr)
         proposal["updated_date"] = tz.localize(updated_naive)
+        proposal["complete"] = self.match_complete(pjson["status"])
+        proposal["description"] = pjson.get("reason_for_petition_other", "")
 
         if "location" in pjson and not pjson["location"]["needs_recoding"]:
             location = pjson["location"]

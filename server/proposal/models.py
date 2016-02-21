@@ -54,8 +54,8 @@ class Proposal(models.Model):
     # The time when the entry was updated in the source:
     updated = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
-    summary = models.CharField(max_length=256, default="")
-    description = models.TextField()
+    summary = models.CharField(max_length=1024, default="")
+    description = models.TextField(default="")
     source = models.URLField(null=True,
                              help_text="The data source for the proposal.")
     status = models.CharField(max_length=64)
@@ -76,13 +76,14 @@ class Proposal(models.Model):
         return self.document_set.filter(field=field)
 
     @classmethod
-    def create_proposal_from_json(kls, p_dict):
+    def create_or_update_proposal_from_dict(kls, p_dict):
         """
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict."""
+        created = False
         try:
             proposal = kls.objects.get(case_number=p_dict["case_number"])
-
+            created = True
             # TODO: We should track changes to a proposal's status over
             # time. This may mean full version-control, with something
             # like django-reversion, or with a hand-rolled alternative.
@@ -96,10 +97,10 @@ class Proposal(models.Model):
         except KeyError:
             # If the dictionary does not have an associated location, do not
             # create a Proposal.
-            return
+            return (False, None)
 
-        proposal.summary = p_dict.get("summary", "")
-        proposal.description = p_dict.get("description")
+        proposal.summary = p_dict.get("summary", "")[0:1024]
+        proposal.description = p_dict.get("description", "") or ""
         proposal.source = p_dict.get("source")
         proposal.region_name = p_dict.get("region_name")
         proposal.updated = p_dict["updated_date"]
@@ -127,9 +128,10 @@ class Proposal(models.Model):
 
         for attr_name, attr_val in p_dict.get("attributes", []):
             proposal.attributes.create(name=attr_name,
-                                       text_value=attr_val)
+                                       text_value=attr_val,
+                                       published=p_dict["updated_date"])
 
-        return proposal
+        return (created, proposal)
 
 
 class Attribute(models.Model):
