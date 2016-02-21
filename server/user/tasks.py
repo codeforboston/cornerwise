@@ -1,8 +1,10 @@
 from django.conf import settings
-import re
 import sendgrid
 
 from cornerwise import celery_app
+
+from .models import Subscription
+from proposal.models import Proposal
 
 
 if getattr(settings, "SENDGRID_API_KEY", None):
@@ -34,4 +36,8 @@ def send_subscription_updates(subscription, proposals):
 
 @celery_app.task()
 def run_notifications():
+    """
+    Check the Subscriptions and find those that have new updates since the last
+    update was run.
+    """
     pass
