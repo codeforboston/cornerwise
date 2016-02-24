@@ -1,12 +1,27 @@
-import datetime, redis
+import datetime
+import logging
+import redis
+from django.conf import settings
 
 from cornerwise import celery_app
 
-from . import idf, keywords
+from scripts import idf, keywords
+from scripts.text_analytics import TextAnalyzer
 from .models import Attribute
+
+
+logger = logging.getLogger(__name__)
+
+if hasattr(settings, "AZURE_API_KEY"):
+    text_analyzer = TextAnalyzer(settings.AZURE_API_KEY)
+else:
+    logger.warning("You must set AZURE_API_KEY in local_settings.py " +
+                   "to use the text analyzer")
+
 
 # For testing:
 def add_full_text(r, doc):
+    ""
     terms = keywords.keywords(doc.get_text())
     idf.add_document(r, terms, doc.pk)
 
@@ -28,7 +43,10 @@ def add_full_docs(docs):
 
 def top_terms(doc):
     r = redis.StrictRedis()
-    terms = keywords.keywords(doc.get_text())
+    try:
+        terms = text_analyzer.get_key_phrases(doc.get_text())
+    except:
+        return []
     sorted_terms = idf.sorted_terms(r, terms)
     return [t[0] for t in sorted_terms]
 
@@ -39,10 +57,13 @@ def build_counts(handles=[]):
     r = redis.StrictRedis()
 
     for att in attrs:
-        att_keywords = keywords.keywords(text)
+        try:
+            att_keywords = text_analyzer.get_key_phrases(att.text_value)
+        except:
+            continue
         idf.add_document(r, att_keywords, att.pk)
 
 
 celery_app.task(name="proposal.analyze_text")
-def analyze_text(doc):
+def analyze_document_text(doc):
     att_keywords = keywords.keywords(doc.get_text())

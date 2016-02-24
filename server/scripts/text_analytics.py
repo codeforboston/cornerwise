@@ -24,4 +24,4 @@ class TextAnalyzer(object):
     def get_key_phrases(self, text):
         with self.make_request("GetKeyPhrases", {"Text": text}) as resp:
             json_str = resp.read().decode("utf-8")
-            return json.loads(json_str)
+            return json.loads(json_str)["KeyPhrases"]

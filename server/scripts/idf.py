@@ -1,7 +1,6 @@
 from collections import defaultdict
 from math import log
 from operator import itemgetter
-import re
 
 
 def raw_frequencies(terms):
@@ -31,7 +30,9 @@ def doc_key(doc_id):
     return "idf:docs:" + str(doc_id)
 
 
+# Interacting with storage:
 def doc_count(r, term):
+    "Retrieves the total document count."
     return int(r.get(term_key(term) + ":docs") or "0")
 
 
@@ -54,7 +55,7 @@ def add_document(r, terms, doc_id=None):
 
 
 def inverse_frequencies(r, terms):
-    doc_total = int(r.get("idf:doc_count"))
+    doc_total = int(r.get("idf:doc_count") or "0")
 
     return {term: log(doc_total/(1 + doc_count(r, term)))
             for term in terms}
