@@ -1,11 +1,14 @@
 {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "title": "MBTA 88",
+                "description": ""
+            },
+            "geometry": {
+                "coordinates": [
           [
             -71.13211,
             42.40593
@@ -3434,14 +3437,10 @@
             -71.13211,
             42.40593
           ]
-        ]
-      },
-      "properties": {
-        "prop0": "value0",
-        "prop1": {
-          "this": "that"
-        }
-      }
-    }
-  ]
+
+      ],
+      "type": "LineString"
+  }
+}
+]
 }
