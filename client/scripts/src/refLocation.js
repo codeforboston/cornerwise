@@ -1,10 +1,11 @@
 /*
  * The reference location is used to determine the distance to
  */
-define(["backbone", "leaflet", "alerts", "config", "arcgis", "utils"],
-       function(B, L, alerts, config, arcgis, $u) {
-           var region = config.regionBounds || config.maxBounds,
-               bounds = L.latLngBounds(region[0], region[1]);
+define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"],
+       function(B, L, alerts, config, arcgis, Regions, $u) {
+           var currentRegion, bounds;
+
+
 
            var LocationModel = B.Model.extend({
                defaults: {

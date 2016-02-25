@@ -1,13 +1,12 @@
 define(["backbone", "config", "leaflet", "jquery", "underscore",
         "ref-location", "ref-marker", "proposal-marker", "layers",
-        "info-layer-helper", "appState", "utils"],
+        "regions", "info-layer-helper", "app-state", "utils"],
        function(B, config, L, $, _, refLocation, RefMarker,
-                ProposalMarker, infoLayers, info, appState, $u) {
+                ProposalMarker, infoLayers, Regions, info, appState, $u) {
     return B.View.extend({
         initialize: function() {
             var map = L.map(this.el,
-                            {minZoom: 13,
-                             maxBounds: config.maxBounds}),
+                            {minZoom: 13}),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
@@ -19,7 +18,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             map.addLayer(parcelLayer);
             map.addLayer(zoningLayer);
 
-            this.addBaseLayers(config.baseLayers);
             this.parcelLayer = parcelLayer;
             this.zoningLayer = zoningLayer;
 
@@ -44,13 +42,11 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 .listenTo(this.collection, "remove", this.proposalRemoved)
                 .listenTo(this.collection, "change", this.changed)
                 .listenTo(refLocation, "change", this.placeReferenceMarker)
-                .listenTo(infoLayers, "change", this.layersChanged);
+                .listenTo(infoLayers, "change", this.layersChanged)
+                .listenTo(Regions, "selectionLoaded", this.showRegions)
+                .listenTo(Regions, "selectionRemoved", this.removeRegions);
 
             appState.onStateChange(_.bind(this.stateChanged, this));
-
-
-            // this.listenTo(this.collection, "selectionLoaded",
-            //               this.selectionChanged);
 
             return this;
         },
@@ -92,6 +88,42 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                               return model.get("location");
                           }));
             this.map.setView(bounds.getCenter());
+        },
+
+        regionLayers: {},
+        showRegions: function(regions, ids) {
+            var self = this,
+                deferreds = _.map(ids, function(id) {
+                var regionInfo = regions.get(id);
+
+                if (self.regionLayers[id]) return null;
+
+                return regionInfo.loadShape()
+                    .done(function(shape) {
+                        var layer = L.geoJson(shape,
+                                              {style: config.regionStyle});
+                        self.regionLayers[id] = layer;
+                        self.map.addLayer(layer);
+                    });
+
+            });
+
+            // Fit to visible regions?
+            // $.when(deferreds).done(...)
+        },
+
+        removeRegions: function(regions, ids) {
+            _.each(ids, function(id) {
+                var layer = this.regionLayers[id];
+
+                if (layer) {
+                    this.map.removeLayer(layer);
+                    delete this.regionLayers[id];
+                }
+            }, this);
+
+
+            // Refit?
         },
 
         // Layer ordering (bottom -> top):
@@ -300,7 +332,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 $.getJSON(layer.source)
                     .done(function(features) {
                         self.map.addLayer(L.geoJson(features,
-                                                    {style: layer.style}));
+                                                    {style: layer.style}))
+                            .bringToBack();
                     });
             });
         }

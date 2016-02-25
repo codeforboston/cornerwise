@@ -1,4 +1,4 @@
-define(["backbone", "appState", "underscore", "config",
+define(["backbone", "app-state", "underscore", "config",
         "utils"],
        function(B, appState, _, config, $u) {
            return B.View.extend({

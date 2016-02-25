@@ -1,4 +1,4 @@
-define(["backbone", "underscore", "jquery", "appState"],
+define(["backbone", "underscore", "jquery", "app-state"],
        function(B, _, $, appState) {
            return B.View.extend({
                initialize: function(options) {

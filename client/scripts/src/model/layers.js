@@ -1,4 +1,4 @@
-define(["backbone", "layer", "config", "underscore", "appState"],
+define(["backbone", "layer", "config", "underscore", "app-state"],
        function(B, Layer, config, _, appState ) {
            // Construct a Backbone model for each of the layers:
            var layerModels = _.map(config.layers, function(info) {

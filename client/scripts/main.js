@@ -17,7 +17,7 @@ require.config({
         // Application: //
         "config": "src/config",
         "local-config": "src/localConfig",
-        "appState": "src/appState",
+        "app-state": "src/appState",
         "ref-location": "src/refLocation",
 
         // Leaflet stuff:
@@ -34,6 +34,7 @@ require.config({
         "selectable": "src/model/selectableCollection",
         "proposals": "src/model/proposals",
         "layers": "src/model/layers",
+        "regions": "src/model/regions",
         "projects": "src/model/projects",
         "collection-manager": "src/model/collectionManager",
 
@@ -57,7 +58,6 @@ require.config({
         "filters-view": "src/view/filters",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
-        "minilist-view": "src/view/minilist",
 
         // View managers:
         "tab-view": "src/view/tabs",

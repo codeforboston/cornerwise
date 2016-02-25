@@ -3,7 +3,7 @@
  */
 define(
     ["backbone", "underscore", "jquery", "ref-location", "utils", "arcgis",
-     "appState", "config"],
+     "app-state", "config"],
 
     function(B, _, $, refLocation, $u, arcgis, appState, config) {
         return B.View.extend({

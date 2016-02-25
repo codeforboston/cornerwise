@@ -1,5 +1,5 @@
 define(
-    ["jquery", "proposals", "projects", "collection-manager", "map-view", "proposal-view", "project-view", "glossary", "config", "appState", "view-manager", "ref-location", "legal-notice"],
+    ["jquery", "proposals", "projects", "collection-manager", "map-view", "proposal-view", "project-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
     function($, Proposals, Projects, CollectionManager, MapView, ProposalItemView, ProjectItemView,
              glossary, config, appState, ViewManager, refLocation) {
         return {
@@ -56,15 +56,13 @@ define(
                 });
 
                 require(["info-view", "proposal-info-view", "project-info-view",
-                         "minilist-view"],
-                        function(InfoView, ProposalInfoView, ProjectInfoView, MiniListView) {
+                        "layers-view"],
+                        function(InfoView, ProposalInfoView, ProjectInfoView,
+                                LayersView) {
                             var infoView = new InfoView({
                                 el: "#info",
                                 startExpanded: appState.getKey("x") === "1",
-                                defaultView: new MiniListView({
-                                    manager: cm,
-                                    collection: proposals
-                                }),
+                                defaultView: new LayersView(),
                                 views: {
                                     "proposal": new ProposalInfoView(),
                                     "project": new ProjectInfoView()

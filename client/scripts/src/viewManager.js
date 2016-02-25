@@ -23,7 +23,7 @@
  * to observe.
  *
  */
-define(["appState", "underscore", "jquery"],
+define(["app-state", "underscore", "jquery"],
        function(appState, _, $) {
            function ViewManager(views, name) {
                name = name || "view";

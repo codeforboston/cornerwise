@@ -1,5 +1,5 @@
 define(["backbone", "jquery", "utils", "underscore", 
-        "appState"],
+        "app-state"],
        // TODO: Use the collection manager here?
        function(B, $, $u, _, appState) {
            var ListView = B.View.extend({

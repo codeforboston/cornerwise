@@ -22,11 +22,6 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         bounds:  [[42.37236882604975, -71.14565849304199],
                   [42.41680352972898, -71.04806900024413]],
 
-        maxBounds: [[42.35524578349561, -71.18951797485352],
-                    [42.444107964019395, -70.99004745483398]],
-
-        regionName: "Somerville",
-
         regionBounds: null,
 
         // Default reference location:
@@ -51,23 +46,32 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             "SPSR/V": "Special Permit with Site Plan Review"
         },
 
-        // Layers that are always shown
-        baseLayers: [
+        regions: [
             {
-                source: "/static/scripts/src/layerdata/somerville.geojson",
-                style: {
-                    weight: 3,
-                    color: "#4fb8f7",
-                    fillColor: "#4fb8f7",
-                    fillOpacity: 0.15
-                }
+                id: "somerville",
+                regionName: "Somerville, MA",
+                source: "/static/scripts/src/layerdata/somerville.geojson"
+            },
+            {
+                id: "cambridge",
+                regionName: "Cambridge, MA",
+                source: "/static/scripts/src/layerdata/cambridge.geojson"
             }
         ],
+
+        regionStyle: {
+            weight: 3,
+            color: "#4fb8f7",
+            fillColor: "#4fb8f7",
+            fillOpacity: 0.15
+        },
+
 
         layers: [
             {
                 source: "/static/scripts/src/layerdata/glx.geojson",
                 id: "glx",
+                icon: "/static/images/icon/major_building.png",
                 title: "Green Line Extension",
                 info: "The Green Line Extension plans to bring light rail services to areas of Somerville and Medford currently underserved by the MBTA.",
                 template:
