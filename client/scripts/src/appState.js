@@ -1,10 +1,16 @@
-define(["backbone", "underscore", "utils"],
-       function(B, _, $u) {
+define(["backbone", "underscore", "config", "utils"],
+       function(B, _, config, $u) {
            var dispatcher = _.clone(B.Events),
                appState =
                    {
                        /** @private */
                        _cachedState: null,
+
+                       defaults: {
+                           "r": "somerville"
+                       },
+
+                       getters: {},
 
                        /**
                         * Returns an event dispatcher that is shared by the entire
@@ -48,7 +54,8 @@ define(["backbone", "underscore", "utils"],
                            var state = this.getState(),
                                ks = _.isArray(k) ? k : k.split(".");
 
-                           return $u.getIn(state, ks);
+                           return $u.getIn(state, ks) ||
+                               $u.getIn(this.defaults, ks);
                        },
 
                        /**
@@ -100,15 +107,17 @@ define(["backbone", "underscore", "utils"],
 
                        startWatch: function() {
                            var lastState = null,
-                               watchers = this.watchers;
+                               watchers = this.watchers,
+                               defaults = this.defaults;
                            this.getDispatcher().on("hashState", function(state) {
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
                                        key = watcher[1];
 
                                    if (key) {
-                                       var oldVal = $u.getIn(lastState, key),
-                                           newVal = $u.getIn(state, key);
+                                       var defval = $u.getIn(defaults, key),
+                                    oldVal = $u.getIn(lastState, key) || (lastState && defval),
+                                           newVal = $u.getIn(state, key) || defval;
                                        if (lastState && _.isEqual(newVal, oldVal))
                                            return;
                                        callback(newVal, oldVal);
