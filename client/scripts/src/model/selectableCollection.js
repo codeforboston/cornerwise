@@ -1,4 +1,4 @@
-define(["backbone", "underscore", "appState", "utils"],
+define(["backbone", "underscore", "app-state", "utils"],
        function(B, _, appState, $u) {
            /**
             * @constructor
@@ -11,7 +11,8 @@ define(["backbone", "underscore", "appState", "utils"],
             *   that have not yet been loaded.
             *
             * - selectionLoaded (collection, ids, loadedIds)
-            *   Triggered when the entire selection is loaded
+            *   Triggered when the entire selection is loaded (meaning that
+            *   there is local data for id in the selection).
             *   ids: ids of all selected children
             *
             * - selectionRemoved (collection, ids, selectedIds)
@@ -29,10 +30,17 @@ define(["backbone", "underscore", "appState", "utils"],
             * - removedFiltered (model, collection)
             */
            var SelectableCollection = B.Collection.extend({
-               initialize: function() {
+
+               initialize: function(models, options) {
+                   B.Collection.prototype.initialize.call(this, models, options);
+
                    // The ids of the selected members that are loaded
                    // and available.
-                   this.selection = [];
+                   if (options && options.selection)
+                       this.selection = options.selection;
+                   else
+                       this.selection = [];
+
                    // The ids of selected members that are not loaded
                    // yet.
                    this.pending = [];
@@ -45,7 +53,7 @@ define(["backbone", "underscore", "appState", "utils"],
                        appState.onStateChange(this.hashParam, function(ids, oldIds) {
                            if (!ids) return;
 
-                           ids = _.map(ids.split(","), $u.parseInt10);
+                           ids = ids.split(",");
                            self.setSelection(ids);
                        });
 
