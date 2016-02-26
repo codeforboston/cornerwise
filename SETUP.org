@@ -35,12 +35,15 @@
     script. It may take a while, especially if this is the first time
     you've used Docker.
 
-  - Once you're running inside the container (you should see a prompt
-    beginning with root@[some id]), you can start the server by typing:
+  - Once you're running inside the container (you should see a prompt beginning
+    beginning `root@[some id]`), you can start the server by typing:
 
-    ~sh /app/start.sh~
+    ~bash /app/start.sh~
 
-    Django should start.
+    This will start Postgres and Redis, run any outstanding migrations, then
+    start Django, Celery Beat, and a Celery worker. You can safely press Ctrl-C
+    if you wish. This will shut down the worker, so that scraping and processing
+    tasks will not run, but the web app will remain up.
 
   - The easy start script will try by default to remap ports from the
     virtual machine to localhost, so you should be able to browse to
