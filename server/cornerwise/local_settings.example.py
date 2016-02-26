@@ -8,14 +8,14 @@ GOOGLE_API_KEY = "YOUR API KEY HERE"
 GEOCODER = "google"
 
 ARCGIS_CLIENT_ID = "YOUR CLIENT ID HERE"
-ARCGIS_CLIENT_SECRET = "YOUR "
+ARCGIS_CLIENT_SECRET = ""
 
 # Used by project and proposal importers:
-SOCRATA_APP_TOKEN = "8MD9DtTRnDpNGNY94PRB5OSRM"
-SOCRATA_APP_SECRET = "eF3c5ssJR71IUBfs8xAh3oDNFwbdCX8G4O57"
+SOCRATA_APP_TOKEN = ""
+SOCRATA_APP_SECRET = ""
 
 # Used for sending email:
 SENDGRID_API_KEY = ""
 
-# Currently unused:
+# Used by Azure Text Analytics; later--maybe news search
 BING_API_KEY = ""

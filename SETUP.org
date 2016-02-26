@@ -80,15 +80,17 @@
       This sets up some environment variables to allow the ~docker~
       command line client to communicate with the ~dev~ machine.
 
-    - ~docker run -it -v $PWD/server:/app -v $PWD/client:/client -v $PWD/data:/data APP_PORT=3000 APP_NAME=cornerwise -p "3000:3000" bdsand/cornerwise /bin/bash~
+    - ~docker run -it -v $PWD/server:/app -v $PWD/client:/client -v
+      $PWD/data:/data -e APP_PORT=3000 -e APP_NAME=cornerwise -p "3000:3000" -e GOOGLE_APPLICATION_CREDENTIALS=/app/cornerwise/google_credentials.json bdsand/cornerwise /bin/bash~
 
       Creates a new /container/ from the 'bdsand/cornerwise' /image/,
       which it will fetch from Docker Hub if it's not present on the
       local machine. Exposes the 'server' directory as /app inside the
       container. Maps the container's port 3000 to port 3000 on the
       virtual machine. Sets APP_PORT and APP_NAME environment variables,
-      which are used by the Django start script. Runs ~/bin/bash~ within
-      the new container.
+      which are used by the Django start script. Sets
+      GOOGLE_APPLICATION_CREDENTIALS, which are used for some API calls. Runs
+      ~/bin/bash~ within the new container.
 
       If you have never run this before, it will need to download the
       image, which includes (among other things) Python 3, PostGIS,
@@ -133,9 +135,21 @@
 
     - For additional details, see the [[http://www.virtualbox.org/manual/ch06.html][VirtualBox manual]].
 
-* Additional Notes
+* API Credentials
+  
+  Many of the features of Cornerwise require the application to communicate with
+  third-party APIs. To get them working, you'll need to set up accounts with the
+  appropriate vendors. All of them offer services that are free at the volume we
+  deal with (certainly, more than needed for the purposes of local development.)
 
-  - An image creates a snapshot of a machine. When you start a container from an image, you're starting clean. Changes you make to unshared folders (including--for now--Postgres data) will not be persisted on the image. When you stop the container, the data will be lost. This is acceptable for us while we stabilize the models, etc.
+** Setup
+
+  Rename ~server/cornerwise/local_settings.example.py~ to ~local_settings.py~
+  and replace the values there.
+
+  Certain Google applications require [[https://developers.google.com/identity/protocols/application-default-credentials][default credentials]].  Rename the
+  credentials ~json~ file to ~google_credentials.json~ and move it to
+  ~server/cornerwise~.
 
 * Troubleshooting
   - If the script hangs while fetching a new image (~Using default tag:
