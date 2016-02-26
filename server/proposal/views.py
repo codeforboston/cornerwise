@@ -84,7 +84,8 @@ def build_attributes_query(d):
 query_params = {
     "region": "region_name",
     "case": "case_number",
-    "address": "address"
+    "address": "address",
+    "source": "source"
 }
 
 
@@ -97,12 +98,6 @@ def build_proposal_query(d):
 
     if ids:
         subqueries["pk__in"] = ids
-
-    if "region" in d:
-        subqueries["region"] = d["region"]
-
-    if "source" in d:
-        subqueries["source"] = d["source"]
 
     if "project" in d:
         if d["project"] == "null":
