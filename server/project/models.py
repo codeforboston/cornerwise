@@ -4,14 +4,6 @@ from django.forms.models import model_to_dict
 
 
 class Project(models.Model):
-    # TODO: Use these as choices for category
-    CATEGORIES = (("recurring", "Recurring"),
-                  ("building", "Major Building"),
-                  ("planning", "Planning"),
-                  ("parks", "Parks and Playgrounds"),
-                  ("infrastructure", "Infrastructure"),
-                  ("onetime", "One-Time"))
-
     name = models.CharField(max_length=128,
                             unique=True)
     department = models.CharField(max_length=128,
@@ -20,8 +12,6 @@ class Project(models.Model):
                                 db_index=True)
     region_name = models.CharField(max_length=128,
                                    default="Somerville, MA")
-    address = models.CharField(default="", max_length=256)
-    location = models.PointField(null=True)
     shape = models.MultiPolygonField(null=True)
     description = models.TextField(default="")
     justification = models.TextField(default="")
@@ -55,6 +45,16 @@ class Project(models.Model):
                                           funding_source=d["funding_source"])
 
         if d["address"]:
+            # Future notes: Each location associated with a project could
+            # potentially have its own description.
+            project.proposal_set.create(case_number="CP " + str(project.pk),
+                                        summary=d["description"],
+                                        source="",
+                                        updated=d["updated"],
+                                        region_name=d["region_name"],
+                                        address=d["address"],
+                                        status=d["status"],
+                                        location=Point(d["long"], d["lat"]))
             project.address = d["address"]
             project.location = Point(d["long"], d["lat"])
 

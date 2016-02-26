@@ -1,17 +1,22 @@
 import copy
 from decimal import Decimal
+from datetime import datetime
 import json
+import pytz
 import re
 from urllib import parse
 from urllib.request import Request, urlopen
 
 
 def make_request(domain, resource_id, token, fmt="json",
-                 soql=None):
+                 soql=None, exclude_system=True):
+    params = {}
     if soql:
-        qs = "?" + parse.urlencode({"$query": soql})
-    else:
-        qs = ""
+        params["$query"] = soql
+    if not exclude_system:
+        params["$$exclude_system_fields"] = "false"
+
+    qs = ("?" + parse.urlencode(params)) if params else ""
     url = "https://{domain}/resource/{resource_id}.{fmt}{qs}"\
           .format(domain=domain,
                   resource_id=resource_id,
@@ -57,10 +62,13 @@ class Importer(object):
 
         project["approved"] = bool(re.match(r"approved", pjson["status"],
                                             re.I))
+        project["status"] = pjson["status"]
 
         budget_keys = ((k, re.match(r"^_(\d+)$", k)) for k in pjson.keys())
         project["budget"] = {int(m.group(1)): Decimal(pjson[k])
                              for k, m in budget_keys if m}
+        project["updated"] = datetime.fromtimestamp(pjson[":updated_at"],
+                                                    pytz.utc)
 
         try:
             address = pjson["address"]
@@ -83,7 +91,7 @@ class Importer(object):
         else:
             soql = None
         req = make_request(self.domain, self.resource_id,
-                           self.api_key, soql=soql)
+                           self.api_key, soql=soql, exclude_system=False)
         projects = get_json(req)
 
         return map(self.process_json, projects)

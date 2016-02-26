@@ -62,7 +62,7 @@ class Proposal(models.Model):
 
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True)
-
+    # A misnomer; if True, indicates that the proposal has been approved:
     complete = models.BooleanField(default=False)
 
     # To enable geo queries

@@ -420,6 +420,8 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
         geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
                                       settings.ARCGIS_CLIENT_SECRET)
 
+    # TODO: If `since` is not provided explicitly, we should probably determine
+    # the appropriate date on a per-importer basis.
     if not since:
         # If there was no last run, the scraper will fetch all
         # proposals.
