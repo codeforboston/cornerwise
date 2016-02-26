@@ -32,8 +32,11 @@ IS_PRODUCTION = False
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs'
+if "DJANGO_SECRET" in os.environ:
+    SECRET_KEY = os.environ["DJANGO_SECRET"]
+else:
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = '98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not IS_PRODUCTION
@@ -171,9 +174,6 @@ CELERYBEAT_SCHEDULE = {
 }
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 60
-
-ARCGIS_CLIENT_ID = "jYLY7AeA1U9xDiWu"
-ARCGIS_CLIENT_SECRET = "64a66909ff724a0a9928838ef4462909"
 
 GEO_BOUNDS = [42.371861543730496, -71.13338470458984,  # northwest
               42.40393908425197, -71.0679817199707]    # southeast
