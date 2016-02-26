@@ -552,6 +552,17 @@ body.main .main-mode, body.list .list-mode {
     white-space: nowrap;
 }
 
+.project-name {
+    font-style:italic;
+}
+
+.info-item .dates {
+
+    color: crimson;
+    float: right;
+    font-size: small;
+}
+
 .department {
     font-size: small;
     font-style: italic;

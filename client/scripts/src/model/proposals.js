@@ -9,7 +9,7 @@ define(
             model: Proposal,
 
             url: function() {
-                return config.pzURL +
+                return config.pzURL + "?" +
                     (_.isEmpty(this.query) ? "" : $u.encodeQuery(this.query));
             },
 

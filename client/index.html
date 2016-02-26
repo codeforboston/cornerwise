@@ -18,48 +18,6 @@
     <meta name="og:type" content="website" />
     <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
 
-    <!-- Template for proposals in the proposal table -->
-    <script type="text/template" id="proposal-template">
-        <div class="thumbnail">
-            <img src="<%- proposal.getThumb() %>"/>
-            <a href="#view=main&ps=<%- proposal.id %>">Show on Map</a>
-        </div>
-      <div class="name" title="<%- proposal.get('address') %>">
-        <%- proposal.get('address') %>
-      </div>
-      <div class="case"><%- proposal.get("caseNumber") %></div>
-      &bull;
-      <div class="distance">
-          <%= prettyDistance(proposal.get('refDistance')) %> away
-          from
-          <%= refLocationButton() %>
-      </div>
-      <div class="dates">
-        Last updated <span class="updated"><%= prettyDate(proposal.get("updated")) %></span>
-      </div>
-
-      <%
-         var notice = proposal.getAttributeValue("legal_notice");
-
-         if (notice) {
-      %>
-      <div class="legal-notice">
-        <%= gloss(abridge(notice)) %>
-      </div>
-      <% } %>
-
-      <table class="attributes table">
-        <tr class="attribute">
-          <th scope="row">APPLICANT</th>
-          <td><%- proposal.getAttributeValue("applicant_name") %></td>
-        </tr>
-
-        <tr class="attribute">
-          <th scope="row">PUBLIC HEARINGS</th>
-          <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
-        </tr>
-      </table>
-    </script>
 
     <script type="text/template" id="project-template">
       <div class="thumbnail">

@@ -196,6 +196,10 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return this.getDistance(this.get("location"), refLocation.getLatLng());
         },
 
+        getProject: function() {
+            return this.get("project");
+        },
+
         recalculateDistance: function() {
             var dist = this.set("refDistance", this.getDistanceToRef());
         }
