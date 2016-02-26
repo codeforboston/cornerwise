@@ -527,13 +527,21 @@ define(["underscore", "jquery", "locale"],
                    return $u.template(templateString, options, options.helpers);
                },
 
+               _getting: {},
+               _getUrl: function(url) {
+                   if (this._getting[url])
+                       return this._getting[url];
+
+                   return (this._getting[url] = $.get(url));
+               },
+
                /**
                 * @param {string} url
                 * @param {object} options
                 * @param options.helpers 
                 */
                templateWithUrl: function(url, options) {
-                   var template = null;
+                   var template = null, self = this;
                    options = options || {};
 
                    return function(arg, cb) {
@@ -542,15 +550,13 @@ define(["underscore", "jquery", "locale"],
                            return;
                        }
 
-                       $.get(
-                           url,
-                           function(templateString) {
+                       self._getUrl(url)
+                           .done(function (templateString) {
                                template = $u.template(templateString,
                                                       options,
                                                       options.helpers);
                                cb(template(arg));
-                           }
-                       );
+                           });
                    };
                }
            };
