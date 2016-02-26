@@ -55,7 +55,8 @@ class Importer(object):
         for project_key, json_key in kls.copy_keys.items():
             project[project_key] = pjson.get(json_key)
 
-        project["approved"] = bool(re.match(r"approved", pjson["status"], re.I))
+        project["approved"] = bool(re.match(r"approved", pjson["status"],
+                                            re.I))
 
         budget_keys = ((k, re.match(r"^_(\d+)$", k)) for k in pjson.keys())
         project["budget"] = {int(m.group(1)): Decimal(pjson[k])
@@ -63,12 +64,13 @@ class Importer(object):
 
         try:
             address = pjson["address"]
-            human_address = json.loads(address["human_address"])
-            project["address"] = {
-                "lat": address["latitude"],
-                "lng": address["longitude"],
-                "address": human_address["address"]
-            }
+            if address["needs_recoding"]:
+                project["address"] = None
+            else:
+                human_address = json.loads(address["human_address"])
+                project["address"] = human_address["address"]
+                project["lat"] = float(address["latitude"])
+                project["long"] = float(address["longitude"])
         except:
             project["address"] = None
 
@@ -82,6 +84,6 @@ class Importer(object):
             soql = None
         req = make_request(self.domain, self.resource_id,
                            self.api_key, soql=soql)
-        proposals = get_json(req)
+        projects = get_json(req)
 
-        return map(self.process_json, proposals)
+        return map(self.process_json, projects)

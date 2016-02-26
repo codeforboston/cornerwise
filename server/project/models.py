@@ -1,7 +1,8 @@
-from django.db import models
+from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
 from django.forms.models import model_to_dict
 
-# A project
+
 class Project(models.Model):
     # TODO: Use these as choices for category
     CATEGORIES = (("recurring", "Recurring"),
@@ -19,6 +20,9 @@ class Project(models.Model):
                                 db_index=True)
     region_name = models.CharField(max_length=128,
                                    default="Somerville, MA")
+    address = models.CharField(default="", max_length=256)
+    location = models.PointField(null=True)
+    shape = models.MultiPolygonField(null=True)
     description = models.TextField(default="")
     justification = models.TextField(default="")
     website = models.URLField(null=True)
@@ -49,6 +53,10 @@ class Project(models.Model):
             project.budgetitem_set.create(year=year,
                                           budget=amount,
                                           funding_source=d["funding_source"])
+
+        if d["address"]:
+            project.address = d["address"]
+            project.location = Point(d["long"], d["lat"])
 
         return project
 
