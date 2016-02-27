@@ -22,8 +22,9 @@ class Project(models.Model):
         d = model_to_dict(self)
 
         if include_budget:
-            d["budget"] = {bi.year: bi.to_dict() for bi in
-                           self.budgetitem_set.all()}
+            d["budget"] = {bi.year: {"budget": bi.budget,
+                                     "funding_source": bi.funding_source}
+                           for bi in self.budgetitem_set.all()}
 
         return d
 
@@ -54,6 +55,8 @@ class Project(models.Model):
                                         region_name=d["region_name"],
                                         address=d["address"],
                                         status=d["status"],
+                                        # TODO: Rethink this.
+                                        complete=False,
                                         location=Point(d["long"], d["lat"]))
             project.address = d["address"]
             project.location = Point(d["long"], d["lat"])

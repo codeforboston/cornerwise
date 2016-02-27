@@ -23,7 +23,8 @@ default_attributes = [
 
 def proposal_json(proposal, include_images=True,
                   include_attributes=default_attributes,
-                  include_events=False, include_documents=True):
+                  include_events=False, include_documents=True,
+                  include_projects=True):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
     pdict["location"] = {"lat": proposal.location.y,
                          "lng": proposal.location.x}
@@ -46,6 +47,9 @@ def proposal_json(proposal, include_images=True,
 
     if include_events:
         pdict["events"] = [e.to_dict for e in proposal.events.all()]
+
+    if include_projects and proposal.project:
+        pdict["project"] = proposal.project.to_dict()
 
     # TODO: fulltext query
 
@@ -138,7 +142,9 @@ def build_proposal_query(d):
 @make_response()
 def active_proposals(req):
     proposal_query = Proposal.objects.filter(build_proposal_query(req.GET))
-    paginator = Paginator(proposal_query, per_page=50)
+    if "include_projects" in req.GET:
+        proposal_query = proposal_query.select_related("project")
+    paginator = Paginator(proposal_query, per_page=100)
 
     page = req.GET.get("page")
     try:
