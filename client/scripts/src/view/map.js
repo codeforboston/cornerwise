@@ -232,7 +232,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 var inBounds = bounds.contains(marker.getLatLng());
                 marker.getModel().set("_visible", inBounds);
 
-                if (zoom >= 16) {
+                if (zoom >= 17) {
                     if (!inBounds)
                         return;
                     marker.setZoomed(zoom - 17);

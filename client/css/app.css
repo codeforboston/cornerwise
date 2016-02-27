@@ -461,6 +461,28 @@ body.main .main-mode, body.list .list-mode {
     padding-top: 3px;
 }
 
+div.proposal-marker {
+    background: url(/static/images/marker-orange.png) no-repeat;
+    background-size: contain;
+    padding-top: 5px;
+    height: 30px;
+    width: 30px;
+    text-align: center;
+}
+
+.marker-hovered {
+    background: url(/static/images/marker-orange-hover.png) no-repeat;
+}
+
+.marker-selected {
+    background: url(/static/images/marker-orange-active.png) no-repeat;
+}
+
+.project-marker img {
+    max-width: 20px;
+    max-height: 20px;
+}
+
 .zoomed-proposal-marker {
     background-color: #eee;
     border: 1px solid black;

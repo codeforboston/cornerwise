@@ -11,10 +11,21 @@ define(["backbone", "app-state", "underscore", "config",
                    {variable: "proposal",
                     expanded: true}),
 
+               // Used for proposals that have associated 
+               projectPreviewTemplate: $u.templateWithUrl(
+                   "/static/template/projectProposalDetail.html",
+                   {variable: "proposal"}),
+
+               projectDetailsTemplate: $u.templateWithUrl(
+                   "/static/template/projectProposalDetail.html",
+                   {variable: "proposal",
+                    expanded: true}),
+
                show: function(proposal, expanded) {
-                   var template = expanded ?
-                           this.detailsTemplate :
-                           this.previewTemplate,
+                   var project = proposal.getProject(),
+                       template = expanded ?
+                           (project ? this.projectPreviewTemplate : this.detailsTemplate) :
+                       (project ? this.projectDetailsTemplate : this.previewTemplate),
                        self = this;
 
                    this.model = proposal;

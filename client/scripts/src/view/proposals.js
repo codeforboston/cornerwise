@@ -1,10 +1,10 @@
 define(["backbone", "proposal-view", "app-state", "jquery"],
-       function(B, ProposalView, appState, $) {
+       function(B, ProposalView,  appState, $) {
            return B.View.extend({
                title: "Proposals",
 
-               initialize: function() {
-
+               initialize: function(options) {
+                   this.projects = options.projects;
                },
 
                buildHeader: function() {

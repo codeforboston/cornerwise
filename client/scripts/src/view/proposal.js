@@ -29,13 +29,16 @@ define(["backbone", "underscore", "utils", "ref-location", "config"],
 
                className: "proposal-info info-item",
 
-               template: $u.templateWithId("proposal-template",
-                                           {variable: "proposal",
-                                            helpers: proposalHelpers}),
-
+               template: $u.templateWithUrl("/static/template/proposal.html",
+                                            {variable: "proposal",
+                                             helpers: proposalHelpers}),
                render: function() {
-                   var proposal = this.model;
-                   this.$el.html(this.template(proposal));
+                   var proposal = this.model,
+                       $el = this.$el;
+                   this.template(proposal,
+                                 function(html) {
+                                     $el.html(html);
+                                 });
 
                    return this;
                }

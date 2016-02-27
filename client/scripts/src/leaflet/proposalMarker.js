@@ -1,25 +1,33 @@
 define(["leaflet", "underscore"],
        function(L, _) {
-           function getMarkerPng(isHovered, isSelected) {
-               if(isSelected){
-                   return "/static/images/marker-active";
-               } else if(isHovered){
-                   return "/static/images/marker-hover";
-               } else {
-                   return "/static/images/marker-normal";
-               }
+           function projectTypeIcon(p) {
+               var cat = p.category.replace(/[&.]+/g, "").replace(/[\s-]+/g, "_");
+               return "/static/images/icon/" + cat + ".png";
            }
 
            function getIcon(proposal) {
-               // Generate an L.icon for a given proposal's parameters
                var isHovered = proposal.get("_hovered"),
                    isSelected = proposal.get("_selected"),
+                   project = proposal.getProject(),
+                   className = [
+                       "proposal-marker",
+                       isHovered ? "marker-hovered" : "",
+                       isSelected ? "marker-selected" : "",
+                       project ? "project-marker" : ""
+                   ].join(" "),
+                   html = "";
 
-                   png = getMarkerPng(isHovered, isSelected);
+               if (project) {
+                   html = ["<div class='project-type-badge'>",
+                           "<img src='", projectTypeIcon(project),
+                          "'/></div>"].join("");
+               }
 
-               return L.icon({iconUrl: png + "@1x.png",
-                              iconRetinaUrl: png + "@2x.png",
-                              iconSize: [48, 55]});
+               return L.divIcon({
+                   className: className,
+                   iconSize: L.point(30, 30),
+                   html: html
+               });
            }
 
            return L.Marker.extend({

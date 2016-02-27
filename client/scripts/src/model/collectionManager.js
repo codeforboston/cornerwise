@@ -26,7 +26,7 @@ define(["backbone", "underscore", "app-state"],
                        }
 
                        // Check if the sort has changed:
-                       if (newState.sort !== oldState.sort) {
+                       if (newState.sort && newState.sort !== oldState.sort) {
                            var sort = newState.sort,
                                desc = sort[0] == "-",
                                sortKey = desc ? sort.slice(1) : sort;

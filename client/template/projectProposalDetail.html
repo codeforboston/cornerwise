@@ -1,0 +1,20 @@
+<% var project = proposal.getProject(); %>
+<div class="details">
+    <div class="sidebar" >
+        <div class="main-thumb-container" >
+            <img class="main-thumb"  src="<%= proposal.getThumb() %>" />
+        </div>
+    </div>
+
+    <h4>
+        <%- project.name %>
+    </h4>
+
+    <div class="description">
+        <% if (project.description) { %>
+        <%- project.description %>
+        <% } else { %>
+        <span class="empty-field">No description available.</span>
+        <% } %>
+    </div>
+</div>

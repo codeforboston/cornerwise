@@ -1,20 +1,15 @@
 define(
-    ["jquery", "proposals", "projects", "collection-manager", "map-view", "proposal-view", "project-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, Projects, CollectionManager, MapView, ProposalItemView, ProjectItemView,
+    ["jquery", "proposals", "collection-manager", "map-view", "proposal-view", "project-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
+    function($, Proposals, CollectionManager, MapView, ProposalItemView, ProjectItemView,
              glossary, config, appState, ViewManager, refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
-                    projects = new Projects(),
                     cm = new CollectionManager({
-                        collections: {
-                            proposals: proposals,
-                            projects: projects
-                        }
+                        collections: {proposals: proposals}
                     }),
                     appViews = {
                         proposals: proposals,
-                        projects: projects,
                         glossary: glossary
                     };
 
@@ -44,13 +39,9 @@ define(
                     "about": ["modal-view", {url: "/static/template/about.html"}],
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
-                    "projectSummary": ["projects-summary-view",
-                                       {collection: projects}],
                     "list": ["list-view",
-                             {collections: {proposals: proposals,
-                                            projects: projects},
-                              subviews: {proposals: ProposalItemView,
-                                         projects: ProjectItemView},
+                             {collections: {proposals: proposals},
+                              subviews: {proposals: ProposalItemView},
                               manager: cm,
                               active: "proposals"}]
                 });
@@ -68,8 +59,7 @@ define(
                                     "project": new ProjectInfoView()
                                 },
                                 collections: {
-                                    "proposal": proposals,
-                                    "project": projects
+                                    "proposal": proposals
                                 }
                             });
                             appViews.info = infoView;
@@ -102,7 +92,6 @@ define(
                         });
 
                 proposals.fetch({dataType: "jsonp"});
-                projects.fetch({dataType: "jsonp"});
 
                 appState.init();
                 glossary.init();
