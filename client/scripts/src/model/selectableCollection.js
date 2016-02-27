@@ -54,12 +54,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                            if (!ids) return;
 
                            ids = ids.split(",");
-                           self.setSelection(ids);
-                       });
-
-                       // TODO: Move this to a collection manager?
-                       this.on("selection", function(self, sel) {
-                           appState.setHashKey(self.hashParam, sel.join(","), true);
+                           self._setSelection(ids);
                        });
                    }
                },
@@ -68,12 +63,24 @@ define(["backbone", "underscore", "app-state", "utils"],
                    return this.model.modelName || "model";
                },
 
+               setSelection: function(selection) {
+                   if (!this.hashParam)
+                       return this._setSelection(selection);
+
+                   if (!_.isArray(selection))
+                       selection = [selection];
+
+                   appState.setHashKey(this.hashParam,
+                                       selection.join(","));
+                   return null;
+               },
+
                /**
                 * @param {number|number[]} selection An id or ids of the
                 * model(s) to select.
                 * @param {?boolean} add
                 */
-               setSelection: function(selection, add) {
+               _setSelection: function(selection, add) {
                    if (!_.isArray(selection))
                        selection = [selection];
                    if (add)
@@ -138,11 +145,6 @@ define(["backbone", "underscore", "app-state", "utils"],
                        this.trigger("removedFiltered", model, coll);
                },
 
-               addToSelection: function(id) {
-                   this.setSelection(id, true);
-               },
-
-
                getSelectedIndex: function() {
                    var id = this.selection[0];
 
@@ -151,7 +153,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                },
 
                selectRelative: function(dir) {
-                   var fs = _.values(this.activeFilters), idx;
+                   var fs = _.values(this.activeFilters), idx, model;
 
                    if (fs.length) {
                        var models = this.getFiltered(fs),
