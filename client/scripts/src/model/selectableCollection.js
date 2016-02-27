@@ -84,7 +84,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                           function(id) {
                               var member = this.get(id);
                               if (member)
-                                  member.set("selected", false);
+                                  member.set("_selected", false);
                           },
                           this);
                    var select = _.difference(selection, this.selection),
@@ -93,7 +93,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                           function(id) {
                               var member = this.get(id);
                               if (member)
-                                  member.set("selected", true);
+                                  member.set("_selected", true);
                               else
                                   pending.push(id);
                           },
@@ -126,7 +126,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                            this.trigger("selectionLoaded", this, this.selection,
                                         [model.id]);
 
-                       model.set("selected", true);
+                       model.set("_selected", true);
                    }
 
                    if (this.matchesFilters(model))

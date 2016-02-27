@@ -470,12 +470,12 @@ div.proposal-marker {
     text-align: center;
 }
 
-.marker-hovered {
-    background: url(/static/images/marker-orange-hover.png) no-repeat;
+div.marker-hovered {
+    background-image: url(/static/images/marker-orange-hover.png) !important;
 }
 
-.marker-selected {
-    background: url(/static/images/marker-orange-active.png) no-repeat;
+div.marker-selected {
+    background-image: url(/static/images/marker-orange-active.png) !important;
 }
 
 .project-marker img {
