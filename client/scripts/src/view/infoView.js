@@ -30,13 +30,9 @@ define(["backbone", "underscore", "utils"],
                    this.collections = options.collections;
                    this.defaultView = options.defaultView;
                    this.expanded = !!options.startExpanded;
+                   this.currentView = null;
                    this.threshold = options.threshold || 250;
                    this.shouldShow = false;
-
-                   // TODO: Need a better way to manage access to the shared element:
-                   _.each(options.views, function(view) {
-                       view.setElement(this.$(".content"));
-                   }, this);
 
                    _.each(options.collections, function(coll, name) {
                        this.listenTo(coll, "selection",
@@ -49,9 +45,6 @@ define(["backbone", "underscore", "utils"],
 
                    }, this);
 
-                   if (this.defaultView)
-                       this.defaultView.setElement(this.$(".content"));
-                   
                    this.$el
                        .on("mousedown touchstart", ".dragarea",
                            _.bind(this.onMousedown, this))
@@ -68,9 +61,14 @@ define(["backbone", "underscore", "utils"],
 
                    this.$el.removeClass("loading empty");
 
+                   if (this.currentView)
+                       this.currentView.setElement(null);
+
                    if (!name || !models.length) {
                        this.$el.addClass("default");
                        if (this.defaultView) {
+                           this.currentView = this.defaultView;
+                           this.defaultView.setElement(this.$(".content"));
                            this.defaultView.render();
                        } else if (this.defaultTemplate) {
                            this.$(".content").html(this.defaultTemplate());
@@ -79,6 +77,8 @@ define(["backbone", "underscore", "utils"],
                        }
                    } else {
                        this.$el.removeClass("default");
+                       this.currentView = view;
+                       view.setElement(this.$(".content"));
                        if (view.showMulti && models.length > 1) {
                            view.showMulti(models, this.expanded);
                        } else {
