@@ -1,6 +1,6 @@
 define(["backbone", "app-state", "underscore", "config",
-        "utils"],
-       function(B, appState, _, config, $u) {
+        "utils", "budget"],
+       function(B, appState, _, config, $u, budget) {
            return B.View.extend({
                previewTemplate: $u.templateWithUrl(
                    "/static/template/proposalDetail.html",
@@ -22,19 +22,39 @@ define(["backbone", "app-state", "underscore", "config",
                     expanded: true}),
 
                show: function(proposal, expanded) {
-                   var project = proposal.getProject(),
-                       template = expanded ?
-                           (project ? this.projectPreviewTemplate : this.detailsTemplate) :
-                       (project ? this.projectDetailsTemplate : this.previewTemplate),
-                       self = this;
-
+                   if (expanded) proposal.fetch();
                    this.model = proposal;
 
-                   if (expanded) proposal.fetch();
+                   if (proposal.getProject())
+                       return this.showProject(proposal, expanded);
+
+                   var template = expanded ?
+                           this.detailsTemplate : this.previewTemplate,
+                       self = this;
+
                    template(proposal,
                             function(html) {
-                                if (self.model.id == proposal.id)
-                                    self.$el.html(html);
+                                self.$el.html(html);
+                            });
+                   return this;
+               },
+
+               /**
+                * Render a proposal with an associated project.
+                */
+               showProject: function(proposal, expanded) {
+                   console.log("Showing project");
+                   var project = proposal.getProject(),
+                       template = expanded ?
+                           this.projectDetailsTemplate : this.projectPreviewTemplate,
+                       self = this;
+
+                   template(proposal,
+                            function(html) {
+                                self.$el.html(html);
+                                var canvas = self.$("canvas")[0];
+                                if (canvas)
+                                    budget.drawChart(project.budget, canvas);
                             });
                    return this;
                }
