@@ -57,15 +57,16 @@ define(["backbone", "underscore", "utils"],
                    var name = this.active,
                        coll = this.collections[name],
                        view = this.views[name] || this.defaultView,
-                       models = coll ? coll.getSelection() : [];
+                       models = coll ? coll.getSelection() : [],
+                       $el = this.$el;
 
-                   this.$el.removeClass("loading empty");
+                   $el.removeClass("loading empty");
 
                    if (this.currentView)
                        this.currentView.setElement(null);
 
                    if (!name || !models.length) {
-                       this.$el.addClass("default");
+                       $el.addClass("default");
                        if (this.defaultView) {
                            this.currentView = this.defaultView;
                            this.defaultView.setElement(this.$(".content"));
@@ -73,16 +74,20 @@ define(["backbone", "underscore", "utils"],
                        } else if (this.defaultTemplate) {
                            this.$(".content").html(this.defaultTemplate());
                        } else {
-                           this.$el.addClass("empty");
+                           $el.addClass("empty");
                        }
                    } else {
-                       this.$el.removeClass("default");
+                       $el.removeClass("default")
+                          .addClass("loading");
                        this.currentView = view;
                        view.setElement(this.$(".content"));
                        if (view.showMulti && models.length > 1) {
                            view.showMulti(models, this.expanded);
                        } else {
-                           view.show(models[0], this.expanded);
+                           view.show(models[0], this.expanded)
+                               .done(function() {
+                                   $el.removeClass("loading");
+                               });
                        }
                    }
                },
@@ -149,7 +154,6 @@ define(["backbone", "underscore", "utils"],
 
                    return false;
                },
-
 
                onSelection: function(name, coll, ids) {
                    this.active = name;

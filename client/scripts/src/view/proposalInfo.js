@@ -1,6 +1,6 @@
-define(["backbone", "app-state", "underscore", "config",
+define(["jquery", "backbone", "app-state", "underscore", "config",
         "utils", "budget"],
-       function(B, appState, _, config, $u, budget) {
+       function($, B, appState, _, config, $u, budget) {
            return B.View.extend({
                previewTemplate: $u.templateWithUrl(
                    "/static/template/proposalDetail.html",
@@ -30,24 +30,26 @@ define(["backbone", "app-state", "underscore", "config",
 
                    var template = expanded ?
                            this.detailsTemplate : this.previewTemplate,
-                       self = this;
+                       self = this,
+                       promise = $.Deferred();
 
                    template(proposal,
                             function(html) {
                                 self.$el.html(html);
+                                promise.resolve();
                             });
-                   return this;
+                   return promise;
                },
 
                /**
                 * Render a proposal with an associated project.
                 */
                showProject: function(proposal, expanded) {
-                   console.log("Showing project");
                    var project = proposal.getProject(),
                        template = expanded ?
                            this.projectDetailsTemplate : this.projectPreviewTemplate,
-                       self = this;
+                       self = this,
+                       promise = $.Deferred();
 
                    template(proposal,
                             function(html) {
@@ -55,8 +57,9 @@ define(["backbone", "app-state", "underscore", "config",
                                 var canvas = self.$("canvas")[0];
                                 if (canvas)
                                     budget.drawChart(project.budget, canvas);
+                                promise.resolve();
                             });
-                   return this;
+                   return promise;
                }
            });
        });

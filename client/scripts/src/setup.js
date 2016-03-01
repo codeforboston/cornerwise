@@ -46,17 +46,14 @@ define(
                               active: "proposals"}]
                 });
 
-                require(["info-view", "proposal-info-view", "project-info-view",
-                        "layers-view"],
-                        function(InfoView, ProposalInfoView, ProjectInfoView,
-                                LayersView) {
+                require(["info-view", "proposal-info-view", "layers-view"],
+                        function(InfoView, ProposalInfoView, LayersView) {
                             var infoView = new InfoView({
                                 el: "#info",
                                 startExpanded: appState.getKey("x") === "1",
                                 defaultView: new LayersView(),
                                 views: {
-                                    "proposal": new ProposalInfoView(),
-                                    "project": new ProjectInfoView()
+                                    "proposal": new ProposalInfoView()
                                 },
                                 collections: {
                                     "proposal": proposals
@@ -68,6 +65,7 @@ define(
                                                  function(newKey) {
                                                      infoView.toggle(newKey == "main");
                                                  });
+                            infoView.render();
                         });
 
 
