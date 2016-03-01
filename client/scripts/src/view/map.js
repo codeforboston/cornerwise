@@ -5,14 +5,25 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 ProposalMarker, infoLayers, Regions, info, appState, $u) {
     return B.View.extend({
         initialize: function() {
-            var map = L.map(this.el,
-                            {minZoom: 13}),
+            var state = appState.getState(),
+                mapOptions = {minZoom: 13,
+                              maxBounds: config.bounds},
+                lat = parseFloat(state.lat),
+                lng = parseFloat(state.lng),
+                zoom = parseInt(state.zoom);
+
+            if (_.isFinite(lat) && _.isFinite(lng))
+                mapOptions.center = L.latLng(lat, lng);
+            if (_.isFinite(zoom)) {
+                mapOptions.zoom = zoom;
+            }
+
+            var map = L.map(this.el, mapOptions),
                 layer = L.tileLayer(config.tilesURL),
                 zoningLayer = L.featureGroup(),
                 parcelLayer = L.geoJson();
 
             this.map = map;
-            this.resetBounds();
 
             map.addLayer(layer);
             map.addLayer(parcelLayer);
@@ -46,38 +57,11 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 .listenTo(Regions, "selectionLoaded", this.showRegions)
                 .listenTo(Regions, "selectionRemoved", this.removeRegions);
 
-            appState.onStateChange(_.bind(this.stateChanged, this));
-
             return this;
         },
 
         getMap: function() {
             return this.map;
-        },
-
-        // Synchronize the map bounds with the lat, lng, and zoom values in the
-        // location hash.
-        stateChanged: function(newState) {
-            var map = this.map;
-            if (!map) return;
-
-            var lat = parseFloat(newState.lat),
-                lng = parseFloat(newState.lng),
-                zoom = parseInt(newState.zoom);
-
-            var currentCenter = map.getCenter(),
-                currentZoom = map.getZoom();
-
-            if (zoom !== currentZoom ||
-                !$u.closeTo(lat, currentCenter.lat, 0.0000000000001) ||
-                !$u.closeTo(lng, currentCenter.lng, 0.0000000000001)) {
-
-                lat = lat || currentCenter.lat;
-                lng = lng || currentCenter.lng;
-                zoom = zoom || currentZoom;
-
-                map.setView([lat, lng], zoom);
-            }
         },
 
         selectionChanged: function(proposals, ids) {
