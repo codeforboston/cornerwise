@@ -28,6 +28,8 @@ define(["backbone", "underscore", "app-state", "utils"],
             *   A model was added that matches the active filters
             *
             * - removedFiltered (model, collection)
+            *
+            * NOTE: Selection ids are always stored as strings.
             */
            var SelectableCollection = B.Collection.extend({
 
@@ -51,9 +53,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                    if (this.hashParam) {
                        var self = this;
                        appState.onStateChange(this.hashParam, function(ids, oldIds) {
-                           if (!ids) return;
-
-                           ids = ids.split(",");
+                           ids = ids ? ids.split(",") : [];
                            self._setSelection(ids);
                        });
                    }
@@ -83,8 +83,11 @@ define(["backbone", "underscore", "app-state", "utils"],
                _setSelection: function(selection, add) {
                    if (!_.isArray(selection))
                        selection = [selection];
+
                    if (add)
                        selection = _.union(this.selection, selection);
+                   else
+                       this.pending = [];
 
                    var deselect = _.difference(this.selection, selection);
                    _.each(deselect,
@@ -124,14 +127,15 @@ define(["backbone", "underscore", "app-state", "utils"],
 
                onAdd: function(model, coll) {
                    // Check if the added model is one we're waiting for:
-                   if (_.contains(this.pending, model.id)) {
-                       this.pending = _.without(this.pending, model.id);
-                       this.selection.push(model.id);
+                   var id = "" + model.id;
+                   if (_.contains(this.pending, id)) {
+                       this.pending = _.without(this.pending, id);
+                       this.selection.push(id);
                        this.trigger("selection", this, this.selection);
 
                        if (!this.pending.length)
                            this.trigger("selectionLoaded", this, this.selection,
-                                        [model.id]);
+                                        [id]);
 
                        model.set("_selected", true);
                    }
@@ -170,7 +174,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                    }
 
                    if (model)
-                       this.setSelection(model.id);
+                       this.setSelection("" + model.id);
                    return model;
                },
 
