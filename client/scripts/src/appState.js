@@ -1,7 +1,6 @@
 define(["backbone", "underscore", "config", "utils"],
        function(B, _, config, $u) {
-           var dispatcher = _.clone(B.Events),
-               appState =
+           var appState =
                    {
                        /** @private */
                        _cachedState: null,
@@ -11,14 +10,6 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        getters: {},
-
-                       /**
-                        * Returns an event dispatcher that is shared by the entire
-                        * application.
-                        */
-                       getDispatcher: function() {
-                           return dispatcher;
-                       },
 
                        /**
                         * Replaces the current state of the application with a
@@ -100,7 +91,7 @@ define(["backbone", "underscore", "config", "utils"],
 
                        triggerHashState: function(o) {
                            o = o || $u.decodeQuery(B.history.getHash());
-                           dispatcher.trigger("hashState", o);
+                           this.trigger("hashState", o);
                        },
 
                        watchers: [],
@@ -109,7 +100,7 @@ define(["backbone", "underscore", "config", "utils"],
                            var lastState = null,
                                watchers = this.watchers,
                                defaults = this.defaults;
-                           this.getDispatcher().on("hashState", function(state) {
+                           this.on("hashState", function(state) {
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
                                        key = watcher[1];
@@ -179,6 +170,17 @@ define(["backbone", "underscore", "config", "utils"],
                            });
                        },
 
+                       // Events that are not properly considered part of the
+                       // application state:
+
+                       /**
+                        * @param {Object[]} models
+                        * @param {boolean} shouldZoom
+                        */
+                       focusModels: function(models, shouldZoom) {
+                           this.trigger("shouldFocus", models, shouldZoom);
+                       },
+
                        init: function() {
                            this.startWatch();
                            this.triggerHashState();
@@ -196,6 +198,8 @@ define(["backbone", "underscore", "config", "utils"],
                            });
                        }
                    };
+
+           _.extend(appState, B.Events);
 
            return appState;
 
