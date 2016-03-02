@@ -10,13 +10,18 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                               maxBounds: config.bounds},
                 lat = parseFloat(state.lat),
                 lng = parseFloat(state.lng),
-                zoom = parseInt(state.zoom);
+                zoom = parseInt(state.zoom),
+                bounds = null;
 
             if (_.isFinite(lat) && _.isFinite(lng))
                 mapOptions.center = L.latLng(lat, lng);
-            if (_.isFinite(zoom)) {
+            else
+                mapOptions.center = config.refPointDefault;
+
+            if (_.isFinite(zoom))
                 mapOptions.zoom = zoom;
-            }
+            else 
+                mapOptions.zoom = 14;
 
             var map = L.map(this.el, mapOptions),
                 layer = L.tileLayer(config.tilesURL),
