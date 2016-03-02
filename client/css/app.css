@@ -142,11 +142,11 @@ span.icon {
     top: 100px;
     z-index: 2;
 
-    transition: top 0.2s linear;
+    transition: top 0.2s linear, background-color 0.2s linear;
 }
 
 #filter-controls {
-    background-color: rgba(43, 43, 43, 0.98);
+    background-color: #2A749B;
     height: 0.5em;
     display: none;
     text-align: left;
@@ -364,6 +364,7 @@ body.nointro #intro {
 
 
 body.nointro #search-banner {
+    background-color: rgba(43, 43, 43, 0.98);
     top: 0;
 }
 
@@ -394,7 +395,7 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 #filter-controls .filters {
-    background-color: rgba(43, 43, 43, 0.98);
+    background-color: #2A749B;
     height: 2.5em;
     margin-bottom: -0.2em;
     overflow: hidden;
@@ -428,7 +429,7 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 .toggle-filters {
-    background-color: rgba(43, 43, 43, 0.98);
+    background-color: #2A749B;
     color: white;
     font-size: small;
     padding: 0.5em;
@@ -475,7 +476,21 @@ div.marker-hovered {
 }
 
 div.marker-selected {
+    animation-duration: 1s;
+    animation-name: selection-highlight;
     background-image: url(/static/images/marker-orange-active.png) !important;
+    border-radius: 15px;
+}
+
+@keyframes selection-highlight {
+    from {
+            background-color: goldenrod;
+        box-shadow: 0 0 10px 10px goldenrod;
+    }
+
+    to {
+        box-shadow: none;
+    }
 }
 
 .project-marker img {
@@ -554,6 +569,7 @@ div.marker-selected {
     margin-left: 2em;
     margin-right: 1em;
     overflow: hidden;
+    position: relative;
     height: 200px;
     width: 200px;
     text-align: center;
@@ -562,6 +578,22 @@ div.marker-selected {
 .thumbnail img {
     max-height: 100%;
     max-width: 100%;
+}
+
+.thumbnail a.show-on-map {
+    background-color: white;
+    background-image: url(/static/images/icon/youarehere.png);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 3px;
+    box-shadow: 0 0 3px black;
+    display: block;
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    height: 30px;
+    width: 30px;
 }
 
 .info-item .name {
