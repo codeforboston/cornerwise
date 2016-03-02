@@ -5,8 +5,8 @@ contents.
 from collections import OrderedDict
 from datetime import datetime
 from dateutil.parser import parse as date_parse
+import pytz
 from utils import pushback_iter
-
 import re
 
 empty_line = re.compile(r"\s*\n$")
@@ -76,9 +76,11 @@ def skip_match(patt, n=0):
             return skip
     return skipper
 
+
 def subsection_matcher(line):
     if re.match(r"^[0-9]+\.$", line):
         subsection_patt = re.compile(r"^([a-z]+(\s+[a-z]+)*):", re.I)
+
         def get_subsection_name(inlines):
             for line in inlines:
                 m = subsection_patt.match(line)
@@ -172,6 +174,9 @@ def staff_report_sections(doc_json):
     return make_sections(lines, staff_report_section_matchers)
 
 
+# TODO: Clean up the dates of public hearing
+
+
 def staff_report_properties(doc_json):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
@@ -241,59 +246,6 @@ def decision_properties(doc_json):
 def remove_match(s, m):
     return s[0:m.start()].rstrip() + s[m.end():]
 
-def legal_notice_properties(notice):
-    # The 'legal notice' section of Somerville Planning Staff Reports
-    # have the same general format.  Here, we exploit this fact to
-    # extract some useful information:
-    type_match = r"(?P<type>revision to|special permit|time extension|variance)"
-    per_patt = r"((?:under|per) (?:SZO)? .(?P<per>\d+\.\d+(\.(\d+|[A-Z]))?))"
-    section_patt = r"\u00A7(?P<per>\d+\.\d+(\.(\d+|[A-Z]))?)"
-    sought_split = r"and (?:seeks? )?a {0}".format(type_match)
-    patt = r"seeks? a {0}".format(type_match)
-    sentences = re.split(r"\.\s+(?=[A-Z])", notice)
-    sought = []
-
-    for sentence in sentences:
-        m = re.search(patt, sentence, re.I)
-        if m:
-            rest = sentence[m.end():]
-            while True:
-                sought_m = re.search(sought_split, rest, re.I)
-
-                if not sought_m:
-                    break
-
-                desc = rest[0:sought_m.start()]
-                per_m = re.search(per_patt, desc)
-                if not per_m:
-                    per_m = re.search(section_patt, desc)
-                if per_m:
-                    desc = remove_match(desc, per_m)
-
-                sought.append(
-                    {"per": per_m and per_m.group("per"),
-                     "type": sought_m.group("type"),
-                     "description": desc.strip()})
-
-                rest = rest[sought_m.end():]
-
-            if rest:
-                per_m = re.search(per_patt, rest)
-                if not per_m:
-                    per_m = re.search(section_patt, rest)
-                per = per_m and per_m.group("per")
-                if per:
-                    desc = remove_match(rest, per_m)
-                else:
-                    desc = rest
-
-                sought.append(
-                    {"per": per,
-                     "type": m.group("type"),
-                     "description": desc.strip()})
-
-    return sought
-
 
 def doc_type(doc_json):
     if doc_json["field"] == "reports" and re.match(r"staff report",
@@ -321,6 +273,7 @@ def get_properties(doc_json):
     else:
         return {}
 
+
 def split_event(desc):
     """
     Splits a string description of an event into
@@ -344,11 +297,10 @@ def split_event(desc):
     return {"date": dt, "title": event_desc}
 
 event_fields = [("Dates of Public Hearing", "Public Hearing"),
-                ("Dates of Public Meeting", "Public Hearing")]
+                ("Date of Public Meeting", "Public Hearing")]
+
 
 def get_events(doc, props=None, fields=event_fields):
-    dtype = doc_type(doc)
-
     if doc.field == "reports":
         if not props:
             props = get_properties(doc)

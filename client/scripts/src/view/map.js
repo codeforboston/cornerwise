@@ -52,8 +52,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.listenTo(this.collection, "add", this.proposalAdded)
                 .listenTo(this.collection, "remove", this.proposalRemoved)
                 .listenTo(this.collection, "change", this.changed)
+                .listenTo(this.collection, "focused", this.onFocused)
+            // Reference location marker:
                 .listenTo(refLocation, "change", this.placeReferenceMarker)
+            // Informational overlays:
                 .listenTo(infoLayers, "change", this.layersChanged)
+            // Region base layers:
                 .listenTo(Regions, "selectionLoaded", this.showRegions)
                 .listenTo(Regions, "selectionRemoved", this.removeRegions);
 
@@ -195,6 +199,21 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             }
         },
 
+        onFocused: function(ids, zoom, pan) {
+            var self = this,
+                models = this.collection.getAll(ids),
+                ll = _.map(models, function(model) {
+                    var loc = model.get("location");
+
+                    return L.latLng(loc.lat, loc.lng);
+                });
+
+            if (models.length == 1) {
+                
+            }
+
+        },
+
         /* Getting information about the markers. */
         getMarkerForPermit: function(permit) {
             var marker = this.caseMarker[permit.get("caseNumber")],
@@ -267,12 +286,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             if (!coll.getFiltered) return;
             this.fitToModels(coll.getFiltered());
         },
-
-        setShouldFit: function(shouldFit) {
-            this.shouldFit = shouldFit;
-            // ??
-        },
-
+        
         zoomToRefLocation: function() {
             var bounds = this._refMarker.getBounds();
             this.map.fitBounds(bounds, {padding: [5, 5]});

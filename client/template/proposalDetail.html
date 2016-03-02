@@ -26,7 +26,7 @@
   <div class="documents">
     <% _.each(documents.slice(0, 10), function(doc) { %>
     <a class="document" href="<%= doc.url %>" target="_blank">
-      🀆&nbsp;&nbsp;<%- doc.title %>
+      <div class="doc-icon"/>&nbsp;&nbsp;<%- doc.title %>
     </a>
     <% }); %>
   </div>

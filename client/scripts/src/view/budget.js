@@ -85,3 +85,5 @@ define(["backbone", "chartjs", "utils"],
                }
            };
        });
+
+;;;;;

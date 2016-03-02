@@ -634,6 +634,10 @@ a.color {
     width: 0.5em;
 }
 
+.layer-list .layer {
+    display: inline-block;
+}
+
 a.layer-info {
     background-color: steelblue;
     border-radius: 10px;
@@ -831,6 +835,18 @@ a.glossary:hover {
     transition: max-height 0.2s linear;
 }
 
+.loading-message {
+    color: rgba(255, 255, 255, 0.4);
+    display: none;
+    font-size: 30pt;
+    font-weight: bold;
+    text-align: center;
+}
+
+#info.loading .loading-message {
+    display: block;
+}
+
 body.main #info {
     display: block;
     height: auto;
@@ -844,6 +860,14 @@ body.main #info {
     top: -1.5em;
     left: 0;
     right: 0;
+}
+
+#info.minimized {
+    height: 0 !important;
+}
+
+#info.minimized .content * {
+    display: none;
 }
 
 /* Applied while the user is dragging */

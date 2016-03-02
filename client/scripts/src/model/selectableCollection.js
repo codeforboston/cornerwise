@@ -63,6 +63,10 @@ define(["backbone", "underscore", "app-state", "utils"],
                    return this.model.modelName || "model";
                },
 
+               getAll: function(ids) {
+                   return _.map(ids, this.getAll, this);
+               },
+
                setSelection: function(selection) {
                    if (!this.hashParam)
                        return this._setSelection(selection);
