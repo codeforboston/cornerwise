@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "utils"],
-       function(B, _, $u) {
+define(["backbone", "underscore", "utils", "app-state"],
+       function(B, _, $u, appState) {
            /**
             * A view that manages other views.
             *
@@ -198,14 +198,19 @@ define(["backbone", "underscore", "utils"],
                },
 
                onNav: function(dir) {
-                   var coll = this.collections[this.active];
+                   var coll = this.collections[this.active],
+                       model;
 
                    if (coll) {
                        if (dir < 0) {
-                           coll.selectPrev();
+                           model = coll.selectPrev();
                        } else if (dir > 0) {
-                           coll.selectNext();
+                           model = coll.selectNext();
                        }
+
+                       if (!model) return true;
+
+                       appState.focusModels([model]);
 
                        return false;
                    }

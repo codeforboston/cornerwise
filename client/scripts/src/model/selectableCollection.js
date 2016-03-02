@@ -186,14 +186,14 @@ define(["backbone", "underscore", "app-state", "utils"],
                 * @returns {?Model}
                 */
                selectNext: function() {
-                   this.selectRelative(1);
+                   return this.selectRelative(1);
                },
 
                /*
                 * @returns {?Model}
                 */
                selectPrev: function() {
-                   this.selectRelative(-1);
+                   return this.selectRelative(-1);
                },
 
                /**

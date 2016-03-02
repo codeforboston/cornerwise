@@ -1,7 +1,10 @@
 <% var project = proposal.getProject(); %>
 <div class="thumbnail" >
     <img src="<%- proposal.getThumb() %>"/>
-    <a href="#view=main&ps=<%- proposal.id %>">Show on Map</a>
+    <a class="show-on-map"
+       href="#view=main&ps=<%- proposal.id %>"
+       data-model-id="<%- proposal.id %>"
+       title="Show on Map"></a>
 </div>
 <div class="dates">
     Last updated <span class="updated"><%= prettyDate(proposal.get("updated")) %></span>

@@ -1,6 +1,5 @@
 define(["backbone", "jquery", "utils", "underscore", 
         "app-state"],
-       // TODO: Use the collection manager here?
        function(B, $, $u, _, appState) {
            var ListView = B.View.extend({
                template: $u.templateWithUrl(
@@ -10,7 +9,9 @@ define(["backbone", "jquery", "utils", "underscore",
                el: "#list-view",
 
                events: {
-                   "click .sort-button": "changeSort"
+                   "click .sort-button": "changeSort",
+                   "click a.show-on-map": "showOnMap"
+
                },
 
                initialize: function(options) {
@@ -104,6 +105,23 @@ define(["backbone", "jquery", "utils", "underscore",
                hide: function() {
                    this.shouldShow = false;
                    this.$el.removeClass("showing");
+               },
+
+               showOnMap: function(e) {
+                   var modelId = e.target.getAttribute("data-model-id"),
+                       coll = this.manager.getCollection();
+
+                   if (!modelId || !coll) return true;
+
+                   var model = coll.get(modelId);
+
+                   if (!model) return true;
+
+                   // This is still incredibly kludgy.
+                   coll.setSelection(modelId);
+                   appState.setHashKey("view", "main");
+                   appState.trigger("shouldFocus", [model], true);
+                   return false;
                }
            });
 

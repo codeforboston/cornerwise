@@ -38,6 +38,7 @@ define(["leaflet", "underscore"],
                        L.Marker.prototype.initialize.call(
                            this, loc,
                            {icon: getIcon(proposal),
+                            riseOnHover: true,
                             title: proposal.get("address")});
                    }
                    this.proposal = proposal;
