@@ -57,14 +57,15 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             this.listenTo(this.collection, "add", this.proposalAdded)
                 .listenTo(this.collection, "remove", this.proposalRemoved)
                 .listenTo(this.collection, "change", this.changed)
-                .listenTo(this.collection, "focused", this.onFocused)
             // Reference location marker:
                 .listenTo(refLocation, "change", this.placeReferenceMarker)
             // Informational overlays:
                 .listenTo(infoLayers, "change", this.layersChanged)
             // Region base layers:
                 .listenTo(Regions, "selectionLoaded", this.showRegions)
-                .listenTo(Regions, "selectionRemoved", this.removeRegions);
+                .listenTo(Regions, "selectionRemoved", this.removeRegions)
+            // App behaviors:
+                .listenTo(appState, "shouldFocus", this.onFocused);
 
             return this;
         },
@@ -204,9 +205,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             }
         },
 
-        onFocused: function(ids, zoom, pan) {
+        onFocused: function(models, zoom) {
             var self = this,
-                models = this.collection.getAll(ids),
                 ll = _.map(models, function(model) {
                     var loc = model.get("location");
 
@@ -214,7 +214,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                 });
 
             if (models.length == 1) {
-                
+                this.map.setView(ll[0], zoom ? 17 : this.map.getZoom());
+            } else {
+                var bounds = L.latLngBounds(ll);
+                this.map.fitBounds(bounds);
             }
 
         },
@@ -327,18 +330,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
             if (infoLayer.changed.shown === false)
                 this.map.removeLayer(layer);
-        },
-
-        addBaseLayers: function(layers) {
-            var self = this;
-            _.each(layers, function(layer) {
-                $.getJSON(layer.source)
-                    .done(function(features) {
-                        self.map.addLayer(L.geoJson(features,
-                                                    {style: layer.style}))
-                            .bringToBack();
-                    });
-            });
         }
     });
 });
