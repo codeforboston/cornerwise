@@ -396,8 +396,8 @@ def process_documents(docs=None):
 @celery_app.task(name="proposal.process_proposals")
 def process_proposals(proposals):
     "Perform additional processing on proposals."
-    process_documents.map(chain.from_iterable(p.document_set.all()
-                                              for p in proposals))
+    process_document.map(chain.from_iterable(p.document_set.all()
+                                             for p in proposals))()
 
     # Create a Google Street View image for each proposal:
     add_street_view.map(proposals)()

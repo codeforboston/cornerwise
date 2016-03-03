@@ -51,15 +51,12 @@ require.config({
         "minimap-view": "src/view/minimap",
         "proposal-info-view": "src/view/proposalInfo",
         "projects-summary-view": "src/view/projectsSummary",
-        "projects-view": "src/view/projects",
-        "project-view": "src/view/project",
         "layers-view": "src/view/layers",
         "filters-view": "src/view/filters",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
 
         // View managers:
-        "tab-view": "src/view/tabs",
         "view-manager": "src/viewManager",
 
         // Additional features:

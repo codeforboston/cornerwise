@@ -1,6 +1,6 @@
 define(
-    ["jquery", "proposals", "collection-manager", "map-view", "proposal-view", "project-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, CollectionManager, MapView, ProposalItemView, ProjectItemView,
+    ["jquery", "proposals", "collection-manager", "map-view", "proposal-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
+    function($, Proposals, CollectionManager, MapView, ProposalItemView, 
              glossary, config, appState, ViewManager, refLocation) {
         return {
             start: function() {
