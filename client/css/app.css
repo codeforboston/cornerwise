@@ -610,6 +610,16 @@ div.marker-selected {
     font-style:italic;
 }
 
+.source-link {
+    color: darkgray !important;
+    font-size: small;
+}
+
+.details .source-link {
+    float: right;
+    margin-right: 5em;
+}
+
 .info-item .dates {
 
     color: crimson;
