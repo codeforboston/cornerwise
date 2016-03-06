@@ -149,11 +149,11 @@ def make_sections(lines, matchers):
     return OrderedDict(generate_sections(lines, matchers))
 
 
-def get_lines(doc):
+def get_lines(doc_json):
     """Returns a generator that successively produces lines from the
     document."""
-    enc = doc.encoding
-    lines = (line.decode(enc) for line in doc.fulltext)
+    enc = doc_json.encoding
+    lines = (line.decode(enc) for line in doc_json.fulltext)
 
     return lines
 
@@ -300,10 +300,10 @@ event_fields = [("Dates of Public Hearing", "Public Hearing"),
                 ("Date of Public Meeting", "Public Hearing")]
 
 
-def get_events(doc, props=None, fields=event_fields):
-    if doc.field == "reports":
+def get_events(doc_json, props=None, fields=event_fields):
+    if doc_json["field"] == "reports":
         if not props:
-            props = get_properties(doc)
+            props = get_properties(doc_json)
 
         events = []
         for (field, title) in fields:
