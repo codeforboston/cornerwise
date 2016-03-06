@@ -504,7 +504,6 @@ div.marker-selected {
     border-radius: 5px;
     box-shadow: -2px 2px 4px darkgray;
     line-height: 75px;
-    overflow: hidden;
     padding: 5px;
     text-align: center;
 }
@@ -513,9 +512,16 @@ div.marker-selected {
     background-color: white;
 }
 
-.zoomed-proposal-marker img {
+.zoomed-proposal-marker img.thumb {
     max-height: 100%;
     max-width: 100% !important;
+}
+
+.zoomed-proposal-marker .proposal-marker {
+    position: absolute;
+    z-index: 10;
+    right: -0.5em;
+    top: -0.5em;
 }
 
 .proposal-selected {
