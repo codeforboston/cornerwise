@@ -8,6 +8,10 @@ define(
         return Selectable.extend({
             model: Proposal,
 
+            initialize: function() {
+                Selectable.prototype.initialize.apply(this, arguments);
+            },
+
             url: function() {
                 return config.pzURL + "?" +
                     (_.isEmpty(this.query) ? "" : $u.encodeQuery(this.query));

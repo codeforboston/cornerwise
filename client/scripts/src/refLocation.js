@@ -2,10 +2,8 @@
  * The reference location is used to determine the distance to
  */
 define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"],
-       function(B, L, alerts, config, arcgis, Regions, $u) {
-           var currentRegion, bounds;
-
-
+       function(B, L, alerts, config, arcgis, regions, $u) {
+           var bounds;
 
            var LocationModel = B.Model.extend({
                defaults: {
@@ -14,6 +12,11 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
                    // The search radius, centered on the current latitude and longitude:
                    radius: null,
                    setMethod: "auto"
+               },
+
+               initialize: function() {
+                   B.Model.prototype.initialize.apply(this, arguments);
+                   this.bounds = null;
                },
 
                getPoint: function() {
@@ -39,7 +42,7 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
                    var self = this;
                    return $u.promiseLocation()
                        .then(function(loc) {
-                           if (!bounds.contains(loc)) {
+                           if (this.bounds && !this.bounds.contains(loc)) {
                                alerts.show("You are outside " + config.regionName,
                                            "error");
                                return loc;
@@ -81,12 +84,23 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
 
                        return loc;
                    }).fail(function() {
-                       alert.show("I couldn't find that address.");
+                       alerts.show("I couldn't find that address.");
                    }).always(function() {
                        self.set("geolocating", false);
                    });
                }
            });
 
-           return new LocationModel();
+           var refLocation = new LocationModel();
+
+           refLocation.listenTo(regions, "regionLoaded",
+                                function(shape) {
+
+                                })
+               .listenTo(regions, "selectionRemoved",
+                         function(regions, ids) {
+                             
+                         });
+
+           return refLocation;
        });

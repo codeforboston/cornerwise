@@ -1,29 +1,27 @@
 <div class="details">
-  <h4>
-    <%- project.get("name") %>
-  </h4>
+    <h4>
+        <%- project.get("name") %>
+    </h4>
 
-  <div class="section">
-    <div class="description">
-      <% if (project.get("description")) { %>
-      <%- project.get("description") %>
-      <% } else { %>
-      <span class="empty-field">No description available.</span>
-      <% } %>
+    <div class="section">
+        <div class="description">
+            <% if (project.get("description")) { %>
+            <%- project.get("description") %>
+            <% } else { %>
+            <span class="empty-field">No description available.</span>
+            <% } %>
+        </div>
     </div>
-  </div>
 
-  <div class="section">
-    <div class="section-title">
-      Budget
+    <div class="section">
+        <div class="section-title">
+            Budget
+        </div>
+        <div>
+            <span class="budget-total"><%- prettyAmount(project.totalBudget()) %></span>
+            over
+            <%- project.yearCount() %> <%- pluralize(project.yearCount(), "year") %>
+        </div>
+        <canvas class="budget-chart" height="300" width="400"></canvas>
     </div>
-    <div>
-      <span class="budget-total"><%- prettyAmount(project.totalBudget()) %></span>
-      over
-      <%- project.yearCount() %> <%- pluralize(project.yearCount(), "year") %>
-    </div>
-    <canvas class="budget-chart" height="300" width="400"></canvas>
-
-    </div>
-  </div>
 </div>

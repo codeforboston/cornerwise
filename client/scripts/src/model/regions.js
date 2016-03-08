@@ -11,6 +11,7 @@ define(["backbone", "jquery", "underscore", "selectable", "config"],
                    return $.getJSON(this.get("source"))
                        .done(function(shape) {
                            self.set("shape", shape);
+                           self.trigger("regionLoaded", shape);
                        });
 
                }

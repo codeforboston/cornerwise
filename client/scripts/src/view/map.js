@@ -2,7 +2,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
         "ref-location", "ref-marker", "proposal-marker", "layers",
         "regions", "info-layer-helper", "app-state", "utils"],
        function(B, config, L, $, _, refLocation, RefMarker,
-                ProposalMarker, infoLayers, Regions, info, appState, $u) {
+                ProposalMarker, infoLayers, regions, info, appState, $u) {
     return B.View.extend({
         initialize: function() {
             var state = appState.getState(),
@@ -62,8 +62,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
             // Informational overlays:
                 .listenTo(infoLayers, "change", this.layersChanged)
             // Region base layers:
-                .listenTo(Regions, "selectionLoaded", this.showRegions)
-                .listenTo(Regions, "selectionRemoved", this.removeRegions)
+                .listenTo(regions, "selectionLoaded", this.showRegions)
+                .listenTo(regions, "selectionRemoved", this.removeRegions)
             // App behaviors:
                 .listenTo(appState, "shouldFocus", this.onFocused);
 
@@ -86,27 +86,38 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
         regionLayers: {},
         showRegions: function(regions, ids) {
+            this.map.setMaxBounds(null);
+
             var self = this,
+                bounds = L.latLngBounds([]),
+                deferredBounds = $.Deferred(),
+                completeCount = 0,
                 deferreds = _.map(ids, function(id) {
-                var regionInfo = regions.get(id);
+                    var regionInfo = regions.get(id);
 
-                if (self.regionLayers[id]) return null;
+                    if (self.regionLayers[id]) return null;
 
-                return regionInfo.loadShape()
-                    .done(function(shape) {
-                        var layer = L.geoJson(shape,
-                                              {style: config.regionStyle});
-                        self.regionLayers[id] = layer;
-                        self.map.addLayer(layer);
-                    });
+                    return regionInfo.loadShape()
+                        .done(function(shape) {
+                            var layer = L.geoJson(shape,
+                                                  {style: config.regionStyle});
+                            bounds.extend(layer.getBounds());
+                            self.regionLayers[id] = layer;
+                            self.map.addLayer(layer);
 
-            });
+                            if (++completeCount == ids.length)
+                                deferredBounds.resolve(bounds);
+                        });
+                });
 
             // Fit to visible regions?
-            // $.when(deferreds).done(...)
+            deferredBounds.done(function(bounds) {
+                // Need to add padding to the bounds
+                // self.map.setMaxBounds(bounds);
+            });
         },
 
-        removeRegions: function(regions, ids) {
+        removeRegions: function(_regions, ids) {
             _.each(ids, function(id) {
                 var layer = this.regionLayers[id];
 

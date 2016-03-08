@@ -1,6 +1,5 @@
-define(["backbone", "underscore", "project", "project-view",
-       "selectable"],
-       function(B, _, Project, ProjectView, Selectable) {
+define(["backbone", "underscore", "project", "selectable"],
+       function(B, _, Project, Selectable) {
            return Selectable.extend({
                model: Project,
 
