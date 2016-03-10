@@ -10,9 +10,14 @@ google-api-python-client==1.5.0
 kombu==3.0.26
 nltk==3.1
 oauth2client==2.0.0.post1
+Pillow==3.1.1
+Pillow-PIL==0.1.dev0
 ply==3.6
 psycopg2==2.6.1
 py==1.4.30
+pyasn1==0.1.9
+pyasn1-modules==0.0.8
+PyPDF2==1.25.1
 pytest==2.7.2
 python-dateutil==2.4.2
 pytz==2015.4

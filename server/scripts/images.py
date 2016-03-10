@@ -4,6 +4,7 @@ import subprocess
 
 ImageInfo = namedtuple("ImageInfo", "name type width height depth space size")
 
+
 def image_info(image_path):
     """Get information about the image at the given path. Requires the
 'identify' command line utility.
@@ -16,7 +17,7 @@ def image_info(image_path):
     status = p.wait()
 
     if status:
-        raise Exception("Error in command: {error}"\
+        raise Exception("Error in command: {error}"
                         .format(error=p.stderr.read()))
 
     output = p.stdout.read().decode("utf-8")
@@ -27,9 +28,11 @@ def image_info(image_path):
     return ImageInfo(name, imgtype, int(w), int(h), bit_depth,
                      cspace, size)
 
+
 def dimensions(image_path):
     info = image_info(image_path)
     return info.width, info.height
+
 
 def is_interesting(image_path):
     """Heuristics to determine if the image at the given path is
@@ -41,6 +44,7 @@ def is_interesting(image_path):
     w, h = dimensions(image_path)
 
     return w > 200 and h > 200
+
 
 def make_thumbnail(image_path, percent=None, fit=None, dim=None, dest_file=None):
     """Uses the 'convert' command line utility to resize the image at the
