@@ -21,7 +21,9 @@ from . import utils as proposal_utils
 from .importers.register import Importers
 from cornerwise import celery_app
 from scripts import arcgis, gmaps, street_view
+from scripts import pdf
 from scripts.images import is_interesting, make_thumbnail
+
 from shared import files_metadata
 
 logger = get_task_logger(__name__)
@@ -84,8 +86,8 @@ def fetch_document(doc):
 
 @celery_app.task(name="proposal.extract_text")
 def extract_text(doc, encoding="ISO-8859-9"):
-    """If a document is a PDF, extract its text contents to a file and save
-the path of the text document.
+    """If a document is a PDF that has been copied to the filesystem, extract its
+    text contents to a file and save the path of the text document.
 
     :param doc: proposal.models.Document object
 
@@ -105,13 +107,9 @@ the path of the text document.
 
     if status:
         logger.error("Failed to extract text from %s", path)
-        # TODO: Correct way to signal a 'hard' failure that will break
-        # this chain of subtasks.
     else:
         logger.info("Extracted text from Document #%i to %s.",
                     doc.pk, doc.fulltext)
-        # Do stuff with the contents of the file.
-        # Possibly perform some rudimentary scraping?
         doc.fulltext = text_path
         doc.encoding = encoding
         doc.save()
@@ -123,8 +121,7 @@ the path of the text document.
 def extract_images(doc):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
-    document's directory (docs/<doc id>/images). Extracts the text
-    contents to docs/<doc id>/text.txt.
+    document's directory (docs/<doc id>/images).
 
     :param doc: proposal.models.Document object with a corresponding PDF
     file that has been copied to the local filesystem
@@ -132,7 +129,6 @@ def extract_images(doc):
     :returns: A list of proposal.model.Image objects
 
     """
-    # TODO: Break this into smaller subtasks
     docfile = doc.document
 
     if not docfile:
@@ -149,36 +145,32 @@ def extract_images(doc):
     images_dir = os.path.join(os.path.dirname(path), "images")
     os.makedirs(images_dir, exist_ok=True)
 
-    images_pattern = os.path.join(images_dir, "image")
-
     logger.info("Extracting images to '%s'", images_dir)
-    status = subprocess.call(["pdfimages", "-png", "-tiff", "-j", "-jp2",
-                              path, images_pattern])
+    image_paths = pdf.extract_images(path, dirname=images_dir)
 
     images = []
-    if status:
-        logger.warn("pdfimages failed with exit code %i", status)
-    else:
-        # Do stuff with the images in the directory
-        for image_name in os.listdir(images_dir):
-            image_path = os.path.join(images_dir, image_name)
+    # Do stuff with the images in the directory
+    for image_name in image_paths:
+        image_path = os.path.join(images_dir, image_name)
 
-            if not is_interesting(image_path):
-                # Delete 'uninteresting' images
-                os.unlink(image_path)
-                continue
+        if not is_interesting(image_path):
+            # Delete 'uninteresting' images
+            os.unlink(image_path)
+            continue
 
-            image = Image(proposal=doc.proposal,
-                          document=doc)
-            image.image = image_path
-            images.append(image)
+        image = Image(proposal=doc.proposal,
+                      document=doc)
+        image.image = image_path
+        images.append(image)
 
-            try:
-                image.save()
-            except IntegrityError:
-                # This can occur if the image has already been fetched
-                # and associated with the Proposal.
-                pass
+        try:
+            image.save()
+        except IntegrityError:
+            # This can occur if the image has already been fetched
+            # and associated with the Proposal.
+            pass
+
+    logger.info("Extracted %i image(s) from %s.", len(images), path)
 
     return images
 

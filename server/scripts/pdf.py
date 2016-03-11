@@ -27,11 +27,11 @@ def default_guard(xobject):
 
 def extract_images(path, guard_fn=default_guard, name_fn=default_name,
                    limit=10, dirname=None):
+    image_paths = []
     if not dirname:
         dirname = os.path.dirname(path)
     with open(path, "rb") as infile:
         pdf = PdfFileReader(infile)
-        extracted_count = 0
         for i, (xid, xobject) in enumerate(xobjects(pdf)):
             if xobject["/Subtype"] != "/Image":
                 continue
@@ -48,16 +48,18 @@ def extract_images(path, guard_fn=default_guard, name_fn=default_name,
                 height = xobject["/Height"]
                 img = Image.frombytes(mode, (width, height), data)
                 filename = os.path.join(dirname, name_fn(i, "png", xobject))
-                print("Extracted to", filename)
                 img.save(filename)
+                image_paths.append(filename)
             elif filter == "/DCTDecode":
                 filename = os.path.join(dirname, name_fn(i, "jpg", xobject))
                 data = xobject._data
                 img = Image.open(BytesIO(data))
                 img.save(filename)
+                image_paths.append(filename)
             else:
                 continue
 
-            extracted_count += 1
-            if extracted_count == limit:
+            if len(image_paths) == limit:
                 break
+
+    return image_paths
