@@ -49,8 +49,8 @@ def fetch_document(doc):
         # Has the document been updated?
         updated = proposal_utils.last_modified(doc.url)
         # No?  Then we're good.
-        if updated <= doc.published:
-            return
+        if not updated or updated <= doc.published:
+            return doc
 
         # TODO Special handling of updated documents
 
@@ -234,8 +234,9 @@ def generate_doc_thumbnail(doc):
                      path, err)
         raise Exception("Failed for document %s" % doc.pk)
     else:
-        logger.info("Generated thumbnail for '%s'", docfile)
         thumb_path = out_prefix + os.path.extsep + "jpg"
+        logger.info("Generated thumbnail for Document #%i: '%s'",
+                    doc.pk, thumb_path)
         doc.thumbnail = thumb_path
         doc.save()
 
