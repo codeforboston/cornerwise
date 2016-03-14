@@ -204,13 +204,15 @@ define(["underscore", "jquery", "locale"],
 
            function deepMerge(obj1, obj2) {
                _.each(obj2, function(v, k) {
-                   var orig = obj2[k];
+                   var orig = obj1[k];
                    if (orig && isSimpleObject(v) && isSimpleObject(orig)) {
-                       deepMerge(v, orig);
+                       deepMerge(orig, v);
                    } else {
                        obj1[k] = v;
                    }
                });
+
+               return obj1;
            }
 
            function flattenMap(obj, pref) {

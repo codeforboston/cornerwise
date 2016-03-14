@@ -6,7 +6,13 @@ define(["backbone", "underscore", "config", "utils"],
                        _cachedState: null,
 
                        defaults: {
-                           "r": "somerville"
+                           // Region:
+                           "r": "somerville",
+                           // Filters:
+                           "f": {
+                               "city": "1",
+                               "private": "1"
+                           }
                        },
 
                        getters: {},
@@ -37,16 +43,21 @@ define(["backbone", "underscore", "config", "utils"],
                            return o;
                        },
 
-                       getState: function() {
+                       getHashState: function() {
                            return $u.decodeQuery(B.history.getHash());
+                       },
+
+                       getState: function() {
+                           return $u.deepMerge(
+                               $u.decodeQuery(B.history.getHash()),
+                               this.defaults);
                        },
 
                        getKey: function(k) {
                            var state = this.getState(),
                                ks = _.isArray(k) ? k : k.split(".");
 
-                           return $u.getIn(state, ks) ||
-                               $u.getIn(this.defaults, ks);
+                           return $u.getIn(state, ks);
                        },
 
                        /**
@@ -59,7 +70,7 @@ define(["backbone", "underscore", "config", "utils"],
                         * @returns {Object}
                         */
                        changeHash: function(f, replace, quiet) {
-                           return this.setHashState(f(this.getState()), replace, quiet);
+                           return this.setHashState(f(this.getHashState()), replace, quiet);
                        },
 
                        changeHashKey: function(key, f, replace, quiet) {
@@ -70,11 +81,11 @@ define(["backbone", "underscore", "config", "utils"],
                         * @param {Object} o
                         */
                        extendHash: function(o, replace, quiet) {
-                           return this.setHashState(_.extend(this.getState(), o), replace, quiet);
+                           return this.setHashState(_.extend(this.getHashState(), o), replace, quiet);
                        },
 
                        setHashKey: function(k, v, replace, quiet) {
-                           var hashObject = this.getState(),
+                           var hashObject = this.getHashState(),
                                ks = _.isArray(k) ? k : k.split(".");
 
                            $u.setIn(hashObject, ks, v);
