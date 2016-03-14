@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from cornerwise import celery_app
 from .models import Project
 from .importers.register import Importers
@@ -21,7 +22,11 @@ def pull_updates(since=None):
     created = []
 
     for project in projects:
-        created.append(Project.create_from_dict(project))
+        try:
+            created.append(Project.create_from_dict(project))
+        except IntegrityError as ierr:
+            logger.error("Could not create project '%s': %s",
+                         project["name"], ierr)
 
     return created
 
