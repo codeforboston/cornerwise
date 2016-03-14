@@ -74,13 +74,6 @@ define(
                     el: "#map"
                 });
 
-                require(["layers-view"],
-                        function(LayersView) {
-                            appViews.layers = new LayersView({
-                                el: "#layers .contents"
-                            }).render();
-                        });
-
                 require(["filters-view"],
                         function(FiltersView) {
                             appViews.filtersView = new FiltersView({
