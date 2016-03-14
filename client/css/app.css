@@ -482,9 +482,13 @@ div.marker-selected {
     border-radius: 15px;
 }
 
+div.proposal-marker.zoomed-proposal-marker {
+    background-image: none;
+}
+
 @keyframes selection-highlight {
     from {
-            background-color: goldenrod;
+        background-color: goldenrod;
         box-shadow: 0 0 10px 10px goldenrod;
     }
 
@@ -493,9 +497,12 @@ div.marker-selected {
     }
 }
 
-.project-marker img {
+img.project-type-badge {
     max-width: 20px;
     max-height: 20px;
+    position: absolute;
+    right: 5px;
+    top: 4px;
 }
 
 .zoomed-proposal-marker {
@@ -537,7 +544,6 @@ div.marker-selected {
     display: inline-block;
     font-size: small;
 }
-
 
 .updated {
     font-weight: 500;
@@ -924,6 +930,18 @@ body.main #info {
 
 #info.default .dragger {
     display: none;
+}
+
+#info .chart-area {
+    text-align: center;
+}
+
+#info .budget-chart {
+    background-color: white;
+    display: inline-block;
+    padding: 0.5em;
+    padding-left: 1em;
+    padding-right: 1em;
 }
 
 .brief-model {

@@ -59,7 +59,8 @@ define(["jquery", "backbone", "app-state", "underscore", "config",
                                 self.$el.html(html);
                                 var canvas = self.$("canvas")[0];
                                 if (canvas)
-                                    budget.drawChart(project.budget, canvas);
+                                    budget.drawChart(project.budget, canvas,
+                                                     {yearCount: 10});
                                 promise.resolve();
                             });
                    return promise;

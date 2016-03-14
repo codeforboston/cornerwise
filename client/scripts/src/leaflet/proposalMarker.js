@@ -5,7 +5,7 @@ define(["leaflet", "underscore"],
                return "/static/images/icon/" + cat + ".png";
            }
 
-           function getIconClassName(proposal) {
+           function getBadgeClassName(proposal) {
                var isHovered = proposal.get("_hovered"),
                    isSelected = proposal.get("_selected"),
                    project = proposal.getProject();
@@ -18,40 +18,40 @@ define(["leaflet", "underscore"],
                ].join(" ");
            }
 
-           function getIconHTML(proposal) {
+           function getBadgeHTML(proposal) {
                var project = proposal.getProject(),
                    html = "";
 
                if (project) {
-                   html = ["<div class='project-type-badge'>",
-                           "<img src='", projectTypeIcon(project),
-                           "'/></div>"].join("");
+                   html =
+                       "<img src='" + projectTypeIcon(project) +
+                       "' class='project-type-badge'/>";
                }
 
                return html;
            }
 
-           function getIcon(proposal) {
+           function getBadge(proposal) {
                return L.divIcon({
-                   className: getIconClassName(proposal),
+                   className: getBadgeClassName(proposal),
                    iconSize: L.point(30, 30),
-                   html: getIconHTML(proposal)
+                   html: getBadgeHTML(proposal)
                });
            }
 
            return L.Marker.extend({
-               initialize: function(proposal) {
+               initialize: function(proposal, zoom) {
                    var loc = proposal.get("location");
 
                    if (loc) {
                        L.Marker.prototype.initialize.call(
                            this, loc,
-                           {icon: getIcon(proposal),
+                           {icon: getBadge(proposal),
                             riseOnHover: true,
                             title: proposal.get("address")});
                    }
                    this.proposal = proposal;
-                   this.zoomed = null;
+                   this.zoomed = zoom;
 
                    var self = this;
                    proposal
@@ -72,10 +72,10 @@ define(["leaflet", "underscore"],
                },
 
                updateIcon: function(proposal) {
-                   if (this.zoomed !== null)
+                   if (this.zoomed >= 0)
                        return;
 
-                   this.setIcon(getIcon(proposal));
+                   this.setIcon(getBadge(proposal));
                },
 
                setZoomed: function(n) {
@@ -83,12 +83,12 @@ define(["leaflet", "underscore"],
                        factor = Math.pow(2, n),
                        size = L.point(100*factor, 75*factor),
                        html = ["<img class='thumb' src='", proposal.getThumb(),  "'/>",
-                               "<div class='", getIconClassName(proposal),
-                               "'>", getIconHTML(proposal), "</div>"].join("");
-                   console.log(html);
+                               "<div class='", getBadgeClassName(proposal),
+                               "'>", getBadgeHTML(proposal), "</div>"].join(""),
+                       className = proposal.get("_selected") ? " marker-selected" : "";
 
                    this.setIcon(L.divIcon({
-                       className: "zoomed-proposal-marker",
+                       className: "zoomed-proposal-marker" + className,
                        iconSize: size,
                        html: html
                    }));
@@ -97,7 +97,7 @@ define(["leaflet", "underscore"],
                },
 
                unsetZoomed: function() {
-                   this.setIcon(getIcon(this.proposal));
+                   this.setIcon(getBadge(this.proposal));
                    this.zoomed = null;
                }
            });
