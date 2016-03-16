@@ -5,11 +5,13 @@ define(
     ["backbone", "jquery", "underscore", "leaflet", "proposal", "ref-location",
      "selectable", "config", "utils"],
     function(B, $, _, L, Proposal, refLocation, Selectable, config, $u) {
+        window.$u = $u;
         return Selectable.extend({
             model: Proposal,
 
-            initialize: function() {
+            initialize: function(options) {
                 Selectable.prototype.initialize.apply(this, arguments);
+                this.appState = options && options.appState;
             },
 
             url: function() {
@@ -28,7 +30,12 @@ define(
             // Used by Selectable:
             hashParam: "ps",
 
+            // Contains the query parameters corresponding to the active filters:
             query: {},
+
+            // The last query to be sent to the server.  Use this to determine
+            // whether a change in filters can be satisfied from local data alone.
+            lastQuery: {},
 
             sortFields: [
                 {name: "Distance",
@@ -55,6 +62,33 @@ define(
                 } else {
                     this.removeFilter("search");
                 }
+            },
+
+            filterProjectTypes: function(includeProjects, includeProposals) {
+                if (includeProjects && includeProposals) {
+                    this.removeFilter("projectTypes");
+                    delete this.query.project;
+                } else if (includeProjects) {
+                    this.addFilter("projectTypes", function(proposal) {
+                        return !!proposal.getProject();
+                    });
+                    this.query.project = "all";
+                } else if (includeProposals) {
+                    this.addFilter("projectTypes", function(proposal) {
+                        return !proposal.getProject();
+                    });
+                    this.query.project = "null";
+                }
+                this._includeProjects = includeProjects;
+                this._includeProposals = includeProposals;
+            },
+
+            includeProjects: function(shouldInclude) {
+                this.filterProjectTypes(shouldInclude, this._includeProposals);
+            },
+
+            includeProposals: function(shouldInclude) {
+                this.filterProjectTypes(this._includeProjects, shouldInclude);
             },
 
             /**

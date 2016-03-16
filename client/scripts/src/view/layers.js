@@ -28,10 +28,6 @@ define(["backbone", "underscore", "jquery", "layers", "utils"],
            return B.View.extend({
                collection: layers,
 
-               initialize: function() {
-                   //this.listenTo(this.collection, "change",
-               },
-
                render: function() {
                    this.$el.html("");
                    var ul = $('<ul class="layer-list"></ul>').appendTo(this.el);

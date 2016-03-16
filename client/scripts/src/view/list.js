@@ -32,7 +32,8 @@ define(["backbone", "jquery", "utils", "underscore",
                    this.listenTo(cm, "sort", this.render)
                        .listenTo(cm, "filtered", this.render)
                        .listenTo(cm, "change", this.modelChanged)
-                       .listenTo(cm, "add", this.modelAdded);
+                       .listenTo(cm, "add", this.modelAdded)
+                       .listenTo(cm, "remove", this.modelRemoved);
                },
 
                changeSort: function(e) {
@@ -86,15 +87,24 @@ define(["backbone", "jquery", "utils", "underscore",
                 * Run when a collection is re-rendered or when a model is added
                 * to the active collection.
                 *
-                * @param {String} name of the active collection
                 * @param {B.Model} model The added model
                 * @param {B.Collection} coll The active collection
                 */
-               modelAdded: function(name, model, coll) {
-                   var view = new this.subviews[name]({model: model});
+               modelAdded: function(model, coll) {
+                   var name = this.cm.getCollectionName(),
+                       view = new this.subviews[name]({model: model});
                    this.$(".contents").append(view.el);
                    this.subviewCache[model.id] = view;
                    view.render();
+               },
+
+               modelRemoved: function(model) {
+                   var view = this.subviewsCache[model.id];
+
+                   if (view) {
+                       view.$el.remove();
+                       delete this.subviewsCache[model.id];
+                   }
                },
 
                show: function() {

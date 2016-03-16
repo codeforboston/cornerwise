@@ -260,6 +260,11 @@ define(["backbone", "underscore", "app-state", "utils"],
                    this.refresh();
                },
 
+               addFilters: function(filterMap) {
+                   _.extend(this.activeFilters, filterMap);
+                   this.refresh();
+               },
+
                removeFilter: function(name) {
                    delete this.activeFilters[name];
                    this.refresh();

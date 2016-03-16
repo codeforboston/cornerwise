@@ -5,13 +5,6 @@ define(["backbone", "underscore", "project", "selectable"],
 
                url: "/project/list",
 
-               hashParam: "pj",
-
-               sortFields: [
-                   {name: "Department",
-                    field: "department"}
-               ],
-
                parse: function(results) {
                    return results.projects;
                },

@@ -6,6 +6,35 @@ define(
      "app-state", "config"],
 
     function(B, _, $, refLocation, $u, arcgis, appState, config) {
+        var ToggleButtonView = B.View.extend({
+            tagName: "a",
+            className: function() {
+                return "toggle-button " + this.typeClass;
+            },
+            events: {
+                "click": "onClick"
+            },
+
+            initialize: function(options) {
+                B.View.prototype.initialize.call(this, options);
+                this.filterParam = options.filterParam;
+                this.selected = options.selected;
+                this.title = options.title;
+                this.typeClass = options.typeClass || "";
+            },
+
+            onClick: function(e) {
+                appState.setHashKey(["filt", this.filterParam],
+                                    this.selected ? "0" : "1");
+                return false;
+            },
+
+            render: function() {
+                this.$el.toggleClass("toggled-on", this.selected)
+                    .text(this.title);
+            }
+        });
+
         return B.View.extend({
             el: function() {
                 return document.body;
@@ -35,6 +64,10 @@ define(
                 });
 
                 appState.onStateChange("fa", _.bind(this.showAttributeFilters, this));
+            },
+
+            render: function() {
+                
             },
 
             toggle: function(shouldShow) {
