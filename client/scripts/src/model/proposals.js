@@ -143,26 +143,6 @@ define(
                                             function(p) {
                                                 return p.get("location");
                                             }));
-            },
-
-
-
-            // Called when a child proposal has its "selected" attribute
-            // set. Clears the existing selection.
-            proposalSelected: function(proposal, selected) {
-                if (this.selected && this.selected.id != proposal.id)
-                    this.selected.set("selected", false);
-
-                // If the proposal is being deselected, clear selected
-                // property.
-                this.selected = selected ? proposal : null;
-            },
-
-            proposalZoomed: function(proposal, zoomed) {
-                if (this.zoomed && this.zoomed.id != proposal.id)
-                    this.zoomed.set("zoomed", false);
-
-                this.zoomed = zoomed ? proposal : null;
             }
         });
     });
