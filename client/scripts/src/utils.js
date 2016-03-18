@@ -230,6 +230,21 @@ define(["underscore", "jquery", "locale"],
                }, {});
            }
 
+           /**
+            * Like map, but discards results that are null or undefined.
+            */
+           function keep(coll, fn, ctx) {
+               ctx = ctx || this;
+               coll = _.toArray(coll);
+               var result = [];
+               for (var i = 0, l = coll.length; i < l; i++) {
+                   var val = fn.call(ctx, coll[i]);
+                   if (val && val !== undefined && val !== null)
+                       result.push(val);
+               }
+               return result;
+           }
+
            var defaultHelpers = {
                formatDate: function(d) {
                    return (d.toLocaleDateString) ?
@@ -450,6 +465,16 @@ define(["underscore", "jquery", "locale"],
 
                deepMerge: deepMerge,
                flattenMap: flattenMap,
+
+               /**
+                * @param {Object[]} coll
+                * @param {Function} fn
+                * @param {Object} ctx The value to which 'this' is bound
+                *
+                * @returns The function fn applied to each member of coll, with
+                * null and undefined values removed.
+                */
+               keep: keep,
 
                /**
                 * @param {Object} o A map of strings to

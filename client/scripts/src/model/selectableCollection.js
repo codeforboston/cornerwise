@@ -151,6 +151,10 @@ define(["backbone", "underscore", "app-state", "utils"],
                onRemove: function(model, coll) {
                    if (this.matchesFilters(model))
                        this.trigger("removedFiltered", model, coll);
+
+                   var idx = _.indexOf(this.selection, model.id);
+                   if (idx > -1)
+                       this.selection.splice(idx, 1);
                },
 
                getSelectedIndex: function() {
@@ -200,7 +204,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                 * @return {Proposal[]}
                 */
                getSelection: function() {
-                   return _.map(this.selection, this.get, this);
+                   return $u.keep(this.selection, this.get, this);
                },
 
                getSelectionIds: function() {
