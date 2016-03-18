@@ -1,7 +1,9 @@
 define(["leaflet", "underscore"],
        function(L, _) {
            function projectTypeIcon(p) {
-               var cat = p.category.replace(/[&.]+/g, "").replace(/[\s-]+/g, "_");
+               var cat = p.category.replace(/[&.]+/g, "")
+                       .replace(/[\s-]+/g, "_")
+                       .toLowerCase();
                return "/static/images/icon/" + cat + ".png";
            }
 
