@@ -173,9 +173,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                },
 
                proposalRemoved: function(permit) {
+                   var self = this;
                    this.getMarkerForPermit(permit)
                        .done(function(marker) {
-                           this.zoningLayer.removeLayer(marker);
+                           self.zoningLayer.removeLayer(marker);
                        });
 
                    delete this.caseMarker[permit.get("caseNumber")];
