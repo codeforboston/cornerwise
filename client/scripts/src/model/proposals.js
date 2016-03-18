@@ -3,15 +3,27 @@
  */
 define(
     ["backbone", "jquery", "underscore", "leaflet", "proposal", "ref-location",
-     "selectable", "config", "utils"],
-    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u) {
+     "selectable", "config", "utils", "app-state"],
+    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u,
+             appState) {
         window.$u = $u;
         return Selectable.extend({
             model: Proposal,
 
             initialize: function(options) {
                 Selectable.prototype.initialize.apply(this, arguments);
-                this.appState = options && options.appState;
+                // Contains the query parameters corresponding to the active filters:
+                this.query = {};
+
+                // The last query to be sent to the server. Could use this to
+                // determine whether a change in filters can be satisfied from
+                // local data alone.
+                this.lastQuery = {};
+
+                this._includeProjects = this._includeProposals = true;
+
+                appState.onStateChange(
+                    "f", _.bind(this.onStateChange, this));
             },
 
             url: function() {
@@ -30,13 +42,6 @@ define(
             // Used by Selectable:
             hashParam: "ps",
 
-            // Contains the query parameters corresponding to the active filters:
-            query: {},
-
-            // The last query to be sent to the server.  Use this to determine
-            // whether a change in filters can be satisfied from local data alone.
-            lastQuery: {},
-
             sortFields: [
                 {name: "Distance",
                  field: "refDistance",
@@ -46,49 +51,44 @@ define(
                  desc: true}
             ],
 
-            filterByText: function(s) {
-                var re = new RegExp($u.escapeRegex(s), "i");
-                this._filterByRegex(re);
-
-                this.query.q = s;
+            queryFilters: {
+                projects: "typeFilter",
+                text: "textFilter"
             },
 
-            _filterByRegex: function(regex) {
-                if (regex) {
-                    this.addFilter("search", function(proposal) {
-                        return regex.exec(proposal.get("address")) ||
-                            regex.exec(proposal.getAttributeValue("legal_notice"));
-                    });
-                } else {
-                    this.removeFilter("search");
+            onStateChange: function(newFilters, oldFilters) {
+                oldFilters = oldFilters || {};
+                var query;
+
+                _.each(newFilters, function(val, key) {
+                    if (newFilters[key] !== oldFilters[key] &&
+                        this.queryFilters[key]) {
+
+                        if (!query) query = _.clone(this.query);
+
+                        var filter = this[this.queryFilters[key]];
+                        filter.call(this, query, val, key, newFilters);
+                    }
+                }, this);
+
+                if (query) {
+                    this.lastQuery = this.query;
+                    this.query = query;
+                    this.fetch();
                 }
             },
 
-            filterProjectTypes: function(includeProjects, includeProposals) {
-                if (includeProjects && includeProposals) {
-                    this.removeFilter("projectTypes");
-                    delete this.query.project;
-                } else if (includeProjects) {
-                    this.addFilter("projectTypes", function(proposal) {
-                        return !!proposal.getProject();
-                    });
-                    this.query.project = "all";
-                } else if (includeProposals) {
-                    this.addFilter("projectTypes", function(proposal) {
-                        return !proposal.getProject();
-                    });
-                    this.query.project = "null";
-                }
-                this._includeProjects = includeProjects;
-                this._includeProposals = includeProposals;
+            textFilter: function(query, s) {
+                query.q = s;
             },
 
-            includeProjects: function(shouldInclude) {
-                this.filterProjectTypes(shouldInclude, this._includeProposals);
-            },
-
-            includeProposals: function(shouldInclude) {
-                this.filterProjectTypes(this._includeProjects, shouldInclude);
+            typeFilter: function(query, val) {
+                if (val == "all")
+                    query.project = "all";
+                else if (val == "null")
+                    query.project = "null";
+                else
+                    delete query.project;
             },
 
             /**
@@ -97,44 +97,15 @@ define(
              * hidden.
              */
             filterByViewBox: function(viewBox) {
-                this.addFilter("viewbox", function(proposal) {
-                    var location = proposal.get("location");
-
-                    return location && viewBox.contains(location);
-                });
-
                 this.query.bounds = [viewBox.getWest(), viewBox.getSouth(),
                                      viewBox.getEast(), viewBox.getNorth()].join(",");
+                this.fetch();
             },
 
             clearViewBoxFilter: function() {
-                this.removeFilter(viewBox);
                 delete this.query.bounds;
+                this.fetch();
             },
-
-            /*
-             * @param {Array} spga
-             */
-            filterByAuthority: function(spga) {
-                if (spga) {
-                    this.addFilter("spga", function(proposal) {
-                        return _.contains(spga, proposal.get("spga"));
-                    });
-                } else {
-                    this.removeFilter("spga");
-                }
-            },
-
-            filterByTypes: function(types) {
-                if (types) {
-                    this.addFilter("types", function(proposal) {
-                        return _.contains(types, proposal.get("proposal"));
-                    });
-                } else {
-                    this.removeFilter("types");
-                }
-            },
-
 
             // Returns a LatLngBounds object for the proposals that are
             // not excluded.
