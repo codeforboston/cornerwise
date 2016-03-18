@@ -51,7 +51,7 @@ define(["leaflet", "underscore"],
                             title: proposal.get("address")});
                    }
                    this.proposal = proposal;
-                   this.zoomed = zoom;
+                   this.zoomed = true;
 
                    var self = this;
                    proposal
@@ -72,8 +72,7 @@ define(["leaflet", "underscore"],
                },
 
                updateIcon: function(proposal) {
-                   if (this.zoomed >= 0)
-                       return;
+                   if (this.zoomed) return;
 
                    this.setIcon(getBadge(proposal));
                },
@@ -93,12 +92,12 @@ define(["leaflet", "underscore"],
                        html: html
                    }));
 
-                   this.zoomed = n;
+                   this.zoomed = true;
                },
 
                unsetZoomed: function() {
                    this.setIcon(getBadge(this.proposal));
-                   this.zoomed = null;
+                   this.zoomed = false;
                }
            });
        });

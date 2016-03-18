@@ -87,12 +87,12 @@ define(["backbone", "jquery", "utils", "underscore",
                 * Run when a collection is re-rendered or when a model is added
                 * to the active collection.
                 *
+                * @param {String} name Collection name
                 * @param {B.Model} model The added model
                 * @param {B.Collection} coll The active collection
                 */
-               modelAdded: function(model, coll) {
-                   var name = this.cm.getCollectionName(),
-                       view = new this.subviews[name]({model: model});
+               modelAdded: function(name, model, coll) {
+                   var view = new this.subviews[name]({model: model});
                    this.$(".contents").append(view.el);
                    this.subviewCache[model.id] = view;
                    view.render();
