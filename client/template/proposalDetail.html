@@ -86,11 +86,12 @@
     <% _.each(images.slice(0, 10), function(img) { %>
     <a class="thumb-link" href="<%= img.src %>" target="_blank"> <img class="thumb" src="<%= img.thumb || img.src %>"/> </a>
     <% }); %>
+    <br style="clear:both" />
   </div>
   <% } %>
 
   <% } %>
 
-  <a href="#" class="prev-button">⟨</a>
-  <a href="#" class="next-button">⟩</a>
+  <a href="#" class="prev-button"><div>⟨</div></a>
+  <a href="#" class="next-button"><div>⟩</div></a>
 </div>

@@ -446,11 +446,19 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 #mode-controls .mode {
-    background-color: #4EAF48;
+    border-radius: 5px;
     color: white;
     margin: 0.5em;
     width: 50px;
     height: 50px;
+}
+
+.action {
+    background-color: #4EAF48;
+}
+
+.action:hover {
+    background-color: #7fc87a;
 }
 
 .mode {
@@ -482,8 +490,14 @@ div.marker-selected {
     border-radius: 15px;
 }
 
-div.proposal-marker.zoomed-proposal-marker {
+div.leaflet-marker.zoomed-proposal-marker {
     background-image: none;
+}
+
+div.zoomed-proposal-marker.marker-selected {
+    background-color: white;
+    background-image: none !important;
+    border-color: #EE6C43;
 }
 
 @keyframes selection-highlight {
@@ -765,6 +779,7 @@ a.glossary:hover {
 
 .definition {
     bottom: 0;
+    color: black;
     left: 110%;
     position: absolute;
     width: 15em;
@@ -904,6 +919,7 @@ body.main #info {
     display: block;
     height: auto;
     max-height: 500px;
+    /* overflow-y: scroll; */
     overflow: visible;
     padding-bottom: 2em;
 }
@@ -959,7 +975,7 @@ a.brief-model:hover {
 }
 
 .dragarea .dragger {
-    background-color: #4EAF48;
+    color: white;
     cursor: -webkit-grab;
     padding: 0.5em;
     text-align: center;
@@ -1008,23 +1024,34 @@ a.brief-model:hover {
 }
 
 #info .prev-button, #info .next-button {
+    border-radius: 10px;
     font-size: 36pt;
-    line-height: 225px;
     position: absolute;
-    bottom: 0;
+    padding: 10px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    top: 50%;
+    margin-top: -70px;
 }
 
 #info .prev-button:hover, #info .next-button:hover {
+    background-color: rgba(0, 0, 0, 0.2);
     color: #4EAF48;
     text-decoration: none;
 }
 
 #info .prev-button {
     left: 0.5em;
+    margin-left: -10px;
 }
 
 #info .next-button {
     right: 0.5em;
+    margin-right: -10px;
+}
+
+.details {
+    overflow-y: auto;
 }
 
 .details h4 {
