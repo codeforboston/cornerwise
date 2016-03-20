@@ -1,8 +1,9 @@
 /*
  * The reference location is used to determine the distance to
  */
-define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"],
-       function(B, L, alerts, config, arcgis, regions, $u) {
+define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
+        "app-state"],
+       function(B, L, alerts, config, arcgis, regions, $u, appState) {
            var bounds;
 
            var LocationModel = B.Model.extend({
@@ -14,9 +15,33 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
                    setMethod: "auto"
                },
 
-               initialize: function() {
-                   B.Model.prototype.initialize.apply(this, arguments);
+               initialize: function(attrs, options) {
+                   var ref = appState.getKey("ref");
+
+                   B.Model.prototype.initialize.call(
+                       this, this.checkedAttrs(ref, attrs), options);
                    this.bounds = null;
+
+                   appState.onStateChange("ref", _.bind(this.checkedSet, this));
+               },
+
+               checkedAttrs: function(ref, attrs) {
+                   var lat = parseFloat(ref.lat),
+                       lng = parseFloat(ref.lng),
+                       newAttrs = {};
+
+                   if (!isNaN(lat) && !isNaN(lng)) {
+                       newAttrs.lat = lat;
+                       newAttrs.lng = lng;
+                   }
+
+                   return _.extend(newAttrs, attrs);
+               },
+
+               checkedSet: function(ref, oldRef) {
+                   var attrs = this.checkedAttrs(ref);
+
+                   this.set(attrs);
                },
 
                getPoint: function() {
@@ -42,17 +67,19 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
                    var self = this;
                    return $u.promiseLocation()
                        .then(function(loc) {
-                           if (this.bounds && !this.bounds.contains(loc)) {
+                           if (bounds && !bounds.contains(loc)) {
                                alerts.show("You are outside " + config.regionName,
                                            "error");
                                return loc;
                            }
 
                            self.set({
-                               lat: loc[0],
-                               lng: loc[1],
                                altitude: loc[2],
                                setMethod: "geolocate"
+                           });
+                           appState.setHashKey("ref", {
+                               lat: loc[0],
+                               lng: loc[1]
                            });
 
                            return loc;
@@ -66,21 +93,21 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
                    var self = this;
                    this.set("geolocating", true);
                    return arcgis.geocode(addr).then(arcgis.getLatLngForFirstAddress).done(function(loc) {
-                       if (!bounds.contains(loc)) {
+                       if (bounds && !bounds.contains(loc)) {
                            alerts.show("That address is outside " + config.regionName,
                                        "error");
                            return loc;
                        }
 
                        self.set({
-                           lat: loc[0],
-                           lng: loc[1],
                            altitude: null,
-                           setMethod: "address",
-                           address: addr
+                           setMethod: "address"
                        });
-
-                       $(document).trigger("showMain");
+                       appState.setHashKey("ref", {
+                           address: addr,
+                           lat: loc[0],
+                           lng: loc[1]
+                       });
 
                        return loc;
                    }).fail(function() {
@@ -93,14 +120,11 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils"]
 
            var refLocation = new LocationModel();
 
+           // TODO: Update whenever the active regions change:
            refLocation.listenTo(regions, "regionLoaded",
-                                function(shape) {
-
-                                })
+                                function(shape) {})
                .listenTo(regions, "selectionRemoved",
-                         function(regions, ids) {
-                             
-                         });
+                         function(regions, ids) {});
 
            return refLocation;
        });
