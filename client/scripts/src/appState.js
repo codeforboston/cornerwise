@@ -10,8 +10,11 @@ define(["backbone", "underscore", "config", "utils"],
                            "r": "somerville",
                            // Filters:
                            "f": {
-                               "city": "1",
-                               "private": "1"
+                               "projects": ""
+                           },
+                           "ref": {
+                               "lat": config.refPointDefault.lat,
+                               "lng": config.refPointDefault.lng
                            }
                        },
 
@@ -43,11 +46,18 @@ define(["backbone", "underscore", "config", "utils"],
                            return o;
                        },
 
+                       /**
+                        * @returns {Object} An object representing the current
+                        * location hash.
+                        */
                        getHashState: function() {
                            return $u.decodeQuery(B.history.getHash());
                        },
 
                        getState: function() {
+                           if (this._cachedState)
+                               return this._cachedState;
+
                            return $u.deepMerge(
                                $u.decodeQuery(B.history.getHash()),
                                this.defaults);
