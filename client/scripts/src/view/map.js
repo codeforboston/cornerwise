@@ -151,7 +151,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    if (!loc) return;
 
                    var z = this.map.getZoom() - zoomThreshold,
-                       marker = new ProposalMarker(proposal, z),
+                       marker = new ProposalMarker(proposal, z >= 0 ? z : null),
                        proposals = this.collection;
 
                    marker.addTo(this.zoningLayer);
@@ -167,6 +167,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        })
                        .on("click", function(e) {
                            proposals.setSelection(proposal.id);
+                       })
+                       .on("dblclick", function(e) {
+                           appState.focusModels([proposal], true);
                        });
 
                    this.listenTo(proposal, "change", this.changed);
