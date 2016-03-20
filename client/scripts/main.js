@@ -45,10 +45,8 @@ require.config({
         "modal-view": "src/view/modalView",
 
         // Application-specific:
-        "proposals-view": "src/view/proposals",
         "proposal-view": "src/view/proposal",
         "map-view": "src/view/map",
-        "minimap-view": "src/view/minimap",
         "proposal-info-view": "src/view/proposalInfo",
         "projects-summary-view": "src/view/projectsSummary",
         "layers-view": "src/view/layers",
