@@ -59,6 +59,16 @@ define(["backbone", "underscore", "app-state", "utils"],
                    }
                },
 
+               fetch: function() {
+                   this.trigger("fetching");
+                   var xhr = B.Collection.prototype.fetch.apply(this, arguments);
+                   var self = this;
+                   xhr.done(function() {
+                       self.trigger("fetchingComplete");
+                   });
+                   return xhr;
+               },
+
                getModelName: function() {
                    return this.model.modelName || "model";
                },
