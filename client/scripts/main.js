@@ -53,6 +53,7 @@ require.config({
         "filters-view": "src/view/filters",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
+        "toggle-button-view": "src/view/toggleButton",
 
         // View managers:
         "view-manager": "src/viewManager",
