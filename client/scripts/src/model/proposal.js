@@ -40,7 +40,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
             if (!attrs.documents)
                 attrs.documents = [];
-            
+
             attrs.attributes = _.indexBy(attrs.attributes || [], "handle");
 
             return attrs;
@@ -54,7 +54,7 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             this._fetched = true;
 
             opts = opts || {};
-            var error = opts && opts.error;
+            var error = opts.error;
             opts.error = function(m, resp, options) {
                 if (error)
                     error(m, resp, options);

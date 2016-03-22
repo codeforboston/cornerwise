@@ -23,7 +23,7 @@ define(
                 this._includeProjects = this._includeProposals = true;
 
                 appState.onStateChange(
-                    "f", _.bind(this.onStateChange, this));
+                    "f", _.bind(this.onFiltersChange, this));
             },
 
             url: function() {
@@ -56,7 +56,7 @@ define(
                 text: "textFilter"
             },
 
-            onStateChange: function(newFilters, oldFilters) {
+            onFiltersChange: function(newFilters, oldFilters) {
                 oldFilters = oldFilters || {};
                 var query;
 
