@@ -13,6 +13,18 @@ define(
                         glossary: glossary
                     };
 
+                proposals
+                    .on("fetching",
+                             function() {
+                                 $("document.body")
+                                     .addClass("loading-proposals");
+                             })
+                    .on("fetchingComplete",
+                             function() {
+                                 $("document.body")
+                                     .removeClass("loading-proposals");
+                             });
+
                 appState.onStateChange("view", function(view, oldView) {
                     $(document.body)
                         .removeClass(oldView)
