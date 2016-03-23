@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="description" content="Visual map of Planning reports and capital projects">
+    <!--duplicate meta description-->
+    <!--<meta name="description" content="Visual map of Planning reports and capital projects">-->
     <link rel="icon" type="image/png" href="/static/images/favicon.png" />
 
     <title>Cornerwise</title>
@@ -12,12 +13,11 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="description" content="Find and explore current and future zoning projects near you."/>
+    <meta name="description" content="Find and explore current and future zoning projects near you in City of Sommerville."/>
     <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning boardmurban planning,zoning,zoning board" />
     <!-- OpenGraph -->
     <meta name="og:type" content="website" />
     <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
-
 
     <script type="text/template" id="project-template">
       <div class="thumbnail">
@@ -130,8 +130,8 @@
         Click a proposal to view more information about it.
       </div>
     </script>
-
   </head>
+
   <body>
     <div id="alert-container"><div id="alert"></div></div>
     <div id="map-container">
@@ -151,7 +151,7 @@
     <div id="search-banner" class="overlay">
         <div id="logo" class="resp-portrait-hide"></div>
         <div class="overlay-contents">
-            <h3>what&rsquo;s being built near&hellip;</h3>
+            <h3>What&rsquo;s Being Built Near&hellip;</h3>
             <div class="input-group big-input">
                 <form id="ref-address-form">
                     <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off" autofocus/>
@@ -199,7 +199,7 @@
       <div class="section">
         <h3>PLANNING AND ZONING</h3>
 
-        <ul>
+        <ul class="planning">
           <li>current building projects</li>
           <li>building requests</li>
           <li>variances</li>

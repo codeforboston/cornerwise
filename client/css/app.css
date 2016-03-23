@@ -127,13 +127,13 @@ span.icon {
 }
 
 .overlay {
-    background-color: rgba(43, 43, 43, 0.98);
+    background-color: rgba(43, 43, 43, 0.95);
     color: white;
     overflow: hidden;
 }
 
 #search-banner {
-    background-color: rgba(57,127,52, 0.9);
+    background-color: rgba(57, 127, 52, 0.9);
     overflow: visible;
     position: absolute;
     left: 0;
@@ -296,7 +296,7 @@ body.geolocating #ref-address-form .go-button {
 }
 
 .section h3 {
-    color: #54C9D3;
+    color: #397F34;
     font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
     font-weight: 500;
     letter-spacing: 0.1em;
@@ -844,6 +844,11 @@ a.glossary:hover {
     padding: 0.2em;
 }
 
+.planning {
+    margin-left: -10px;
+    margin-top: 7px;
+}
+
 #overlay, #modal {
     background-color: rgba(0, 0, 0, 0.5);
     overflow-y: auto;
@@ -899,7 +904,7 @@ a.glossary:hover {
     overflow: hidden;
     position: absolute;
     height: 0;
-    
+
     transition: max-height 0.2s linear;
 }
 
