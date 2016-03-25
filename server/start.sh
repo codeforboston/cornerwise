@@ -1,4 +1,15 @@
 #!/bin/bash
+
+start_all=0
+
+while getopts ":a" opt; do
+    case $opt in
+        a)
+            start_all=1
+            ;;
+    esac
+done
+
 service postgresql start
 service redis-server start # Required for celery and caching
 
@@ -53,27 +64,24 @@ if [ "$DJANGO_MODE" != "production" ]; then
     celery_opts=" --loglevel=INFO"
 fi
 
-echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
-$PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err &
+if ((start_all)); then
+    echo "Starting Django.  Logging output to: $(readlink -f $server_out)"
+    $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT >>$server_out 2>>$server_err &
 
-echo "Starting celery beat and worker"
-# Force Celery to run as root
-export C_FORCE_ROOT=1
+    echo "Starting celery beat and worker"
+    # Force Celery to run as root
+    export C_FORCE_ROOT=1
 
-celerybeat_pid_file="$APP_ROOT/celerybeat.pid" 
-if [ -f "$celerybeat_pid_file" ]; then
-    if kill $(cat $celerybeat_pid_file) 2>/dev/null; then
-        echo "Killed running celerybeat."
+    celerybeat_pid_file="$APP_ROOT/celerybeat.pid" 
+    if [ -f "$celerybeat_pid_file" ]; then
+        if kill $(cat $celerybeat_pid_file) 2>/dev/null; then
+            echo "Killed running celerybeat."
+        fi
     fi
+
+    $PYTHON_BIN $APP_ROOT/manage.py celerybeat --detach || (echo "celery beat failed!" && exit 1)
+    $PYTHON_BIN $APP_ROOT/manage.py celery worker $celery_opts
+else
+    echo "Starting Django. Logging output to stdout."
+    $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT
 fi
-
-$PYTHON_BIN $APP_ROOT/manage.py celerybeat --detach || (echo "celery beat failed!" && exit 1)
-$PYTHON_BIN $APP_ROOT/manage.py celery worker $celery_opts
-
-if (($?)); then
-    echo "I encountered an error while trying to start Django."
-    exit 1;
-fi
-
-
-
