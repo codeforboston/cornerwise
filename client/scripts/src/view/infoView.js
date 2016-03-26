@@ -1,21 +1,6 @@
 define(["backbone", "underscore", "utils", "app-state"],
        function(B, _, $u, appState) {
            /**
-            * A view that manages other views.
-            *
-            * Important options:
-            *
-            * - views: A map of string names to Views. The View objects should
-            *    implement a show() method that accepts a model object and a
-            *    boolean indicating if the info bar is expanded. An optional
-            *    showMulti() method will be called when multiple models are
-            *    selected.
-            *
-            * - collections: A map of string names to SelectableCollection
-            *    objects.
-            *
-            * Additional options:
-            *
             * - defaultView
             *
             * - threshold: When the info pane is dragged open, it will be
@@ -25,38 +10,30 @@ define(["backbone", "underscore", "utils", "app-state"],
                defaultTemplate: $u.templateWithId("info-template"),
 
                initialize: function(options) {
-                   this.views = options.views;
-                   this.collectionManager = options.collectionManager;
-                   this.collections = options.collections;
+                   this.subview = options.subview;
                    this.defaultView = options.defaultView;
                    this.expanded = !!options.startExpanded;
                    this.currentView = null;
                    this.threshold = options.threshold || 250;
                    this.shouldShow = false;
 
-                   _.each(options.collections, function(coll, name) {
-                       this.listenTo(coll, "selection",
-                                     _.bind(this.onSelection, this, name));
-                       this.listenTo(coll, "selectionLoaded",
-                                     _.bind(this.onSelectionLoaded, this, name));
-                       this.listenTo(coll, "selectionRemoved",
-                                     _.bind(this.onSelectionRemoved, this, name));
-                       this.listenTo(coll, "change", this.modelChanged);
+                   var coll = this.collection;
+                   this.listenTo(coll, "selection", this.onSelection)
+                       .listenTo(coll, "selectionLoaded", this.onSelectionLoaded)
+                       .listenTo(coll, "selectionRemoved", this.onSelectionRemoved)
+                       .listenTo(coll, "change", this.modelChanged);
+               },
 
-                   }, this);
-
-                   this.$el
-                       .on("mousedown touchstart", ".dragarea",
-                           _.bind(this.onMousedown, this))
-                       .on("click", ".close", _.bind(this.onClick, this))
-                       .on("click", ".prev-button", _.bind(this.onNav, this, -1))
-                       .on("click", ".next-button", _.bind(this.onNav, this, 1));
+               events: {
+                   "mousedown .dragarea": "onMousedown",
+                   "click .close": "onClick",
+                   "click .prev-button": "onPrev",
+                   "click .next-button": "onNext"
                },
 
                render: function() {
-                   var name = this.active,
-                       coll = this.collections[name],
-                       view = this.views[name] || this.defaultView,
+                   var coll = this.collection,
+                       view = this.subview || this.defaultView,
                        models = coll ? coll.getSelection() : [],
                        $el = this.$el;
 
@@ -65,7 +42,7 @@ define(["backbone", "underscore", "utils", "app-state"],
                    if (this.currentView)
                        this.currentView.setElement(null);
 
-                   if (!name || !models.length) {
+                   if (!models.length) {
                        $el.addClass("default");
                        if (this.defaultView) {
                            this.currentView = this.defaultView;
@@ -185,11 +162,7 @@ define(["backbone", "underscore", "utils", "app-state"],
                },
 
                clearSelection: function() {
-                   var coll = this.collections[this.active];
-
-                   if (coll) {
-                       coll.setSelection([]);
-                   }
+                   this.collection.setSelection([]);
                },
 
                onClick: function(e) {
@@ -197,8 +170,12 @@ define(["backbone", "underscore", "utils", "app-state"],
                    return false;
                },
 
+               onNext: function() { return this.onNav(1); },
+
+               onPrev: function() {return this.onPrev(-1); },
+
                onNav: function(dir) {
-                   var coll = this.collections[this.active],
+                   var coll = this.collection,
                        model;
 
                    if (coll) {

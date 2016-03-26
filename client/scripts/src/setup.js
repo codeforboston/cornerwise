@@ -5,9 +5,6 @@ define(
         return {
             start: function() {
                 var proposals = new Proposals(),
-                    cm = new CollectionManager({
-                        collections: {proposals: proposals}
-                    }),
                     appViews = {
                         proposals: proposals,
                         glossary: glossary
@@ -52,10 +49,8 @@ define(
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
                     "list": ["list-view",
-                             {collections: {proposals: proposals},
-                              subviews: {proposals: ProposalItemView},
-                              manager: cm,
-                              active: "proposals"}]
+                             {collection: proposals,
+                              subview: ProposalItemView}]
                 });
 
                 require(["info-view", "proposal-info-view", "layers-view"],
