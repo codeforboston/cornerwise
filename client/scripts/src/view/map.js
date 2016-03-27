@@ -104,6 +104,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                                .done(function(shape) {
                                    var layer = L.geoJson(shape,
                                                          {style: config.regionStyle});
+
+
+                                   layer.on("dblclick", self.onDblClick);
                                    bounds.extend(layer.getBounds());
                                    self.regionLayers[id] = layer;
                                    self.map.addLayer(layer);
@@ -221,6 +224,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                                change.changed._hovered === false)) {
                        this.parcelLayer.removeLayer(parcelLayer);
                    }
+               },
+
+               onDblClick: function(e) {
+                   refLocation.setFromLatLng(
+                       e.latlng.lat,
+                       e.latlng.lng);
                },
 
                onFocused: function(models, zoom) {

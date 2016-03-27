@@ -83,10 +83,20 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
                            });
 
                            return loc;
+                       }, function(err) {
+                           alerts.show(err.reason);
                        })
                        .always(function() {
                            self.set("geolocating", false);
                        });
+               },
+
+               setFromLatLng: function(lat, long) {
+                   this.set({setMethod: "map"});
+                   appState.setHashKey("ref", {
+                       lat: lat,
+                       lng: long
+                   });
                },
 
                setFromAddress: function(addr) {

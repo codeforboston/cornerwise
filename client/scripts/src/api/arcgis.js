@@ -48,7 +48,7 @@ define(["jquery", "config"], function($, config) {
                                      f: "pjson"
                                  }).then(function(json) {
                                      if (!json.locations ||
-                                         json.locations.length == 0) {
+                                         json.locations.length === 0) {
                                          return $.Deferred().reject(
                                              {reason: "No matching locations."});
                                      }
