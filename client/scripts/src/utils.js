@@ -367,10 +367,13 @@ define(["underscore", "jquery", "locale"],
                                                 coords.altitude]);
                            },
                            function() {
-                               promise.reject({reason: "Permission denied"});
+                               promise.reject(
+                                   {reason: "Could not set location without " +
+                                    "user permission."});
                            });
                    } else {
-                       promise.reject({reason: "Geolocation unavailable in this browser."});
+                       promise.reject({reason: "Geolocation unavailable " +
+                                       "in this browser."});
                    }
 
                    return promise;
