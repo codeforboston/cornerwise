@@ -64,31 +64,18 @@ if [ -z "$image_name" ]; then
     image_name=$(basename $(git rev-parse --show-toplevel))
 fi
 
-# Indicates whether the image should be rebuild:
-should_build=0
 # If true, do not attach to a running container (if applicable):
 force_run=0
 vm_port_forwarding=1
 # How long should the script wait for the application to launch?
 open_timeout=30
-# Do not rebuild the image if support files have changed
-ignore_changes=0
 autostart=0
 # If a running container is found, should we stop it?
 stop_running=0
-skip_build_prompt=0
 remove_after=1
 
-while getopts ":bBFm:Op:rRSthx" opt; do
+while getopts ":Fm:Op:rRSthx" opt; do
     case $opt in
-        b)
-            should_build=1
-            skip_build_prompt=1
-            ;;
-        B)
-            ignore_changes=1
-            skip_build_prompt=1
-            ;;
         e)
             env_file="$OPTARG"
             ;;
