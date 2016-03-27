@@ -12,15 +12,21 @@ define(
 
                 proposals
                     .on("fetching",
-                             function() {
-                                 $("document.body")
-                                     .addClass("loading-proposals");
-                             })
+                        function() {
+                            $(document.body)
+                                .removeClass("loading-failed")
+                                .addClass("loading-proposals");
+                        })
                     .on("fetchingComplete",
-                             function() {
-                                 $("document.body")
-                                     .removeClass("loading-proposals");
-                             });
+                        function() {
+                            $(document.body)
+                                .removeClass("loading-proposals");
+                        })
+                    .on("fetchingFailed",
+                        function() {
+                            $(document.body).addClass("loading-failed");
+                        });
+
 
                 appState.onStateChange("view", function(view, oldView) {
                     $(document.body)
@@ -89,14 +95,8 @@ define(
                             });
                         });
 
-                proposals.fetch({dataType: "jsonp"});
-
                 appState.init();
                 glossary.init();
-                $(document).on("click", "a.ref-loc", function(e) {
-                    $("#ref-address-form input").focus().select();
-                    return false;
-                });
 
                 return appViews;
             }
