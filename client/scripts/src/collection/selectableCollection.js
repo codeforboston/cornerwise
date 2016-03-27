@@ -63,9 +63,12 @@ define(["backbone", "underscore", "app-state", "utils"],
                    this.trigger("fetching");
                    var xhr = B.Collection.prototype.fetch.apply(this, arguments);
                    var self = this;
-                   xhr.done(function() {
+                   xhr.fail(function(err) {
+                       self.trigger("fetchingFailed");
+                   }).always(function() {
                        self.trigger("fetchingComplete");
                    });
+
                    return xhr;
                },
 
