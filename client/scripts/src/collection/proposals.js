@@ -56,20 +56,26 @@ define(
                 text: "textFilter"
             },
 
-            onFiltersChange: function(newFilters, oldFilters) {
-                oldFilters = oldFilters || {};
+            updateQuery: function(filters, old) {
+                old = old || {};
                 var query;
 
-                _.each(newFilters, function(val, key) {
-                    if (newFilters[key] !== oldFilters[key] &&
+                _.each(filters, function(val, key) {
+                    if (filters[key] !== old[key] &&
                         this.queryFilters[key]) {
 
-                        if (!query) query = _.clone(this.query);
+                        if (!query) query = {};
 
                         var filter = this[this.queryFilters[key]];
-                        filter.call(this, query, val, key, newFilters);
+                        filter.call(this, query, val, key, filters);
                     }
                 }, this);
+
+                return query;
+            },
+
+            onFiltersChange: function(newFilters, oldFilters) {
+                var query = this.updateQuery(newFilters, oldFilters);
 
                 if (query) {
                     this.lastQuery = this.query;
@@ -83,10 +89,8 @@ define(
             },
 
             typeFilter: function(query, val) {
-                if (val == "all")
-                    query.project = "all";
-                else if (val == "null")
-                    query.project = "null";
+                if (/^(all|null)$/.exec(val))
+                    query.project = val.toLowerCase();
                 else
                     delete query.project;
             },
