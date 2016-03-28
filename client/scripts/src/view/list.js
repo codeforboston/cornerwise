@@ -15,25 +15,16 @@ define(["backbone", "jquery", "utils", "underscore",
                },
 
                initialize: function(options) {
-                   console.assert(
-                       _.isEqual(options.manager.getCollectionNames(),
-                                 _.keys(options.subviews)),
-                       "You must have a matching subview for each " +
-                           "collection.");
-
-                   this.manager = options.manager;
-                   this.subviews = options.subviews;
-
-                   this.listenTo(this.manager, "activeCollection", this.render);
+                   this.subview = options.subview;
                },
 
                onFirstShow: function() {
-                   var cm = this.manager;
-                   this.listenTo(cm, "sort", this.render)
-                       .listenTo(cm, "filtered", this.render)
-                       .listenTo(cm, "change", this.modelChanged)
-                       .listenTo(cm, "add", this.modelAdded)
-                       .listenTo(cm, "remove", this.modelRemoved);
+                   var collection = this.collection;
+                   this.listenTo(collection, "sort", this.render)
+                       .listenTo(collection, "filtered", this.render)
+                       .listenTo(collection, "change", this.modelChanged)
+                       .listenTo(collection, "add", this.modelAdded)
+                       .listenTo(collection, "remove", this.modelRemoved);
                },
 
                changeSort: function(e) {
@@ -46,7 +37,7 @@ define(["backbone", "jquery", "utils", "underscore",
                },
 
                modelChanged: function(name, model) {
-                   var activeSort = this.manager.getCollection().sortField;
+                   var activeSort = this.collection.sortField;
                    if (activeSort &&
                        _.contains(_.keys(model.changed), activeSort)) {
                        this.render();
@@ -66,8 +57,7 @@ define(["backbone", "jquery", "utils", "underscore",
                 * @returns {ListView} 
                 */
                render: function() {
-                   var coll = this.manager.getCollection(),
-                       name = this.manager.getCollectionName(),
+                   var coll = this.collection,
                        self = this;
                    this.subviewCache = {};
                    this.template(coll,
@@ -76,7 +66,7 @@ define(["backbone", "jquery", "utils", "underscore",
                                                           self.shouldShow)
                                          .html(html);
                                      _.each(coll.getFiltered(), function(model) {
-                                         self.modelAdded(name, model, coll);
+                                         self.modelAdded(model, coll);
                                      });
                                  });
 
@@ -87,12 +77,11 @@ define(["backbone", "jquery", "utils", "underscore",
                 * Run when a collection is re-rendered or when a model is added
                 * to the active collection.
                 *
-                * @param {String} name Collection name
                 * @param {B.Model} model The added model
                 * @param {B.Collection} coll The active collection
                 */
-               modelAdded: function(name, model, coll) {
-                   var view = new this.subviews[name]({model: model});
+               modelAdded: function(model, coll) {
+                   var view = new this.subview({model: model});
                    this.$(".contents").append(view.el);
                    this.subviewCache[model.id] = view;
                    view.render();
@@ -119,7 +108,7 @@ define(["backbone", "jquery", "utils", "underscore",
 
                showOnMap: function(e) {
                    var modelId = e.target.getAttribute("data-model-id"),
-                       coll = this.manager.getCollection();
+                       coll = this.collection;
 
                    if (!modelId || !coll) return true;
 
