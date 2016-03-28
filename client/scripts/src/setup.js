@@ -65,12 +65,8 @@ define(
                                 el: "#info",
                                 startExpanded: appState.getKey("x") === "1",
                                 defaultView: new LayersView(),
-                                views: {
-                                    "proposal": new ProposalInfoView()
-                                },
-                                collections: {
-                                    "proposal": proposals
-                                }
+                                subview: new ProposalInfoView(),
+                                collection: proposals
                             });
                             appViews.info = infoView;
 

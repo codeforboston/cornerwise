@@ -132,12 +132,12 @@ define(["backbone", "underscore", "utils", "app-state"],
                    return false;
                },
 
-               onSelection: function(name, coll, ids) {
+               onSelection: function(coll, ids) {
                    this.active = name;
                    this.$el.addClass("loading").find(".content").html("");
                },
 
-               onSelectionLoaded: function(name, coll, ids) {
+               onSelectionLoaded: function(coll, ids) {
                    this.active = name;
                    this.render();
 
@@ -146,7 +146,7 @@ define(["backbone", "underscore", "utils", "app-state"],
                    }, this);
                },
 
-               onSelectionRemoved: function(name, coll, remIds, ids) {
+               onSelectionRemoved: function(coll, remIds, ids) {
                    if (!ids.length) {
                        // No active selection:
                        this.active = null;
