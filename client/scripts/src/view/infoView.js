@@ -172,7 +172,7 @@ define(["backbone", "underscore", "utils", "app-state"],
 
                onNext: function() { return this.onNav(1); },
 
-               onPrev: function() {return this.onPrev(-1); },
+               onPrev: function() { return this.onNav(-1); },
 
                onNav: function(dir) {
                    var coll = this.collection,
