@@ -64,7 +64,6 @@ define(
                             var infoView = new InfoView({
                                 el: "#info",
                                 startExpanded: appState.getKey("x") === "1",
-                                defaultView: new LayersView(),
                                 subview: new ProposalInfoView(),
                                 collection: proposals
                             });

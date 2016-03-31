@@ -949,6 +949,15 @@ body.main #info {
     transition: none;
 }
 
+#info.default {
+    max-height: 0 !important;
+    padding: 0 !important;
+}
+
+#info.default * {
+    display: none;
+}
+
 #info.default .dragger {
     display: none;
 }

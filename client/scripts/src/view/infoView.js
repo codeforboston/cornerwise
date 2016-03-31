@@ -7,8 +7,6 @@ define(["backbone", "underscore", "utils", "app-state"],
                 considered expanded when its height is greater than this value.
             */
            return B.View.extend({
-               defaultTemplate: $u.templateWithId("info-template"),
-
                initialize: function(options) {
                    this.subview = options.subview;
                    this.defaultView = options.defaultView;
