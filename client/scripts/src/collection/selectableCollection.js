@@ -57,6 +57,15 @@ define(["backbone", "underscore", "app-state", "utils"],
                            self._setSelection(ids);
                        });
                    }
+                   if (this.sortParam) {
+                       appState.onStateChange(
+                           this.sortParam,
+                           function(newSort, oldSort) {
+                               var desc = newSort[0] === "-",
+                                   key = desc ? newSort.slice(1) : newSort;
+                               self.sortByField(key, desc);
+                           });
+                   }
                },
 
                fetch: function() {
@@ -294,7 +303,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                 * 
                 */
                comparators: {},
-               
+
                /**
                 * @param {String} name
                 * @param {Boolean} desc true to sort descending

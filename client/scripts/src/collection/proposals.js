@@ -41,6 +41,7 @@ define(
 
             // Used by Selectable:
             hashParam: "ps",
+            sortParam: "sort",
 
             sortFields: [
                 {name: "Distance",
