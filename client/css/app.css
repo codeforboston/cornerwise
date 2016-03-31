@@ -58,31 +58,32 @@ body.nointro #event-eater {
     height: 100%;
 }
 
-#minimap-container {
-    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-    display: none;
+.control {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid white;
+    color: #2A749B;
     position: absolute;
-    bottom: 2%;
-    right: 2%;
-    z-index: 20;
 }
 
-#minimap-container .reset {
-    background-color: white;
-    border: 1px solid black;
-    display: none;
+#map-controls.control a {
+    border: 1px solid white;
+    color: #2A749B;
+    display: block;
     font-size: x-large;
-    position: absolute;
-    right: -1px;
-    text-align: center;
-    top: -1px;
-    width: 30px;
-    z-index: 2;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
 }
 
-#minimap {
-    height: 10em;
-    width: 10em;
+.control a:hover {
+    background-color: #2A749B;
+    color: white !important;
+    text-decoration: none;
+}
+
+#map-controls {
+    
+    right: 1em;
+    top: -7em;
 }
 
 .empty {
@@ -936,14 +937,6 @@ body.main #info {
     right: 0;
 }
 
-#info.minimized {
-    height: 0 !important;
-}
-
-#info.minimized .content * {
-    display: none;
-}
-
 /* Applied while the user is dragging */
 #info._disable_height_transition {
     transition: none;
@@ -952,10 +945,6 @@ body.main #info {
 #info.default {
     max-height: 0 !important;
     padding: 0 !important;
-}
-
-#info.default * {
-    display: none;
 }
 
 #info.default .dragger {
@@ -1201,6 +1190,10 @@ body.main .leaflet-control-container {
 
 body.loading-proposals #loading-indicator {
     display: block;
+}
+
+#map-options {
+    
 }
 
 /* Projects Summary */

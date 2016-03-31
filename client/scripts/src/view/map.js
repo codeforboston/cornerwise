@@ -10,7 +10,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                initialize: function() {
                    var state = appState.getState(),
                        mapOptions = {minZoom: 13,
-                                     maxBounds: config.bounds},
+                                     maxBounds: config.bounds,
+                                     zoomControl: false},
                        lat = parseFloat(state.lat),
                        lng = parseFloat(state.lng),
                        zoom = parseInt(state.zoom),
@@ -70,6 +71,17 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    // App behaviors:
                        .listenTo(appState, "shouldFocus", this.onFocused);
 
+                   $(document).on("click", ".map-zoom-in",
+                                  function() {
+                                      map.zoomIn();
+                                      return false;
+                                  })
+                       .on("click", ".map-zoom-out",
+                           function() {
+                               map.zoomOut();
+                               return false;
+                           });
+
                    return this;
                },
 
@@ -106,7 +118,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                                                          {style: config.regionStyle});
 
 
-                                   layer.on("dblclick", self.onDblClick);
+                                   layer.on("dblclick", function() {
+                                       self.onDblClick();
+                                   });
                                    bounds.extend(layer.getBounds());
                                    self.regionLayers[id] = layer;
                                    self.map.addLayer(layer);
