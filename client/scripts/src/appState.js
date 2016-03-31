@@ -10,12 +10,14 @@ define(["backbone", "underscore", "config", "utils"],
                            "r": "somerville",
                            // Filters:
                            "f": {
-                               "projects": ""
+                               "projects": "",
+                               "range": "<60"
                            },
                            "ref": {
                                "lat": config.refPointDefault.lat,
                                "lng": config.refPointDefault.lng
-                           }
+                           },
+                           sort: "-updated"
                        },
 
                        getters: {},
