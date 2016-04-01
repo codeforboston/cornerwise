@@ -89,6 +89,7 @@ body.nointro #event-eater {
     right: 4em;
     top: -4em;
     height: 2em;
+    line-height: 2em;
 }
 
 #map-options.expanded .expand-layers {
@@ -137,7 +138,6 @@ span.icon {
 
 #logo {
     background: url(/static/images/cornerwise-beta-logo.png);
-    /*     background-color: rgba(57,127,52, 0.9); */
     background-color: #222;
     background-position: 50% 0%;
     background-repeat: no-repeat;
@@ -1056,6 +1056,7 @@ a.brief-model:hover {
     padding-bottom: 50px;
     top: 50%;
     margin-top: -70px;
+    z-index: 10;
 }
 
 #info .prev-button:hover, #info .next-button:hover {
@@ -1391,14 +1392,13 @@ ul.model-list li {
 
 
 
-
+/* Responsive */
 
 @media screen and (min-width: 768px) {
     .resp-portrait-show {
         display: none;
     }
 }
-
 
 @media screen and (max-width: 768px) {
     .resp-portrait-hide {
@@ -1421,18 +1421,9 @@ ul.model-list li {
     .layer-button .label {
         display: none;
     }
-}
-
-@media screen and (max-width: 675px) {
-    #search-banner {
-        text-align: left;
-    }
-
-    #search-banner .overlay-contents {
-        width: 75% !important;
-    }
 
     #info .sidebar {
+        display: none;
         padding-right: 0;
         padding-top: 2.5em;
         position: relative;
@@ -1443,13 +1434,31 @@ ul.model-list li {
         padding-right: 4em;
     }
 
+    #info.expanded .sidebar {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    body.nointro #search-banner {
+        text-align: left;
+    }
+
+    body.nointro #search-banner .overlay-contents {
+        width: 75% !important;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    h3 {
+        font-size: smaller;
+    }
 }
 
 @media screen and (max-width: 1000px) {
-    #logo {
+    body.nointro #logo {
         background: url(/static/images/cornerwise-owl.png);
         background-repeat: no-repeat;
         background-size: contain;
-        border: 3px solid black;
         width: 40px;
     }
