@@ -88,11 +88,11 @@ define(["backbone", "jquery", "utils", "underscore",
                },
 
                modelRemoved: function(model) {
-                   var view = this.subviewsCache[model.id];
+                   var view = this.subviewCache[model.id];
 
                    if (view) {
                        view.$el.remove();
-                       delete this.subviewsCache[model.id];
+                       delete this.subviewCache[model.id];
                    }
                },
 
