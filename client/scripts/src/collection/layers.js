@@ -6,7 +6,25 @@ define(["backbone", "layer", "config", "underscore", "app-state"],
            });
 
            // Return a singleton collection
-           var layers = new B.Collection(layerModels);
+           var Layers = B.Collection.extend({
+               toggleLayer: function(layer, turnOn) {
+                   var layer_id = _.isString(layer) ? layer : layer.id;
+
+                   appState.changeHashKey("lys", function(ids) {
+                       var id_list = (ids ? ids.split(",") : []);
+
+                       var in_list = (turnOn === undefined ?
+                                      _.contains(id_list, layer_id) :
+                                      turnOn);
+
+                       if (_.contains(id_list, layer_id))
+                           return _.without(id_list, layer_id);
+                       else
+                           return id_list.concat([layer_id]);
+                   });
+               }
+           });
+           var layers = new Layers(layerModels);
 
            appState.onStateChange("lys", function(ids) {
                var idList = ids ? ids.split(",") : [];
@@ -19,23 +37,6 @@ define(["backbone", "layer", "config", "underscore", "app-state"],
                        layer.set("shown", false);
                    }
                });
-           });
-
-           layers.on("change:shown", function(layer, isShown) {
-               if (!layer.id) return;
-
-               appState.changeHashKey("lys", function(ids) {
-                   var idList = ids ? ids.split(",") : [],
-                       inList = _.contains(idList, layer.id);
-
-                   if (isShown && !inList) {
-                       idList.push(layer.id);
-                   } else if (!isShown && inList) {
-                       idList = _.without(idList, layer.id);
-                   }
-
-                   return idList.join(",") || undefined;
-               }, true);
            });
 
            return layers;

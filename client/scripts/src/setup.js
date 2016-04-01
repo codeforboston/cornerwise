@@ -74,6 +74,10 @@ define(
                                                      infoView.toggle(newKey == "main");
                                                  });
                             infoView.render();
+
+                            var layersView = new LayersView({
+                                el: "#map-options"
+                            }).render();
                         });
 
 

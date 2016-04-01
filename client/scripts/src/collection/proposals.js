@@ -20,6 +20,9 @@ define(
                 // local data alone.
                 this.lastQuery = {};
 
+                // Used 
+                this.resultCache = {};
+
                 this._includeProjects = this._includeProposals = true;
 
                 appState.onStateChange(
@@ -57,6 +60,50 @@ define(
                 text: "textFilter"
             },
 
+            /**
+             * Used to determine whether the new query can be satisfied from the
+             * cached results of a previous query. (TODO: There are actually
+             * different relationships that could be interesting, so it might be
+             * useful to return something other than a boolean here. Some
+             * queries have nonoverlapping results, some queries only widen or
+             * narrow, some queries overlap.)
+             *
+             * @param {Object} newQuery
+             * @param {Object} oldQuery
+             *
+             * @param {boolean} true if the results of oldQuery will contain all
+             * the results for newQuery
+             */
+            isNarrowingQuery: function(newQuery, oldQuery) {
+                if (!oldQuery) return false;
+
+                if (!newQuery.projects && oldQuery.projects ||
+                    newQuery.projects !== oldQuery.projects)
+                    return false;
+
+                // Text queries:
+                if (!newQuery.text && oldProjects.text)
+                    return false;
+
+                if (newQuery.text && oldQuery.text &&
+                    !$u.startsWith(oldQuery.text, newQuery.text))
+                    return false;
+
+                // Time queries:
+                if (newQuery.range !== oldQuery.rangeCount) {
+                    
+                }
+
+                // TODO: Check geographic query bounds:
+
+                return true;
+            },
+
+            runQuery: function(query) {
+                var lastQuery = this.lastQuery;
+
+            },
+
             updateQuery: function(filters, old) {
                 old = old || {};
                 var query;
@@ -83,6 +130,10 @@ define(
                     this.query = query;
                     this.fetch();
                 }
+            },
+
+            filterByText: function(text) {
+                appState.setHashKey("f.q", text);
             },
 
             textFilter: function(query, s) {

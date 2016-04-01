@@ -1,11 +1,23 @@
-define(["backbone", "underscore", "jquery", "layers", "utils"],
-       function(B, _, $, layers, $u) {
+define(["backbone", "underscore", "jquery", "layers", "utils",
+       "app-state"],
+       function(B, _, $, layers, $u, appState) {
            var LayerItemView = B.View.extend({
                template: $u.templateWithId("layer-item-template",
                                            {variable: "layer"}),
 
+               tagName: "a",
+
+               attributes: function() {
+                   return {href: "#"};
+               },
+
+               className: function() {
+                   return "layer-button" +
+                       (this.model.get("shown") ? " selected" : "");
+               },
+
                events: {
-                   "change input": "onChange"
+                   "click": "onClick"
                },
 
                initialize: function() {
@@ -13,29 +25,74 @@ define(["backbone", "underscore", "jquery", "layers", "utils"],
                },
 
                render: function() {
-                   this.$el.html(this.template(this.model));
+                   this.$el
+                       .attr("className", this.className())
+                       .html(this.template(this.model));
+
+                   return this;
                },
 
-               onChange: function(e) {
-                   if (e.target.type == "color") {
-                       this.model.set("color", e.target.value);
-                   } else {
-                       this.model.set("shown", e.target.checked);
-                   }
+               onClick: function(e) {
+                   e.preventDefault();
+                   this.model.collection.toggleLayer(this.model.id);
                }
            });
 
            return B.View.extend({
                collection: layers,
+               hashParam: "ly",
+               className: function() {
+                   return "blorg";
+               },
+
+               initialize: function(options) {
+                   B.View.prototype.initialize.call(this, options);
+
+                   var self = this;
+                   appState.onStateChange(this.hashParam, function(newLy, oldLy) {
+                       if (newLy === "1")
+                           self._show();
+                       else
+                           self._hide();
+                   });
+               },
+
+               events: {
+                   "click .toggle-layers": "toggle",
+                   "click .layer-button": "toggleLayer"
+               },
+
+               toggle: function(e) {
+                   if (this.$el.hasClass("expanded")) {
+                       this.hide();
+                   } else {
+                       this.show();
+                   }
+                   e.preventDefault();
+               },
+
+               show: function() {
+                   appState.setHashKey(this.hashParam, "1");
+               },
+
+               hide: function() {
+                   appState.clearHashKey(this.hashParam);
+               },
+
+               _show: function() {
+                   this.$el.addClass("expanded");
+               },
+
+               _hide: function() {
+                   this.$el.removeClass("expanded");
+               },
 
                render: function() {
-                   this.$el.html("");
-                   var ul = $('<ul class="layer-list"></ul>').appendTo(this.el);
+                   var $el = $("#layers"),
+                       div = $('<div class="layer-list"></div>').appendTo($el);
                    this.collection.forEach(function(layer) {
-                       var li = $('<li class="layer"></li>').appendTo(ul),
-                           view = new LayerItemView({el: li[0],
-                                                     model: layer});
-                       view.render();
+                       var view = new LayerItemView({model: layer});
+                       div.append(view.render().el);
                    }, this);
 
                    return this;

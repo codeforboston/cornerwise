@@ -105,30 +105,17 @@
     </script>
 
     <script type="text/template" id="layer-item-template">
-      <input type="checkbox"
-             name="<%- layer.get('id') %>"
-             id="<%- layer.get('id') %>-layer"
-             <% if (layer.get('shown')) { %>checked<% } %>/>
-      <label class="title" for="<%- layer.get('id') %>-layer">
-        <%- layer.get('title') %>
-      </label>
-      <a class="color" style="background-color: <%- layer.get('color') %>"/>
-      <%
-         if (layer.get("info")) {
-      %>
-      <a class="layer-info">
-        i
-        <div class="info"><%- layer.get("info") %></div>
-      </a>
-      <%
-         }
-         %>
+        <a class="layer-button <% if (layer.get('shown')) { %>selected<% } %>"
+           href="#">
+            <div class="flaticon-<%- layer.get('icon') %> layer-icon"/>
+            <div class="label"><%- layer.get('short') %></div>
+        </a>
     </script>
   </head>
 
   <body>
     <div id="alert-container"><div id="alert"></div></div>
-    <div id="loading-indicator">
+    <div id="loading-indicator" class="control">
         <img src="/static/images/loading.gif">
     </div>
     <div id="map-container">
@@ -228,6 +215,10 @@
 
     <div id="info" class="overlay default">
       <div id="map-options" class="control">
+          <a href="#" class="toggle-layers" >
+              <span class="expand-layers">Options</span>
+              <span class="collapse-layers">&gt;&gt;</span>
+          </a>
           <div id="layers"></div>
       </div>
       <div id="map-controls" class="control">
@@ -248,10 +239,10 @@
 
     <div id="list-view"></div>
 
-    <script src="https://use.typekit.net/wpe7mmw.js"></script>
-    <script src="/static/scripts/src/outline.js"></script>
-    <script type="text/javascript">
-      try{Typekit.load({ async: true });}catch(e){}
-    </script>
+    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
+    <!-- <script src="/static/scripts/src/outline.js"></script> -->
+    <!-- <script type="text/javascript"> -->
+    <!-- try{Typekit.load({ async: true });}catch(e){} -->
+    <!-- </script> -->
   </body>
 </html>

@@ -59,7 +59,7 @@ body.nointro #event-eater {
 }
 
 .control {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.6);
     border: 1px solid white;
     color: #2A749B;
     position: absolute;
@@ -74,16 +74,41 @@ body.nointro #event-eater {
     padding-right: 0.25em;
 }
 
-.control a:hover {
+#map-controls.control a:hover {
     background-color: #2A749B;
     color: white !important;
     text-decoration: none;
 }
 
 #map-controls {
-    
     right: 1em;
     top: -7em;
+}
+
+#map-options {
+    right: 4em;
+    top: -4em;
+    height: 2em;
+}
+
+#map-options.expanded .expand-layers {
+    display: none;
+}
+
+#map-options .collapse-layers {
+    display: none;
+}
+
+#map-options.expanded .collapse-layers {
+    display: block;
+    height: 2em;
+    line-height: 2em;
+    text-align: center;
+    width: 2em;
+}
+
+#map-options.control a {
+   color: #2A749B;
 }
 
 .empty {
@@ -142,7 +167,6 @@ span.icon {
     text-align: center;
     top: 100px;
     z-index: 2;
-
     transition: top 0.2s linear, background-color 0.2s linear;
 }
 
@@ -442,6 +466,7 @@ body.main #filter-controls, body.list #filter-controls {
 
 #mode-controls {
     position: absolute;
+    text-align: center;
     top: 0;
     right: 0;
 }
@@ -701,10 +726,6 @@ a.color {
     display: inline-block;
     height: 0.5em;
     width: 0.5em;
-}
-
-.layer-list .layer {
-    display: inline-block;
 }
 
 a.layer-info {
@@ -1123,31 +1144,6 @@ a.thumb-link:hover {
     padding-bottom: 5px;
 }
 
-
-
-@media screen and (min-width: 768px) {
-    .resp-portrait-show {
-        display: none;
-    }
-}
-
-
-@media screen and (max-width: 768px) {
-    .resp-portrait-hide {
-        display: none;
-    }
-}
-
-@media screen and (max-width: 1000px) {
-    #logo {
-        background: url(/static/images/cornerwise-owl.png);
-        background-repeat: no-repeat;
-        background-size: contain;
-        border: 3px solid black;
-        width: 40px;
-    }
-}
-
 #alert-container {
     pointer-events: none;
     position: absolute;
@@ -1179,10 +1175,8 @@ body.main .leaflet-control-container {
 }
 
 #loading-indicator {
-    background-color: rgba(255, 255, 255, 0.5);
     display: none;
     padding: 0.75em;
-    position: absolute;
     top: 100px;
     right: 1em;
     z-index: 10;
@@ -1194,6 +1188,59 @@ body.loading-proposals #loading-indicator {
 
 #map-options {
     
+}
+
+#layers {
+    bottom: 0;
+    max-width: 0;
+    position: absolute;
+    right: 2em;
+    overflow: hidden;
+
+    transition: max-width 0.3s linear, max-height 0.3s linear;
+}
+
+#map-options.expanded #layers {
+    max-height: 6em;
+    max-width: 1000px;
+    
+}
+
+.layer-list {
+    height: 6em;
+    width: 1000px;
+    text-align: right;
+}
+
+.layer-button {
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid white;
+    display: inline-block;
+    text-align: center;
+    height: 6em;
+    width: 8em;
+}
+
+.layer-button:hover, .layer-button.selected {
+    background-color: #2A749B;
+    color: white !important;
+    text-decoration: none;
+}
+
+.layer-button:hover .layer-icon, 
+.layer-button:hover .label {
+    color: white;
+}
+
+.layer-button .layer-icon {
+    font-size: 36pt;
+    text-align: center;
+}
+
+.layer-button .label {
+    font-size: small;
+    font-weight: 500;
+    text-transform: uppercase;
 }
 
 /* Projects Summary */
@@ -1216,6 +1263,8 @@ body.loading-proposals #loading-indicator {
 .selected-event .date {
     font-weight: bold;
 }
+
+/* List View */
 
 ul.model-list {
     box-shadow: 0 1px 5px rgba(0,0,0,0.65);
@@ -1302,3 +1351,105 @@ ul.model-list li {
 
 .button.sorted.desc:after {
     content: "\25be";
+}
+
+/*
+  Flaticon icon font: Flaticon
+  Creation date: 01/04/2016 17:07
+*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./font/Flaticon.eot");
+  src: url("./font/Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./font/Flaticon.woff") format("woff"),
+       url("./font/Flaticon.ttf") format("truetype"),
+       url("./font/Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./font/Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before,
+[class^="flaticon-"]:after, [class*=" flaticon-"]:after {
+  font-family: Flaticon;
+  font-style: normal;
+}
+
+.flaticon-glx:before { content: "\f100"; }
+.flaticon-neighborhoods:before { content: "\f101"; }
+.flaticon-mbta:before { content: "\f102"; }
+.flaticon-show-on-map:before { content: "\f103"; }
+.flaticon-sports:before { content: "\f104"; }
+.flaticon-wards:before { content: "\f105"; }
+
+
+
+
+
+@media screen and (min-width: 768px) {
+    .resp-portrait-show {
+        display: none;
+    }
+}
+
+
+@media screen and (max-width: 768px) {
+    .resp-portrait-hide {
+        display: none;
+    }
+
+    .layer-list {
+        height: 3em;
+    }
+
+    .layer-button {
+        height: 3em;
+        width: 4em;
+    }
+
+    .layer-button .layer-icon {
+        font-size: xx-large;
+    }
+
+    .layer-button .label {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 675px) {
+    #search-banner {
+        text-align: left;
+    }
+
+    #search-banner .overlay-contents {
+        width: 75% !important;
+    }
+
+    #info .sidebar {
+        padding-right: 0;
+        padding-top: 2.5em;
+        position: relative;
+        width:  auto;
+    }
+
+    #info {
+        padding-right: 4em;
+    }
+
+}
+
+@media screen and (max-width: 1000px) {
+    #logo {
+        background: url(/static/images/cornerwise-owl.png);
+        background-repeat: no-repeat;
+        background-size: contain;
+        border: 3px solid black;
+        width: 40px;
+    }

@@ -71,8 +71,10 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "/static/scripts/src/layerdata/glx.geojson",
                 id: "glx",
-                icon: "/static/images/icon/major_building.png",
+                icon: "glx",
+                iconCredit: "Scott de Jonge",
                 title: "Green Line Extension",
+                short: "GLX",
                 info: "The Green Line Extension plans to bring light rail services to areas of Somerville and Medford currently underserved by the MBTA.",
                 template:
                 ('<strong><%= title %></strong>' +
@@ -90,20 +92,23 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 },
                 features: null
             },
-            {
-                source: "/static/scripts/src/layerdata/community_path.geojson",
-                id: "cp",
-                info: "The Somerville Community Path is a paved bike and walking path. It begins at Davis Square, where it connects to the Cambridge Linear Path, and ends at Lowell Street. Once extended, it will end at NorthPoint, Cambridge.",
-                title: "Community Path Extension",
-                color: "orange",
-                shown: false,
-                features: null
-            },
+            // {
+            //     source: "/static/scripts/src/layerdata/community_path.geojson",
+            //     id: "cp",
+            //     info: "The Somerville Community Path is a paved bike and walking path. It begins at Davis Square, where it connects to the Cambridge Linear Path, and ends at Lowell Street. Once extended, it will end at NorthPoint, Cambridge.",
+            //     title: "Community Path Extension",
+            //     color: "orange",
+            //     shown: false,
+            //     features: null
+            // },
             {
                 source: "/static/scripts/src/layerdata/MBTABus88.geojson",
                 id: "mbtabus",
-                info: "Somervile bus routes",
-                title: "Mbta Bus Routes",
+                icon: "mbta",
+                iconCredit: "Freepik",
+                info: "Major MBTA bus routes",
+                title: "Major Bus Routes",
+                short: "Bus",
                 color: "black",
                 shown: false,
                 marker: {
@@ -118,32 +123,23 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
+                icon: "neighborhoods",
+                iconCredit: "Freepik",
                 info: "These neighborhood boundaries are unofficial and approximate.",
                 title: "Neighborhood Boundaries",
+                short: "Neighborhoods",
                 color: "blue",
                 shown: false,
                 features: null,
                 template: "<%= title %>"
             },
             {
-                source: "/static/scripts/src/layerdata/firehydrant.geojson",
-                id: "firehydrant",
-                title: "Fire Hydrants",
-                color: "red",
-                shown: false,
-                marker: {
-                    type: "circle",
-                    color: "red",
-                    fillColor: "pink",
-                    radius: 3,
-                    fillOpacity: 1
-                },
-                features: null
-            },
-            {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/wards.geojson",
                 id: "wards",
+                iconCredit: "Scott de Jonge",
+                icon: "wards",
                 title: "Wards",
+                short: "Wards",
                 color: "purple",
                 shown: false,
                 features: null,
