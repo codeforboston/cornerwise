@@ -1,21 +1,5 @@
 define(["underscore", "jquery", "locale"],
        function(_, $, locale) {
-           $.fn.transition = function(klFrom, klActive, klFinal) {
-               var self = this;
-               this.addClass(klFrom);
-               this.one("animationend", function(e) {
-                   self.removeClass(klFrom).removeClass(klActive);
-                   if (klFinal)
-                       self.addClass(klFinal);
-               });
-               this.addClass(klActive);
-           };
-
-           $.fn.animateAddClass = function(klBase) {
-               this.classTransition(klBase + "-enter",
-                                    klBase + "-active");
-           };
-
            /**
             * Takes a numeric string s and adds thousands separators.
             * For example: commas("12345678.3") -> "12,345,678.3"
