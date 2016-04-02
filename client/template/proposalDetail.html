@@ -1,7 +1,7 @@
 <div class="details">
     <a href="#" class="prev-button"><div>⟨</div></a>
     <a href="#" class="next-button"><div>⟩</div></a>
-    
+
     <h4>
         <%- proposal.get("address") %>
     </h4>
@@ -47,30 +47,43 @@
     </table>
     <!-- end expanded -->
     <% } %>
-</div>
 
-<div class="sidebar">
-    <div class="main-thumb-container">
-        <img class="main-thumb" src="<%= proposal.getThumb() %>"/>
+    <div class="sidebar">
+        <div class="main-thumb-container">
+            <img class="main-thumb" src="<%= proposal.getThumb() %>"/>
+        </div>
+
+        <% if (options.expanded) { %>
+
+        <!-- Expanded -->
+
+        <% if (proposal.get("parcel")) { %>
+        <% with(proposal.get("parcel")) { %>
+        <table class="table parcel-info">
+            <tr class="attribute">
+                <th>Lot Size:</th>
+                <td><%- properties.LOT_SIZE %> acres</td>
+            </tr>
+            <tr class="attribute">
+                <th>Residential Area</th>
+                <td><%- commas(properties.RES_AREA) %> square feet</td>
+            </tr>
+        </table>
+        <% } }  %>
+
+        <%
+        var documents = proposal.get("documents");
+        if (documents && documents.length) { %>
+        <div class="documents">
+            <% _.each(documents.slice(0, 10), function(doc) { %>
+            <a class="document" href="<%= doc.url %>" target="_blank">
+                <%- doc.title %>
+            </a>
+            <% }); %>
+        </div>
+        <!-- end documents -->
+        <% } %>
     </div>
-
-    <% if (options.expanded) { %>
-
-    <!-- Expanded -->
-
-    <% if (proposal.get("parcel")) { %>
-    <% with(proposal.get("parcel")) { %>
-    <table class="table parcel-info">
-        <tr class="attribute">
-            <th>Lot Size:</th>
-            <td><%- properties.LOT_SIZE %> acres</td>
-        </tr>
-        <tr class="attribute">
-            <th>Residential Area</th>
-            <td><%- commas(properties.RES_AREA) %> square feet</td>
-        </tr>
-    </table>
-    <% } }  %>
 
     <% var images = proposal.get("images");
     if (images && images.length) { %>
@@ -81,21 +94,9 @@
         <br style="clear:both" />
     </div>
     <% } %>
-
-    <%
-    var documents = proposal.get("documents");
-    if (documents && documents.length) { %>
-    <div class="documents">
-        <% _.each(documents.slice(0, 10), function(doc) { %>
-        <a class="document" href="<%= doc.url %>" target="_blank">
-            <div class="doc-icon"/>&nbsp;&nbsp;<%- doc.title %>
-        </a>
-        <% }); %>
-    </div>
-    <!-- end documents -->
-    <% } %>
-
+    
     <!-- end expanded -->
 
     <% } %>
 </div>
+
