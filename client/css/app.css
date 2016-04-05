@@ -92,6 +92,7 @@ body.nointro #event-eater {
     line-height: 2em;
 }
 
+
 #map-options.expanded .expand-layers {
     display: none;
 }
@@ -673,7 +674,6 @@ img.project-type-badge {
 }
 
 .info-item .dates {
-
     color: crimson;
     float: right;
     font-size: small;
@@ -1098,6 +1098,7 @@ a.brief-model:hover {
     display: block;
 }
 
+
 .attribute th, .attribute td {
     padding-bottom: 1em;
 }
@@ -1217,6 +1218,7 @@ body.loading-proposals #loading-indicator {
     background-color: rgba(255, 255, 255, 0.4);
     border: 1px solid white;
     display: inline-block;
+    padding-top: 1em;
     text-align: center;
     height: 6em;
     width: 8em;
@@ -1384,13 +1386,32 @@ ul.model-list li {
 }
 
 .flaticon-glx:before { content: "\f100"; }
-.flaticon-neighborhoods:before { content: "\f101"; }
-.flaticon-mbta:before { content: "\f102"; }
-.flaticon-show-on-map:before { content: "\f103"; }
-.flaticon-sports:before { content: "\f104"; }
-.flaticon-wards:before { content: "\f105"; }
+.flaticon-home:before { content: "\f101"; }
+.flaticon-layers:before { content: "\f102"; }
+.flaticon-mbta:before { content: "\f103"; }
+.flaticon-pin:before { content: "\f104"; }
+.flaticon-sheet:before { content: "\f105"; }
+.flaticon-show-on-map:before { content: "\f106"; }
+.flaticon-sports:before { content: "\f107"; }
+.flaticon-transport:before { content: "\f108"; }
+.flaticon-wards:before { content: "\f109"; }
 
 
+
+.expand-layers:before { 
+    content: "\f102"; 
+    font-family: Flaticon;
+    font-style: normal;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
+
+a.document:before { 
+    content: "\f105";
+    font-family: Flaticon;
+    font-style: normal; 
+    padding-left: 0.2em;
+}
 
 /* Responsive */
 
@@ -1410,6 +1431,7 @@ ul.model-list li {
     }
 
     .layer-button {
+        padding-top: 0.5em;
         height: 3em;
         width: 4em;
     }
@@ -1447,8 +1469,12 @@ ul.model-list li {
     body.nointro #search-banner .overlay-contents {
         width: 75% !important;
     }
-}
 
+    .details .source-link {
+        display: none;
+    }
+}
+    
 @media screen and (max-width: 600px) {
     h3 {
         font-size: smaller;
