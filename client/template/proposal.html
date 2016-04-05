@@ -1,3 +1,4 @@
+<!-- List item -->
 <% var project = proposal.getProject(); %>
 <div class="thumbnail" >
     <img src="<%- proposal.getThumb() %>"/>
@@ -62,4 +63,16 @@ if (notice) {
         <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
     </tr>
 </table>
+<% } %>
+
+<%
+var documents = proposal.get("documents");
+if (documents && documents.length) { %>
+<div class="documents" >
+    <% _.each(documents, function(doc) { %>
+    <a class="document"  href="<%= doc.url %>"  target="_blank">
+        <%- doc.title %>
+    </a>
+    <% }); %>
+</div>
 <% } %>
