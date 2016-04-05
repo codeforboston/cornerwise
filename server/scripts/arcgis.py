@@ -3,7 +3,9 @@ import re
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
+
 ADDRESS_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses"
+
 
 def camel_to_under(s):
     if not s:
@@ -11,6 +13,7 @@ def camel_to_under(s):
     return re.sub(r"(?!^)[A-Z]",
                   lambda r: ("_"+r.group(0).lower()),
                   s).lower()
+
 
 def simplify(result):
     loc = result["location"]
@@ -26,6 +29,7 @@ def simplify(result):
             "score": result["score"]
         }
     }
+
 
 class ArcGISCoder(object):
     def __init__(self, client_id, client_secret, url=ADDRESS_URL):
@@ -58,15 +62,13 @@ class ArcGISCoder(object):
 
         addresses = json.dumps(
             {"records":
-             [{ "attributes":
-                {
-                    "OBJECTID": i+1,
-                    "Address": addr,
-                    "City": "Somerville",
-                    "Region": "MA"
-                }
-             } for i, addr in enumerate(addrs)]
-            })
+             [{"attributes":
+               {
+                   "OBJECTID": i+1,
+                   "Address": addr,
+                   "City": "Somerville",
+                   "Region": "MA"
+               }} for i, addr in enumerate(addrs)]})
         data = {
             "addresses": addresses,
             "token": self.get_access_token(),

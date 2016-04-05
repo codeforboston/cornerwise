@@ -1,5 +1,4 @@
-define(["backbone", "jquery", "utils", "underscore", 
-        "app-state"],
+define(["backbone", "jquery", "utils", "underscore", "app-state"],
        function(B, $, $u, _, appState) {
            var ListView = B.View.extend({
                template: $u.templateWithUrl(

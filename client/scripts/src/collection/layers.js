@@ -26,7 +26,7 @@ define(["backbone", "layer", "config", "underscore", "app-state"],
            });
            var layers = new Layers(layerModels);
 
-           appState.onStateChange("lys", function(ids) {
+           appState.onStateKeyChange("lys", function(ids) {
                var idList = ids ? ids.split(",") : [];
 
                layers.each(function(layer) {

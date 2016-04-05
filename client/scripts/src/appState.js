@@ -144,19 +144,33 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        /**
-                        * @param {String|Function} arg1 If arg2 is present, the key to
-                        * watch for changes. Otherwise, callback function.
-                        * @param {Function} [arg2] Used as the callback if a key is
-                        * provided.
+                        * @param {stateChangeCallback} fn
                         *
-                        * @callback
-                        * @param {Object} newState If a key is provided, the
-                        * key's value
+                        * @callback stateChangeCallback
+                        * @param {Object} newState
                         * @param {Object} oldState
                         */
-                       onStateChange: function(arg1, arg2) {
-                           var watcher = arg2 ? [arg2, _.isArray(arg1) ? arg1 : arg1.split(".")] : [arg1];
-                           this.watchers.push(watcher);
+                       onStateChange: function(fn) {
+                           this.watchers.push([fn]);
+                       },
+
+                       /**
+                        * @param {string} key
+                        * @param {keyChangeCallback} fn
+                        * @param {boolean} [immediate=false]
+                        *
+                        * @callback keyChangeCallback
+                        * @param {} newValue
+                        * @param {} [oldValue]
+                        */
+                       onStateKeyChange: function(key, fn, immediate) {
+                           var ks = _.isArray(key) ? key : key.split(".");
+
+                           this.watchers.push([fn, ks]);
+
+                           if (immediate) {
+                               fn(this.getKey(ks), null);
+                           }
                        },
 
                        /**

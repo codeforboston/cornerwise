@@ -123,7 +123,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
-                icon: "neighborhoods",
+                icon: "home",
                 iconCredit: "Freepik",
                 info: "These neighborhood boundaries are unofficial and approximate.",
                 title: "Neighborhood Boundaries",

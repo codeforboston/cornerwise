@@ -26,7 +26,7 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
 
                render: function() {
                    this.$el
-                       .attr("className", this.className())
+                       .attr("class", this.className())
                        .html(this.template(this.model));
 
                    return this;
@@ -49,25 +49,25 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
                    B.View.prototype.initialize.call(this, options);
 
                    var self = this;
-                   appState.onStateChange(this.hashParam, function(newLy, oldLy) {
-                       if (newLy === "1")
-                           self._show();
-                       else
-                           self._hide();
-                   });
+                   appState.onStateKeyChange(
+                       this.hashParam,
+                       function(newLy, oldLy) {
+                           if (newLy === "1")
+                               self._show();
+                           else
+                               self._hide();
+                       });
                },
 
                events: {
-                   "click .toggle-layers": "toggle",
-                   "click .layer-button": "toggleLayer"
+                   "click .toggle-layers": "toggle"
                },
 
                toggle: function(e) {
-                   if (this.$el.hasClass("expanded")) {
-                       this.hide();
-                   } else {
-                       this.show();
-                   }
+                   appState.changeHashKey(this.hashParam,
+                                          function(v) {
+                                              return v === "1" ? undefined : "1";
+                                          });
                    e.preventDefault();
                },
 

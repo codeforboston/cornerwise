@@ -52,13 +52,13 @@ define(["backbone", "underscore", "app-state", "utils"],
 
                    if (this.hashParam) {
                        var self = this;
-                       appState.onStateChange(this.hashParam, function(ids, oldIds) {
+                       appState.onStateKeyChange(this.hashParam, function(ids, oldIds) {
                            ids = ids ? ids.split(",") : [];
                            self._setSelection(ids);
                        });
                    }
                    if (this.sortParam) {
-                       appState.onStateChange(
+                       appState.onStateKeyChange(
                            this.sortParam,
                            function(newSort, oldSort) {
                                var desc = newSort[0] === "-",

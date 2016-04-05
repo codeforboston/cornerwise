@@ -20,18 +20,32 @@ define(
                 // local data alone.
                 this.lastQuery = {};
 
-                // Used 
-                this.resultCache = {};
+                // Used to store the response from the server corresponding to
+                // the last query.
+                this.resultCache = [];
 
                 this._includeProjects = this._includeProposals = true;
 
-                appState.onStateChange(
+                appState.onStateKeyChange(
                     "f", _.bind(this.onFiltersChange, this));
             },
 
             url: function() {
                 return config.pzURL + "?" +
                     (_.isEmpty(this.query) ? "" : $u.encodeQuery(this.query));
+            },
+
+            fetch: function() {
+                var xhr = Selectable.prototype.fetch.apply(this, arguments),
+                    query = _.clone(this.query),
+                    self = this;
+
+                xhr.done(function(response) {
+                    self.lastQuery = query;
+                    self.resultCache = response.proposals;
+                });
+
+                return xhr;
             },
 
             parse: function(response) {
@@ -82,7 +96,7 @@ define(
                     return false;
 
                 // Text queries:
-                if (!newQuery.text && oldProjects.text)
+                if (!newQuery.text && oldQuery.text)
                     return false;
 
                 if (newQuery.text && oldQuery.text &&
@@ -90,8 +104,16 @@ define(
                     return false;
 
                 // Time queries:
-                if (newQuery.range !== oldQuery.rangeCount) {
-                    
+                if (newQuery.range !== oldQuery.range) {
+                    if (!newQuery.range || !oldQuery.range)
+                        return false;
+                    var newRange = $u.strToDateRange(newQuery.range),
+                        oldRange = $u.strToDateRange(oldQuery.range);
+
+                    if (!newRange || !oldRange ||
+                        newRange[0] < oldRange[0] ||
+                        newRange[1] > oldRange[0])
+                        return false;
                 }
 
                 // TODO: Check geographic query bounds:
@@ -99,9 +121,46 @@ define(
                 return true;
             },
 
+            makePredicate: function(query) {
+                var preds = [];
+
+                if (query.text) {
+                    var regexp = $u.wordsRegex(query.text);
+                    preds.push(function(proposal) {
+                        // For now, just match the address:
+                        return regexp.exec(proposal.address);
+                    });
+                }
+
+                if (query.projects == "all") {
+                    preds.push(function(proposal) {
+                        return !!proposal.project;
+                    });
+                } else if (query.projects == "null") {
+                    preds.push(function(proposal) {
+                        return !proposal.project;
+                    });
+                }
+
+                if (query.range) {
+                }
+
+                return function(proposal) {
+                    return $u.everyPred(preds, proposal);
+                };
+            },
+
             runQuery: function(query) {
                 var lastQuery = this.lastQuery;
 
+                if (this.isNarrowingQuery(query, this.lastQuery)) {
+                    // Find the results in the local cache.
+                    var pred = this.makePredicate(query),
+                        found = _.filter(this.resultCache, pred);
+                    this.set(found);
+                } else {
+                    this.fetch();
+                }
             },
 
             updateQuery: function(filters, old) {

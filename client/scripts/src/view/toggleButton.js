@@ -23,7 +23,7 @@ define(["backbone", "app-state"],
                        this.filterParam = fparam;
 
                        var self = this;
-                       appState.onStateChange(["f", fparam], function(v) {
+                       appState.onStateKeyChange(["f", fparam], function(v) {
                            self.selected = v == "1";
                            self.render();
                        });

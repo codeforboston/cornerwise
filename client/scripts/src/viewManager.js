@@ -32,7 +32,7 @@ define(["app-state", "underscore", "jquery"],
 
                var self = this,
                    key = appState.getKey(name);
-               appState.onStateChange(
+               appState.onStateKeyChange(
                    name,
                    function(newKey, oldKey) {
                        key = newKey;

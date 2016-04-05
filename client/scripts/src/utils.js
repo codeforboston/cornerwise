@@ -4,9 +4,9 @@ define(["underscore", "jquery", "locale"],
             * Takes a numeric string s and adds thousands separators.
             * For example: commas("12345678.3") -> "12,345,678.3"
             *
-            * @param {String|Number} s A number or numeric string to format.
+            * @param {string|Number} s A number or numeric string to format.
             *
-            * @returns {String} A string with commas inserted
+            * @returns {string} A string with commas inserted
             */
            function commas(s) {
                if (!s) return "";
@@ -39,8 +39,6 @@ define(["underscore", "jquery", "locale"],
                n = "" + n;
                var ends = {"1": "st", "2": "nd", "3": "rd"},
                    end = "th";
-
-
 
                if (n.length < 2 || n[n.length-2] !== "1") {
                    end = ends[n[n.length-1]] || "th";
@@ -122,9 +120,9 @@ define(["underscore", "jquery", "locale"],
            }
 
            /**
-            * @param {String} s
+            * @param {string} s
             *
-            * @returns {String} A copy of s with its first character converted
+            * @returns {string} A copy of s with its first character converted
             * to upper case.
             */
            function capitalize(s) {
@@ -137,15 +135,59 @@ define(["underscore", "jquery", "locale"],
                return _.map(pieces, capitalize).join(" ");
            }
 
+           function startsWith(s, pref) {
+               return s.slice(0, pref.length) === pref;
+           }
+
            function pluralize(n, s, pl) {
                pl = pl || s + (s.slice(-1).match(/(sh|[xs])$/) ? "es" : "s");
 
                return n == 1 ? s : pl;
            }
 
+           function strToDate(dateStr) {
+               var m = /^(\d\d\d\d)(\d\d)(\d\d)/.exec(dateStr);
+
+               if (m) {
+                   var date = new Date();
+                   date.setYear(m[1]);
+                   date.setMonth(parseInt(m[2])-1);
+                   date.setDate(parseInt(m[3]));
+                   date.setHours(0);
+                   date.setMinutes(0);
+                   date.setSeconds(0);
+                   date.setMilliseconds(0);
+
+                   return date;
+               }
+
+               return null;
+           }
+
+           function strToDateRange(rangeStr) {
+               if (rangeStr[0] == "<") {
+                   // Special syntax for representing 'the last n days'
+                   var now = new Date(),
+                       n = parseInt(rangeStr.slice(1));
+
+                   if (isNaN(n)) n = 60;
+
+                   return [new Date(now.getTime() - (n*86400000)), now];
+               }
+
+               var dates = rangeStr.split("-"),
+                   start = strToDate($.trim(dates[0])),
+                   end = strToDate($.trim(dates[1])) || new Date();
+
+               if (start)
+                   return [start, end];
+
+               return null;
+           }
+
 
            /**
-            * @param {String} s
+            * @param {string} s
             *
             * @returns {Boolean} true if the string only contains digits.
             */
@@ -262,21 +304,45 @@ define(["underscore", "jquery", "locale"],
 
                capitalize: capitalize,
 
-               //
-               // @param {String} s
-               //
-               // @returns {String} s with underscores removed and words capitalized
+               /**
+                * @param {string} s
+                *
+                * @returns {string} s with underscores removed and words capitalized
+                */
                fromUnder: fromUnder,
 
+               /**
+                * @param {string} s
+                * @param {string} pref
+                *
+                * @returns {boolean} true if the string s begins with the string
+                * pref
+                */
+               startsWith: startsWith,
+
+               /**
+                * Given a string, escapes special characters.
+                *
+                * @param {string} s
+                *
+                * @returns {string} - a string with special regex characters
+                * escaped
+                */
                escapeRegex: function(s) {
                    return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");
+               },
+
+               wordsRegex: function(s) {
+                   var words = s.split(/\s+/);
+
+                   return new RegExp(_.map(words, $u.escapeRegex).join("|"));
                },
 
                /**
                 * Generate an equivalent regular expression for the given glob
                 * string.
                 *
-                * @param {String} patt A glob pattern
+                * @param {string} patt A glob pattern
                 *
                 * @returns {RegExp}
                 */
@@ -290,9 +356,12 @@ define(["underscore", "jquery", "locale"],
                },
 
                everyPred: function(fs, arg) {
-                   return _.every(fs, function(f) {
-                       return f(arg);
-                   });
+                   for (var i = 0, l = fs.length; i < l; ++i) {
+                       if (!fs[i](arg))
+                           return false;
+                   }
+
+                   return true;
                },
 
                idIs: function(val) {
@@ -363,10 +432,6 @@ define(["underscore", "jquery", "locale"],
                    return promise;
                },
 
-               closeTo: function(n1, n2, tolerance) {
-                   return Math.abs(n1 - n2) <= (tolerance || 0.1);
-               },
-
                // Unit conversions:
                mToFeet: function(m) {
                    return m*3.281;
@@ -402,6 +467,11 @@ define(["underscore", "jquery", "locale"],
                currentYear: function() {
                    return (new Date()).getFullYear();
                },
+
+               /**
+                * @param {string}
+                */
+               strToDateRange: strToDateRange,
 
                /**
                 * Register a default template helper, which will be available

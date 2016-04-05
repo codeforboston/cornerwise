@@ -105,11 +105,8 @@
     </script>
 
     <script type="text/template" id="layer-item-template">
-        <a class="layer-button <% if (layer.get('shown')) { %>selected<% } %>"
-           href="#">
-            <div class="flaticon-<%- layer.get('icon') %> layer-icon"/>
-            <div class="label"><%- layer.get('short') %></div>
-        </a>
+        <div class="flaticon-<%- layer.get('icon') %> layer-icon"/>
+        <div class="label"><%- layer.get('short') %></div>
     </script>
   </head>
 
@@ -217,7 +214,7 @@
       <div id="map-options" class="control">
           <a href="#" class="toggle-layers" >
               <span class="expand-layers">Options</span>
-              <span class="collapse-layers">&gt;&gt;</span>
+              <span class="collapse-layers">&raquo;</span>
           </a>
           <div id="layers"></div>
       </div>

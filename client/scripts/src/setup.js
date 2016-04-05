@@ -28,7 +28,7 @@ define(
                         });
 
 
-                appState.onStateChange("view", function(view, oldView) {
+                appState.onStateKeyChange("view", function(view, oldView) {
                     $(document.body)
                         .removeClass(oldView)
                         .addClass(view);
@@ -69,10 +69,11 @@ define(
                             });
                             appViews.info = infoView;
 
-                            appState.onStateChange("view",
-                                                 function(newKey) {
-                                                     infoView.toggle(newKey == "main");
-                                                 });
+                            appState.onStateKeyChange(
+                                "view",
+                                function(newKey) {
+                                    infoView.toggle(newKey == "main");
+                                });
                             infoView.render();
 
                             var layersView = new LayersView({

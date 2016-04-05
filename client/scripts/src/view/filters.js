@@ -7,9 +7,7 @@ define(
 
     function(B, _, $, refLocation, $u, arcgis, appState, config) {
         return B.View.extend({
-            el: function() {
-                return document.body;
-            },
+            el: document.body,
 
             initialize: function(options) {
                 this.mapView = options.mapView;
@@ -21,12 +19,12 @@ define(
                 var self = this;
 
                 // Show the filter controls?
-                appState.onStateChange("fc", function(fc) {
+                appState.onStateKeyChange("fc", function(fc) {
                     self.toggle(fc === "1");
                 });
 
                 // Fit to results?
-                appState.onStateChange("ftr", function(ftr, oldFtr) {
+                appState.onStateKeyChange("ftr", function(ftr, oldFtr) {
                     if (ftr === "1") {
                         self.mapView.resetBounds();
                     } else if (oldFtr === "1") {
@@ -34,7 +32,10 @@ define(
                     }
                 });
 
-                appState.onStateChange("fa", _.bind(this.showAttributeFilters, this));
+                appState.onStateKeyChange(
+                    "fa",
+                    _.bind(this.showAttributeFilters, this));
+
             },
 
             render: function() {
