@@ -21,14 +21,6 @@ define(["backbone", "underscore", "app-state", "utils"],
             *
             * - selectionAdded (collection, ids)
             *
-            * - filtered (collection, models)
-            *   Triggered when filters are applied
-            *
-            * - addedFiltered (model, collection)
-            *   A model was added that matches the active filters
-            *
-            * - removedFiltered (model, collection)
-            *
             * NOTE: Selection ids are always stored as strings.
             */
            var SelectableCollection = B.Collection.extend({
@@ -62,8 +54,8 @@ define(["backbone", "underscore", "app-state", "utils"],
                            function(newSort, oldSort) {
                                var desc = newSort[0] === "-",
                                    key = desc ? newSort.slice(1) : newSort;
-                               self.sortByField(key, desc);
-                           });
+                               this.sortByField(key, desc);
+                           }, this);
                    }
                },
 
@@ -180,21 +172,8 @@ define(["backbone", "underscore", "app-state", "utils"],
                },
 
                selectRelative: function(dir) {
-                   var fs = _.values(this.activeFilters), idx, model;
-
-                   if (fs.length) {
-                       var models = this.getFiltered(fs),
-                           id = this.selection[0];
-
-                       idx = _.findIndex(models, $u.idIs(id));
-
-                       model = models[idx+dir] ||
-                           dir < 0 ? _.last(models) : _.first(models);
-                   } else {
-                       idx = this.getSelectedIndex();
-
+                   var idx = this.getSelectedIndex(),
                        model = this.at(idx+dir) || this.at(dir < 0 ? -1 : 0);
-                   }
 
                    if (model)
                        this.setSelection("" + model.id);
@@ -224,69 +203,6 @@ define(["backbone", "underscore", "app-state", "utils"],
 
                getSelectionIds: function() {
                    return this.selection;
-               },
-
-               // Filters:
-
-               /**
-                * Applies each of the functions in the array fs to the
-                * proposals in the collection. If any of the functions
-                * returns false, the Proposal will be updated: its "_excluded"
-                * attribute will be set to true.
-                *
-                * @param {Array} fs
-                */
-               applyFilters: function(fs) {
-                   return this.filter(function(model) {
-                       var excluded = model.get("_excluded"),
-                           shouldExclude = !$u.everyPred(fs, model);
-
-                       // Is the model already excluded, and should it be?
-                       if (excluded !== shouldExclude) {
-                           model.set("_excluded", shouldExclude);
-                       }
-
-                       return !shouldExclude;
-                   });
-               },
-
-               matchesFilters: function(model) {
-                   var fs = _.values(this.activeFilters);
-
-                   return $u.everyPred(fs, model);
-               },
-
-               getFiltered: function() {
-                   return this.where({_excluded: false});
-               },
-
-               getVisible: function() {
-                   return this.where({_excluded: false,
-                                      _visible: true});
-               },
-
-               // A map of string filter names to functions
-               activeFilters: {},
-
-               // Reapply all of the active filters.
-               refresh: function() {
-                   var ms = this.applyFilters(_.values(this.activeFilters));
-                   this.trigger("filtered", this, ms);
-               },
-
-               addFilter: function(name, f) {
-                   this.activeFilters[name] = f;
-                   this.refresh();
-               },
-
-               addFilters: function(filterMap) {
-                   _.extend(this.activeFilters, filterMap);
-                   this.refresh();
-               },
-
-               removeFilter: function(name) {
-                   delete this.activeFilters[name];
-                   this.refresh();
                },
 
                // Sorting
