@@ -145,7 +145,8 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        /**
-                        * @param {stateChangeCallback} - fn
+                        * @param {stateChangeCallback} fn - this callback should
+                        * not alter the state
                         * @param {} [context] - the value of `this` when
                         * executing the callback
                         *
@@ -155,25 +156,27 @@ define(["backbone", "underscore", "config", "utils"],
                         */
                        onStateChange: function(fn, context) {
                            this.watchers.push([fn, undefined, context]);
+
+                           if (this._initialized)
+                               fn.call(context, this.getState(), null);
                        },
 
                        /**
                         * @param {string} key
                         * @param {keyChangeCallback} fn
                         * @param {} [context]
-                        * @param {boolean} [immediate=false]
                         *
                         * @callback keyChangeCallback
                         * @param {} newValue
                         * @param {} [oldValue]
                         */
-                       onStateKeyChange: function(key, fn, context, immediate) {
+                       onStateKeyChange: function(key, fn, context) {
                            var ks = _.isArray(key) ? key : key.split(".");
 
                            this.watchers.push([fn, ks, context]);
 
-                           if (immediate) {
-                               fn(this.getKey(ks), null);
+                           if (this._initialized) {
+                               fn.call(context, this.getKey(ks), null);
                            }
                        },
 
@@ -225,6 +228,7 @@ define(["backbone", "underscore", "config", "utils"],
                        init: function() {
                            this.startWatch();
                            this.triggerHashState();
+                           this._initialized = true;
                            this._setupLinks();
 
                            var self = this;
