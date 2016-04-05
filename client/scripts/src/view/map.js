@@ -347,12 +347,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                // Fit the map view to the proposals matching the active filters.
                fitToCollection: function() {
-                   var coll = this.collection;
-
-                   if (!coll.getFiltered) return;
-                   this.fitToModels(coll.getFiltered());
+                   this.fitToModels(this.collection);
                },
-               
+
                zoomToRefLocation: function() {
                    var bounds = this._refMarker.getBounds();
                    this.map.fitBounds(bounds, {padding: [5, 5]});

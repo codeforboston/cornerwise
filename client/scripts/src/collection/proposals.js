@@ -150,10 +150,12 @@ define(
 
                 if (query.projects == "all") {
                     preds.push(function(proposal) {
+                        console.log(proposal, proposal.project);
                         return !!proposal.project;
                     });
                 } else if (query.projects == "null") {
                     preds.push(function(proposal) {
+                        console.log(proposal, proposal.project);
                         return !proposal.project;
                     });
                 }
@@ -246,6 +248,15 @@ define(
                 }
             },
 
+            filterByProjectType: function(includePrivate, includePublic) {
+                // No way for both to be false
+                var val = includePrivate ? (includePublic ? null : "null") : "all";
+                if (val)
+                    appState.setHashKey("f.projects", val);
+                else
+                    appState.clearHashKey("f.projects");
+            },
+
             boxFilter: function(query, val) {
                 query.box = val;
             },
@@ -253,10 +264,9 @@ define(
             // Returns a LatLngBounds object for the proposals that are
             // not excluded.
             getBounds: function() {
-                return L.latLngBounds(_.map(this.getFiltered(),
-                                            function(p) {
-                                                return p.get("location");
-                                            }));
+                return L.latLngBounds(this.map(function(p) {
+                    return p.get("location");
+                }));
             }
         });
     });

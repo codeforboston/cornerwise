@@ -51,12 +51,16 @@ define(
                 // Should this be preserved for other methods of input?
                 // "change #filter-text": "filterText",
                 "keyup #filter-text": "filterText",
-                "click #filter-bounds": "filterBounds"
+                "click #filter-bounds": "filterBounds",
+                "change #filter-private": "updateProjectTypeFilter",
+                "change #filter-public": "updateProjectTypeFilter"
             },
 
             onFiltersChange: function(filters) {
                 // Only show the 'Reset' button when there is a bounding box set.
                 $("#reset-filter-bounds").toggle(!!filters.box);
+                $("#filter-private").prop("checked", filters.projects != "all");
+                $("#filter-public").prop("checked", filters.projects != "null");
             },
 
             // C
@@ -162,6 +166,12 @@ define(
             filterBounds: function() {
                 this.collection.filterByViewBox(
                     this.mapView.getMap().getBounds()); 
+            },
+
+            updateProjectTypeFilter: function() {
+                this.collection.filterByProjectType(
+                    $("#filter-private").prop("checked"),
+                    $("#filter-public").prop("checked"));
             },
 
             clearFilterBounds: function() {

@@ -64,7 +64,7 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                                      self.$el.toggleClass("showing",
                                                           self.shouldShow)
                                          .html(html);
-                                     _.each(coll.getFiltered(), function(model) {
+                                     coll.each(function(model) {
                                          self.modelAdded(model, coll);
                                      });
                                  });
