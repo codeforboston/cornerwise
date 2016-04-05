@@ -126,7 +126,8 @@ define(["backbone", "underscore", "config", "utils"],
                            this.on("hashState", function(state) {
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
-                                       key = watcher[1];
+                                       key = watcher[1],
+                                       context = watcher[2] || this;
 
                                    if (key) {
                                        var defval = $u.getIn(defaults, key),
@@ -134,9 +135,9 @@ define(["backbone", "underscore", "config", "utils"],
                                            newVal = $u.getIn(state, key) || defval;
                                        if (lastState && _.isEqual(newVal, oldVal))
                                            return;
-                                       callback(newVal, oldVal);
+                                       callback.call(context, newVal, oldVal);
                                    } else {
-                                       callback(state, lastState || {});
+                                       callback.call(context, state, lastState || {});
                                    }
                                });
                                lastState = state;
@@ -144,29 +145,32 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        /**
-                        * @param {stateChangeCallback} fn
+                        * @param {stateChangeCallback} - fn
+                        * @param {} [context] - the value of `this` when
+                        * executing the callback
                         *
                         * @callback stateChangeCallback
                         * @param {Object} newState
                         * @param {Object} oldState
                         */
-                       onStateChange: function(fn) {
-                           this.watchers.push([fn]);
+                       onStateChange: function(fn, context) {
+                           this.watchers.push([fn, undefined, context]);
                        },
 
                        /**
                         * @param {string} key
                         * @param {keyChangeCallback} fn
+                        * @param {} [context]
                         * @param {boolean} [immediate=false]
                         *
                         * @callback keyChangeCallback
                         * @param {} newValue
                         * @param {} [oldValue]
                         */
-                       onStateKeyChange: function(key, fn, immediate) {
+                       onStateKeyChange: function(key, fn, context, immediate) {
                            var ks = _.isArray(key) ? key : key.split(".");
 
-                           this.watchers.push([fn, ks]);
+                           this.watchers.push([fn, ks, context]);
 
                            if (immediate) {
                                fn(this.getKey(ks), null);

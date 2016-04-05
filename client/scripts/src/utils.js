@@ -1,5 +1,5 @@
-define(["underscore", "jquery", "locale"],
-       function(_, $, locale) {
+define(["underscore", "jquery", "locale", "leaflet"],
+       function(_, $, locale, L) {
            /**
             * Takes a numeric string s and adds thousands separators.
             * For example: commas("12345678.3") -> "12,345,678.3"
@@ -335,7 +335,7 @@ define(["underscore", "jquery", "locale"],
                wordsRegex: function(s) {
                    var words = s.split(/\s+/);
 
-                   return new RegExp(_.map(words, $u.escapeRegex).join("|"));
+                   return new RegExp(_.map(words, $u.escapeRegex).join("|"), "i");
                },
 
                /**
@@ -564,6 +564,21 @@ define(["underscore", "jquery", "locale"],
                },
 
                /**
+                * Converts a string of the form swLat,swLong,neLat,neLong to an
+                * instance of Leaflet's LatLngBounds class.
+                *
+                * @param {string} boxStr
+                *
+                * @returns {L.LatLngBounds}
+                */
+               boxStringToBounds: function(boxStr) {
+                   var pieces = boxStr.split(",");
+
+                   return L.latLngBounds([pieces[0], pieces[1]],
+                                         [pieces[2], pieces[3]]);
+               },
+
+               /**
                 * Like _.template, except that it adds helper functions to the
                 * data passed to the resulting template function.
                 *
@@ -611,6 +626,10 @@ define(["underscore", "jquery", "locale"],
                    return $u.template(templateString, options, options.helpers);
                },
 
+               /**
+                * Store a map of URLs to jQuery xhr objects, so that overlapping
+                * requests to the same URL will not create multiple requests.
+                */
                _getting: {},
                _getUrl: function(url) {
                    if (this._getting[url])
