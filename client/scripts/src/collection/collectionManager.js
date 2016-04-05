@@ -17,12 +17,10 @@ define(["backbone", "underscore", "app-state"],
                        _.keys(options.collections)[0];
                    this.setActiveCollection(name);
 
-                   var self = this;
-
                    appState.onStateChange(function(newState, oldState) {
                        // Check if the active collection has changed:
                        if (newState.c !== oldState.c) {
-                           self.setActiveCollection(newState.c);
+                           this.setActiveCollection(newState.c);
                        }
 
                        // Check if the sort has changed:
@@ -30,9 +28,9 @@ define(["backbone", "underscore", "app-state"],
                            var sort = newState.sort,
                                desc = sort[0] == "-",
                                sortKey = desc ? sort.slice(1) : sort;
-                           self.getCollection().sortByField(sortKey, desc);
+                           this.getCollection().sortByField(sortKey, desc);
                        }
-                   });
+                   }, this);
                },
 
                // Get the active collection:

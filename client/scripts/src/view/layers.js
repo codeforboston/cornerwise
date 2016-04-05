@@ -48,15 +48,14 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
                initialize: function(options) {
                    B.View.prototype.initialize.call(this, options);
 
-                   var self = this;
                    appState.onStateKeyChange(
                        this.hashParam,
                        function(newLy, oldLy) {
                            if (newLy === "1")
-                               self._show();
+                               this._show();
                            else
-                               self._hide();
-                       });
+                               this._hide();
+                       }, this);
                },
 
                events: {

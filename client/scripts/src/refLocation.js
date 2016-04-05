@@ -22,7 +22,7 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
                        this, this.checkedAttrs(ref, attrs), options);
                    this.bounds = null;
 
-                   appState.onStateKeyChange("ref", _.bind(this.checkedSet, this));
+                   appState.onStateKeyChange("ref", this.checkedSet, this);
                },
 
                checkedAttrs: function(ref, attrs) {

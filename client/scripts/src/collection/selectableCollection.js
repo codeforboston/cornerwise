@@ -51,11 +51,10 @@ define(["backbone", "underscore", "app-state", "utils"],
                        .on("remove", this.onRemove, this);
 
                    if (this.hashParam) {
-                       var self = this;
                        appState.onStateKeyChange(this.hashParam, function(ids, oldIds) {
                            ids = ids ? ids.split(",") : [];
-                           self._setSelection(ids);
-                       });
+                           this._setSelection(ids);
+                       }, this);
                    }
                    if (this.sortParam) {
                        appState.onStateKeyChange(
@@ -165,15 +164,9 @@ define(["backbone", "underscore", "app-state", "utils"],
 
                        model.set("_selected", true);
                    }
-
-                   if (this.matchesFilters(model))
-                       this.trigger("addedFiltered", model, coll);
                },
 
                onRemove: function(model, coll) {
-                   if (this.matchesFilters(model))
-                       this.trigger("removedFiltered", model, coll);
-
                    var idx = _.indexOf(this.selection, model.id);
                    if (idx > -1)
                        this.selection.splice(idx, 1);

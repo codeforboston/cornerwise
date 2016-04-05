@@ -30,21 +30,20 @@ define(["app-state", "underscore", "jquery"],
                this.views = views || {};
                this.constructedViews = {};
 
-               var self = this,
-                   key = appState.getKey(name);
+               var key = appState.getKey(name);
                appState.onStateKeyChange(
                    name,
                    function(newKey, oldKey) {
                        key = newKey;
                        if (oldKey) {
-                           var old = self.constructedViews[oldKey];
+                           var old = this.constructedViews[oldKey];
                            if (old && old.hide) {
                                old.hide();
                                old.undelegateEvents();
                            }
                        }
 
-                       self.getOrConstructView(newKey)
+                       this.getOrConstructView(newKey)
                            .then(function(newView) {
                                // If it took too long to load
                                // the module, the key may have
@@ -55,7 +54,7 @@ define(["app-state", "underscore", "jquery"],
                                    newView.delegateEvents();
                                }
                            });
-                   });
+                   }, this);
            }
 
            _.extend(ViewManager.prototype, {
