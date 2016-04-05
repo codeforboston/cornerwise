@@ -34,6 +34,7 @@ def proposal_json(proposal, include_images=True,
 
     if include_images:
         images = proposal.images.order_by("-priority")
+        # Booleans are considered integers
         if isinstance(include_images, int) and include_images is not True:
             images = images[0:include_images]
 
@@ -154,7 +155,10 @@ def active_proposals(req):
     except EmptyPage as err:
         raise ErrorResponse("No such page", {"page": page}, err=err)
 
-    return {"proposals": list(map(proposal_json, proposals)),
+    pjson = [proposal_json(proposal, include_images=1)
+             for proposal in proposals]
+
+    return {"proposals": pjson,
             # "count": proposals.paginator.count,
             "page": proposals.number,
             "total_pages": proposals.paginator.num_pages}
