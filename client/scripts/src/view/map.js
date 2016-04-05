@@ -71,6 +71,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    // App behaviors:
                        .listenTo(appState, "shouldFocus", this.onFocused);
 
+                   appState.onStateKeyChange("f.box", this.onBoxFilterChanged,
+                                             this);
+
                    $(document).on("click", ".map-zoom-in",
                                   function() {
                                       map.zoomIn();
@@ -261,6 +264,23 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        this.map.fitBounds(bounds);
                    }
 
+               },
+
+               onBoxFilterChanged: function(box) {
+                   if (box) {
+                       var bounds = $u.boxStringToBounds(box);
+
+                       if (this._filterBoundsRect)
+                           this._filterBoundsRect.setBounds(bounds);
+                       else
+                           this._filterBoundsRect = L.rectangle(
+                               bounds,
+                               config.filterBoundsStyle)
+                           .addTo(this.map);
+                   } else if (this._filterBoundsRect) {
+                       this.map.removeLayer(this._filterBoundsRect);
+                       delete this._filterBoundsRect;
+                   }
                },
 
                /* Getting information about the markers. */

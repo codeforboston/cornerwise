@@ -16,30 +16,24 @@ define(
                     .listenTo(refLocation, "change:geolocating",
                               this.toggleGeolocating);
 
-                var self = this;
-
                 // Show the filter controls?
                 appState.onStateKeyChange("fc", function(fc) {
-                    self.toggle(fc === "1");
-                });
-
-                // Fit to results?
-                appState.onStateKeyChange("ftr", function(ftr, oldFtr) {
-                    if (ftr === "1") {
-                        self.mapView.resetBounds();
-                    } else if (oldFtr === "1") {
-                        self.mapView.fitToCollection();
-                    }
-                });
+                    this.toggle(fc === "1");
+                }, this, true);
 
                 appState.onStateKeyChange(
                     "fa",
-                    _.bind(this.showAttributeFilters, this));
+                    this.showAttributeFilters, this);
 
+                $("#filter-text").val(appState.getKey("f.text"));
+
+                appState.onStateKeyChange("f", function(filters) {
+                    this.onFiltersChange(filters);
+                }, this);
             },
 
             render: function() {
-                
+
             },
 
             toggle: function(shouldShow) {
@@ -53,8 +47,21 @@ define(
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
                 "click #reset": "clearInputs",
-                "change #filter-text": "filterText",
-                "change #fit-results": "fitResults"
+                "click #reset-filter-bounds": "clearFilterBounds",
+                // Should this be preserved for other methods of input?
+                // "change #filter-text": "filterText",
+                "keyup #filter-text": "filterText",
+                "click #filter-bounds": "filterBounds"
+            },
+
+            onFiltersChange: function(filters) {
+                // Only show the 'Reset' button when there is a bounding box set.
+                $("#reset-filter-bounds").toggle(!!filters.box);
+            },
+
+            // C
+            onMapMoved: function() {
+
             },
 
             submitAddress: function(e) {
@@ -121,9 +128,9 @@ define(
                     .toggleClass("geolocating", isGeolocating);
             },
 
-            filterText: function(e) {
+            filterText: _.debounce(function(e) {
                 this.collection.filterByText(e.target.value);
-            },
+            }, 500),
 
             // Event handler for "Fit to Results"
             fitResults: function(e) {
@@ -152,13 +159,13 @@ define(
 
             // Filter the collection to only include models that lie within the
             // visible bounds.
-            filterOnBounds: function() {
+            filterBounds: function() {
                 this.collection.filterByViewBox(
                     this.mapView.getMap().getBounds()); 
             },
 
-            clearBoundsFilter: function() {
-                this.collection.clearViewBoxFilter();
+            clearFilterBounds: function() {
+                this.collection.filterByViewBox(null);
             }
         });
     });

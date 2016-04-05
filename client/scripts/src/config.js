@@ -30,6 +30,15 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         refMarkerColor: "red",
         refPointName: "City Hall",
 
+        // The style that will be applied to the rectangle representing the
+        // bounds of the current area filter:
+        filterBoundsStyle: {
+            weight: 2,
+            color: "red",
+            fillColor: "red",
+            fillOpacity: "0.15"
+        },
+
         defaultProposalThumb: "/static/images/marker-normal@2x.png",
 
         // Map of { "permit abbreviation": "human readable permit name" }

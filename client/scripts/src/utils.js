@@ -130,7 +130,7 @@ define(["underscore", "jquery", "locale", "leaflet"],
            }
 
            function fromUnder(s) {
-               pieces = s.split(/_+/);
+               var pieces = s.split(/_+/);
 
                return _.map(pieces, capitalize).join(" ");
            }
@@ -572,6 +572,8 @@ define(["underscore", "jquery", "locale", "leaflet"],
                 * @returns {L.LatLngBounds}
                 */
                boxStringToBounds: function(boxStr) {
+                   // TODO: Cache most recent call arg and return value to avoid
+                   // recomputing this a bunch of times in a row?
                    var pieces = boxStr.split(",");
 
                    return L.latLngBounds([pieces[0], pieces[1]],

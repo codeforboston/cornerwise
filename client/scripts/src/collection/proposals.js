@@ -18,7 +18,7 @@ define(
                 // The last query to be sent to the server. Could use this to
                 // determine whether a change in filters can be satisfied from
                 // local data alone.
-                this.lastQuery = {};
+                this.lastQuery = null;
 
                 // Used to store the response from the server corresponding to
                 // the last query.
@@ -27,7 +27,9 @@ define(
                 this._includeProjects = this._includeProposals = true;
 
                 appState.onStateKeyChange(
-                    "f", _.bind(this.onFiltersChange, this));
+                    "f", this.onFiltersChange, this);
+
+                //refLocation.on("change")
             },
 
             url: function() {
@@ -71,7 +73,8 @@ define(
 
             queryFilters: {
                 projects: "typeFilter",
-                text: "textFilter"
+                text: "textFilter",
+                box: "boxFilter"
             },
 
             /**
@@ -100,7 +103,7 @@ define(
                     return false;
 
                 if (newQuery.text && oldQuery.text &&
-                    !$u.startsWith(oldQuery.text, newQuery.text))
+                    !$u.startsWith(newQuery.text, oldQuery.text))
                     return false;
 
                 // Time queries:
@@ -116,7 +119,20 @@ define(
                         return false;
                 }
 
-                // TODO: Check geographic query bounds:
+                // Check geographic query bounds:
+                if (oldQuery.box) {
+                    if (!newQuery.box) return false;
+
+                    var oldBounds = $u.boxStringToBounds(oldQuery.box),
+                        newBounds = $u.boxStringToBounds(newQuery.box);
+
+                    if (!oldBounds.contains(newBounds))
+                        return false;
+                }
+
+                // TODO: Handle attribute queries
+                // They should probably always return false, since by default,
+                // only some attribute values are loaded.
 
                 return true;
             },
@@ -145,6 +161,14 @@ define(
                 if (query.range) {
                 }
 
+                if (query.box) {
+                    var bounds = $u.boxStringToBounds(query.box);
+                    preds.push(function(proposal) {
+                        var loc = proposal.location;
+                        return bounds.contains([loc.lat, loc.lng]);
+                    });
+                }
+
                 return function(proposal) {
                     return $u.everyPred(preds, proposal);
                 };
@@ -163,14 +187,11 @@ define(
                 }
             },
 
-            updateQuery: function(filters, old) {
-                old = old || {};
+            updateQuery: function(filters) {
                 var query;
 
                 _.each(filters, function(val, key) {
-                    if (filters[key] !== old[key] &&
-                        this.queryFilters[key]) {
-
+                    if (this.queryFilters[key]) {
                         if (!query) query = {};
 
                         var filter = this[this.queryFilters[key]];
@@ -182,21 +203,25 @@ define(
             },
 
             onFiltersChange: function(newFilters, oldFilters) {
-                var query = this.updateQuery(newFilters, oldFilters);
+                var query = this.updateQuery(newFilters);
 
-                if (query) {
-                    this.lastQuery = this.query;
-                    this.query = query;
-                    this.fetch();
-                }
+                this.query = query;
+                this.runQuery(query);
+            },
+
+            clearFilters: function() {
+                appState.clearHashKey("f");
             },
 
             filterByText: function(text) {
-                appState.setHashKey("f.q", text);
+                appState.setHashKey("f.text", text);
             },
 
             textFilter: function(query, s) {
-                query.q = s;
+                if (!s)
+                    delete query.text;
+                else
+                    query.text = s;
             },
 
             typeFilter: function(query, val) {
@@ -212,14 +237,17 @@ define(
              * hidden.
              */
             filterByViewBox: function(viewBox) {
-                this.query.bounds = [viewBox.getWest(), viewBox.getSouth(),
-                                     viewBox.getEast(), viewBox.getNorth()].join(",");
-                this.fetch();
+                if (viewBox) {
+                    var box = [viewBox.getSouth(), viewBox.getWest(),
+                               viewBox.getNorth(), viewBox.getEast()].join(",");
+                    appState.setHashKey("f.box", box);
+                } else {
+                    appState.clearHashKey("f.box");
+                }
             },
 
-            clearViewBoxFilter: function() {
-                delete this.query.bounds;
-                this.fetch();
+            boxFilter: function(query, val) {
+                query.box = val;
             },
 
             // Returns a LatLngBounds object for the proposals that are
