@@ -101,6 +101,9 @@ def build_proposal_query(d):
     if "id" in d:
         ids = re.split(r"\s*,\s*", d["id"])
 
+    if "text" in d:
+        subqueries["address__icontains"] = d["text"]
+
     if ids:
         subqueries["pk__in"] = ids
 
@@ -112,10 +115,15 @@ def build_proposal_query(d):
         else:
             subqueries["project"] = d["project"]
 
-    bounds = d.get("bounds")
+    bounds = d.get("box")
     if bounds:
         coords = [float(coord) for coord in bounds.split(",")]
-        bbox = Polygon.from_bbox(*coords, srid=97406)
+        # Coordinates are submitted to the server as
+        # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
+        # different order:
+        bbox = Polygon.from_bbox((coords[1], coords[0],
+                                  coords[3], coords[2]))
+        #bbox.srid = 97406
         subqueries["location__within"] = bbox
 
     status = d.get("status", "active").lower()
