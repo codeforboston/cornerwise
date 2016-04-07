@@ -51,6 +51,7 @@ define(
                 // Should this be preserved for other methods of input?
                 // "change #filter-text": "filterText",
                 "keyup #filter-text": "filterText",
+                "search #filter-text": "filterText",
                 "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
