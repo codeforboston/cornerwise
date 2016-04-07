@@ -95,7 +95,8 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
                    this.set({setMethod: "map"});
                    appState.setHashKey("ref", {
                        lat: lat,
-                       lng: long
+                       lng: long,
+                       address: null
                    });
                },
 
@@ -111,7 +112,8 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
 
                        self.set({
                            altitude: null,
-                           setMethod: "address"
+                           setMethod: "address",
+                           address: addr
                        });
                        appState.setHashKey("ref", {
                            address: addr,
