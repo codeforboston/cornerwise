@@ -61,8 +61,8 @@ define(["backbone", "underscore", "config", "utils"],
                                return this._cachedState;
 
                            return $u.deepMerge(
-                               $u.decodeQuery(B.history.getHash()),
-                               this.defaults);
+                               this.defaults,
+                               $u.decodeQuery(B.history.getHash()));
                        },
 
                        getKey: function(k) {
