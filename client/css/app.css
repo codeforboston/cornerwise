@@ -1339,6 +1339,12 @@ ul.model-list li {
     padding: 1.5em;
 }
 
+#list-view a.document {
+    line-height: 2em;
+    padding-right: 1em;
+    white-space: nowrap;
+}
+
 .results-info {
     float: right;
     font-size: small;
