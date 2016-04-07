@@ -59,10 +59,12 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                    var coll = this.collection,
                        self = this;
                    this.subviewCache = {};
+
                    this.template(coll,
                                  function(html) {
                                      self.$el.toggleClass("showing",
                                                           self.shouldShow)
+                                         .toggleClass("empty", coll.length===0)
                                          .html(html);
                                      coll.each(function(model) {
                                          self.modelAdded(model, coll);
@@ -81,18 +83,22 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                 */
                modelAdded: function(model, coll) {
                    var view = new this.subview({model: model});
+                   this.$el.removeClass("empty");
                    this.$(".contents").append(view.el);
                    this.subviewCache[model.id] = view;
                    view.render();
                },
 
-               modelRemoved: function(model) {
+               modelRemoved: function(model, coll) {
                    var view = this.subviewCache[model.id];
 
                    if (view) {
                        view.$el.remove();
                        delete this.subviewCache[model.id];
                    }
+
+                   if (coll.length === 0)
+                       this.$el.addClass("empty");
                },
 
                show: function() {

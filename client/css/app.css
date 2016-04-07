@@ -1326,6 +1326,19 @@ ul.model-list li {
     text-align: right;
 }
 
+.no-results {
+    display: none;
+}
+
+#list-view.empty .no-results {
+    color: #aaa;
+    display: block;
+    font-size: x-large;
+    font-style: italic;
+    line-height: 100px;
+    padding: 1.5em;
+}
+
 .results-info {
     float: right;
     font-size: small;
