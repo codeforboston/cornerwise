@@ -107,13 +107,13 @@ def build_proposal_query(d):
     if ids:
         subqueries["pk__in"] = ids
 
-    if "project" in d:
-        if d["project"] == "null":
+    if "projects" in d:
+        if d["projects"] == "null":
             subqueries["project__isnull"] = True
-        elif d["project"] == "all":
+        elif d["projects"] == "all":
             subqueries["project__isnull"] = False
-        else:
-            subqueries["project"] = d["project"]
+        # else:
+        #     subqueries["projects"] = d["project"]
 
     bounds = d.get("box")
     if bounds:

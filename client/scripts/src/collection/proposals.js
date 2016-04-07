@@ -95,7 +95,7 @@ define(
                 if (!oldQuery) return false;
 
                 if (!newQuery.projects && oldQuery.projects ||
-                    newQuery.projects !== oldQuery.projects)
+                    (oldQuery.projects && newQuery.projects !== oldQuery.projects))
                     return false;
 
                 // Text queries:
@@ -150,12 +150,10 @@ define(
 
                 if (query.projects == "all") {
                     preds.push(function(proposal) {
-                        console.log(proposal, proposal.project);
                         return !!proposal.project;
                     });
                 } else if (query.projects == "null") {
                     preds.push(function(proposal) {
-                        console.log(proposal, proposal.project);
                         return !proposal.project;
                     });
                 }
@@ -228,9 +226,9 @@ define(
 
             typeFilter: function(query, val) {
                 if (/^(all|null)$/.exec(val))
-                    query.project = val.toLowerCase();
+                    query.projects = val.toLowerCase();
                 else
-                    delete query.project;
+                    delete query.projects;
             },
 
             /**
