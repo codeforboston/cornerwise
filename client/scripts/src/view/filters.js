@@ -53,7 +53,8 @@ define(
                 "keyup #filter-text": "filterText",
                 "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
-                "change #filter-public": "updateProjectTypeFilter"
+                "change #filter-public": "updateProjectTypeFilter",
+                "click a.ref-loc": "selectAddress"
             },
 
             onFiltersChange: function(filters) {
@@ -61,11 +62,6 @@ define(
                 $("#reset-filter-bounds").toggle(!!filters.box);
                 $("#filter-private").prop("checked", filters.projects != "all");
                 $("#filter-public").prop("checked", filters.projects != "null");
-            },
-
-            // C
-            onMapMoved: function() {
-
             },
 
             submitAddress: function(e) {
@@ -84,6 +80,11 @@ define(
 
                 e.preventDefault();
                 return false;
+            },
+
+            selectAddress: function(e) {
+                $("#ref-address-form input").focus();
+                e.preventDefault();
             },
 
             /**
