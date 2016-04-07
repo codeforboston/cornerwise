@@ -10,7 +10,6 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                events: {
                    "click .sort-button": "changeSort",
                    "click a.show-on-map": "showOnMap"
-
                },
 
                initialize: function(options) {
@@ -20,10 +19,11 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                onFirstShow: function() {
                    var collection = this.collection;
                    this.listenTo(collection, "sort", this.render)
-                       .listenTo(collection, "filtered", this.render)
+                       //.listenTo(collection, "filter", this.render)
                        .listenTo(collection, "change", this.modelChanged)
                        .listenTo(collection, "add", this.modelAdded)
-                       .listenTo(collection, "remove", this.modelRemoved);
+                       .listenTo(collection, "remove", this.modelRemoved)
+                       .listenTo(collection, "update", this.onUpdate);
                },
 
                changeSort: function(e) {
@@ -70,6 +70,7 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                                          self.modelAdded(model, coll);
                                      });
                                  });
+                   this.onUpdate(coll);
 
                    return this;
                },
@@ -99,6 +100,17 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
 
                    if (coll.length === 0)
                        this.$el.addClass("empty");
+               },
+
+               onUpdate: function(coll) {
+                   this.$el.toggleClass("empty", coll.length === 0);
+                   var info = 
+                   this.$(".results-info")
+                       .html(coll.length > 0 ?
+                             ("Matched " +
+                              coll.length + " " +
+                              $u.pluralize(coll.length, "proposal")) :
+                             "No proposals found.");
                },
 
                show: function() {

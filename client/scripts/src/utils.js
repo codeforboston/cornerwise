@@ -304,6 +304,8 @@ define(["underscore", "jquery", "locale", "leaflet"],
 
                capitalize: capitalize,
 
+               pluralize: pluralize,
+
                /**
                 * @param {string} s
                 *

@@ -3,7 +3,6 @@
         <%
         var models = collection,
         n = models.length,
-        typeName = collection.getModelName(),
         sort = collection.sortField,
         desc = collection.desc,
         sortClass = function(n) { return n == sort ? 'sorted ' + (desc ? 'desc' : '') : ''; };
@@ -19,9 +18,8 @@
         </a>
         <% }) %>
 
-        <div class="results-info">
-            Matched <%- n %> <%- pluralize(n, typeName) %>
-        </div>
+        <!-- Updated in list.js -->
+        <div class="results-info"> </div>
     </div>
     <div class="no-results" >
         Sorry. No results matched your query
