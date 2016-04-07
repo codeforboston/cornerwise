@@ -140,7 +140,8 @@ define(["backbone", "underscore", "utils", "app-state"],
                    this.render();
 
                    _.each(ids, function(id) {
-                       this.listenTo(coll.get(id), "change", this.modelChanged);
+                       var model = coll.get(id);
+                       this.listenTo(model, "change", this.modelChanged);
                    }, this);
                },
 

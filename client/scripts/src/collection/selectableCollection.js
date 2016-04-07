@@ -24,7 +24,6 @@ define(["backbone", "underscore", "app-state", "utils"],
             * NOTE: Selection ids are always stored as strings.
             */
            var SelectableCollection = B.Collection.extend({
-
                initialize: function(models, options) {
                    B.Collection.prototype.initialize.call(this, models, options);
 
@@ -40,7 +39,7 @@ define(["backbone", "underscore", "app-state", "utils"],
                    this.pending = [];
 
                    this.on("add", this.onAdd, this)
-                       .on("remove", this.onRemove, this);
+                       .on("update", this.onUpdate, this);
 
                    if (this.hashParam) {
                        appState.onStateKeyChange(this.hashParam, function(ids, oldIds) {
@@ -158,10 +157,16 @@ define(["backbone", "underscore", "app-state", "utils"],
                    }
                },
 
-               onRemove: function(model, coll) {
-                   var idx = _.indexOf(this.selection, model.id);
-                   if (idx > -1)
-                       this.selection.splice(idx, 1);
+               onUpdate: function(coll) {
+                   var ids = _.pluck(coll.models, "id"),
+                       keep_ids = _.intersection(this.selection, ids),
+                       removed_ids = _.difference(this.selection, keep_ids);
+
+                   this.selection = keep_ids;
+                   if (removed_ids.length) {
+                       this.trigger("selectionRemoved", this,
+                                    removed_ids, keep_ids);
+                   }
                },
 
                getSelectedIndex: function() {
