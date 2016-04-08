@@ -196,13 +196,15 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                },
 
                proposalRemoved: function(permit) {
-                   var self = this;
-                   this.getMarkerForPermit(permit)
-                       .done(function(marker) {
-                           self.zoningLayer.removeLayer(marker);
-                       });
-
-                   delete this.caseMarker[permit.get("caseNumber")];
+                   var caseNumber = permit.get("caseNumber"),
+                       marker = this.caseMarker[caseNumber],
+                       parcel = this.parcelLayers[caseNumber];
+                   if (marker) {
+                       this.zoningLayer.removeLayer(marker);
+                       delete this.caseMarker[caseNumber];
+                   }
+                   if (parcel)
+                       this.parcelLayer.removeLayer(parcel);
                },
 
                // Map of case # -> ILayer objects
@@ -211,16 +213,17 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                // Triggered when a child permit changes
                changed: function(change) {
                    var self = this,
-                       excluded = change.get("_excluded");
+                       excluded = change.get("_excluded"),
+                       caseNumber = permit.get("caseNumber"),
+                       marker= this.caseMarker[caseNumber];
 
-                   this.getMarkerForPermit(change)
-                       .done(function(marker) {
-                           if (excluded) {
-                               self.zoningLayer.removeLayer(marker);
-                           } else {
-                               marker.addTo(self.zoningLayer);
-                           }
-                       });
+                   if (marker) {
+                       if (excluded) {
+                           self.zoningLayer.removeLayer(marker);
+                       } else {
+                           marker.addTo(self.zoningLayer);
+                       }
+                   }
 
                    // Hide or show parcel outlines:
                    var parcelLayer = this.parcelLayers[change.get("caseNumber")];
@@ -285,10 +288,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                /* Getting information about the markers. */
                getMarkerForPermit: function(permit) {
-                   var marker = this.caseMarker[permit.get("caseNumber")],
-                       promise = $.Deferred();
-
-                   return marker ? promise.resolve(marker) : promise.fail();
+                   return this.caseMarker[permit.get("caseNumber")];
                },
 
                updateMarkers: function() {
