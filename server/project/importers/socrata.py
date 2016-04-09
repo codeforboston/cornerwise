@@ -34,44 +34,28 @@ def get_json(req):
 
 
 class Importer(object):
+    def __init__(self, api_key, resource):
+        pass
+
+
+class Importer(object):
     domain = "data.somervillema.gov"
 
-    def __init__(self, api_key, resource="wz6k-gm5k"):
+    def __init__(self, api_key):
         self.api_key = api_key
-        self.resource_id = resource
 
-    copy_keys = {
-        "name": "project",
-        "description": "project_description",
-        "justification": "project_justification",
-        "department": "department",
-        "category": "type",
-        "funding_source": "funding_source",
-    }
+    copy_keys = {}
 
-    constant_fields = {
-        "region_name": "Somerville, MA"
-    }
+    address_key = "address"
 
-    @classmethod
-    def process_json(kls, pjson):
-        project = copy.copy(kls.constant_fields)
+    def process_json(self, pjson):
+        project = copy.copy(self.constant_fields)
 
-        for project_key, json_key in kls.copy_keys.items():
+        for project_key, json_key in self.copy_keys.items():
             project[project_key] = pjson.get(json_key)
 
-        project["approved"] = bool(re.match(r"approved", pjson["status"],
-                                            re.I))
-        project["status"] = pjson["status"]
-
-        budget_keys = ((k, re.match(r"^_(\d+)$", k)) for k in pjson.keys())
-        project["budget"] = {int(m.group(1)): Decimal(pjson[k])
-                             for k, m in budget_keys if m}
-        project["updated"] = datetime.fromtimestamp(pjson[":updated_at"],
-                                                    pytz.utc)
-
         try:
-            address = pjson["address"]
+            address = pjson[self.address_key]
             if address["needs_recoding"]:
                 project["address"] = None
             else:
@@ -82,7 +66,12 @@ class Importer(object):
         except:
             project["address"] = None
 
+        self.process(pjson, project)
+
         return project
+
+    def process(self, json, project):
+        pass
 
     def updated_since(self, dt=None):
         if dt:
@@ -94,4 +83,4 @@ class Importer(object):
                            self.api_key, soql=soql, exclude_system=False)
         projects = get_json(req)
 
-        return map(self.process_json, projects)
+        return [self.process_json(project) for project in projects]
