@@ -1,0 +1,33 @@
+{% extends "base.djhtml" %}
+
+{% load humanize %}
+
+{% block body %}
+<table>
+    {% for proposal in proposals %}
+    <tr>
+        <td class="thumbnail" >
+            <img src="{{ proposal.images.0.thumb }}"/>
+        </td>
+        <td class="info" >
+            <h3>{{ proposal.address }}</h3>
+            Last updated {{ proposal.updated|naturalday }}
+
+            {% if proposal.project %}
+
+            {% else %}
+            <table>
+                <tbody>
+                    {% for attribute in proposal.attributes %}
+                    <tr>
+                        <th>{{ attribute.name }}</th>
+                        <td>{{ attribute.value }}</td>
+                        {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

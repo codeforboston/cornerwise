@@ -148,7 +148,7 @@ def build_proposal_query(d):
     return Q(**subqueries)
 
 
-@make_response()
+@make_response("list.djhtml")
 def active_proposals(req):
     proposal_query = Proposal.objects.filter(build_proposal_query(req.GET))
     if "include_projects" in req.GET:
@@ -172,7 +172,7 @@ def active_proposals(req):
             "total_pages": proposals.paginator.num_pages}
 
 
-@make_response()
+@make_response("list.djhtml")
 def closed_proposals(req):
     proposals = Proposal.objects.filter(complete=True)
 

@@ -18,7 +18,7 @@ class ErrorResponse(Exception):
         self.exception = err
 
 
-def make_response(template=None, error_template="error.html"):
+def make_response(template=None, error_template="error.djhtml"):
     """
     View decorator
 
