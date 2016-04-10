@@ -214,7 +214,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                changed: function(change) {
                    var self = this,
                        excluded = change.get("_excluded"),
-                       caseNumber = permit.get("caseNumber"),
+                       caseNumber = change.get("caseNumber"),
                        marker= this.caseMarker[caseNumber];
 
                    if (marker) {
