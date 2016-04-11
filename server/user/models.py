@@ -10,11 +10,13 @@ def make_token():
 
 
 class User(models.Model):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     # Used for managing preferences
     token = models.CharField(max_length=64, default=make_token)
     # The user should not be able to log in if this is false:
     activated = models.BooleanField(default=False)
+    nickname = models.CharField(max_length=128, empty=True,
+                                help="What do you prefer to be called?")
 
     def generate_token(self):
         self.token = make_token()
