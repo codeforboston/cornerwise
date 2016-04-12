@@ -1,21 +1,28 @@
-postgres:
-  image: mdillon/postgis:9.4-2.1
-  ports:
-    - "5432:5432"
-  volumes:
-    - cornerwise_db:/var/lib/postgresql/9.4/main
+version: '2'
 
-redis:
-  image: redis:latest
-
-cornerwise:
-  build: .
-  ports:
-    - "3000:3000"
-  links:
-    - postgres
-    - redis
-  environment:
-    - PYTHONUNBUFFERED=1
-    - REDIS_HOST=redis
-    - POSTGRES_HOST=postgres
+services:
+  cornerwise:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+    links:
+      - postgres
+      - redis
+    command: bash /app/start.sh
+  postgres:
+    image: mdillon/postgis:9.4-2.1
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
