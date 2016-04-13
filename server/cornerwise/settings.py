@@ -16,6 +16,7 @@ import os
 from celery.schedules import crontab
 from datetime import timedelta
 
+aodisnflkasfioanfoiafsdnio.wtf()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Determine if the app is in production mode by examining the
@@ -104,13 +105,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': POSTGRES_HOST,
-        'NAME': 'cornerwise',
+        'NAME': 'postgres',
         'USER': 'postgres'
     },
     'migrate': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': POSTGRES_HOST,
-        'NAME': 'cornerwise',
+        'NAME': 'postgres',
         'USER': 'postgres'
     }
 }
@@ -141,7 +142,6 @@ SERVER_DOMAIN = "cornerwise1125.cloudapp.net"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
