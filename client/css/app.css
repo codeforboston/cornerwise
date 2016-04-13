@@ -1312,6 +1312,7 @@ ul.model-list li {
     top: 60px;
     bottom: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #list-view.showing {
