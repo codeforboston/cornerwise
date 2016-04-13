@@ -17,7 +17,7 @@ services:
       - redis
     command: bash /app/start.sh
   postgres:
-    image: mdillon/postgis:9.4-2.1
+    image: mdillon/postgis:9.4
     ports:
       - "5432:5432"
     volumes:
@@ -26,3 +26,10 @@ services:
     image: redis:latest
     volumes:
       - redis_data:/data
+
+volumes:
+  redis_data:
+    driver: local
+  data:
+    driver: local
+
