@@ -51,9 +51,7 @@ def proposal_json(proposal, include_images=True,
 
     return pdict
 
-
-
-
+# Views:
 
 
 @make_response("list.djhtml")
@@ -87,7 +85,7 @@ def closed_proposals(req):
     return {"proposals": list(map(proposal_json, proposals))}
 
 
-@make_response()
+@make_response("view.djhtml")
 def view_proposal(req, pk=None):
     if not pk:
         pk = req.GET.get("pk")
