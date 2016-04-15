@@ -28,7 +28,7 @@ APP_MODE = os.environ.get("DJANGO_MODE", "development").lower()
 APP_MODE = "development"
 IS_PRODUCTION = False
 
-REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_HOST = os.environ.get("REDIS_HOST", "redis://")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -153,7 +153,7 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
-BROKER_URL = REDIS_HOST or "redis://"
+BROKER_URL = REDIS_HOST
 
 # Persist task results to the database
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
