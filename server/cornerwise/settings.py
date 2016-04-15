@@ -28,6 +28,7 @@ APP_MODE = os.environ.get("DJANGO_MODE", "development").lower()
 APP_MODE = "development"
 IS_PRODUCTION = False
 
+REDIS_HOST = os.environ.get("REDIS_HOST")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -113,6 +114,14 @@ DATABASES = {
     }
 }
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+CACHES = {
+    "default": {
+        'BACKEND': 'redis_cache.RedisCache',
+        "LOCATION": REDIS_HOST
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -127,6 +136,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+SERVER_DOMAIN = "cornerwise1125.cloudapp.net"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -143,7 +153,7 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
-BROKER_URL = os.environ.get("REDIS_HOST", "redis://")
+BROKER_URL = REDIS_HOST or "redis://"
 
 # Persist task results to the database
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
