@@ -1,28 +1,150 @@
-import django.contrib.auth as auth
-from django.shortcuts import render
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template import RequestContext
 
-from shared.request import make_response
+import json
+
+from shared.request import make_response, ErrorResponse
+from .models import Subscription, User
 
 
 def user_dict(user):
     return {}
 
-
-@make_response
-def login(request):
-    user = auth.authenticate(username=request.POST["username"],
-                             password=request.POST["password"])
-    if user is not None:
-        if user.is_active:
-            auth.login(request, user)
-            return user_dict(user)
-        else:
-            return {"error": "That user account has been disabled."}
-
-    return {"error": "Invalid username or password"}
+# These correspond to the filters the user can apply.
+valid_keys = {"projects", "text", "box"}
 
 
-@make_response
-def logout(request):
-    auth.logout(request)
-    return {}
+def validate_query(d):
+    # Remove unrecognized keys:
+    for k in set(d.keys()).difference(valid_keys):
+        del d[k]
+
+    if "projects" in d:
+        d["projects"] = d["projects"].lower()
+        if d["projects"] not in {"all", "null"}:
+            del d["projects"]
+
+    # Verify that all the keys are well-formed
+    return d
+
+
+@make_response("subscribed.djhtml", "subscribe_error.djhtml")
+def subscribe(request):
+    """
+    Set up a new subscription. If the supplied
+    """
+    if request.method is not "POST":
+        return ErrorResponse("Request must use POST method.", status=405)
+
+    try:
+        query_dict = json.loads(request.POST["query"])
+    except KeyError:
+        return ErrorResponse("Missing a 'query' field")
+    except ValueError:
+        return ErrorResponse("Malformed JSON in 'query' field.")
+
+    query_dict = validate_query(query_dict)
+    if not query_dict:
+        return ErrorResponse("Invalid query", {"query": query_dict})
+
+    try:
+        user = User.objects.get(pk=request.session["user_id"])
+    except KeyError, User.DoesNotExist:
+        return ErrorResponse("Invalid user")
+
+    if not user:
+        try:
+            email = request.POST["email"]
+            user = User.objects.get(email=email)
+        except KeyError as kerr:
+            return ErrorResponse(
+                "Missing required key:" + kerr.args[0],
+                {})
+        except User.DoesNotExist:
+            user = User.objects.create(email=email)
+
+    try:
+        subscription = Subscription()
+        subscription.set_validated_query(query_dict)
+        user.subscriptions.add(subscription)
+    except Exception as exc:
+        return ErrorResponse("Invalid subscription")
+
+    messages.success(request, "")
+
+
+
+def do_login(request, token, uid):
+    try:
+        user = User.objects.get(pk=uid)
+        if user.token == token:
+            request.session["user_id"] = uid
+            user.generate_token()
+            return user
+    except User.DoesNotExist:
+        return None
+
+
+def with_user(view_fn):
+    def wrapped_fn(request):
+        try:
+            user = User.objects.get(pk=request.session["user_id"])
+            return view_fn(request, user)
+        except KeyError, User.DoesNotExist:
+            try:
+                user = do_login(request,
+                                request.GET["token"],
+                                request.GET["uid"])
+                if user:
+                    return view_fn(request, user)
+            except KeyError:
+                messages.error(request,
+                               "You must be logged in to view that page.")
+
+            return redirect("/")
+
+    return wrapped_fn
+
+
+def login(request, token, pk):
+    try:
+        user = User.objects.get(pk=pk)
+        if user.token != token:
+            messages.error(request, "")
+            return render(request, "token_error.djhtml",
+                          status=403)
+    except User.DoesNotExist:
+        user = None
+
+    if not user:
+        return redirect("/")
+
+    request.session["user_id"] = user.pk
+    redirect(reverse(manage))
+
+
+@with_user
+def manage(request, user):
+    if not user.is_active:
+        user.activate()
+        messages.success(request,
+                         "Thank you for confirming your account.")
+
+    return render("user/manager.djhtml",
+                  {"user": user,
+                   "subscriptions": user.subscriptions},
+                  context_instance=RequestContext(request))
+
+@with_user
+def delete_subscription(request, user, sub_id):
+    try:
+        subscription = user.subscriptions.get(pk=sub_id)
+        subscription.delete()
+        messages.success(request, "Subscription deleted")
+    except Subscription.DoesNotExist:
+        messages.error(request, "Invalid subscription ID")
+    return redirect(reverse(manage))
+
+

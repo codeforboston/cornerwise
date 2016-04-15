@@ -1,0 +1,22 @@
+{% extends "base.djhtml %}
+
+{% block body %}
+
+    <table id="subscriptions" >
+        {% for sub in user.subscriptions %}
+            <tr>
+                <td>
+                    <a href="{% url "delete_subscription" sub.pk %}">Cancel</a>
+                </td>
+                <td>
+                    {{ sub.readable_description }}
+                </td>
+            </tr>
+        {% empty %}
+            <tr class=" empty">
+                <td>No subscriptions.</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
