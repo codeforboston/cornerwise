@@ -87,7 +87,7 @@ body.nointro #event-eater {
 
 #map-options {
     right: 4em;
-    top: -4em;
+    top: -4.7em;
     height: 2em;
     line-height: 2em;
 }
@@ -447,7 +447,7 @@ body.main #filter-controls, body.list #filter-controls {
 .filters .filter-group {
     display: inline-block;
     margin-right: 1em;
-    
+
 }
 
 .filters .input-group {
@@ -1197,7 +1197,7 @@ body.loading-proposals #loading-indicator {
 }
 
 #map-options {
-    
+
 }
 
 #layers {
@@ -1213,7 +1213,7 @@ body.loading-proposals #loading-indicator {
 #map-options.expanded #layers {
     max-height: 6em;
     max-width: 1000px;
-    
+
 }
 
 .layer-list {
@@ -1238,7 +1238,7 @@ body.loading-proposals #loading-indicator {
     text-decoration: none;
 }
 
-.layer-button:hover .layer-icon, 
+.layer-button:hover .layer-icon,
 .layer-button:hover .label {
     color: white;
 }
@@ -1426,18 +1426,18 @@ ul.model-list li {
 
 
 
-.expand-layers:before { 
-    content: "\f102"; 
+.expand-layers:before {
+    content: "\f102";
     font-family: Flaticon;
     font-style: normal;
     padding-left: 0.3em;
     padding-right: 0.3em;
 }
 
-a.document:before { 
+a.document:before {
     content: "\f105";
     font-family: Flaticon;
-    font-style: normal; 
+    font-style: normal;
     padding-left: 0.2em;
 }
 
@@ -1502,7 +1502,7 @@ a.document:before {
         display: none;
     }
 }
-    
+
 @media screen and (max-width: 600px) {
     h3 {
         font-size: smaller;
