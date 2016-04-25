@@ -85,13 +85,18 @@ body.nointro #event-eater {
     top: -7em;
 }
 
+#map-controls a.disabled {
+    color: black;
+    cursor: default;
+    pointer-events: none;
+}
+
 #map-options {
     right: 4em;
     top: -4em;
     height: 2em;
     line-height: 2em;
 }
-
 
 #map-options.expanded .expand-layers {
     display: none;

@@ -41,6 +41,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    this.parcelLayer = parcelLayer;
                    this.zoningLayer = zoningLayer;
 
+                   map.on("zoomend", _.bind(this.updateControls, this));
                    map.on("moveend", _.bind(this.updateMarkers, this));
                    map.on("moveend", function() {
                        var center = map.getCenter();
@@ -309,6 +310,14 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                            marker.unsetZoomed();
                        }
                    });
+               },
+
+               updateControls: function() {
+                   var zoom = this.map.getZoom(),
+                       max = zoom >= this.map.getMaxZoom(),
+                       min = !max && zoom <= this.map.getMinZoom();
+                   $(".map-zoom-in").toggleClass("disabled", max);
+                   $(".map-zoom-out").toggleClass("disabled", min);
                },
 
                // Store a reference to the reference marker
