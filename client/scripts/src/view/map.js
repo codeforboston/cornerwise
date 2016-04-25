@@ -317,7 +317,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                placeReferenceMarker: function(change) {
                    var loc = refLocation.getPoint();
 
-                   if (!this._hideRefMarker) {
+                   // Don't show the ref marker if the user has not entered an
+                   // address or clicked the geolocate button.
+                   if (!this._hideRefMarker &&
+                       refLocation.get("setMethod") !== "auto") {
                        if (!this._refMarker) {
                            this._refMarker =
                                (new RefMarker(refLocation))
@@ -325,10 +328,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        }
 
                        // Recenter
-                       if (refLocation.get("setMethod") !== "auto") {
-                           this.map.setView(loc, Math.max(this.map.getZoom(), 16),
-                                            {animate: false});
-                       }
+                       this.map.setView(loc, Math.max(this.map.getZoom(), 16),
+                                        {animate: false});
                    }
                },
 
