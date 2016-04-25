@@ -313,14 +313,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                // Store a reference to the reference marker
                _refMarker: null,
-               _hideRefMarker: false,
                placeReferenceMarker: function(change) {
                    var loc = refLocation.getPoint();
 
                    // Don't show the ref marker if the user has not entered an
                    // address or clicked the geolocate button.
-                   if (!this._hideRefMarker &&
-                       refLocation.get("setMethod") !== "auto") {
+                   if (refLocation.get("setMethod") !== "auto") {
                        if (!this._refMarker) {
                            this._refMarker =
                                (new RefMarker(refLocation))
@@ -330,6 +328,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        // Recenter
                        this.map.setView(loc, Math.max(this.map.getZoom(), 16),
                                         {animate: false});
+                       this._refMarker.bringToBack();
+                   } else if (this._refMarker) {
+                       this.zoningLayer.removeLayer(this._refMarker);
+                       this._refMarker = null;
                    }
                },
 
