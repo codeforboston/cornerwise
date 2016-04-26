@@ -1156,7 +1156,6 @@ a.thumb-link:hover {
 }
 
 #alert-container {
-    pointer-events: none;
     position: absolute;
     text-align: center;
     width: 100%;
@@ -1164,21 +1163,29 @@ a.thumb-link:hover {
 }
 
 #alert {
-    background-color: rgba(240,108,73,0.5);
-    border: 2px solid #ee6c49;
+    background-color: whitesmoke;
+    border: 2px solid #BA252A;
+    border-radius: 0.2em;
+    color: black;
+    cursor: pointer;
     display: inline-block;
+    opacity: 0;
     padding: 0.5em;
+    pointer-events: none;
     position: relative;
-    top: -100px;
-    transition: top 0.2s ease-out;
+    top: 65px;
+    width: 50%;
+
+    transition: opacity 0.2s ease-out;
 }
 
 #alert.displayed {
-    top: 0;
+    opacity: 1;
+    pointer-events: auto;
 }
 
-body.nointro #alert.displayed {
-    top: 75px;
+#alert.info {
+    border: 2px solid #888;
 }
 
 body.main .leaflet-control-container {
