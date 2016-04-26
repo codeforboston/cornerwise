@@ -86,7 +86,7 @@ body.nointro #event-eater {
 }
 
 #map-controls a.disabled {
-    color: black;
+    color: #aaa;
     cursor: default;
     pointer-events: none;
 }
@@ -116,6 +116,13 @@ body.nointro #event-eater {
 
 #map-options.control a {
    color: #2A749B;
+}
+
+button {
+    background-color:  white;
+    border-radius: 0;
+    color: #2A749B;
+    font-size: 10pt;
 }
 
 .empty {
@@ -181,6 +188,10 @@ span.icon {
     height: 0.5em;
     display: none;
     text-align: left;
+}
+
+#user-controls {
+    float: right;
 }
 
 h3 {
@@ -432,6 +443,7 @@ body.main #filter-controls, body.list #filter-controls {
     overflow: hidden;
     box-shadow: 0 2px 3px rgba(180,180,180,1);
     transition: height 0.2s linear;
+    /* width: 60%; */
 }
 #filter-controls.collapsed .filters {
     height: 0;
