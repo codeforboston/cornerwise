@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 
@@ -13,17 +15,29 @@ def make_token():
     return b64encode(random.getrandbits(256).to_bytes(32, "big"))
 
 
-class User(models.Model):
-    email = models.EmailField(unique=True)
-    # Used for managing preferences
+class UserProfile(models.Model):
+    """
+    Extension to the built-in User class that adds a token for allowing
+    password-less login from email links.
+
+    For now, we can get away with this, because we won't be handling any
+    sensitive data.
+    """
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE,
+                                related_name="profile")
     token = models.CharField(max_length=64, default=make_token)
     # The user should not be able to log in if this is false:
-    activated = models.BooleanField(default=False)
-    nickname = models.CharField(max_length=128, empty=True,
-                                help="What do you prefer to be called?")
+    nickname = models.CharField(max_length=128,
+                                help_text="What do you prefer to be called?")
 
     def activate(self):
-        self.activated = True
+        self.is_active = True
+        self.token = make_token()
+        self.save()
+
+    def deactivate(self):
+        self.is_active = False
         self.token = make_token()
         self.save()
 

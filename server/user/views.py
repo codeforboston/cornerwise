@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.template import RequestContext
+
+from django.contrib.auth import login, logout
 
 import json
 
@@ -49,10 +51,8 @@ def subscribe(request):
     if not query_dict:
         return ErrorResponse("Invalid query", {"query": query_dict})
 
-    try:
-        user = User.objects.get(pk=request.session["user_id"])
-    except KeyError, User.DoesNotExist:
-        return ErrorResponse("Invalid user")
+    user = request.user
+    new_user = False
 
     if not user:
         try:
@@ -64,23 +64,25 @@ def subscribe(request):
                 {})
         except User.DoesNotExist:
             user = User.objects.create(email=email)
+            new_user = True
 
     try:
         subscription = Subscription()
         subscription.set_validated_query(query_dict)
         user.subscriptions.add(subscription)
-    except Exception as exc:
+    except Exception:
         return ErrorResponse("Invalid subscription")
 
-    messages.success(request, "")
-
+    messages.success(request, "Subscription added")
+    return {"new_user": new_user,
+            "email": user.email}
 
 
 def do_login(request, token, uid):
     try:
         user = User.objects.get(pk=uid)
         if user.token == token:
-            request.session["user_id"] = uid
+            login(request, user)
             user.generate_token()
             return user
     except User.DoesNotExist:
@@ -89,10 +91,9 @@ def do_login(request, token, uid):
 
 def with_user(view_fn):
     def wrapped_fn(request):
-        try:
-            user = User.objects.get(pk=request.session["user_id"])
-            return view_fn(request, user)
-        except KeyError, User.DoesNotExist:
+        if request.user:
+            return view_fn(request, request.user)
+        else:
             try:
                 user = do_login(request,
                                 request.GET["token"],
@@ -108,7 +109,7 @@ def with_user(view_fn):
     return wrapped_fn
 
 
-def login(request, token, pk):
+def user_login(request, token, pk):
     try:
         user = User.objects.get(pk=pk)
         if user.token != token:
@@ -121,8 +122,22 @@ def login(request, token, pk):
     if not user:
         return redirect("/")
 
-    request.session["user_id"] = user.pk
+    login(request, user)
     redirect(reverse(manage))
+
+
+@with_user
+def activate_account(request, user):
+    user.activate()
+
+    return redirect(reverse("manage-user"))
+
+
+@with_user
+def deactivate_account(request, user):
+    user.deactivate()
+
+    return redirect("/")
 
 
 @with_user
@@ -137,6 +152,7 @@ def manage(request, user):
                    "subscriptions": user.subscriptions},
                   context_instance=RequestContext(request))
 
+
 @with_user
 def delete_subscription(request, user, sub_id):
     try:
@@ -148,3 +164,7 @@ def delete_subscription(request, user, sub_id):
     return redirect(reverse(manage))
 
 
+def user_logout(request):
+    logout(request)
+
+    return redirect("/")

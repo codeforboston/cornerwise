@@ -12,6 +12,7 @@ from cornerwise import celery_app
 from cornerwise.utils import make_absolute_url
 
 from .models import Subscription, User
+from .changes import find_updates
 # from proposal.models import Proposal
 # from proposal.query import build_proposal_query
 
@@ -26,7 +27,7 @@ else:
 
 
 @celery_app.task()
-def send_subscription_updates(user, updates, proposals):
+def send_subscription_updates(user, updates):
     html = ""
     text = ""
 
@@ -43,8 +44,11 @@ def send_subscription_updates(user, updates, proposals):
         status, msg = SG.send(message)
         logger.info("Sent subscription updates to %s (status %i)",
                     user.email, status)
+        return status
     else:
         logger.info("SendGrid is not configured")
+        logger.info("Generated email:", html)
+        return -1
 
 
 @celery_app.task(name="project.send_user_key")
@@ -77,8 +81,7 @@ def send_user_key(user):
         logger.info("Sent welcome email to %s (status %i)",
                     user.email, status)
     else:
-        logger.info("SendGrid not available.  Generated email:")
-        logger.info(text)
+        logger.info("SendGrid not available.  Generated email:", html)
 
 
 @celery_app.task()
@@ -92,10 +95,10 @@ def run_notifications(subscriptions=None, since=None):
     if since is None:
         since = datetime.now() - timedelta(days=7)
 
-    # Use django-reversion to find all changes to Proposals, Attributes,
-    # Events, and Documents within the period of interest
-
-    # Group the updates by user
+    for subscription in subscriptions:
+        updates = find_updates(subscription, since)
+        if updates:
+            send_subscription_updates(subscription.user, updates)
 
 
 # Database hooks:
