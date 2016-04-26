@@ -60,7 +60,7 @@ INSTALLED_APPS = (
     'parcel',
     'proposal.ProposalConfig',
     'project.ProjectConfig',
-    'user',
+    'user.UserAppConfig',
     'shared'
 )
 

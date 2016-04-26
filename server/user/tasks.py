@@ -111,6 +111,3 @@ def user_created(kls, **kwargs):
 def set_up_hooks():
     post_save.connect(user_created, User,
                       dispatch_uid="send_confirmation_email")
-
-
-set_up_hooks()
