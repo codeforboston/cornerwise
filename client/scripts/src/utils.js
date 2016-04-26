@@ -501,7 +501,7 @@ define(["underscore", "jquery", "locale", "leaflet"],
                                          "=([^;]+)"),
                        m = cookie.match(patt);
 
-                   return m && decodeURIComponents(m[2]);
+                   return m && decodeURIComponent(m[2]);
                },
 
                /**
