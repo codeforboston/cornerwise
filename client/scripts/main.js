@@ -51,6 +51,7 @@ require.config({
         "projects-summary-view": "src/view/projectsSummary",
         "layers-view": "src/view/layers",
         "filters-view": "src/view/filters",
+        "subscribe-view": "src/view/subscribe",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
         "toggle-button-view": "src/view/toggleButton",

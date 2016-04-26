@@ -41,6 +41,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    this.parcelLayer = parcelLayer;
                    this.zoningLayer = zoningLayer;
 
+                   map.on("zoomend", _.bind(this.updateControls, this));
                    map.on("moveend", _.bind(this.updateMarkers, this));
                    map.on("moveend", function() {
                        var center = map.getCenter();
@@ -311,13 +312,22 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    });
                },
 
+               updateControls: function() {
+                   var zoom = this.map.getZoom(),
+                       max = zoom >= this.map.getMaxZoom(),
+                       min = !max && zoom <= this.map.getMinZoom();
+                   $(".map-zoom-in").toggleClass("disabled", max);
+                   $(".map-zoom-out").toggleClass("disabled", min);
+               },
+
                // Store a reference to the reference marker
                _refMarker: null,
-               _hideRefMarker: false,
                placeReferenceMarker: function(change) {
                    var loc = refLocation.getPoint();
 
-                   if (!this._hideRefMarker) {
+                   // Don't show the ref marker if the user has not entered an
+                   // address or clicked the geolocate button.
+                   if (refLocation.get("setMethod") !== "auto") {
                        if (!this._refMarker) {
                            this._refMarker =
                                (new RefMarker(refLocation))
@@ -325,10 +335,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        }
 
                        // Recenter
-                       if (refLocation.get("setMethod") !== "auto") {
-                           this.map.setView(loc, Math.max(this.map.getZoom(), 16),
-                                            {animate: false});
-                       }
+                       this.map.setView(loc, Math.max(this.map.getZoom(), 16),
+                                        {animate: false});
+                       this._refMarker.bringToBack();
+                   } else if (this._refMarker) {
+                       this.zoningLayer.removeLayer(this._refMarker);
+                       this._refMarker = null;
                    }
                },
 

@@ -12,6 +12,7 @@ from cornerwise import celery_app
 from cornerwise.utils import make_absolute_url
 
 from .models import Subscription, User
+from .changes import find_updates
 # from proposal.models import Proposal
 # from proposal.query import build_proposal_query
 
@@ -26,7 +27,7 @@ else:
 
 
 @celery_app.task()
-def send_subscription_updates(user, updates, proposals):
+def send_subscription_updates(user, updates):
     html = ""
     text = ""
 
@@ -43,17 +44,21 @@ def send_subscription_updates(user, updates, proposals):
         status, msg = SG.send(message)
         logger.info("Sent subscription updates to %s (status %i)",
                     user.email, status)
+        return status
     else:
         logger.info("SendGrid is not configured")
+        logger.info("Generated email:", html)
+        return -1
 
 
 @celery_app.task(name="project.send_user_key")
 def send_user_key(user):
-    if not user.mod_code:
-        user.generate_token()
+    profile = user.profile
+    if not profile.token:
+        profile.generate_token()
 
     # Render HTML and text templates:
-    path = reverse("user-login", kwargs={"token": user.token,
+    path = reverse("user-login", kwargs={"token": profile.token,
                                          "pk": user.pk})
     context = {"user": user,
                "confirm_url": make_absolute_url(path)}
@@ -66,19 +71,14 @@ def send_user_key(user):
             html=html,
             text=text,
             from_email=settings.EMAIL_ADDRESS)
-        if user.nickname:
-            message.add_to("{user.nickname} <{user.email}>".
-                           format(user=user))
-        else:
-            message.add_to(user.email)
+        message.add_to(user.email)
 
         status, msg = SG.send(message)
 
         logger.info("Sent welcome email to %s (status %i)",
                     user.email, status)
     else:
-        logger.info("SendGrid not available.  Generated email:")
-        logger.info(text)
+        logger.info("SendGrid not available.  Generated email:", html)
 
 
 @celery_app.task()
@@ -92,14 +92,16 @@ def run_notifications(subscriptions=None, since=None):
     if since is None:
         since = datetime.now() - timedelta(days=7)
 
-    # Use django-reversion to find all changes to Proposals, Attributes,
-    # Events, and Documents within the period of interest
-
-    # Group the updates by user
+    for subscription in subscriptions:
+        updates = find_updates(subscription, since)
+        if updates:
+            send_subscription_updates(subscription.user, updates)
 
 
 # Database hooks:
-def user_created(kls, user, created):
+def user_created(kls, **kwargs):
+    user = kwargs["instance"]
+    created = kwargs["created"]
     if not created:
         return
 
@@ -109,6 +111,3 @@ def user_created(kls, user, created):
 def set_up_hooks():
     post_save.connect(user_created, User,
                       dispatch_uid="send_confirmation_email")
-
-
-set_up_hooks()

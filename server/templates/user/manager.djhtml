@@ -1,22 +1,61 @@
-{% extends "base.djhtml %}
+{% extends "base.djhtml" %}
 
 {% block body %}
+    <h1>
+        Manage Subscription Settings
+    </h1>
 
-    <table id="subscriptions" >
-        {% for sub in user.subscriptions %}
-            <tr>
-                <td>
-                    <a href="{% url "delete_subscription" sub.pk %}">Cancel</a>
-                </td>
-                <td>
-                    {{ sub.readable_description }}
-                </td>
-            </tr>
-        {% empty %}
-            <tr class=" empty">
-                <td>No subscriptions.</td>
-            </tr>
-        {% endfor %}
-    </table>
+    <h4>
+        User: {{ user.email }}
+    </h4>
+
+    {% if not user.is_active %}
+        <p>
+            This email is currently deactivated and will not receive emails until
+            you reactivate it.
+        </p>
+    {% endif %}
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            Notifications:
+        </div>
+        <table id="subscriptions"
+               class="table">
+            {% for sub in user.subscriptions.all %}
+                <tr>
+                    <td>
+                        <form action="{% url "delete-subscription" sub_id=sub.pk %}" >
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        {{ sub.readable_description }}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr class=" empty">
+                    <td>No subscriptions.</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="panel">
+        {% if user.is_active %}
+            <form action="{% url "deactivate-account" %}">
+                <button class="btn btn-danger">
+                    Deactivate Account
+                </button>
+            </form>
+        {% else %}
+            <form action="{% url "activate-account" %}"
+                <button class=" btn">
+                    Reactivate Account
+                </button>
+        {% endif %}
+    </div>
 
 {% endblock %}

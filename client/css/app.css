@@ -85,13 +85,18 @@ body.nointro #event-eater {
     top: -7em;
 }
 
+#map-controls a.disabled {
+    color: #aaa;
+    cursor: default;
+    pointer-events: none;
+}
+
 #map-options {
     right: 4em;
     top: -4.7em;
     height: 2em;
     line-height: 2em;
 }
-
 
 #map-options.expanded .expand-layers {
     display: none;
@@ -111,6 +116,13 @@ body.nointro #event-eater {
 
 #map-options.control a {
    color: #2A749B;
+}
+
+button {
+    background-color:  white;
+    border-radius: 0;
+    color: #2A749B;
+    font-size: 10pt;
 }
 
 .empty {
@@ -176,6 +188,10 @@ span.icon {
     height: 0.5em;
     display: none;
     text-align: left;
+}
+
+#user-controls {
+    float: right;
 }
 
 h3 {
@@ -427,6 +443,7 @@ body.main #filter-controls, body.list #filter-controls {
     overflow: hidden;
     box-shadow: 0 2px 3px rgba(180,180,180,1);
     transition: height 0.2s linear;
+    /* width: 60%; */
 }
 #filter-controls.collapsed .filters {
     height: 0;
@@ -1151,7 +1168,6 @@ a.thumb-link:hover {
 }
 
 #alert-container {
-    pointer-events: none;
     position: absolute;
     text-align: center;
     width: 100%;
@@ -1159,21 +1175,29 @@ a.thumb-link:hover {
 }
 
 #alert {
-    background-color: rgba(240,108,73,0.5);
-    border: 2px solid #ee6c49;
+    background-color: whitesmoke;
+    border: 2px solid #BA252A;
+    border-radius: 0.2em;
+    color: black;
+    cursor: pointer;
     display: inline-block;
+    opacity: 0;
     padding: 0.5em;
+    pointer-events: none;
     position: relative;
-    top: -100px;
-    transition: top 0.2s ease-out;
+    top: 65px;
+    width: 50%;
+
+    transition: opacity 0.2s ease-out;
 }
 
 #alert.displayed {
-    top: 0;
+    opacity: 1;
+    pointer-events: auto;
 }
 
-body.nointro #alert.displayed {
-    top: 75px;
+#alert.info {
+    border: 2px solid #888;
 }
 
 body.main .leaflet-control-container {

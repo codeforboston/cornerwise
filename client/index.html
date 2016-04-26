@@ -111,7 +111,6 @@
   </head>
 
   <body>
-    <div id="alert-container"><div id="alert"></div></div>
     <div id="loading-indicator" class="control">
         <img src="/static/images/loading.gif">
     </div>
@@ -130,7 +129,7 @@
     <div id="event-eater" class="_setview" data-goto="main"></div>
 
     <div id="search-banner" class="overlay">
-        <div id="logo"></div>
+        <a href="#" id="logo"></a>
         <div class="overlay-contents">
             <h3>What&rsquo;s Being Built Near&hellip;</h3>
             <div class="input-group big-input">
@@ -142,7 +141,7 @@
                 </form>
             </div>
         </div>
-        <a id="explore" href="#view=main">Explore the Data</a>
+        <a id="explore" href="#view=main">Explore the Map</a>
 
         <!-- Filter controls will be appear below the title bar when the intro is
              complete. -->
@@ -166,6 +165,18 @@
                     </label>
                 </div>
                 <div id="filter-attributes"></div>
+
+            <div id="user-controls">
+                <form class="form-popup" id="subscribe-form">
+                    <div class="error"></div>
+                    <div class="input-group filter-group">
+                        <input class="input" type="email" name="email"
+                               placeholder="Email" autocomplete="off"/>
+                    </div>
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+
             </div>
 
             <a href="#fc=1" class="toggle-filters when-collapsed">Filter Results</a>
@@ -174,9 +185,13 @@
 
         <div id="mode-controls">
             <a class="mode main-mode action" href="#view=list"><img src="static/images/list-icon.png" alt="List" width="23" height="23"><br>
-            LIST</a>
+                LIST
+            </a>
             <a class="mode list-mode action" href="#view=main"><img src="static/images/map-icon.png" alt="Map" width="23" height="23"><br>
-        MAP</a>        </div>
+                MAP
+            </a>
+        </div>
+    <div id="alert"></div>
     </div>
 
 
@@ -240,10 +255,10 @@
 
     <div id="list-view"></div>
 
-    <script src="https://use.typekit.net/wpe7mmw.js"></script>
-    <script src="/static/scripts/src/outline.js"></script>
-    <script type="text/javascript">
-     try{Typekit.load({ async: true });}catch(e){}
-    </script>
+    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
+    <!-- <script src="/static/scripts/src/outline.js"></script> -->
+    <!-- <script type="text/javascript"> -->
+    <!-- try{Typekit.load({ async: true });}catch(e){} -->
+    <!-- </script> -->
   </body>
 </html>

@@ -1,17 +1,16 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title>Cornerwise</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <meta name="viewport" content="width=device-width, initial-scape=1" >
     </head>
-    <body>
-        {% if messages %}
-            <ul class="messages" >
-                {% for message in messages %}
-                    <li class="message {{ message.tags }}">
-                        {{ message }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+    <body class="container">
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
         {% block body %}
 
         {% endblock %}

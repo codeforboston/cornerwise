@@ -87,11 +87,16 @@ define(
                     el: "#map"
                 });
 
-                require(["filters-view"],
-                        function(FiltersView) {
+                require(["filters-view", "subscribe-view"],
+                        function(FiltersView, SubscribeView) {
                             appViews.filtersView = new FiltersView({
                                 collection: proposals,
                                 mapView: appViews.mapView
+                            });
+
+                            appViews.subscribeView = new SubscribeView({
+                                collection: proposals,
+                                el: "#user-controls"
                             });
                         });
 

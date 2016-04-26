@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'parcel',
     'proposal.ProposalConfig',
     'project.ProjectConfig',
+    'user.UserAppConfig',
     'shared'
 )
 
@@ -198,6 +199,8 @@ GEOCODER = "arcgis"
 
 # Email address and name for emails:
 EMAIL_ADDRESS = "Cornerwise <cornerwise@somervillema.gov>"
+
+AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
 # Load select environment variables into settings:
 for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",

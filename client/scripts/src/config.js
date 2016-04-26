@@ -36,7 +36,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             weight: 2,
             color: "red",
             fillColor: "red",
-            fillOpacity: "0.15"
+            fillOpacity: "0"
         },
 
         defaultProposalThumb: "/static/images/marker-normal@2x.png",
