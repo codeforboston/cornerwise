@@ -108,7 +108,8 @@ class Subscription(models.Model):
 
         if "box" in query:
             coords = [float(s) for s in query["box"].split(",")]
-            desc += "".join(["between ", prettify_lat(coords[0]), ", ",
+            desc += "".join(["inside the region: ",
+                             prettify_lat(coords[0]), ", ",
                              prettify_long(coords[1]), " and ",
                              prettify_lat(coords[2]), ", ",
                              prettify_long(coords[3])])

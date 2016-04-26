@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 from django.template import RequestContext
@@ -8,7 +10,7 @@ from django.contrib.auth import login, logout
 import json
 
 from shared.request import make_response, ErrorResponse
-from .models import Subscription, User
+from .models import Subscription, UserProfile
 
 
 def user_dict(user):
@@ -37,41 +39,45 @@ def subscribe(request):
     """
     Set up a new subscription. If the supplied
     """
-    if request.method is not "POST":
-        return ErrorResponse("Request must use POST method.", status=405)
+    if request.method != "POST":
+        raise ErrorResponse("Request must use POST method.", status=405)
 
     try:
         query_dict = json.loads(request.POST["query"])
     except KeyError:
-        return ErrorResponse("Missing a 'query' field")
+        raise ErrorResponse("Missing a 'query' field")
     except ValueError:
-        return ErrorResponse("Malformed JSON in 'query' field.")
+        raise ErrorResponse("Malformed JSON in 'query' field.")
 
-    query_dict = validate_query(query_dict)
-    if not query_dict:
-        return ErrorResponse("Invalid query", {"query": query_dict})
+    if query_dict != {}:
+        query_dict = validate_query(query_dict)
+        if not query_dict:
+            raise ErrorResponse("Invalid query", {"query": query_dict})
 
     user = request.user
     new_user = False
 
-    if not user:
+    if user.is_anonymous():
         try:
             email = request.POST["email"]
             user = User.objects.get(email=email)
         except KeyError as kerr:
-            return ErrorResponse(
+            raise ErrorResponse(
                 "Missing required key:" + kerr.args[0],
                 {})
         except User.DoesNotExist:
-            user = User.objects.create(email=email)
+            user = User.objects.create(username=email,
+                                       email=email)
+            UserProfile.objects.create(user=user)
             new_user = True
 
     try:
         subscription = Subscription()
         subscription.set_validated_query(query_dict)
         user.subscriptions.add(subscription)
-    except Exception:
-        return ErrorResponse("Invalid subscription")
+    except Exception as exc:
+        raise ErrorResponse("Invalid subscription",
+                            {"exception": exc.args})
 
     messages.success(request, "Subscription added")
     return {"new_user": new_user,
@@ -83,23 +89,26 @@ def do_login(request, token, uid):
         user = User.objects.get(pk=uid)
         if user.token == token:
             login(request, user)
-            user.generate_token()
+            # Should the old token be invalidated at each login, or should it
+            #  only be regenerated when emails are sent?
+
+            # user.generate_token()
             return user
     except User.DoesNotExist:
         return None
 
 
 def with_user(view_fn):
-    def wrapped_fn(request):
+    def wrapped_fn(request, **kwargs):
         if request.user:
-            return view_fn(request, request.user)
+            return view_fn(request, request.user, **kwargs)
         else:
             try:
                 user = do_login(request,
                                 request.GET["token"],
                                 request.GET["uid"])
                 if user:
-                    return view_fn(request, user)
+                    return view_fn(request, user, **kwargs)
             except KeyError:
                 messages.error(request,
                                "You must be logged in to view that page.")
@@ -110,20 +119,13 @@ def with_user(view_fn):
 
 
 def user_login(request, token, pk):
-    try:
-        user = User.objects.get(pk=pk)
-        if user.token != token:
-            messages.error(request, "")
-            return render(request, "token_error.djhtml",
-                          status=403)
-    except User.DoesNotExist:
-        user = None
-
+    user = authenticate(pk=pk, token=token)
     if not user:
-        return redirect("/")
+        return render(request, "token_error.djhtml",
+                      status=403)
 
     login(request, user)
-    redirect(reverse(manage))
+    return redirect(reverse(manage))
 
 
 @with_user
@@ -147,7 +149,7 @@ def manage(request, user):
         messages.success(request,
                          "Thank you for confirming your account.")
 
-    return render("user/manager.djhtml",
+    return render(request, "user/manager.djhtml",
                   {"user": user,
                    "subscriptions": user.subscriptions},
                   context_instance=RequestContext(request))
@@ -164,6 +166,7 @@ def delete_subscription(request, user, sub_id):
     return redirect(reverse(manage))
 
 
+# Should there be a user logout?
 def user_logout(request):
     logout(request)
 

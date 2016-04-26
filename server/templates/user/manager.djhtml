@@ -1,12 +1,12 @@
-{% extends "base.djhtml %}
+{% extends "base.djhtml" %}
 
 {% block body %}
 
     <table id="subscriptions" >
-        {% for sub in user.subscriptions %}
+        {% for sub in user.subscriptions.all %}
             <tr>
                 <td>
-                    <a href="{% url "delete_subscription" sub.pk %}">Cancel</a>
+                    <a href="{% url "delete-subscription" sub_id=sub.pk %}">Cancel</a>
                 </td>
                 <td>
                     {{ sub.readable_description }}

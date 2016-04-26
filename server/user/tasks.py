@@ -53,11 +53,12 @@ def send_subscription_updates(user, updates):
 
 @celery_app.task(name="project.send_user_key")
 def send_user_key(user):
-    if not user.mod_code:
-        user.generate_token()
+    profile = user.profile
+    if not profile.token:
+        profile.generate_token()
 
     # Render HTML and text templates:
-    path = reverse("user-login", kwargs={"token": user.token,
+    path = reverse("user-login", kwargs={"token": profile.token,
                                          "pk": user.pk})
     context = {"user": user,
                "confirm_url": make_absolute_url(path)}
@@ -70,11 +71,7 @@ def send_user_key(user):
             html=html,
             text=text,
             from_email=settings.EMAIL_ADDRESS)
-        if user.nickname:
-            message.add_to("{user.nickname} <{user.email}>".
-                           format(user=user))
-        else:
-            message.add_to(user.email)
+        message.add_to(user.email)
 
         status, msg = SG.send(message)
 
@@ -102,7 +99,9 @@ def run_notifications(subscriptions=None, since=None):
 
 
 # Database hooks:
-def user_created(kls, user, created):
+def user_created(kls, **kwargs):
+    user = kwargs["instance"]
+    created = kwargs["created"]
     if not created:
         return
 

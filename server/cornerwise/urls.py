@@ -21,6 +21,7 @@ from django.http import HttpResponse
 import parcel.urls as parcel_urls
 import project.urls as project_urls
 import proposal.urls as proposal_urls
+import user.urls as user_urls
 from proposal import doc_urls
 
 urlpatterns = [
@@ -29,6 +30,7 @@ urlpatterns = [
     url(r'^project/', include(project_urls)),
     url(r'^proposal/', include(proposal_urls)),
     url(r"^doc/", include(doc_urls)),
+    url(r"^user/", include(user_urls))
 ]
 
 if settings.DEBUG:
