@@ -1,0 +1,23 @@
+<p>Hello,</p>
+
+<p>
+    You are receiving this message because you have requested to receive updates
+    from Cornerwise about proposed changes in your area.
+</p>
+
+<h2>
+    Summary
+</h2>
+
+<ul>
+    {% for changeset in changes %}
+    <li>
+        <h3>{{ changeset.proposal.address }}</h3>
+        <ul>
+        {% for prop_path, change in changeset.changes %}
+            <li>{{ change.description }}</li>
+        {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
