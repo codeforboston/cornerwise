@@ -13,7 +13,8 @@ class ErrorResponse(Exception):
     def __init__(self, message, data=None, status=401, err=None):
         super(Exception, self).__init__(self, message)
         self.data = {"error": message}
-        self.data.update(data)
+        if data:
+            self.data.update(data)
         self.status = status
         self.exception = err
 
@@ -51,10 +52,9 @@ def make_response(template=None, error_template="error.djhtml"):
                 return response
 
             accepts = req.META["HTTP_ACCEPT"]
-            typestring, _ = accepts.split(";", 1)
 
             if not use_template \
-               or re.search(r"application/json", typestring):
+               or re.search(r"application/json", accepts):
                 response = JsonResponse(data, status=status)
                 # TODO: We may (or may not!) want to be more restrictive
                 # in the future:
