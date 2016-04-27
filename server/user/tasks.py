@@ -99,13 +99,9 @@ def run_notifications(subscriptions=None, since=None):
 
 
 # Database hooks:
-def user_created(kls, **kwargs):
-    user = kwargs["instance"]
-    created = kwargs["created"]
-    if not created:
-        return
-
-    send_user_key.delay(user)
+def user_created(**kwargs):
+    if kwargs["created"]:
+        send_user_key.delay(kwargs["instance"])
 
 
 def set_up_hooks():
