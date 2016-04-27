@@ -53,9 +53,20 @@ def proposal_json(proposal, include_images=True,
 
 # Views:
 
-
 @make_response("list.djhtml")
 def active_proposals(req):
+    proposals = Proposal.objects.filter(build_proposal_query(req.GET))
+    if "include_projects" in req.GET:
+        proposals = proposals.select_related("project")
+
+    pjson = [proposal_json(proposal, include_images=1)
+             for proposal in proposals]
+
+    return {"proposals": pjson}
+
+
+@make_response("list.djhtml")
+def paginated_active_proposals(req):
     proposal_query = Proposal.objects.filter(build_proposal_query(req.GET))
     if "include_projects" in req.GET:
         proposal_query = proposal_query.select_related("project")
