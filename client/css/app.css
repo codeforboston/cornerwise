@@ -327,13 +327,12 @@ body.geolocating #ref-address-form .go-button {
 }
 
 #intro {
-    height: 12em;
+    height: 5em;
     overflow: hidden;
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-
     transition: height 0.2s linear;
 }
 
@@ -1168,6 +1167,9 @@ a.thumb-link:hover {
 }
 
 #alert-container {
+    bottom: -65px;
+    height: 0;
+    pointer-events: none;
     position: absolute;
     text-align: center;
     width: 100%;
@@ -1184,8 +1186,6 @@ a.thumb-link:hover {
     opacity: 0;
     padding: 0.5em;
     pointer-events: none;
-    position: relative;
-    top: 65px;
     width: 50%;
 
     transition: opacity 0.2s ease-out;
