@@ -3,31 +3,32 @@
 {% load humanize %}
 
 {% block body %}
-<table>
     {% for proposal in proposals %}
-    <tr>
-        <td class="thumbnail" >
-            <img src="{{ proposal.images.0.thumb }}"/>
-        </td>
-        <td class="info" >
-            <h3>{{ proposal.address }}</h3>
-            Last updated {{ proposal.updated|naturalday }}
+        <div class="row" >
+            <div class="col-md-4">
+                <img src="{{ proposal.images.0.thumb }}"
+                     class="img-thumbnail"/>
+            </div>
+            <div class="col-md-8" >
+                <h3>{{ proposal.address }}</h3>
+                Last updated {{ proposal.updated|naturalday }}
 
-            {% if proposal.project %}
+                {% if proposal.project %}
 
-            {% else %}
-            <table>
-                <tbody>
-                    {% for attribute in proposal.attributes %}
-                    <tr>
-                        <th>{{ attribute.name }}</th>
-                        <td>{{ attribute.value }}</td>
-                        {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-        </td>
-    </tr>
+                {% else %}
+                    <table class="table table-striped">
+                        <tbody>
+                            {% for attribute in proposal.attributes %}
+                                <tr>
+                                    <th>{{ attribute.name }}</th>
+                                    <td>{{ attribute.value }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
     {% endfor %}
-</table>
+        </div>
 {% endblock %}
