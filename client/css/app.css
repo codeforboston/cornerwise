@@ -118,6 +118,15 @@ body.nointro #event-eater {
    color: #2A749B;
 }
 
+#map-options.control:hover {
+    background-color: #2A749B;
+}
+
+#map-options.control:hover a.toggle-layers {
+    color: white !important;
+    text-decoration: none;
+}
+
 button {
     background-color:  white;
     border-radius: 0;
