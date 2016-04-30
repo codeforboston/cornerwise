@@ -11,6 +11,7 @@ import json
 
 from shared.request import make_response, ErrorResponse
 from .models import Subscription, UserProfile
+from .tasks import send_user_key
 
 
 def user_dict(user):
@@ -81,7 +82,21 @@ def subscribe(request):
 
     messages.success(request, "Subscription added")
     return {"new_user": new_user,
+            "active": user.is_active,
             "email": user.email}
+
+
+@make_response()
+def resend_email(request):
+    try:
+        user = User.objects.get(email=request.POST["email"])
+        send_user_key.delay(user)
+    except KeyError:
+        raise ErrorResponse("Bad request", status=405)
+    except User.DoesNotExist:
+        pass
+
+    return {"status": "OK"}
 
 
 def do_login(request, token, uid):
