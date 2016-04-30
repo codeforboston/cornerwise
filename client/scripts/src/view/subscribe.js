@@ -12,7 +12,6 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                },
 
                onSubmit: function(e) {
-                   console.log("Submitted");
                    var form = e.target,
                        self = this;
                    $.ajax("/user/subscribe",
@@ -30,8 +29,21 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                                     "instructions on how to complete the ",
                                     "process"].join(""),
                                    "info");
+                           } else if (resp.active) {
+                               alerts.show(
+                                   "You will now receive notifications for " +
+                                       "proposals matching the current filters.",
+                                   "info");
                            } else {
-
+                               alerts.show(
+                                   ["You will receive notifications for proposals",
+                                    "matching the current filters once you",
+                                    "confirm your email address."].join(""),
+                                   "info");
+                                    //    <br/>",
+                                    // "<form action='/user/resent' method='post'>",
+                                    // "<input type='hidden' name='email' ",
+                                    // "value='", 
                            }
                        })
                        .fail(function(err) {
