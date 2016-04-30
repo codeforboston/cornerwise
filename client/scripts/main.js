@@ -3,9 +3,9 @@ require.config({
         // Dependencies:
         "underscore": "lib/underscore-min",
         "backbone": "lib/backbone",
-        "leaflet": "http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet",
-        "jquery": "http://code.jquery.com/jquery-1.11.3.min",
-        "chartjs": "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min",
+        "leaflet": "//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet",
+        "jquery": "//code.jquery.com/jquery-1.11.3.min",
+        "chartjs": "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min",
 
         // Utilities:
         "utils": "src/utils",
