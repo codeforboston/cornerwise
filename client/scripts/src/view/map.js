@@ -122,8 +122,8 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                                                          {style: config.regionStyle});
 
 
-                                   layer.on("dblclick", function() {
-                                       self.onDblClick();
+                                   layer.on("dblclick", function(e) {
+                                       self.onDblClick(e);
                                    });
                                    bounds.extend(layer.getBounds());
                                    self.regionLayers[id] = layer;
@@ -137,7 +137,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    // Fit to visible regions?
                    deferredBounds.done(function(bounds) {
                        // Need to add padding to the bounds
-                       // self.map.setMaxBounds(bounds);
+                       self.map.setMaxBounds(bounds);
                    });
                },
 
