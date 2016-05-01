@@ -6,12 +6,12 @@ define(["backbone", "underscore", "config", "utils"],
                        _cachedState: null,
 
                        defaults: {
-                           // Region:
-                           "r": "somerville",
                            // Filters:
                            "f": {
                                "projects": "",
-                               "range": "<60"
+                               "range": "<60",
+                               // Region:
+                               "region": "somerville"
                            },
                            "ref": {
                                "lat": config.refPointDefault.lat,

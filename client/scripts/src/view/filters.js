@@ -2,10 +2,10 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location", "utils", "arcgis",
+    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis",
      "app-state", "config"],
 
-    function(B, _, $, refLocation, $u, arcgis, appState, config) {
+    function(B, _, $, refLocation, regions, $u, arcgis, appState, config) {
         return B.View.extend({
             el: document.body,
 
@@ -15,6 +15,8 @@ define(
                               this.updateRadius)
                     .listenTo(refLocation, "change:geolocating",
                               this.toggleGeolocating);
+
+                this.buildRegionSelection();
 
                 // Show the filter controls?
                 appState.onStateKeyChange("fc", function(fc) {
@@ -55,6 +57,7 @@ define(
                 "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
+                "change #filter-region": "updateRegion",
                 "click a.ref-loc": "selectAddress"
             },
 
@@ -63,6 +66,7 @@ define(
                 $("#reset-filter-bounds").toggle(!!filters.box);
                 $("#filter-private").prop("checked", filters.projects != "all");
                 $("#filter-public").prop("checked", filters.projects != "null");
+                $("#filter-region").val(filters.region);
             },
 
             submitAddress: function(e) {
@@ -161,6 +165,20 @@ define(
                       "<input class='input' type='text' value='" +
                       _.escape(val) + "'/></div>").appendTo($con);
                 });
+            },
+
+            buildRegionSelection: function() {
+                var html = regions.map(function(region) {
+                    return ("<option value='" + region.id +
+                        "'>" + _.escape(region.get("regionName")) +
+                            "</option>");
+                });
+
+                $("#filter-region").html(html.join(""));
+            },
+
+            updateRegion: function(e) {
+                regions.setSelection([e.target.value]);
             },
 
             // Filter the collection to only include models that lie within the

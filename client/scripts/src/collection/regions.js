@@ -26,7 +26,7 @@ define(["backbone", "jquery", "underscore", "selectable", "config"],
 
                model: RegionModel,
 
-               hashParam: "r"
+               hashParam: "f.region"
            });
 
            return new RegionCollection(regions);

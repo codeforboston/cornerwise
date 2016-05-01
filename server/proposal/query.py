@@ -4,7 +4,8 @@ from collections import defaultdict
 from functools import reduce
 import re
 
-from .models import Proposal, Attribute
+from .models import Attribute
+
 
 def build_attributes_query(d):
     """Construct a Proposal query from query parameters.
@@ -36,14 +37,19 @@ def build_attributes_query(d):
 
 
 query_params = {
-    "region": "region_name",
     "case": "case_number",
     "address": "address",
     "source": "source"
 }
 
+# TODO: Don't hardcode this
+region_names = {
+    "somerville": "Somerville, MA",
+    "cambridge": "Cambridge, MA"
+}
 
-def build_proposal_query(d):
+
+def build_proposal_query_dict(d):
     subqueries = {}
     ids = build_attributes_query(d) or []
 
@@ -52,6 +58,14 @@ def build_proposal_query(d):
 
     if "text" in d:
         subqueries["address__icontains"] = d["text"]
+
+    if d.get("region"):
+        regions = re.split(r"\s*,\s*", d["region"])
+        regions = [region_names[r] for r in regions if r in region_names]
+        if len(regions) == 1:
+            subqueries["region_name"] = regions[0]
+        else:
+            subqueries["region_name__in"] = regions
 
     if ids:
         subqueries["pk__in"] = ids
@@ -74,13 +88,13 @@ def build_proposal_query(d):
                                   coords[3], coords[2]))
         subqueries["location__within"] = bbox
 
+    # If status is anything other than 'active' or 'closed', find all
+    # proposals.
     status = d.get("status", "active").lower()
     if status == "closed":
         subqueries["complete"] = True
     elif status == "active":
         subqueries["complete"] = False
-    # If status is anything other than 'active' or 'closed', find all
-    # proposals.
 
     event = d.get("event")
     if event:
@@ -93,4 +107,9 @@ def build_proposal_query(d):
         if k in query_params:
             subqueries[query_params[k]] = d[k]
 
+    return subqueries
+
+
+def build_proposal_query(d):
+    subqueries = build_proposal_query_dict(d)
     return Q(**subqueries)

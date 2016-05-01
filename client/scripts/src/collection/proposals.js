@@ -74,7 +74,8 @@ define(
             queryFilters: {
                 projects: "typeFilter",
                 text: "textFilter",
-                box: "boxFilter"
+                box: "boxFilter",
+                region: "regionFilter"
             },
 
             /**
@@ -130,6 +131,9 @@ define(
                         return false;
                 }
 
+                if (newQuery.region !== oldQuery.region)
+                    return false;
+
                 // TODO: Handle attribute queries
                 // They should probably always return false, since by default,
                 // only some attribute values are loaded.
@@ -166,6 +170,12 @@ define(
                     preds.push(function(proposal) {
                         var loc = proposal.location;
                         return bounds.contains([loc.lat, loc.lng]);
+                    });
+                }
+
+                if (query.region) {
+                    preds.push(function(proposal) {
+                        return proposal.region_name == query.region;
                     });
                 }
 
@@ -257,6 +267,10 @@ define(
 
             boxFilter: function(query, val) {
                 query.box = val;
+            },
+
+            regionFilter: function(query, val) {
+                query.region = val;
             },
 
             // Returns a LatLngBounds object for the proposals that are

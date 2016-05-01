@@ -153,7 +153,7 @@
                            id="filter-text"/>
                 </div>
                 <div class="filter-group">
-                    Bounds: <button id="filter-bounds">Update</button>
+                    <button id="filter-bounds">Update</button>
                     <button id="reset-filter-bounds" style="display:none">Clear</button>
                 </div>
                 <div class="filter-group" >
@@ -163,6 +163,9 @@
                     <label>
                         <input type="checkbox"  id="filter-public" > Public
                     </label>
+                </div>
+                <div class="filter-group">
+                    <select id="filter-region"></select>
                 </div>
                 <div id="filter-attributes"></div>
 
