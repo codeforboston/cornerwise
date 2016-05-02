@@ -196,7 +196,6 @@
         </div>
         <div id="alert-container">
             <div id="alert"></div>
-            <div class="close">&times;</div>
         </div>
     </div>
 
