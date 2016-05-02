@@ -6,7 +6,7 @@ explore and visualize past, present, and pending changes to the built
 environment.  For now, we're exploring better ways to show the contents
 of Somerville, MA's Reports and Decisions page.
 
-[Show me!](http://www.somervillema.gov/cornerwise)
+[Show me!](https://www.cornerwise.org)
 
 In its current state, the project breaks more or less neatly into three
 pieces:
@@ -37,12 +37,15 @@ Getting Started
 See the [Setup](SETUP.org) file for full instructions on getting
 Cornerwise running locally.
 
+For an architectural overview, see the [Overview](docs/Overview.md).
+
 
 Technologies used: 
 ----------
 
 - [Docker](https://www.docker.com)
 - [Python 3.4](https://www.python.org) and [Django](https://www.djangoproject.com)
+- [Celery](http://www.celeryproject.org/)
 - [PostGIS](http://postgis.net)
 - HTML/CSS
 - [Backbone.js](http://backbonejs.org), [jQuery](http://jquery.com/)
