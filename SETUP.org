@@ -160,3 +160,18 @@
     issue with the VM's networking. I'm not sure exactly what causes it,
     but you can fix it by running ~docker-machine restart dev~ in a
     fresh terminal window.
+* Uninstalling
+** Stop and Remove Containers:
+
+#+BEGIN_SRC bash
+eval $(docker-machine env dev)
+container_ids=$(docker ps -a --filter="ancestor=bdsand/cornerwise" | awk '{ print $1 }')
+docker stop $container_ids
+docker rm $container_ids
+#+END_SRC
+
+** Remove the image:
+
+#+BEGIN_SRC bash
+docker rmi bdsand/cornerwise
+#+END_SRC
