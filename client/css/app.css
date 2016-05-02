@@ -1265,6 +1265,7 @@ body.loading-proposals #loading-indicator {
     border: 1px solid white;
     display: inline-block;
     padding-top: 1em;
+    position: relative;
     text-align: center;
     height: 6em;
     width: 8em;
@@ -1296,6 +1297,17 @@ body.loading-proposals #loading-indicator {
 .projects-summary canvas {
     margin: auto;
     display: block;
+}
+
+.layer-info-popup {
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px solid #2A749B;
+    border-radius: 4px;
+    font-size: smaller;
+    margin-bottom: 10px;
+    padding: 0.5em;
+    position: absolute;
+    width: 250px;
 }
 
 /* Events Browser */

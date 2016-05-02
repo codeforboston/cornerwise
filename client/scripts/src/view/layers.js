@@ -17,7 +17,9 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
                },
 
                events: {
-                   "click": "onClick"
+                   "click": "onClick",
+                   "mouseover": "onMouseover",
+                   "mouseout": "onMouseout"
                },
 
                initialize: function() {
@@ -35,6 +37,29 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
                onClick: function(e) {
                    e.preventDefault();
                    this.model.collection.toggleLayer(this.model.id);
+               },
+
+               onMouseover: function(e) {
+                   var info = this.model.get("info");
+
+                   if (info) {
+                       var offset = this.$el.offset(),
+                           bottom = $(window).height() - offset.top;
+                       this.$popup =
+                               $("<div/>")
+                               .addClass("layer-info-popup")
+                               .text(info)
+                           .css({bottom: bottom,
+                                 left: offset.left})
+                           .appendTo(document.body);
+                   }
+               },
+
+               onMouseout: function(e) {
+                   if (this.$popup) {
+                       this.$popup.remove();
+                       delete this.$popup;
+                   }
                }
            });
 
