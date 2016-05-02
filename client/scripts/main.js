@@ -54,7 +54,7 @@ require.config({
         "subscribe-view": "src/view/subscribe",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
-        "toggle-button-view": "src/view/toggleButton",
+        "image-view": "src/view/image",
 
         // View managers:
         "view-manager": "src/viewManager",

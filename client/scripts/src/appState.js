@@ -75,7 +75,7 @@ define(["backbone", "underscore", "config", "utils"],
                        /**
                         * @callback stateCallback
                         * @param {Object} state
-                        * 
+                        *
                         * @param {stateCallback} f
                         * @param {bool} replace
                         *

@@ -596,7 +596,7 @@ img.project-type-badge {
 
 .zoomed-proposal-marker .proposal-marker {
     position: absolute;
-    z-index: 10;
+    z-index: 5;
     right: -0.5em;
     top: -0.5em;
 }
@@ -1042,7 +1042,7 @@ a.brief-model:hover {
     right: 1em;
     top: 0em;
     width: 20px;
-    z-index: 20;
+    z-index: 5;
 }
 
 #info .close:hover {
@@ -1091,7 +1091,7 @@ a.brief-model:hover {
     padding-bottom: 50px;
     top: 50%;
     margin-top: -70px;
-    z-index: 10;
+    z-index: 4;
 }
 
 #info .prev-button:hover, #info .next-button:hover {
@@ -1307,7 +1307,7 @@ body.loading-proposals #loading-indicator {
     margin-bottom: 10px;
     padding: 0.5em;
     position: absolute;
-    width: 250px;
+    width: 200px;
 }
 
 /* Events Browser */
@@ -1432,6 +1432,24 @@ ul.model-list li {
 
 .button.sorted.desc:after {
     content: "\25be";
+}
+
+
+#image-view {
+    background-color: rgba(0, 0, 0, 0.9);
+    display: none;
+    text-align: center;
+    padding-top: 50px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 11;
+}
+
+#image-view img {
+    max-height: 600px;
 }
 
 /*

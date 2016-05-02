@@ -89,12 +89,13 @@
     if (images && images.length) { %>
     <div class="images">
         <% _.each(images.slice(0, 10), function(img) { %>
-        <a class="thumb-link" href="<%= img.src %>" target="_blank"> <img class="thumb" src="<%= img.thumb || img.src %>"/> </a>
+        <a class="thumb-link _setview" href="#image=<%= img.id %>">
+            <img class="thumb" src="<%= img.thumb || img.src %>"/>
+        </a>
         <% }); %>
         <br style="clear:both" />
     </div>
     <% } %>
-    
     <!-- end expanded -->
 
     <% } %>

@@ -100,6 +100,13 @@ define(
                             });
                         });
 
+                require(["image-view"],
+                        function(ImageView) {
+                            appViews.imageView = new ImageView({
+                                el: "#image-view"
+                            });
+                        });
+
                 appState.init();
                 glossary.init();
 
