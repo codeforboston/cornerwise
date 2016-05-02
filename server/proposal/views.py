@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from shared.request import make_response, ErrorResponse
 
-from .models import Proposal, Attribute, Document, Event
+from .models import Proposal, Attribute, Document, Event, Image
 from .query import build_proposal_query
 
 default_attributes = [
@@ -143,3 +143,12 @@ def view_event(req, pk=None):
 
     event = get_object_or_404(Event, pk=pk)
     return event.to_dict()
+
+
+@make_response()
+def view_image(req, pk=None):
+    if not pk:
+        pk = req.GET.get("pk")
+
+    image = get_object_or_404(Image, pk=pk)
+    return image.to_dict()

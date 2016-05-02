@@ -1,4 +1,4 @@
-from django.conf.urls import include, url
+from django.conf.urls import url
 
 from . import views
 from . import feed
@@ -14,6 +14,8 @@ urlpatterns = [
     url(r"^view/(?P<pk>[0-9]+)$", views.view_proposal, name="view-proposal"),
     url(r"^events$", views.list_events, name="list-events"),
     url(r"^event/(?P<pk>[0-9]+)$", views.view_event),
+    url(r"^image/(?P<pk>[0-9]+)$", views.view_image),
+    url(r"^image$", views.view_image),
 
     # Feeds:
     url(r"^rss", feed.ReportsAndDecisionsFeed()),
