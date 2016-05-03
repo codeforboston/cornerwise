@@ -16,9 +16,11 @@
     </div>
     <% } %>
 
+    <% if (proposal.get("source")) { %>
     <a class="source-link"  href="<%- proposal.get('source') %>" target="_blank ">
         Go to Source
     </a>
+    <% } %>
 
     <% if (!options.expanded) { %>
     <table class="attributes table">
