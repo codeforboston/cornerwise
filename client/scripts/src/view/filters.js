@@ -34,10 +34,6 @@ define(
                 }, this);
             },
 
-            render: function() {
-
-            },
-
             toggle: function(shouldShow) {
                 $("#filter-controls")
                     .toggleClass("expanded", shouldShow)

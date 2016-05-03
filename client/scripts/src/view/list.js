@@ -19,7 +19,6 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                onFirstShow: function() {
                    var collection = this.collection;
                    this.listenTo(collection, "sort", this.render)
-                       //.listenTo(collection, "filter", this.render)
                        .listenTo(collection, "change", this.modelChanged)
                        .listenTo(collection, "add", this.modelAdded)
                        .listenTo(collection, "remove", this.modelRemoved)

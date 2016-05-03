@@ -41,7 +41,7 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                                     "confirm your email address."].join(""),
                                    "info");
                                     //    <br/>",
-                                    // "<form action='/user/resent' method='post'>",
+                                    // "<form action='/user/resend' method='post'>",
                                     // "<input type='hidden' name='email' ",
                                     // "value='", 
                            }
