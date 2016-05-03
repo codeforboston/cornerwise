@@ -267,7 +267,8 @@ class Image(models.Model):
         return self.image and self.image.url or self.url
 
     def to_dict(self):
-        return {"src": self.get_url(),
+        return {"id": self.pk,
+                "src": self.get_url(),
                 "thumb": self.thumbnail.url if self.thumbnail else None}
 
 
