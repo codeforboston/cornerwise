@@ -25,9 +25,9 @@
             {% for sub in user.subscriptions.all %}
                 <tr>
                     <td>
-                        <form action="{% url "delete-subscription" sub_id=sub.pk %}" >
-                            <button type="submit"
-                                    class="btn btn-danger">
+                        <form class="delete-button-form"
+                              action="{% url "delete-subscription" sub_id=sub.pk %}" >
+                            <button type="submit" class="btn btn-danger">
                                 Delete
                             </button>
                         </form>
@@ -58,4 +58,17 @@
         {% endif %}
     </div>
 
+    <script type="text/javascript">
+     var forms = document.querySelectorAll(".delete-button-form");
+
+     forms.forEach(function(form) {
+         form.addEventListener(
+             "submit",
+             function(e) {
+                 if (!confirm("Are you sure you want " +
+                              "to delete this subcription?"))
+                     e.preventDefault();
+             });
+     });
+    </script>
 {% endblock %}
