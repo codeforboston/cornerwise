@@ -129,7 +129,7 @@
     <div id="event-eater" class="_setview" data-goto="main"></div>
 
     <div id="search-banner" class="overlay">
-        <a href="#" id="logo"></a>
+        <a href="#view=about" id="logo" class="_setview"></a>
         <div class="overlay-contents">
             <h3>What&rsquo;s Being Built Near&hellip;</h3>
             <div class="input-group big-input">
