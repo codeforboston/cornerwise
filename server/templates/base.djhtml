@@ -16,5 +16,14 @@
         {% block body %}
 
         {% endblock %}
+
+        {% block footer %}
+
+            <hr/>
+
+            <p>
+                <a href="/#view=main" >Go to Cornerwise</a>
+            </p>
+        {% endblock %}
     </body>
 </html>

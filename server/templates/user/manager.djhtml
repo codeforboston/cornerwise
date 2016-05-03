@@ -43,20 +43,18 @@
             {% endfor %}
         </table>
     </div>
-    <div class="panel">
-        {% if user.is_active %}
-            <form action="{% url "deactivate-account" %}">
-                <button class="btn btn-danger">
-                    Deactivate Account
-                </button>
-            </form>
-        {% else %}
-            <form action="{% url "activate-account" %}"
-                <button class=" btn">
-                    Reactivate Account
-                </button>
-        {% endif %}
-    </div>
+    {% if user.is_active %}
+        <form action="{% url "deactivate-account" %}">
+            <button class="btn btn-danger">
+                Deactivate Account
+            </button>
+        </form>
+    {% else %}
+        <form action="{% url "activate-account" %}"
+            <button class=" btn">
+                Reactivate Account
+            </button>
+    {% endif %}
 
     <script type="text/javascript">
      var forms = document.querySelectorAll(".delete-button-form");
