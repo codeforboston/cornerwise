@@ -1,6 +1,7 @@
 define(["backbone", "jquery", "underscore"],
        function(B, $, _) {
            var alertElement = $("#alert"),
+               alertCount = 0,
                messages = [],
                lastMessage;
 
@@ -36,12 +37,30 @@ define(["backbone", "jquery", "underscore"],
            });
 
            return {
+               remove: function(id) {
+                   if (lastMessage && lastMessage.id === id) {
+                       var m = lastMessage;
+                       advance();
+                       return m;
+                   } else {
+                       var idx = _.findIndex(messages,
+                                             function(m) { return m.id === id; });
+                       if (idx !== -1) {
+                           return messages.splice(idx, 1)[0];
+                       }
+
+                       return null;
+                   }
+               },
+
                show: function(message, className) {
+                   var id = alertCount++;
                    messages.push({text: message,
+                                  id: id,
                                   className: className || ""});
                    start();
 
-                   return alertElement;
+                   return id;
                }
            };
        });

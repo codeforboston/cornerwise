@@ -171,7 +171,6 @@
 
             <div id="user-controls">
                 <form class="form-popup" id="subscribe-form">
-                    <div class="error"></div>
                     <div class="input-group filter-group">
                         <input class="input" type="email" name="email"
                                placeholder="Email" autocomplete="off"/>

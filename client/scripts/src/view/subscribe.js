@@ -55,16 +55,17 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
 
                showError: function(message) {
                    if (message) {
-                       $("#subscribe-form .error")
-                           .html(_.escape(message))
-                           .show();
+                       this._errorId = alerts.show(_.escape(message), "error");
                    } else {
                        this.hideError();
                    }
                },
 
                hideError: function() {
-                   
+                   if (this._errorId !== undefined) {
+                       alerts.remove(this._errorId);
+                       delete this._errorId;
+                   }
                }
            });
        });
