@@ -56,13 +56,19 @@ define(["backbone", "underscore", "config", "utils"],
                            return $u.decodeQuery(B.history.getHash());
                        },
 
+                       getStateFromFragment: function(fragment) {
+                           return $u.deepMerge(
+                               this.defaults,
+                               $u.decodeQuery(fragment));
+                       },
+
                        getState: function() {
                            if (this._cachedState)
                                return this._cachedState;
 
                            return $u.deepMerge(
                                this.defaults,
-                               $u.decodeQuery(B.history.getHash()));
+                               this.getHashState());
                        },
 
                        getKey: function(k) {
@@ -237,7 +243,7 @@ define(["backbone", "underscore", "config", "utils"],
                                route: {test: _.constant(true)},
                                callback: function(fragment) {
                                    var o = $u.decodeQuery(fragment);
-                                   self._cachedState = o;
+                                   self._cachedState = null;
                                    self.triggerHashState(o);
                                }
                            });
