@@ -18,7 +18,7 @@ def user_dict(user):
     return {}
 
 # These correspond to the filters the user can apply.
-valid_keys = {"projects", "text", "box"}
+valid_keys = {"projects", "text", "box", "region"}
 
 
 def validate_query(d):
@@ -30,6 +30,11 @@ def validate_query(d):
         d["projects"] = d["projects"].lower()
         if d["projects"] not in {"all", "null"}:
             del d["projects"]
+
+    if "region" in d:
+        d["region"] = d["region"].lower()
+        if d["region"] not in {"somerville", "cambridge"}:
+            del d["region"]
 
     # Verify that all the keys are well-formed
     return d
@@ -51,6 +56,7 @@ def subscribe(request):
         raise ErrorResponse("Malformed JSON in 'query' field.")
 
     if query_dict != {}:
+        
         query_dict = validate_query(query_dict)
         if not query_dict:
             raise ErrorResponse("Invalid query", {"query": query_dict})
