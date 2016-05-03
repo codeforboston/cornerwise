@@ -5,7 +5,8 @@ define(["backbone", "underscore", "config", "utils"],
                        /** @private */
                        _cachedState: null,
 
-                       defaults: {
+                       getDefaults: function() {
+                           return {
                            // Filters:
                            "f": {
                                "projects": "",
@@ -18,6 +19,7 @@ define(["backbone", "underscore", "config", "utils"],
                                "lng": config.refPointDefault.lng
                            },
                            sort: "-updated"
+                           };
                        },
 
                        getters: {},
@@ -58,7 +60,7 @@ define(["backbone", "underscore", "config", "utils"],
 
                        getStateFromFragment: function(fragment) {
                            return $u.deepMerge(
-                               this.defaults,
+                               this.getDefaults(),
                                $u.decodeQuery(fragment));
                        },
 
@@ -67,7 +69,7 @@ define(["backbone", "underscore", "config", "utils"],
                                return this._cachedState;
 
                            return $u.deepMerge(
-                               this.defaults,
+                               this.getDefaults(),
                                this.getHashState());
                        },
 
@@ -128,7 +130,7 @@ define(["backbone", "underscore", "config", "utils"],
                        startWatch: function() {
                            var lastState = null,
                                watchers = this.watchers,
-                               defaults = this.defaults;
+                               defaults = this.getDefaults();
                            this.on("hashState", function(state) {
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
