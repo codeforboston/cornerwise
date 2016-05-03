@@ -56,7 +56,6 @@ def subscribe(request):
         raise ErrorResponse("Malformed JSON in 'query' field.")
 
     if query_dict != {}:
-        
         query_dict = validate_query(query_dict)
         if not query_dict:
             raise ErrorResponse("Invalid query", {"query": query_dict})
@@ -86,7 +85,6 @@ def subscribe(request):
         raise ErrorResponse("Invalid subscription",
                             {"exception": exc.args})
 
-    messages.success(request, "Subscription added")
     return {"new_user": new_user,
             "active": user.is_active,
             "email": user.email}
@@ -167,8 +165,8 @@ def deactivate_account(request, user):
 def manage(request, user):
     if not user.is_active:
         user.activate()
-        messages.success(request,
-                         "Thank you for confirming your account.")
+        # messages.success(request,
+        #                  "Thank you for confirming your account.")
 
     return render(request, "user/manager.djhtml",
                   {"user": user,
