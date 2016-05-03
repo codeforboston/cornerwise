@@ -10,6 +10,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         // image URLs for map files.
         //tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
         tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        tilesCredit: "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL",
 
         backendURL: "",
 

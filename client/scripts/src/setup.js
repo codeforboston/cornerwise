@@ -51,7 +51,8 @@ define(
                     // Simple view that will load the about page from a
                     // static URL into a modal overlay when the 'view'
                     // parameter in the hash.
-                    "about": ["modal-view", {url: "/static/template/about.html"}],
+                    "about": ["modal-view", {url: "/static/template/about.html",
+                                             context: {config: config}}],
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
                     "list": ["list-view",
