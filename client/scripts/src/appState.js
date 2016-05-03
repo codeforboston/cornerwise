@@ -197,14 +197,15 @@ define(["backbone", "underscore", "config", "utils"],
                         */
                        _setupLinks: function() {
                            $(document).on("click", "a,._setview", function(e) {
-                               if (e.currentTarget != e.target)
-                                   return true;
+                               // if (e.currentTarget != e.target)
+                               //     return true;
 
                                var goto = $(this).data("goto");
 
                                if (goto) {
                                    appState.setHashKey("view", goto);
 
+                                   e.preventDefault();
                                    return false;
                                } else {
                                    var href = $(this).attr("href"),
@@ -213,6 +214,7 @@ define(["backbone", "underscore", "config", "utils"],
                                    if (hash) {
                                        appState.extendHash($u.decodeQuery(hash));
 
+                                       e.preventDefault();
                                        return false;
                                    }
 
