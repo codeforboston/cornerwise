@@ -58,12 +58,6 @@ define(["backbone", "underscore", "config", "utils"],
                            return $u.decodeQuery(B.history.getHash());
                        },
 
-                       getStateFromFragment: function(fragment) {
-                           return $u.deepMerge(
-                               this.getDefaults(),
-                               $u.decodeQuery(fragment));
-                       },
-
                        getState: function() {
                            if (this._cachedState)
                                return this._cachedState;
