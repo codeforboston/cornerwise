@@ -15,6 +15,8 @@ define([], function() {
         // https://developers.arcgis.com/ so that we're not all hitting
         // the same quota. Put your credentials here.
         clientId: "jYLY7AeA1U9xDiWu",
-        clientSecret: "64a66909ff724a0a9928838ef4462909"
+        clientSecret: "64a66909ff724a0a9928838ef4462909",
+
+        gAnalyticsId: ""
     };
 });
