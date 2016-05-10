@@ -1,5 +1,6 @@
 define(["backbone", "jquery", "utils", "underscore", "app-state"],
        function(B, $, $u, _, appState) {
+           window.$ = $;
            var ListView = B.View.extend({
                template: $u.templateWithUrl(
                    "/static/template/list.html",
@@ -9,11 +10,15 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
 
                events: {
                    "click .sort-button": "changeSort",
-                   "click a.show-on-map": "showOnMap"
+                   "click a.show-on-map": "showOnMap",
+                   "scroll": "onScroll"
                },
 
                initialize: function(options) {
                    this.subview = options.subview;
+                   // The number of proposals to render:
+                   this.renderCount = options.renderCount || 10;
+                   this.renderIncrement = options.renderIncrement || 10;
                },
 
                onFirstShow: function() {
@@ -65,13 +70,30 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                                                           self.shouldShow)
                                          .toggleClass("empty", coll.length===0)
                                          .html(html);
-                                     coll.each(function(model) {
-                                         self.modelAdded(model, coll);
-                                     });
+                                     var models = coll.slice(0, self.renderCount);
+                                     _.each(models, function(model) {
+                                             self.modelAdded(model, coll);
+                                         });
                                  });
                    this.onUpdate(coll);
 
                    return this;
+               },
+
+               renderNext: function() {
+                   var len = this.collection.length;
+                   if (len <= this.renderCount)
+                       return;
+
+                   var start = this.renderCount,
+                       end = Math.min(len, start+this.renderIncrement),
+                       models = this.collection.slice(start, end),
+                       self = this;
+
+                   _.each(models, function(model) {
+                       self.modelAdded(model, self.collection);
+                   });
+                   this.renderCount = end;
                },
 
                /**
@@ -81,7 +103,7 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                 * @param {B.Model} model The added model
                 * @param {B.Collection} coll The active collection
                 */
-               modelAdded: function(model, coll) {
+               modelAdded: function(model, _coll) {
                    var view = new this.subview({model: model});
                    this.$el.removeClass("empty");
                    this.$(".contents").append(view.el);
@@ -110,6 +132,15 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                               coll.length + " " +
                               $u.pluralize(coll.length, "proposal")) :
                              "No proposals found.");
+               },
+
+               onScroll: function(e) {
+                   var el = e.target,
+                       bottom = el.scrollTop + el.offsetHeight,
+                       fromBottom = el.scrollHeight - bottom;
+
+                   if (fromBottom <= window.innerHeight/2)
+                       this.renderNext();
                },
 
                show: function() {
