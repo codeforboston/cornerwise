@@ -1,11 +1,11 @@
-import base64, json, re
-from urllib.parse import urlencode
+import json
 from urllib.request import Request, urlopen
 
 accepts = {
     "json": "application/json",
     "xml": "application/xml"
 }
+
 
 def make_request(domain, resource_id, token, fmt="json"):
     url = "https://{domain}/resource/{resource_id}.{fmt}"\

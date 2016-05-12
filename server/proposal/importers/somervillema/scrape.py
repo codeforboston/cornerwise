@@ -10,7 +10,8 @@ from . import helpers
 
 logger = logging.getLogger(__name__)
 
-URL_BASE = "http://www.somervillema.gov/departments/planning-board/reports-and-decisions/robots"
+URL_BASE = ("http://www.somervillema.gov/departments/planning-board/"
+            "reports-and-decisions/robots")
 URL_FORMAT = URL_BASE + "?page={:1}"
 
 # Give the attributes a custom name:
