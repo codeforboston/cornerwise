@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 
@@ -56,7 +55,8 @@ class UserProfile(models.Model):
 
 class Subscription(models.Model):
     # The subscription belong to a registered user:
-    user = models.ForeignKey(User, null=True,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True,
                              related_name="subscriptions")
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
