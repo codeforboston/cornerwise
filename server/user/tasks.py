@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from cornerwise import celery_app
 from cornerwise.utils import make_absolute_url
 
-from .models import Subscription, User
+from .models import Subscription
 from .changes import find_updates
 # from proposal.models import Proposal
 # from proposal.query import build_proposal_query
@@ -26,29 +26,41 @@ else:
     SG = None
 
 
-@celery_app.task()
-def send_subscription_updates(user, updates):
-    html = ""
-    text = ""
+def has_name(u):
+    return u.first_name and u.last_name
+
+
+def send_mail(user, subject, template_name, context={}):
+    context = context.copy()
+    context["user"] = user
+    context["profile"] = user.profile
+    html = render_to_string("email/" + template_name + ".djhtml", context)
+    text = render_to_string("email/" + template_name + ".djtxt", context)
 
     if SG:
-        message = sendgrid.Mail(subject="Cornerwise: New Updates",
-                                html=html,
-                                text=text,
-                                from_email=settings.EMAIL_ADDRESS)
-        message.add_to("{first} {last} <{email}>".
-                       format(first=user.first_name,
-                              last=user.last_name,
-                              email=user.email))
-
+        message = sendgrid.Mail(
+            subject=subject,
+            html=html,
+            text=text,
+            from_email=settings.EMAIL_ADDRESS)
+        if has_name(user):
+            message.add("{first} {last} <{email}>".
+                        format(first=user.first_name,
+                               last=user.last_name,
+                               email=user.email))
+        else:
+            message.add(user.email)
         status, msg = SG.send(message)
-        logger.info("Sent subscription updates to %s (status %i)",
-                    user.email, status)
-        return status
+        logger.info("Sent '%s' email to %s (status %i)",
+                    template_name, user.email, status)
     else:
-        logger.info("SendGrid is not configured")
-        logger.info("Generated email:", html)
-        return -1
+        logger.info("SendGrid not available. Generated email: %s", html)
+
+
+@celery_app.task()
+def send_subscription_updates(user, updates):
+    send_mail(user, "Cornerwise: New Updates",
+              "updates", {})
 
 
 @celery_app.task(name="project.send_user_key")
@@ -60,25 +72,14 @@ def send_user_key(user):
     # Render HTML and text templates:
     path = reverse("user-login", kwargs={"token": profile.token,
                                          "pk": user.pk})
-    context = {"user": user,
-               "confirm_url": make_absolute_url(path)}
-    html = render_to_string("email/confirm.djhtml", context)
-    text = render_to_string("email/confirm.djtxt", context)
+    context = {"confirm_url": make_absolute_url(path)}
+    send_mail(user, "Hi! Please confirm your Cornerwise settings",
+              "confirm", context)
 
-    if SG:
-        message = sendgrid.Mail(
-            subject="Hi!  Please confirm your Cornerwise settings",
-            html=html,
-            text=text,
-            from_email=settings.EMAIL_ADDRESS)
-        message.add_to(user.email)
 
-        status, msg = SG.send(message)
-
-        logger.info("Sent welcome email to %s (status %i)",
-                    user.email, status)
-    else:
-        logger.info("SendGrid not available.  Generated email:", html)
+@celery_app.task()
+def send_deactivation_email(user):
+    send_mail(user, "Cornerwise: Account Disabled", "account_deactivated")
 
 
 @celery_app.task()
@@ -105,5 +106,5 @@ def user_created(**kwargs):
 
 
 def set_up_hooks():
-    post_save.connect(user_created, User,
+    post_save.connect(user_created, settings.AUTH_USER_MODEL,
                       dispatch_uid="send_confirmation_email")

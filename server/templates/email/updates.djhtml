@@ -1,0 +1,19 @@
+Updates this week:
+
+<div class="change-list">
+{% for change in changes %}
+    {% with proposal=change.proposal %}
+    <div class="change" >
+        <div class="">
+            <img src="{{ proposal.images.0.thumb }}"/>
+        </div>
+        <div>
+            <h2>{{ proposal.address }}</h2>
+            <!-- TODO: Show each change to the proposal -->
+            {% for attrChange in change.changes %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endwidth %}
+{% endfor %}
+</div>
