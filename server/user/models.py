@@ -31,13 +31,15 @@ class UserProfile(models.Model):
                                 help_text="What do you prefer to be called?")
 
     def activate(self):
-        self.is_active = True
+        self.user.is_active = True
         self.token = make_token()
+        self.user.save()
         self.save()
 
     def deactivate(self):
-        self.is_active = False
+        self.user.is_active = False
         self.token = make_token()
+        self.user.save()
         self.save()
 
     def generate_token(self):
