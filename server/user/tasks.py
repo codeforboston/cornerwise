@@ -73,13 +73,18 @@ def send_user_key(user):
     path = reverse("user-login", kwargs={"token": profile.token,
                                          "pk": user.pk})
     context = {"confirm_url": make_absolute_url(path)}
-    send_mail(user, "Hi! Please confirm your Cornerwise settings",
+    send_mail(user, "Cornerwise: Please confirm your email",
               "confirm", context)
 
 
 @celery_app.task()
 def send_deactivation_email(user):
     send_mail(user, "Cornerwise: Account Disabled", "account_deactivated")
+
+
+@celery_app.task()
+def send_reset_email(user):
+    send_mail(user, "Cornerwise: Login Reset", "account_reset")
 
 
 @celery_app.task()
