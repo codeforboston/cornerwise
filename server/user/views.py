@@ -163,6 +163,9 @@ def deactivate_account(request, user):
 
 @with_user
 def manage(request, user):
+    if user.is_anonymous():
+        return render(request, "user/not_logged_in.djhtml", {})
+
     if not user.is_active:
         user.activate()
         # messages.success(request,

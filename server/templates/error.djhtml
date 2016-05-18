@@ -1,1 +1,5 @@
+{% extends "base.djhtml" %}
+
+{% block body %}
 Encountered an error: {{error}}
+{% endblock %}
