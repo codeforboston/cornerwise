@@ -161,17 +161,10 @@ CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
-        "task": "proposal.pull_updates",
+        "task": "proposal.fetch_proposals",
         # Run daily at midnight:
         "schedule": crontab(minute=0, hour=0)
     },
-
-    # Uncomment this to automatically process any unprocessed documents every
-    # day.  (Documents are supposed to be processed immediately.)
-    # "update-documents": {
-    #     "task": "proposal.process_documents",
-    #     "schedule": crontab(minute=0, hour=0)
-    # },
 
     "update-projects": {
         "task": "project.pull_updates",

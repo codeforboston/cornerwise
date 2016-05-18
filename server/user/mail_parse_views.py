@@ -19,7 +19,7 @@ def mail_inbound(request):
             if command in email_commands:
                 email_commands(command, request, user)
                 return
-    except KeyError, User.DoesNotExist:
+    except (KeyError, User.DoesNotExist):
         return
 
 
