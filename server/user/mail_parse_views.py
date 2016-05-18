@@ -17,7 +17,7 @@ def mail_inbound(request):
         for line in lines:
             command = line.strip().split(" ")[0]
             if command in email_commands:
-                email_commands(command, request, user)
+                email_commands(request, user)
                 return
     except (KeyError, User.DoesNotExist):
         return
