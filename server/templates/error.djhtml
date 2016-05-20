@@ -1,5 +1,7 @@
 {% extends "base.djhtml" %}
 
 {% block body %}
-Encountered an error: {{error}}
+    <div class="alert alert-danger" >
+        {{error}}
+    </div>
 {% endblock %}
