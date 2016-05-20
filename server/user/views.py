@@ -90,17 +90,20 @@ def subscribe(request):
             "email": user.email}
 
 
-@make_response()
+@make_response("user/success.djhtml")
 def resend_email(request):
     try:
-        user = User.objects.get(email=request.POST["email"])
+        email = request.POST["email"]
+        user = User.objects.get(email=email)
         send_user_key.delay(user)
     except KeyError:
         raise ErrorResponse("Bad request", status=405)
     except User.DoesNotExist:
-        pass
+        raise ErrorResponse(
+            "There is no registered user with that email address.")
 
-    return {"status": "OK"}
+    return {"status": "OK",
+            "message": "We've sent a new login link to " + email}
 
 
 def do_login(request, token, uid):

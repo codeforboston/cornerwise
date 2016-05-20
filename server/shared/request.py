@@ -19,7 +19,8 @@ class ErrorResponse(Exception):
         self.exception = err
 
 
-def make_response(template=None, error_template="error.djhtml"):
+def make_response(template=None, error_template="error.djhtml",
+                  shared_context=None):
     """
     View decorator
 
@@ -33,6 +34,8 @@ def make_response(template=None, error_template="error.djhtml"):
             status = 200
             try:
                 data = view(req, *args, **kwargs)
+                if shared_context:
+                    data.update(shared_context)
             except ErrorResponse as err:
                 data = err.data
                 use_template = error_template
