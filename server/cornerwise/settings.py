@@ -171,11 +171,6 @@ CELERYBEAT_SCHEDULE = {
         # Run on Mondays at midnight:
         "schedule": crontab(minute=0, hour=0, day_of_week="monday")
     },
-
-    "heartbeat": {
-        "task": "project.heartbeat",
-        "schedule": timedelta(minutes=10)
-    },
 }
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 60

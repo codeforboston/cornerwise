@@ -29,8 +29,3 @@ def pull_updates(since=None):
                          project["name"], ierr)
 
     return created
-
-
-@celery_app.task(name="project.heartbeat")
-def heartbeat():
-    logger.info("Heartbeat")
