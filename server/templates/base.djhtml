@@ -12,8 +12,8 @@
     </head>
     <body>
         <nav class="navbar navbar-inverse">
-            <a href="#" class="logo pull-left">
-                <img src="/static/images/cornerwise-owl.png">
+            <a href="/" class="logo pull-left">
+                <img src="/static/images/cornerwise-beta-logo.png">
             </a>
 
         </nav>
