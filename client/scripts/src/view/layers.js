@@ -45,10 +45,11 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
                    if (info) {
                        var offset = this.$el.offset(),
                            bottom = $(window).height() - offset.top;
-                       this.$popup =
-                               $("<div/>")
-                               .addClass("layer-info-popup")
-                               .text(info)
+
+                       if (!this.$popup)
+                           this.$popup = $("<div class='layer-info-popup'/>");
+
+                       this.$popup.text(info)
                            .css({bottom: bottom,
                                  left: offset.left})
                            .appendTo(document.body);
