@@ -83,12 +83,9 @@ class Proposal(models.Model):
         created = False
         try:
             proposal = kls.objects.get(case_number=p_dict["case_number"])
-            created = True
-            # TODO: We should track changes to a proposal's status over
-            # time. This may mean full version-control, with something
-            # like django-reversion, or with a hand-rolled alternative.
         except kls.DoesNotExist:
             proposal = kls(case_number=p_dict["case_number"])
+            created = True
 
         proposal.address = p_dict["address"]
 
