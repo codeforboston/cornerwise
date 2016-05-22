@@ -9,13 +9,15 @@ define(["backbone", "jquery"], function(B, $) {
                 return $.Deferred().resolve(f);
             }
 
+            this.set("_loading", true);
+
             var self = this;
             return $.getJSON(this.get("source"))
                 .then(function(json) {
-                    self.set("features", json);
+                    self.set({features: json, _loading: false});
                     return json;
                 }, function(response) {
-                    self.errorResponse = response;
+                    self.set({_loading: false, _errorResponse: response});
                     return _;
                 });
         }

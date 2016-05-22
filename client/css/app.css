@@ -385,7 +385,6 @@ body.geolocating #ref-address-form .go-button {
 }
 
 #subscribe {
-
     top: 2em;
 }
 
@@ -1269,6 +1268,10 @@ body.loading-proposals #loading-indicator {
     text-align: center;
     height: 6em;
     width: 8em;
+}
+
+.layer-button.loading {
+    background-color: #2A749B;
 }
 
 .layer-button:hover, .layer-button.selected {

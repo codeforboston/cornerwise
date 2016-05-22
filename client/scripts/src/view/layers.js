@@ -12,8 +12,10 @@ define(["backbone", "underscore", "jquery", "layers", "utils",
                },
 
                className: function() {
-                   return "layer-button" +
-                       (this.model.get("shown") ? " selected" : "");
+                   var attrs = this.model.attributes;
+                   return ("layer-button" +
+                           (attrs.shown ? " selected" : "") +
+                           (attrs._loading ? " loading" : ""));
                },
 
                events: {
