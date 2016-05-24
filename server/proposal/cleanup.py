@@ -2,7 +2,8 @@
 again.
 """
 
-import logging, os, re
+import logging
+import os
 
 from django.conf import settings
 
@@ -10,6 +11,7 @@ from .models import Attribute, Document, Image
 from utils import extension, make_file_mover
 
 logger = logging.getLogger(__name__)
+
 
 def cleanup(rootpath=settings.DOC_ROOT):
     "Delete image files to which no Image refers."
@@ -27,6 +29,7 @@ def cleanup(rootpath=settings.DOC_ROOT):
                     logger.info("Removing unused image file: %s", file_path)
                     os.unlink(file_path)
 
+
 def remove_duplicate_attributes():
     ids = set()
     for a in Attribute.objects.all():
@@ -41,6 +44,7 @@ def remove_duplicate_attributes():
     Attribute.objects.filter(pk__in=ids).delete()
 
 do_rename = make_file_mover("document")
+
 
 def rename_document(doc):
     docpath = doc.document and doc.document.path
@@ -57,6 +61,7 @@ def rename_document(doc):
     except Exception as err:
         logger.error("Error while attempting rename:", err)
         return
+
 
 def normalize_document_names():
     "Rename all local Documents to have names of the form download.<ext>."
