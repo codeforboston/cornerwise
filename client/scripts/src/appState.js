@@ -5,19 +5,21 @@ define(["backbone", "underscore", "config", "utils"],
                        /** @private */
                        _cachedState: null,
 
-                       defaults: {
-                           // Region:
-                           "r": "somerville",
+                       getDefaults: function() {
+                           return {
                            // Filters:
                            "f": {
                                "projects": "",
-                               "range": "<60"
+                               "range": "<60",
+                               // Region:
+                               "region": "somerville"
                            },
                            "ref": {
                                "lat": config.refPointDefault.lat,
                                "lng": config.refPointDefault.lng
                            },
                            sort: "-updated"
+                           };
                        },
 
                        getters: {},
@@ -61,8 +63,8 @@ define(["backbone", "underscore", "config", "utils"],
                                return this._cachedState;
 
                            return $u.deepMerge(
-                               this.defaults,
-                               $u.decodeQuery(B.history.getHash()));
+                               this.getDefaults(),
+                               this.getHashState());
                        },
 
                        getKey: function(k) {
@@ -75,7 +77,7 @@ define(["backbone", "underscore", "config", "utils"],
                        /**
                         * @callback stateCallback
                         * @param {Object} state
-                        * 
+                        *
                         * @param {stateCallback} f
                         * @param {bool} replace
                         *
@@ -122,7 +124,7 @@ define(["backbone", "underscore", "config", "utils"],
                        startWatch: function() {
                            var lastState = null,
                                watchers = this.watchers,
-                               defaults = this.defaults;
+                               defaults = this.getDefaults();
                            this.on("hashState", function(state) {
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
@@ -189,14 +191,15 @@ define(["backbone", "underscore", "config", "utils"],
                         */
                        _setupLinks: function() {
                            $(document).on("click", "a,._setview", function(e) {
-                               if (e.currentTarget != e.target)
-                                   return true;
+                               // if (e.currentTarget != e.target)
+                               //     return true;
 
                                var goto = $(this).data("goto");
 
                                if (goto) {
                                    appState.setHashKey("view", goto);
 
+                                   e.preventDefault();
                                    return false;
                                } else {
                                    var href = $(this).attr("href"),
@@ -205,6 +208,7 @@ define(["backbone", "underscore", "config", "utils"],
                                    if (hash) {
                                        appState.extendHash($u.decodeQuery(hash));
 
+                                       e.preventDefault();
                                        return false;
                                    }
 
@@ -237,7 +241,7 @@ define(["backbone", "underscore", "config", "utils"],
                                route: {test: _.constant(true)},
                                callback: function(fragment) {
                                    var o = $u.decodeQuery(fragment);
-                                   self._cachedState = o;
+                                   self._cachedState = null;
                                    self.triggerHashState(o);
                                }
                            });

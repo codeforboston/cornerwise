@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from itertools import chain
 import os
 import shutil
 import subprocess
@@ -12,6 +11,7 @@ from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
 from django.conf import settings
 from django.db import transaction
+from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
 from .models import Proposal, Attribute, Event, Document, Image
@@ -196,9 +196,10 @@ def add_street_view(proposal):
                                                priority=1)
                 return image
         except IntegrityError:
-            logger.warning("Image with that URL already exists")
+            logger.warning("Image with that URL already exists: %s", url)
         except DataError:
-            logger.error("Image could not be saved.  Was the URL too long?")
+            logger.error("Image could not be saved.  Was the URL too long? %s",
+                         url)
 
     else:
         logger.warn("Add a local_settings file with your Google API key " +
@@ -386,16 +387,13 @@ def process_documents(docs=None):
     return process_document.map(docs)()
 
 
-@celery_app.task(name="proposal.process_proposals")
-def process_proposals(proposals):
+@celery_app.task(name="proposal.process_proposal")
+def process_proposal(proposal):
     "Perform additional processing on proposals."
-    process_document.map(chain.from_iterable(p.document_set.all()
-                                             for p in proposals))()
-
     # Create a Google Street View image for each proposal:
-    add_street_view.map(proposals)()
+    add_street_view(proposal)
 
-    return proposals
+    return proposal
 
 
 @celery_app.task(name="proposal.fetch_proposals")
@@ -460,7 +458,19 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
     return proposals
 
 
-@celery_app.task(name="proposal.pull_updates")
-def pull_updates():
-    return (fetch_proposals.s() |
-            process_proposals.s())()
+# Hooks:
+def proposal_created(**kwargs):
+    if kwargs["created"]:
+        process_proposal.delay(kwargs["instance"])
+
+
+def document_created(**kwargs):
+    if kwargs["created"]:
+        process_document.delay(kwargs["instance"])
+
+
+def set_up_hooks():
+    post_save.connect(proposal_created, Proposal,
+                      dispatch_uid="proposal_created")
+    post_save.connect(document_created, Document,
+                      dispatch_uid="document_created")

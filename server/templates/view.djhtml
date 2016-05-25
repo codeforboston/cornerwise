@@ -1,0 +1,60 @@
+{% extends "base.djhtml" %}
+
+{% load humanize %}
+
+{% block body %}
+    <div class="view-proposal" >
+        <h2>{{ address }}</h2>
+
+        {% if attributes %}
+            <table>
+                {% for attribute in attributes %}
+                    <tr>
+                        <th>{{ attribute.name }}</th>
+                        <td>{{ attribute.value }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if documents %}
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2" >
+                            Documents
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in documents %}
+                        <tr class="document">
+                            <td class="thumbnail" >
+                                <img src="{{ document.thumb }}"/>
+                            </td>
+                            <td>
+                                <a href="{{document.url}}">
+                                    {{ document.title }}
+                                </a>
+                                {% if document.published %}
+                                    <br>
+                                    Published {{ document.published|naturalday }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if images %}
+            <div class="images" >
+                {% for image in images %}
+                    <a href="{{ image.src }}">
+                        <img src="{{ image.thumb }}"/>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

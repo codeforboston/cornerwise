@@ -8,9 +8,6 @@ docker_opts=""
 # This should not contain any spaces.
 image_name="bdsand/cornerwise"
 
-# space-delimited list of environment variables, to be set in the container
-docker_environment="APP_PORT=$host_port APP_NAME=$(basename $image_name)"
-
 # Optionally specify a file containing environment settings
 env_file=$project_dir/docker-support/env
 
@@ -225,6 +222,9 @@ if [ -n "$container_id" ]; then
     docker exec -it $container_id $run_command
 else
     echo "Starting container..."
+
+    # space-delimited list of environment variables, to be set in the container
+    docker_environment="APP_PORT=$host_port APP_NAME=$(basename $image_name)"
 
     env_opts=""
     # Build the environment options:

@@ -1,10 +1,38 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Cornerwise</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <link href="/static/css/site.css" rel="stylesheet"/>
+
+        {% block head %}{% endblock %}
     </head>
     <body>
-        {% block body %}
+        <nav class="navbar navbar-inverse">
+            <a href="/" class="logo pull-left">
+                <img src="/static/images/cornerwise-beta-logo.png">
+            </a>
 
-        {% endblock %}
+        </nav>
+        <div class="container">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% block body %}
+            {% endblock %}
+
+            {% block footer %}
+                <hr/>
+
+                <p>
+                    <a href="/#view=main" >Go to Cornerwise</a>
+                </p>
+            {% endblock %}
+        </div>
     </body>
 </html>

@@ -51,7 +51,7 @@ class Proposal(models.Model):
                                    help_text="")
     # The time when the proposal was last saved:
     modified = models.DateTimeField(auto_now=True)
-    # The time when the entry was updated in the source:
+    # The last time that the source was changed:
     updated = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
     summary = models.CharField(max_length=1024, default="")
@@ -168,6 +168,11 @@ class Attribute(models.Model):
         return self.text_value or \
             self.date_value
 
+    def save(self):
+        super(Attribute, self).save()
+        # Update the stamp on the related proposal
+        self.proposal.save()
+
 
 class Event(models.Model):
     """
@@ -262,5 +267,17 @@ class Image(models.Model):
         return self.image and self.image.url or self.url
 
     def to_dict(self):
-        return {"src": self.get_url(),
+        return {"id": self.pk,
+                "src": self.get_url(),
                 "thumb": self.thumbnail.url if self.thumbnail else None}
+
+
+class Change(models.Model):
+    """
+    Model used to record the changes to a Proposal over time.
+    """
+    proposal = models.ForeignKey(Proposal, related_name="changes")
+    created_at = models.DateTimeField(auto_now_add=True)
+    action = models.CharField(max_length=50)
+    prop_path = models.CharField(max_length=200)
+    description = models.CharField(max_length=200)

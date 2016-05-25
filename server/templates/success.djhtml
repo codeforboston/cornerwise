@@ -1,0 +1,7 @@
+{% extends "base.djhtml" %}
+
+{% block body %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+{% endblock %}

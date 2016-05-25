@@ -19,3 +19,7 @@ SENDGRID_API_KEY = ""
 
 # Used by Azure Text Analytics; later--maybe news search
 BING_API_KEY = ""
+
+# Used for finding businesses related to a proposal
+FOURSQUARE_CLIENT = ""
+FOURSQUARE_SECRET = ""

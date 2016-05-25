@@ -85,13 +85,18 @@ body.nointro #event-eater {
     top: -7em;
 }
 
+#map-controls a.disabled {
+    color: #aaa;
+    cursor: default;
+    pointer-events: none;
+}
+
 #map-options {
     right: 4em;
-    top: -4em;
+    top: -4.65em;
     height: 2em;
     line-height: 2em;
 }
-
 
 #map-options.expanded .expand-layers {
     display: none;
@@ -111,6 +116,22 @@ body.nointro #event-eater {
 
 #map-options.control a {
    color: #2A749B;
+}
+
+#map-options.control:hover {
+    background-color: #2A749B;
+}
+
+#map-options.control:hover a.toggle-layers {
+    color: white !important;
+    text-decoration: none;
+}
+
+button {
+    background-color:  white;
+    border-radius: 0;
+    color: #2A749B;
+    font-size: 10pt;
 }
 
 .empty {
@@ -176,6 +197,10 @@ span.icon {
     height: 0.5em;
     display: none;
     text-align: left;
+}
+
+#user-controls {
+    float: right;
 }
 
 h3 {
@@ -311,13 +336,12 @@ body.geolocating #ref-address-form .go-button {
 }
 
 #intro {
-    height: 12em;
+    height: 5em;
     overflow: hidden;
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-
     transition: height 0.2s linear;
 }
 
@@ -427,6 +451,7 @@ body.main #filter-controls, body.list #filter-controls {
     overflow: hidden;
     box-shadow: 0 2px 3px rgba(180,180,180,1);
     transition: height 0.2s linear;
+    /* width: 60%; */
 }
 #filter-controls.collapsed .filters {
     height: 0;
@@ -447,7 +472,7 @@ body.main #filter-controls, body.list #filter-controls {
 .filters .filter-group {
     display: inline-block;
     margin-right: 1em;
-    
+
 }
 
 .filters .input-group {
@@ -571,7 +596,7 @@ img.project-type-badge {
 
 .zoomed-proposal-marker .proposal-marker {
     position: absolute;
-    z-index: 10;
+    z-index: 5;
     right: -0.5em;
     top: -0.5em;
 }
@@ -1012,11 +1037,17 @@ a.brief-model:hover {
 }
 
 #info .close {
-    color: #4EAF48;
     font-size: xx-large;
     position: absolute;
     right: 1em;
     top: 0em;
+    width: 20px;
+    z-index: 5;
+}
+
+#info .close:hover {
+    color: #4EAF48;
+    text-decoration: none;
 }
 
 #info a {
@@ -1060,11 +1091,10 @@ a.brief-model:hover {
     padding-bottom: 50px;
     top: 50%;
     margin-top: -70px;
-    z-index: 10;
+    z-index: 4;
 }
 
 #info .prev-button:hover, #info .next-button:hover {
-    background-color: rgba(0, 0, 0, 0.2);
     color: #4EAF48;
     text-decoration: none;
 }
@@ -1151,6 +1181,8 @@ a.thumb-link:hover {
 }
 
 #alert-container {
+    bottom: -65px;
+    height: 0;
     pointer-events: none;
     position: absolute;
     text-align: center;
@@ -1159,21 +1191,27 @@ a.thumb-link:hover {
 }
 
 #alert {
-    background-color: rgba(240,108,73,0.5);
-    border: 2px solid #ee6c49;
+    background-color: whitesmoke;
+    border: 2px solid #BA252A;
+    border-radius: 0.2em;
+    color: black;
+    cursor: pointer;
     display: inline-block;
+    opacity: 0;
     padding: 0.5em;
-    position: relative;
-    top: -100px;
-    transition: top 0.2s ease-out;
+    pointer-events: none;
+    width: 50%;
+
+    transition: opacity 0.2s ease-out;
 }
 
 #alert.displayed {
-    top: 0;
+    opacity: 1;
+    pointer-events: auto;
 }
 
-body.nointro #alert.displayed {
-    top: 75px;
+#alert.info {
+    border: 2px solid #888;
 }
 
 body.main .leaflet-control-container {
@@ -1197,7 +1235,7 @@ body.loading-proposals #loading-indicator {
 }
 
 #map-options {
-    
+
 }
 
 #layers {
@@ -1213,7 +1251,7 @@ body.loading-proposals #loading-indicator {
 #map-options.expanded #layers {
     max-height: 6em;
     max-width: 1000px;
-    
+
 }
 
 .layer-list {
@@ -1227,6 +1265,7 @@ body.loading-proposals #loading-indicator {
     border: 1px solid white;
     display: inline-block;
     padding-top: 1em;
+    position: relative;
     text-align: center;
     height: 6em;
     width: 8em;
@@ -1238,7 +1277,7 @@ body.loading-proposals #loading-indicator {
     text-decoration: none;
 }
 
-.layer-button:hover .layer-icon, 
+.layer-button:hover .layer-icon,
 .layer-button:hover .label {
     color: white;
 }
@@ -1258,6 +1297,17 @@ body.loading-proposals #loading-indicator {
 .projects-summary canvas {
     margin: auto;
     display: block;
+}
+
+.layer-info-popup {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid #2A749B;
+    border-radius: 4px;
+    font-size: smaller;
+    margin-bottom: 10px;
+    padding: 0.5em;
+    position: absolute;
+    width: 200px;
 }
 
 /* Events Browser */
@@ -1312,6 +1362,7 @@ ul.model-list li {
     top: 60px;
     bottom: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #list-view.showing {
@@ -1383,6 +1434,24 @@ ul.model-list li {
     content: "\25be";
 }
 
+
+#image-view {
+    background-color: rgba(0, 0, 0, 0.9);
+    display: none;
+    text-align: center;
+    padding-top: 50px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 11;
+}
+
+#image-view img {
+    max-height: 600px;
+}
+
 /*
   Flaticon icon font: Flaticon
   Creation date: 01/04/2016 17:07
@@ -1425,18 +1494,18 @@ ul.model-list li {
 
 
 
-.expand-layers:before { 
-    content: "\f102"; 
+.expand-layers:before {
+    content: "\f102";
     font-family: Flaticon;
     font-style: normal;
     padding-left: 0.3em;
     padding-right: 0.3em;
 }
 
-a.document:before { 
+a.document:before {
     content: "\f105";
     font-family: Flaticon;
-    font-style: normal; 
+    font-style: normal;
     padding-left: 0.2em;
 }
 
@@ -1501,7 +1570,7 @@ a.document:before {
         display: none;
     }
 }
-    
+
 @media screen and (max-width: 600px) {
     h3 {
         font-size: smaller;

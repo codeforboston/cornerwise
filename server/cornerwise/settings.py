@@ -29,6 +29,7 @@ APP_MODE = os.environ.get("DJANGO_MODE", "development").lower()
 APP_MODE = "development"
 IS_PRODUCTION = False
 
+REDIS_HOST = os.environ.get("REDIS_HOST", "redis://")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -60,6 +61,7 @@ INSTALLED_APPS = (
     'parcel',
     'proposal.ProposalConfig',
     'project.ProjectConfig',
+    'user.UserAppConfig',
     'shared'
 )
 
@@ -114,6 +116,14 @@ DATABASES = {
     }
 }
 
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+CACHES = {
+    "default": {
+        'BACKEND': 'redis_cache.RedisCache',
+        "LOCATION": REDIS_HOST
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -128,6 +138,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+SERVER_DOMAIN = "cornerwise1125.cloudapp.net"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -143,24 +154,17 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
-BROKER_URL = os.environ.get("REDIS_HOST", "redis://")
+BROKER_URL = REDIS_HOST
 
 # Persist task results to the database
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
-        "task": "proposal.pull_updates",
+        "task": "proposal.fetch_proposals",
         # Run daily at midnight:
         "schedule": crontab(minute=0, hour=0)
     },
-
-    # Uncomment this to automatically process any unprocessed documents every
-    # day.  (Documents are supposed to be processed immediately.)
-    # "update-documents": {
-    #     "task": "proposal.process_documents",
-    #     "schedule": crontab(minute=0, hour=0)
-    # },
 
     "update-projects": {
         "task": "project.pull_updates",
@@ -188,6 +192,8 @@ GEOCODER = "arcgis"
 
 # Email address and name for emails:
 EMAIL_ADDRESS = "Cornerwise <cornerwise@somervillema.gov>"
+
+AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
 # Load select environment variables into settings:
 for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",

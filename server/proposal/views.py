@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from shared.request import make_response, ErrorResponse
 
-from .models import Proposal, Attribute, Document, Event
+from .models import Proposal, Attribute, Document, Event, Image
 from .query import build_proposal_query
 
 default_attributes = [
@@ -51,13 +51,22 @@ def proposal_json(proposal, include_images=True,
 
     return pdict
 
-
-
-
-
+# Views:
 
 @make_response("list.djhtml")
 def active_proposals(req):
+    proposals = Proposal.objects.filter(build_proposal_query(req.GET))
+    if "include_projects" in req.GET:
+        proposals = proposals.select_related("project")
+
+    pjson = [proposal_json(proposal, include_images=1)
+             for proposal in proposals]
+
+    return {"proposals": pjson}
+
+
+@make_response("list.djhtml")
+def paginated_active_proposals(req):
     proposal_query = Proposal.objects.filter(build_proposal_query(req.GET))
     if "include_projects" in req.GET:
         proposal_query = proposal_query.select_related("project")
@@ -87,7 +96,7 @@ def closed_proposals(req):
     return {"proposals": list(map(proposal_json, proposals))}
 
 
-@make_response()
+@make_response("view.djhtml")
 def view_proposal(req, pk=None):
     if not pk:
         pk = req.GET.get("pk")
@@ -134,3 +143,12 @@ def view_event(req, pk=None):
 
     event = get_object_or_404(Event, pk=pk)
     return event.to_dict()
+
+
+@make_response()
+def view_image(req, pk=None):
+    if not pk:
+        pk = req.GET.get("pk")
+
+    image = get_object_or_404(Image, pk=pk)
+    return image.to_dict()

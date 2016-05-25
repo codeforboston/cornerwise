@@ -1,6 +1,6 @@
 define(
     ["jquery", "proposals", "collection-manager", "map-view", "proposal-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, CollectionManager, MapView, ProposalItemView, 
+    function($, Proposals, CollectionManager, MapView, ProposalItemView,
              glossary, config, appState, ViewManager, refLocation) {
         return {
             start: function() {
@@ -51,7 +51,8 @@ define(
                     // Simple view that will load the about page from a
                     // static URL into a modal overlay when the 'view'
                     // parameter in the hash.
-                    "about": ["modal-view", {url: "/static/template/about.html"}],
+                    "about": ["modal-view", {url: "/static/template/about.html",
+                                             context: {config: config}}],
                     "events": ["modal-view",
                                {url: "/static/template/eventBrowser.html"}],
                     "list": ["list-view",
@@ -87,16 +88,42 @@ define(
                     el: "#map"
                 });
 
-                require(["filters-view"],
-                        function(FiltersView) {
+                require(["filters-view", "subscribe-view"],
+                        function(FiltersView, SubscribeView) {
                             appViews.filtersView = new FiltersView({
                                 collection: proposals,
                                 mapView: appViews.mapView
+                            });
+
+                            appViews.subscribeView = new SubscribeView({
+                                collection: proposals,
+                                el: "#user-controls"
+                            });
+                        });
+
+                require(["image-view"],
+                        function(ImageView) {
+                            appViews.imageView = new ImageView({
+                                el: "#image-view"
                             });
                         });
 
                 appState.init();
                 glossary.init();
+
+                ga = console ?
+                    function() { console.log(arguments); } :
+                _.noop;
+                // Load Google Analytics, if it's configured.
+                if (config.gAnalyticsID) {
+                    (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+                        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                                             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                                            })(window,document,"script","https://www.google-analytics.com/analytics.js",'ga');
+
+                    ga("create", config.gAnalyticsID, "auto");
+                    ga("send", "pageview");
+                }
 
                 return appViews;
             }

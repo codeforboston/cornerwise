@@ -3,9 +3,9 @@ require.config({
         // Dependencies:
         "underscore": "lib/underscore-min",
         "backbone": "lib/backbone",
-        "leaflet": "http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet",
-        "jquery": "http://code.jquery.com/jquery-1.11.3.min",
-        "chartjs": "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min",
+        "leaflet": "//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet",
+        "jquery": "//code.jquery.com/jquery-1.11.3.min",
+        "chartjs": "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min",
 
         // Utilities:
         "utils": "src/utils",
@@ -51,9 +51,10 @@ require.config({
         "projects-summary-view": "src/view/projectsSummary",
         "layers-view": "src/view/layers",
         "filters-view": "src/view/filters",
+        "subscribe-view": "src/view/subscribe",
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
-        "toggle-button-view": "src/view/toggleButton",
+        "image-view": "src/view/image",
 
         // View managers:
         "view-manager": "src/viewManager",

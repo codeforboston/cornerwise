@@ -1,5 +1,7 @@
-import os, re
+import os
+import re
 from collections import deque
+
 
 def normalize(s):
     s = re.sub(r"[',!@#$%^&*()-=[\]]+", "", s)
@@ -7,8 +9,10 @@ def normalize(s):
 
     return s.lower()
 
+
 def extension(path):
     return path.split(os.path.extsep)[-1].lower()
+
 
 class pushback_iter(object):
     """An iterator that implements a pushback() method, allowing values to
@@ -67,3 +71,28 @@ def make_file_mover(attr):
         return new_path
 
     return move_file
+
+
+def decompose_coord(ll):
+    degrees = int(ll)
+    minutes = ll % 1 * 60
+    seconds = minutes % 1 * 60
+
+    return (degrees, int(minutes), seconds)
+
+
+prettify_format = "{d}\N{DEGREE SIGN} {m}' {s:.2f}\" {h}"
+
+
+def prettify_lat(lat):
+    d, m, s = decompose_coord(lat)
+
+    return prettify_format.\
+        format(d=d, m=m, s=s, h="N" if lat > 0 else "S")
+
+
+def prettify_long(lng):
+    d, m, s = decompose_coord(lng)
+
+    return prettify_format.\
+        format(d=d, m=m, s=s, h="E" if lng > 0 else "W")

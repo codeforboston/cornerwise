@@ -9,6 +9,7 @@ from urllib.request import urlopen
 
 logger = logging.getLogger(__name__)
 
+
 def geocode(api_key, address, bounds=None):
     data = [
         ("key", api_key),
@@ -16,7 +17,8 @@ def geocode(api_key, address, bounds=None):
         ("bounds", bounds or "")
     ]
 
-    url = "https://maps.googleapis.com/maps/api/geocode/json?" + urlencode(data)
+    query = urlencode(data)
+    url = "https://maps.googleapis.com/maps/api/geocode/json?" + query
 
     f = urlopen(url)
     body = f.read().decode("utf-8")
@@ -25,8 +27,10 @@ def geocode(api_key, address, bounds=None):
     if json_response["status"] == "OK":
         return json_response["results"][0]
     else:
-        logger.error("Error encountered while geocoding address: {address}\n{error}"\
+        logger.error("Error encountered while geocoding address: " +
+                     "{address}\n{error}"
                      .format(address=address, error=json_response))
+
 
 def simplify(result):
     """Takes a dictionary as returned from the Google Maps geocoder API and
@@ -41,6 +45,7 @@ returns a flattened dict conforming to the generic geocoder expectations.
                 "types": result["types"]
             }
         }
+
 
 class GeocoderThread(threading.Thread):
     def __init__(self, addr_q, out, geocoder):
@@ -85,7 +90,8 @@ class GoogleGeocoder(object):
 
     def geocode_threaded(self, addrs, parallelism=5):
         address_q = Queue(len(addrs))
-        for addr in addrs: address_q.put_nowait(addr)
+        for addr in addrs:
+            address_q.put_nowait(addr)
 
         # Use a list to collect results, because .append() is
         # thread-safe

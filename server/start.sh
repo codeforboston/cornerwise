@@ -21,8 +21,10 @@ fi
 
 pip install -q -r /support/requirements.txt
 
+cd $(dirname "${BASH_SOURCE[0]}")
+
 if [ -z "$APP_ROOT" ]; then
-    export APP_ROOT=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+    export APP_ROOT=$(pwd)
 fi
 
 if [ -z "$APP_NAME" ]; then

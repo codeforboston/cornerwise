@@ -16,12 +16,15 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib import admin
-from django.http import HttpResponse
+from django.views.static import serve as static_serve
 
 import parcel.urls as parcel_urls
 import project.urls as project_urls
 import proposal.urls as proposal_urls
+import user.urls as user_urls
 from proposal import doc_urls
+
+from cornerwise.views import index
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -29,18 +32,19 @@ urlpatterns = [
     url(r'^project/', include(project_urls)),
     url(r'^proposal/', include(proposal_urls)),
     url(r"^doc/", include(doc_urls)),
+    url(r"^user/", include(user_urls)),
+    url(r"^$", index)
 ]
 
 if settings.DEBUG:
     urlpatterns += [
-        url(r'^' + settings.STATIC_URL + '(?P<path>.*)$', "django.views.static.serve", {
-            "document_root": settings.STATIC_ROOT
-        }),
-        url(r'^' + settings.MEDIA_URL + '(?P<path>.*)$', "django.views.static.serve", {
-            "document_root": settings.MEDIA_ROOT
-        }),
-        url(r'^$', "django.views.static.serve", {
-            "document_root": settings.STATIC_ROOT,
-            "path": "index.html"
-        }),
+        url(r"^" + settings.STATIC_URL + "(?P<path>.*)$",
+            static_serve, {"document_root": settings.STATIC_ROOT}),
+        url(r"^" + settings.MEDIA_URL + "(?P<path>.*)$",
+            static_serve, {"document_root": settings.MEDIA_ROOT}),
+        # url(r'^$', "django.views.static.serve",
+        #     {
+        #         "document_root": settings.STATIC_ROOT,
+        #         "path": "index.html"
+        #     }),
     ]

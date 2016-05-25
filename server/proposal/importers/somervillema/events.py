@@ -4,6 +4,7 @@ from . import helpers
 
 URL_BASE = "http://www.somervillema.gov/government/public-minutes"
 
+
 def get_page():
     url = URL_BASE
 

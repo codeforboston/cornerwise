@@ -1,6 +1,6 @@
 define(["jquery", "config"], function($, config) {
     // URL endpoint for geocoding
-    var ADDRESS_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses";
+    var ADDRESS_URL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses";
 
 
     var ACCESS_TOKEN = null,

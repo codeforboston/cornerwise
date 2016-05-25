@@ -1,0 +1,27 @@
+{% extends "base.djhtml" %}
+
+{% block body %}
+    <div class="alert alert-danger" >
+        You must be logged in to manage your subscription settings.
+    </div>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            Resend Email
+        </div>
+        <form class="panel-body" action="{% url "resend-confirmation" %}" method="post">
+            {% csrf_token %}
+            <div class="input-group">
+                <input class="form-control"
+                       type="email"
+                       name="email"
+                       placeholder="Email address"/>
+                <span class="input-group-btn" >
+                    <button class="btn btn-default" type="submit" >
+                        Send
+                    </button>
+                </span>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,8 @@
+
+{% block body %}
+
+{% endblock %}
+
+<hr>
+
+This message was sent to you because you subscribed to 

@@ -8,8 +8,8 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
     var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
-        //tilesURL: "http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-        tilesURL: "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        tilesURL: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+        tilesCredit: "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL",
 
         backendURL: "",
 
@@ -36,7 +36,7 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             weight: 2,
             color: "red",
             fillColor: "red",
-            fillOpacity: "0.15"
+            fillOpacity: "0"
         },
 
         defaultProposalThumb: "/static/images/marker-normal@2x.png",
@@ -133,8 +133,8 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
                 icon: "home",
+                info: "Approximate and unofficial neighborhood boundaries",
                 iconCredit: "Freepik",
-                info: "These neighborhood boundaries are unofficial and approximate.",
                 title: "Neighborhood Boundaries",
                 short: "Neighborhoods",
                 color: "blue",
@@ -145,8 +145,9 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
             {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/wards.geojson",
                 id: "wards",
-                iconCredit: "Scott de Jonge",
                 icon: "wards",
+                iconCredit: "Scott de Jonge",
+                info: "Somerville is divided into seven wards, each represented by an alderman.",
                 title: "Wards",
                 short: "Wards",
                 color: "purple",

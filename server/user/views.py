@@ -1,28 +1,198 @@
-import django.contrib.auth as auth
-from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect, render
+from django.template import RequestContext
 
-from shared.request import make_response
+from django.contrib.auth import login, logout
+
+import json
+
+from shared.request import make_response, ErrorResponse
+from .models import Subscription, UserProfile
+from .tasks import send_user_key
 
 
 def user_dict(user):
     return {}
 
+# These correspond to the filters the user can apply.
+valid_keys = {"projects", "text", "box", "region"}
 
-@make_response
-def login(request):
-    user = auth.authenticate(username=request.POST["username"],
-                             password=request.POST["password"])
-    if user is not None:
-        if user.is_active:
-            auth.login(request, user)
-            return user_dict(user)
+
+def validate_query(d):
+    # Remove unrecognized keys:
+    for k in set(d.keys()).difference(valid_keys):
+        del d[k]
+
+    if "projects" in d:
+        d["projects"] = d["projects"].lower()
+        if d["projects"] not in {"all", "null"}:
+            del d["projects"]
+
+    if "region" in d:
+        d["region"] = d["region"].lower()
+        if d["region"] not in {"somerville", "cambridge"}:
+            del d["region"]
+
+    # Verify that all the keys are well-formed
+    return d
+
+
+@make_response("subscribed.djhtml", "subscribe_error.djhtml")
+def subscribe(request):
+    """
+    Set up a new subscription. If the supplied
+    """
+    if request.method != "POST":
+        raise ErrorResponse("Request must use POST method.", status=405)
+
+    try:
+        query_dict = json.loads(request.POST["query"])
+    except KeyError:
+        raise ErrorResponse("Missing a 'query' field")
+    except ValueError:
+        raise ErrorResponse("Malformed JSON in 'query' field.")
+
+    if query_dict != {}:
+        query_dict = validate_query(query_dict)
+        if not query_dict:
+            raise ErrorResponse("Invalid query", {"query": query_dict})
+
+    user = request.user
+    new_user = False
+
+    if user.is_anonymous():
+        try:
+            email = request.POST["email"]
+            user = User.objects.get(email=email)
+        except KeyError as kerr:
+            raise ErrorResponse(
+                "Missing required key:" + kerr.args[0],
+                {})
+        except User.DoesNotExist:
+            user = User.objects.create(username=email,
+                                       email=email)
+            UserProfile.objects.create(user=user)
+            new_user = True
+
+    try:
+        subscription = Subscription()
+        subscription.set_validated_query(query_dict)
+        user.subscriptions.add(subscription)
+    except Exception as exc:
+        raise ErrorResponse("Invalid subscription",
+                            {"exception": exc.args})
+
+    return {"new_user": new_user,
+            "active": user.is_active,
+            "email": user.email}
+
+
+@make_response("user/success.djhtml")
+def resend_email(request):
+    try:
+        email = request.POST["email"]
+        user = User.objects.get(email=email)
+        send_user_key.delay(user)
+    except KeyError:
+        raise ErrorResponse("Bad request", status=405)
+    except User.DoesNotExist:
+        raise ErrorResponse(
+            "There is no registered user with that email address.")
+
+    return {"status": "OK",
+            "message": "We've sent a new login link to " + email}
+
+
+def do_login(request, token, uid):
+    try:
+        user = User.objects.get(pk=uid)
+        if user.token == token:
+            login(request, user)
+            # Should the old token be invalidated at each login, or should it
+            #  only be regenerated when emails are sent?
+
+            # user.generate_token()
+            return user
+    except User.DoesNotExist:
+        return None
+
+
+def with_user(view_fn):
+    def wrapped_fn(request, **kwargs):
+        if request.user:
+            return view_fn(request, request.user, **kwargs)
         else:
-            return {"error": "That user account has been disabled."}
+            try:
+                user = do_login(request,
+                                request.GET["token"],
+                                request.GET["uid"])
+                if user:
+                    return view_fn(request, user, **kwargs)
+            except KeyError:
+                messages.error(request,
+                               "You must be logged in to view that page.")
 
-    return {"error": "Invalid username or password"}
+            return redirect("/")
+
+    return wrapped_fn
 
 
-@make_response
-def logout(request):
-    auth.logout(request)
-    return {}
+def user_login(request, token, pk):
+    user = authenticate(pk=pk, token=token)
+    if not user:
+        return render(request, "token_error.djhtml",
+                      status=403)
+
+    login(request, user)
+    return redirect(reverse(manage))
+
+
+@with_user
+def activate_account(request, user):
+    user.activate()
+
+    return redirect(reverse("manage-user"))
+
+
+@with_user
+def deactivate_account(request, user):
+    user.deactivate()
+
+    return redirect("/")
+
+
+@with_user
+def manage(request, user):
+    if user.is_anonymous():
+        return render(request, "user/not_logged_in.djhtml", {})
+
+    if not user.is_active:
+        user.activate()
+        # messages.success(request,
+        #                  "Thank you for confirming your account.")
+
+    return render(request, "user/manager.djhtml",
+                  {"user": user,
+                   "subscriptions": user.subscriptions},
+                  context_instance=RequestContext(request))
+
+
+@with_user
+def delete_subscription(request, user, sub_id):
+    try:
+        subscription = user.subscriptions.get(pk=sub_id)
+        subscription.delete()
+        messages.success(request, "Subscription deleted")
+    except Subscription.DoesNotExist:
+        messages.error(request, "Invalid subscription ID")
+    return redirect(reverse(manage))
+
+
+# Should there be a user logout?
+def user_logout(request):
+    logout(request)
+
+    return redirect("/")
