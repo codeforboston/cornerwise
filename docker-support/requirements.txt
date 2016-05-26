@@ -3,11 +3,12 @@ anyjson==0.3.3
 beautifulsoup4==4.4.0
 billiard==3.3.0.20
 celery==3.1.18
+dbfread==2.0.5
 Django==1.8.3
 django-celery==3.1.16
 django-redis-cache==1.6.0
 google-api-python-client==1.5.0
-kombu==3.0.26
+kombu==3.0.30
 nltk==3.1
 oauth2client==2.0.0.post1
 Pillow==3.1.1
