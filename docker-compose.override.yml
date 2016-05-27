@@ -1,0 +1,15 @@
+version: '2'
+
+# Mount host volumes when running in development mode:
+services:
+  cornerwise:
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server:/app
+      - ./client:/client
+      - ./data:/data
+      - ./docker-support:/support
+    environment:
+      DEBUG: "true"
+      APP_PORT: "4000"
