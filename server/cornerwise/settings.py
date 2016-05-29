@@ -16,7 +16,6 @@ import os
 from celery.schedules import crontab
 from datetime import timedelta
 
-aodisnflkasfioanfoiafsdnio.wtf()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Determine if the app is in production mode by examining the

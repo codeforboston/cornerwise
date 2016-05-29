@@ -15,7 +15,7 @@ services:
     links:
       - postgres
       - redis
-    command: /app/start.sh
+    command: bash /app/start.sh
     volumes:
       - runinfo:/runinfo
   postgres:

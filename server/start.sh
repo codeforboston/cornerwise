@@ -10,15 +10,6 @@ while getopts ":a" opt; do
     esac
 done
 
-SHAPEFILE_DIR="/shapefiles"
-has_run_shape_import=$(cat $SHAPEFILE_DIR/has_imported.txt)
-
-if [ "$has_run_shape_import" != "1" ]; then
-    shp2pgsql -c -s 97406 -g shape $SHAPEFILE_DIR/M274TaxPar.shp parcel | psql -q -h $POSTGRES_HOST
-    echo "1" > "$SHAPEFILE_DIR/has_imported.txt"
-fi    
-
-
 pip install -q -r /support/requirements.txt
 
 cd $(dirname "${BASH_SOURCE[0]}")
