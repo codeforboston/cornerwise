@@ -14,129 +14,79 @@
 
 ** Docker Installation
 
-   You'll only need to run this once. Docker Toolbox is a prerequisite
-   of both the easy instructions and the full instructions below.
+*** OS X and Windows
+- [[https://www.docker.com/toolbox][Install Docker Toolbox]] (Windows and Mac)
+  The Toolbox includes VirtualBox, Docker Machine, and Docker Compose. On
+  Windows, it also includes MinGW (w/a Unix-like shell), Git, and some
+  other handy tools.
 
-   - [[https://www.docker.com/toolbox][Install Docker Toolbox]]
-     - The Toolbox includes VirtualBox and Docker Machine.
+*** Linux
+- [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Intall Docker Engine]]
+  You can try ~apt-get install docker.io~, but make sure you're running a recent
+  version (>1.10)
+- [[https://docs.docker.com/compose/install/][Install Docker Compose]]
 
-** Easy Start (OS X or Linux)
+** Startup
 
-   This is the recommended way to start the server, unless you need
-   more fine-grained control.
+  Note: On Linux, you'll typically have to run all ~docker~ commands, including
+  ~docker-compose~ with ~sudo~. This is due to the fact that the Docker daemon
+  must run as root, and the client communicates with it over a socket owned by
+  root. (You can add your user to the ~docker~ group to avoid having to type
+  ~sudo~.)
 
-  - ~cd path/to/cornerwise~
-  - ~./start.sh~
+- (OS X and Windows) Launch the *Docker Quickstart Terminal*. This will
+  provision a new ~default~ Docker Machine if one does not already exist and set
+  up some environment variables for communicating with that machine. See
+  instructions below if you prefer to do this step manually, or in another
+  terminal.
 
-    The script will detect if you have Docker Toolbox installed. If you
-    do not, it will find the latest version and download it. Toolbox
-    includes Docker, VirtualBox, and other required utilities. Once you
-    have completed the installation process for Toolbox, rerun the start
-    script. It may take a while, especially if this is the first time
-    you've used Docker.
+- ~cd path/to/cornerwise~
 
-  - Once you're running inside the container (you should see a prompt beginning
-    beginning `root@[some id]`), you can start the server by typing:
+- ~docker-compose up~
+  1. When you first run ~up~, Compose will retrieve some pre-built images from
+     Docker Hub and then build the ~cornerwise~ image. It is normal for these steps
+     to take a few minutes.
 
-    ~bash /app/start.sh~
+  2. Once the images have been built and the containers started, you should see
+     something like: 
+     ~cornerwise_1  | Starting development server at http://0.0.0.0:4000/~
 
-    This will start Postgres and Redis, run any outstanding migrations, then
-    start Django, Celery Beat, and a Celery worker. You can safely press Ctrl-C
-    if you wish. This will shut down the worker, so that scraping and processing
-    tasks will not run, but the web app will remain up.
+  3. Keep this window open
 
-  - The easy start script will try by default to remap ports from the
-    virtual machine to localhost, so you should be able to browse to
-    http://localhost:3000 (or another port, if you've configured it). If
-    that fails, you can determine the IP address of the VM by opening a
-    new terminal window and typing ~docker-machine ip dev~.
+- (OS X and Windows) Determine the IP address of the machine by running
+  ~docker-machine ip default~, then open a browser to http://*ip-address*:4000/.
+  (On Mac, you can run ~open http://$(docker-machine ip default):4000~ or set up
+  port forwarding by following the instructions below.)
 
-*** Additional Features
+- (Linux) Open a browser to http://localhost:4000/.
 
-     For full usage details of the easy start script, type
-     ~./start.sh -h~
+- In the original window, press Ctrl-C to shut down the application.
 
-** Full Instructions
+*** Without Quickstart Terminal (/optional/)
+To create a Machine manually:
 
-*** Docker Machine
+- ~docker-machine create -d virtualbox dev~
+  Where ~dev~ is the name of the container
 
-    Docker Machine comes Docker Toolbox. It lets you configure different
-    machines, real and virtual, on which to deploy your containers. For
-    the purposes of testing and development, we'll be using the
-    VirtualBox driver.
+- ~eval $(docker-machine env dev)~
+  Sets up some environment variables for communicating with a running machine
+  named ~dev~.
+ 
+*** Port Forwarding (OS X) (/optional/)
+If you'd like to be able to access the site at http://localhost:4000:
 
-**** Initial Setup
+- ~VBoxManage controlvm default natpf1 cornerwise,tcp,127.0.0.1,4000,,4000~
+  - ~default~ :: name of the Docker Machine
+  - 4000 (first occurrence) :: host port
+  - 4000 (second occurrence) :: VM port
+ 
+*** Production
+- ~docker-compose up -f docker-compose.yml -f docker-compose.prod.yml~
 
-     You'll only need to run this once, after you've installed Docker
-     Toolbox.
-
-     - ~docker-machine create -d virtualbox dev~
-
-       Creates a new machine with the name 'dev'. This may take a minute
-       or two; it has to fetch boot2docker.iso, a stripped-down VM
-       image.
-
-*** Run
-
-    - ~eval $(docker-machine env dev)~
-
-      This sets up some environment variables to allow the ~docker~
-      command line client to communicate with the ~dev~ machine.
-
-    - ~docker run -it -v $PWD/server:/app -v $PWD/client:/client -v
-      $PWD/data:/data -e APP_PORT=3000 -e APP_NAME=cornerwise -p "3000:3000" -e GOOGLE_APPLICATION_CREDENTIALS=/app/cornerwise/google_credentials.json bdsand/cornerwise /bin/bash~
-
-      Creates a new /container/ from the 'bdsand/cornerwise' /image/,
-      which it will fetch from Docker Hub if it's not present on the
-      local machine. Exposes the 'server' directory as /app inside the
-      container. Maps the container's port 3000 to port 3000 on the
-      virtual machine. Sets APP_PORT and APP_NAME environment variables,
-      which are used by the Django start script. Sets
-      GOOGLE_APPLICATION_CREDENTIALS, which are used for some API calls. Runs
-      ~/bin/bash~ within the new container.
-
-      If you have never run this before, it will need to download the
-      image, which includes (among other things) Python 3, PostGIS,
-      Redis, and GDAL utilities. It weighs in at a few hundred MB.
-
-    - *You should see a bash prompt.*
-
-      If you see an error that says something like:
-
-        ~Are you trying to connect to a TLS-enabled daemon without TLS?~
-
-      Run: ~eval $(docker-machine env dev)~
-
-      And try the ~docker~ command again.
-
-      If you are still having a trouble:
-       Run: ~docker-machine stop dev~
-       Run: ~docker-machine start dev~
-
-    - ~sh /app/start.sh~
-
-      Bash script to start the server. It starts Postgres and then
-      Django.
-
-*** Opening in Browser
-    - (OS X) Quick way: ~open http://$(docker-machine ip dev):3000~
-    - (Linux) If you have xdg-open installed: ~xdg-open http://$(docker-machine ip dev):3000~
-
-      Running ~docker-machine ip dev)~ will print out the IP address of
-      the 'dev' machine. In our case, this is a VirtualBox VM. Because
-      the VM does not forward its ports to the host (i.e., your
-      computer) by default, you must connect to it using the IP address.
-
-*** VM Port Forwarding
-    - If you're using VirtualBox, you can set it up to forward, e.g., its port 3000 to your computer's port 3000 by running:
-
-    ~VBoxManage controlvm dev natpf1 "django,tcp,127.0.0.1,3000,,3000"~
-
-    "django" can be any name you choose. The first '3000' is the host
-    port. The second '3000' is the VM port. These do not have to be the
-    same.
-
-    - For additional details, see the [[http://www.virtualbox.org/manual/ch06.html][VirtualBox manual]].
+** Interacting with Containers
+- (OS X/Windows) Launch *Docker Quickstart Terminal*
+- ~cd path/to/cornerwise~
+- ~docker-machine exec cornerwise bash~
 
 * API Credentials
   
@@ -161,7 +111,7 @@
     but you can fix it by running ~docker-machine restart dev~ in a
     fresh terminal window.
 * Uninstalling
-** Stop and Remove Containers:
+** Stop and Remove Containers (Old workflow):
 
 #+BEGIN_SRC bash
 eval $(docker-machine env dev)
@@ -169,7 +119,8 @@ container_ids=$(docker ps -a --filter="ancestor=bdsand/cornerwise" | awk '{ prin
 docker stop $container_ids
 docker rm $container_ids
 #+END_SRC
-
+** Stop and Remove Containers
+- In the ~cornerwise~ directory, run ~docker-compose down~
 ** Remove the image:
 
 #+BEGIN_SRC bash
