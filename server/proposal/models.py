@@ -206,11 +206,6 @@ class Attribute(models.Model):
         return self.text_value or \
             self.date_value
 
-    def save(self):
-        super(Attribute, self).save()
-        # Update the stamp on the related proposal
-        self.proposal.save()
-
 
 class Event(models.Model):
     """

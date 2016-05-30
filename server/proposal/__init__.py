@@ -7,4 +7,3 @@ class ProposalConfig(AppConfig):
     def ready(self):
         # Register tasks with Celery:
         from . import tasks
-        tasks.set_up_hooks()

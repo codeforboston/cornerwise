@@ -11,7 +11,6 @@ from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
 from django.conf import settings
 from django.db import transaction
-from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
 from .models import Proposal, Attribute, Event, Document, Image
@@ -458,19 +457,9 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
     return proposals
 
 
-# Hooks:
-def proposal_created(**kwargs):
-    if kwargs["created"]:
-        process_proposal.delay(kwargs["instance"])
-
-
-def document_created(**kwargs):
-    if kwargs["created"]:
-        process_document.delay(kwargs["instance"])
-
-
-def set_up_hooks():
-    post_save.connect(proposal_created, Proposal,
-                      dispatch_uid="proposal_created")
-    post_save.connect(document_created, Document,
-                      dispatch_uid="document_created")
+@celery_app.task(name="proposal.pull_updates")
+def pull_updates(since=None):
+    proposals = fetch_proposals(since)
+    process_proposal.map(proposals)()
+    docs = Document.objects.filter(proposal__in=proposals)
+    process_document.map(docs)()
