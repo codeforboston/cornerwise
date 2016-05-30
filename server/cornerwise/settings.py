@@ -19,24 +19,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Determine if the app is in production mode by examining the
 # environment variable set by Docker:
-APP_MODE = os.environ.get("DJANGO_MODE", "development").lower()
-
+APP_MODE = os.environ.get("APP_MODE", "development").lower()
 IS_PRODUCTION = (APP_MODE == "production")
-
-# For now...
-APP_MODE = "development"
-IS_PRODUCTION = False
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "redis://")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-if "DJANGO_SECRET" in os.environ:
-    SECRET_KEY = os.environ["DJANGO_SECRET"]
-else:
-    # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = '98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs'
+SECRET_KEY = os.environ.get("DJANGO_SECRET",
+                            "98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not IS_PRODUCTION
