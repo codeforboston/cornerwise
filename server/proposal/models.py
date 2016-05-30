@@ -3,9 +3,11 @@ from datetime import datetime
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
+import pickle
 import utils
 
 
@@ -38,10 +40,28 @@ class ProposalManager(models.GeoManager):
         return self.filter(location__within=parcel.shape)
 
 
+def make_property_map():
+    def _g(p): lambda d: d.get(p, "")
+
+    def _G(p): lambda d: d[p]
+
+    [("address", _G("address")),
+     ("location", lambda d: Point(d["long"], d["lat"])),
+     ("summary", lambda d: d.get("summary", "")[0:1024]),
+     ("description", _g("description")),
+     ("source", _g("source")),
+     ("region_name", _g("region_name")),
+     ("updated", _G("updated_date")),
+     ("complete", _G("complete"))]
+
+property_map = make_property_map()
+
+
 class Proposal(models.Model):
     case_number = models.CharField(max_length=64,
                                    unique=True,
-                                   help_text="The unique case number assigned by the city")
+                                   help_text=("The unique case number "
+                                              "assigned by the city"))
     address = models.CharField(max_length=128,
                                help_text="Street address")
     location = models.PointField(help_text="The latitude and longitude")
@@ -69,8 +89,7 @@ class Proposal(models.Model):
     objects = ProposalManager()
 
     def get_absolute_url(self):
-        return reverse("view-proposal",
-                       kwargs={"pk": self.pk})
+        return reverse("view-proposal", kwargs={"pk": self.pk})
 
     def document_for_field(self, field):
         return self.document_set.filter(field=field)
@@ -80,28 +99,30 @@ class Proposal(models.Model):
         """
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict."""
-        created = False
         try:
             proposal = kls.objects.get(case_number=p_dict["case_number"])
+            created = False
         except kls.DoesNotExist:
             proposal = kls(case_number=p_dict["case_number"])
             created = True
 
-        proposal.address = p_dict["address"]
+        changed = not created
+        if changed:
+            prop_changes = []
 
-        try:
-            proposal.location = Point(p_dict["long"], p_dict["lat"])
-        except KeyError:
-            # If the dictionary does not have an associated location, do not
-            # create a Proposal.
-            return (False, None)
-
-        proposal.summary = p_dict.get("summary", "")[0:1024]
-        proposal.description = p_dict.get("description", "") or ""
-        proposal.source = p_dict.get("source")
-        proposal.region_name = p_dict.get("region_name")
-        proposal.updated = p_dict["updated_date"]
-        proposal.complete = p_dict["complete"]
+        for p, fn in property_map:
+            old_val = changed and getattr(proposal, p)
+            try:
+                val = fn(p_dict)
+                if changed and val != old_val:
+                    prop_changes.push({"name": p,
+                                       "new": val,
+                                       "old": old_val})
+                setattr(proposal, p, fn(p_dict))
+            except:
+                if old_val:
+                    continue
+                return (False, None)
 
         proposal.save()
 
@@ -123,10 +144,29 @@ class Proposal(models.Model):
 
                     doc.save()
 
+        if changed:
+            attr_changes = []
         for attr_name, attr_val in p_dict.get("attributes", []):
-            proposal.attributes.create(name=attr_name,
-                                       text_value=attr_val,
-                                       published=p_dict["updated_date"])
+            try:
+                handle = utils.normalize(attr_name)
+                attr = proposal.attributes.get(handle=handle)
+                old_val = attr.text_value
+            except Attribute.DoesNotExist:
+                proposal.attributes.create(name=attr_name,
+                                           handle=handle,
+                                           text_value=attr_val,
+                                           published=p_dict["updated_date"])
+                old_val = None
+            if changed:
+                attr_changes.push({"name": attr_name,
+                                   "old": old_val,
+                                   "new": attr_val})
+
+        if changed:
+            changeset = Changeset.from_changes(proposal,
+                                               {"properties": prop_changes,
+                                                "attributes": attr_changes})
+            changeset.save()
 
         return (created, proposal)
 
@@ -137,7 +177,8 @@ class Attribute(models.Model):
     """
     proposal = models.ForeignKey(Proposal, related_name="attributes")
     name = models.CharField(max_length=128)
-    handle = models.CharField(max_length=128, db_index=True)
+    handle = models.CharField(max_length=128, db_index=True,
+                              unique=True)
 
     # Either the date when the source document was published or the date
     # when the attribute was observed:
@@ -196,7 +237,8 @@ class Document(models.Model):
     title = models.CharField(max_length=256,
                              help_text="The name of the document")
     field = models.CharField(max_length=256,
-                             help_text="The field in which the document was found")
+                             help_text=("The field in which the document"
+                                        " was found"))
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
 
@@ -269,12 +311,31 @@ class Image(models.Model):
                 "thumb": self.thumbnail.url if self.thumbnail else None}
 
 
-class Change(models.Model):
+class Changeset(models.Model):
     """
     Model used to record the changes to a Proposal over time.
     """
     proposal = models.ForeignKey(Proposal, related_name="changes")
-    created_at = models.DateTimeField(auto_now_add=True)
-    action = models.CharField(max_length=50)
-    prop_path = models.CharField(max_length=200)
-    description = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add=True)
+    change_blob = models.BinaryField()
+
+    @classmethod
+    def from_changes(kls, proposal, changes):
+        instance = kls(proposal=proposal)
+        instance.changes = changes
+        return instance
+
+    @property
+    def changes(self):
+        # { "properties": [ { } ] ,
+        #   "attributes": [ { } ] }
+        d = getattr(self, "_change_dict", None)
+        if not d:
+            d = pickle.loads(self.change_blob) if self.change_blob else {}
+            self._change_dict = d
+        return d
+
+    @changes.setter
+    def changes(self, d):
+        self._change_dict = d
+        self.change_blob = pickle.dumps(d)

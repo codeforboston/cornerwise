@@ -4,6 +4,11 @@ from collections import deque
 
 
 def normalize(s):
+    """
+    Downcases string s, removes special characters and replaces spaces with _.
+
+    :s: a string
+    """
     s = re.sub(r"[',!@#$%^&*()-=[\]]+", "", s)
     s = re.sub(r"\s+", "_", s)
 
@@ -11,15 +16,18 @@ def normalize(s):
 
 
 def extension(path):
+    "Returns the last piece of the filename after the extension separator."
     return path.split(os.path.extsep)[-1].lower()
 
 
 class pushback_iter(object):
     """An iterator that implements a pushback() method, allowing values to
 be added back to the 'stack' after consideration.
-
     """
     def __init__(self, it):
+        """
+        :it: an iterable object
+        """
         self.iterable = iter(it)
         self.pushed = deque()
 
@@ -74,6 +82,11 @@ def make_file_mover(attr):
 
 
 def decompose_coord(ll):
+    """
+    :ll: degrees latitude or longitude.
+
+    Return a tuple of (degrees, minutes, seconds)
+    """
     degrees = int(ll)
     minutes = ll % 1 * 60
     seconds = minutes % 1 * 60
@@ -85,6 +98,11 @@ prettify_format = "{d}\N{DEGREE SIGN} {m}' {s:.2f}\" {h}"
 
 
 def prettify_lat(lat):
+    """
+    :lat: degrees latitude
+
+    Returns a human-friendly string representing latitude
+    """
     d, m, s = decompose_coord(lat)
 
     return prettify_format.\
@@ -92,6 +110,11 @@ def prettify_lat(lat):
 
 
 def prettify_long(lng):
+    """
+    :lng: degrees longitude
+
+    Returns a human-friendly string representing longitude
+    """
     d, m, s = decompose_coord(lng)
 
     return prettify_format.\
