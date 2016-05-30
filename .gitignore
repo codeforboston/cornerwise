@@ -19,3 +19,4 @@ TAGS
 local/
 .tern-port
 google_credentials.json
+/logs/
