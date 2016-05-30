@@ -14,7 +14,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 # For celery:
 from celery.schedules import crontab
-from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # environment variable set by Docker:
 APP_MODE = os.environ.get("DJANGO_MODE", "development").lower()
 
-#IS_PRODUCTION=(APP_MODE == "production")
+IS_PRODUCTION = (APP_MODE == "production")
 
 # For now...
 APP_MODE = "development"
@@ -137,7 +136,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-SERVER_DOMAIN = "cornerwise1125.cloudapp.net"
+SERVER_DOMAIN = "cornerwise.org"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -153,7 +152,7 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
-BROKER_URL = REDIS_HOST
+BROKER_URL = "redis://" + REDIS_HOST
 
 # Persist task results to the database
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
