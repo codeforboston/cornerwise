@@ -11,6 +11,7 @@ services:
       - ./client:/client
       - ./data:/data
       - ./docker-support:/support
+      - media_dev:/media
     environment:
       APP_PORT: "4000"
       APP_MODE: "development"
@@ -20,3 +21,8 @@ services:
       APP_MODE: "development"
     volumes:
       - ./server:/app
+      - media_dev:/media
+
+volumes:
+  media_dev:
+    driver: local
