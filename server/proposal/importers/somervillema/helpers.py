@@ -64,6 +64,17 @@ def default_field(td):
     return td.get_text().strip()
 
 
+def optional(fn, default=None):
+    def helper(td):
+        try:
+            val = fn(td)
+        except:
+            return default
+
+        return val if val is not None else default
+
+    return helper
+
 def get_td_value(td, attr=None, processors={}):
     processor = processors.get(attr, default_field)
     return processor(td)

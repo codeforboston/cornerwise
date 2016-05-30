@@ -61,7 +61,7 @@ field_processors = {
     "reports": helpers.links_field,
     "decisions": helpers.links_field,
     "other": helpers.links_field,
-    "first_hearing_date": helpers.dates_field,
+    "first_hearing_date": helpers.optional(helpers.dates_field),
     "updated_date": helpers.datetime_field_tz("US/Eastern")
 }
 
