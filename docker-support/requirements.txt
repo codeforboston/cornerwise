@@ -8,6 +8,7 @@ Django==1.8.3
 django-celery==3.1.16
 django-redis-cache==1.6.0
 google-api-python-client==1.5.0
+gunicorn==19.6.0
 kombu==3.0.30
 nltk==3.1
 oauth2client==2.0.0.post1
