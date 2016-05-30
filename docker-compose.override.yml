@@ -3,6 +3,7 @@ version: '2'
 # Mount host volumes when running in development mode:
 services:
   cornerwise:
+    image: cornerwise:dev
     ports:
       - "4000:4000"
     volumes:
@@ -11,5 +12,11 @@ services:
       - ./data:/data
       - ./docker-support:/support
     environment:
-      DEBUG: "true"
       APP_PORT: "4000"
+      APP_MODE: "development"
+  celery:
+    image: cornerwise:dev
+    environment:
+      APP_MODE: "development"
+    volumes:
+      - ./server:/app

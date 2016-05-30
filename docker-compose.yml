@@ -3,11 +3,11 @@ version: '2'
 services:
   cornerwise:
     build: .
+    image: cornerwise
     depends_on:
       - postgres
       - redis
     environment:
-      APP_PORT: "3000"
       PYTHONUNBUFFERED: "1"
       REDIS_HOST: "redis"
       POSTGRES_HOST: "postgres"
@@ -18,6 +18,13 @@ services:
     command: bash /app/start.sh
     volumes:
       - runinfo:/runinfo
+  celery:
+    image: cornerwise
+    depends_on:
+      - cornerwise
+      - postgres
+      - redis
+    command: bash /app/celery_start.sh
   postgres:
     image: mdillon/postgis:9.4
     volumes:

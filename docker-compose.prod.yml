@@ -4,4 +4,9 @@ services:
   cornerwise:
     ports:
       - "3000:3000"
-
+    environment:
+      APP_PORT: "3000"
+      APP_MODE: "production"
+  celery:
+    environment:
+      APP_MODE: "production"
