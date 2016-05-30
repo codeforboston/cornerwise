@@ -7,11 +7,8 @@ services:
     depends_on:
       - postgres
       - redis
-    environment:
-      PYTHONUNBUFFERED: "1"
-      REDIS_HOST: "redis"
-      POSTGRES_HOST: "postgres"
-      GOOGLE_APPLICATION_CREDENTIALS: "/app/cornerwise/google_credentials.json"
+    env_file:
+      - ./docker-support/common.env
     links:
       - postgres
       - redis
@@ -24,6 +21,11 @@ services:
       - cornerwise
       - postgres
       - redis
+    links:
+      - postgres
+      - redis
+    env_file:
+      - ./docker-support/common.env
     command: bash /app/celery_start.sh
   postgres:
     image: mdillon/postgis:9.4
