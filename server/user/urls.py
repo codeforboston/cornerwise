@@ -3,7 +3,6 @@ from . import views
 from .mail_parse_views import mail_inbound
 
 urlpatterns = [
-    url(r"^manage$", views.manage, name="manage-user"),
     url(r"^delete_subscription/(?P<sub_id>\d+)", views.delete_subscription,
         name="delete-subscription"),
     # url(r"^delete_subscriptions", views.delete_subscriptions),
@@ -17,5 +16,7 @@ urlpatterns = [
     url(r"^resend$", views.resend_email, name="resend-confirmation"),
 
     # Parse incoming mail:
-    url(r"^mail_inbound$", mail_inbound)
+    url(r"^mail_inbound$", mail_inbound),
+    url(r"^manage$", views.manage, name="manage-user"),
+    url(r"^$", views.default_view),
 ]

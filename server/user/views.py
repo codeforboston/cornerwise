@@ -180,6 +180,10 @@ def manage(request, user):
                   context_instance=RequestContext(request))
 
 
+def default_view(request):
+    return redirect(reverse(manage))
+
+
 @with_user
 def delete_subscription(request, user, sub_id):
     try:
