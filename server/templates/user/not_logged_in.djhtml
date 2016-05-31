@@ -10,6 +10,9 @@
             Resend Email
         </div>
         <form class="panel-body" action="{% url "resend-confirmation" %}" method="post">
+            <p>
+                To receive a login link, please enter your email address below:
+            </p>
             {% csrf_token %}
             <div class="input-group">
                 <input class="form-control"
