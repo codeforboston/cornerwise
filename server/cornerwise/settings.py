@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # environment variable set by Docker:
 APP_MODE = os.environ.get("APP_MODE", "development").lower()
 IS_PRODUCTION = (APP_MODE == "production")
+IS_CELERY = os.environ.get("IS_CELERY") == "1"
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "redis://")
 
@@ -31,7 +32,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET",
                             "98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not IS_PRODUCTION
+DEBUG = not IS_PRODUCTION and not IS_CELERY
 
 ALLOWED_HOSTS = []
 

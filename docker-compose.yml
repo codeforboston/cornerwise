@@ -21,6 +21,8 @@ services:
       - cornerwise
       - postgres
       - redis
+    environment:
+      IS_CELERY: "1"
     links:
       - postgres
       - redis

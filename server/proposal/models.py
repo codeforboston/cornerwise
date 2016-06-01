@@ -41,18 +41,20 @@ class ProposalManager(models.GeoManager):
 
 
 def make_property_map():
-    def _g(p): lambda d: d.get(p, "")
+    def _g(p):
+        return lambda d: d.get(p, "")
 
-    def _G(p): lambda d: d[p]
+    def _G(p):
+        return lambda d: d[p]
 
-    [("address", _G("address")),
-     ("location", lambda d: Point(d["long"], d["lat"])),
-     ("summary", lambda d: d.get("summary", "")[0:1024]),
-     ("description", _g("description")),
-     ("source", _g("source")),
-     ("region_name", _g("region_name")),
-     ("updated", _G("updated_date")),
-     ("complete", _G("complete"))]
+    return [("address", _G("address")),
+            ("location", lambda d: Point(d["long"], d["lat"])),
+            ("summary", lambda d: d.get("summary", "")[0:1024]),
+            ("description", _g("description")),
+            ("source", _g("source")),
+            ("region_name", _g("region_name")),
+            ("updated", _G("updated_date")),
+            ("complete", _G("complete"))]
 
 property_map = make_property_map()
 
