@@ -121,10 +121,11 @@ class Proposal(models.Model):
                                        "new": val,
                                        "old": old_val})
                 setattr(proposal, p, fn(p_dict))
-            except:
+            except Exception as exc:
                 if old_val:
                     continue
-                return (False, None)
+                raise Exception("Missing required property: %s\n Reason: %s" %
+                                (p, exc))
 
         proposal.save()
 
@@ -179,14 +180,16 @@ class Attribute(models.Model):
     """
     proposal = models.ForeignKey(Proposal, related_name="attributes")
     name = models.CharField(max_length=128)
-    handle = models.CharField(max_length=128, db_index=True,
-                              unique=True)
+    handle = models.CharField(max_length=128, db_index=True)
 
     # Either the date when the source document was published or the date
     # when the attribute was observed:
     published = models.DateTimeField()
     text_value = models.TextField(null=True)
     date_value = models.DateTimeField(null=True)
+
+    # class Meta:
+    #     unique_together = ("proposal", "handle")
 
     def to_dict(self):
         return {"name": self.name,

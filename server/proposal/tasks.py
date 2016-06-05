@@ -445,14 +445,14 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
     proposals = []
 
     for p_dict in proposals_json:
-        (_, p) = Proposal.create_or_update_proposal_from_dict(p_dict)
-
-        if p:
+        try:
+            (is_new, p) = Proposal.create_or_update_proposal_from_dict(p_dict)
             p.save()
             proposals.append(p)
-        else:
+        except Exception as exc:
             logger.error("Could not create proposal from dictionary: %s",
                          p_dict)
+            logger.error("%s", exc)
 
     return proposals
 
