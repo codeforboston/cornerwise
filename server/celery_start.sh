@@ -6,7 +6,7 @@ if [ "$APP_MODE" = "production" ]; then
     # Only run tasks automatically in production:
     celery -A cornerwise beat --detach
 else
-    celery_opts=" --loglevel=INFO"
+    celery_opts=" --loglevel=INFO --autoreload"
 fi
 
 celery -A cornerwise worker $celery_opts
