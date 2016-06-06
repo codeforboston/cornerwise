@@ -117,9 +117,9 @@ class Proposal(models.Model):
             try:
                 val = fn(p_dict)
                 if changed and val != old_val:
-                    prop_changes.push({"name": p,
-                                       "new": val,
-                                       "old": old_val})
+                    prop_changes.append({"name": p,
+                                         "new": val,
+                                         "old": old_val})
                 setattr(proposal, p, fn(p_dict))
             except Exception as exc:
                 if old_val:
@@ -161,9 +161,9 @@ class Proposal(models.Model):
                                            published=p_dict["updated_date"])
                 old_val = None
             if changed:
-                attr_changes.push({"name": attr_name,
-                                   "old": old_val,
-                                   "new": attr_val})
+                attr_changes.append({"name": attr_name,
+                                     "old": old_val,
+                                     "new": attr_val})
 
         if changed:
             changeset = Changeset.from_changes(proposal,
