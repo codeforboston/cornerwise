@@ -458,8 +458,16 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
 
 
 @celery_app.task(name="proposal.pull_updates")
-def pull_updates(since=None):
-    proposals = fetch_proposals(since)
+def pull_updates(since=None, importers_filter=None):
+    importers = Importers
+    if importers_filter:
+        name = importers_filter.lower()
+        importers = list(filter(lambda imp: name in imp.region_name.lower(),
+                                importers))
+
+    proposals = fetch_proposals(since, importers=importers)
     process_proposal.map(proposals)()
     docs = Document.objects.filter(proposal__in=proposals)
     process_document.map(docs)()
+
+    return proposals
