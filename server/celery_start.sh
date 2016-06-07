@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd $(dirname "${BASH_SOURCE[0]}")
 
 export C_FORCE_ROOT=1
