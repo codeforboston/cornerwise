@@ -87,8 +87,8 @@ def send_reset_email(user):
     send_mail(user, "Cornerwise: Login Reset", "account_reset")
 
 
-@celery_app.task()
-def run_notifications(subscriptions=None, since=None):
+@celery_app.task(name="user.send_notifications")
+def send_notifications(subscriptions=None, since=None):
     """Check the Subscriptions and find those that have new updates since the last
     update was run.
     """

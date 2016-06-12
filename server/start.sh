@@ -18,7 +18,7 @@ fi
 trial_count=0
 while ! timeout 1 bash -c "echo > /dev/tcp/$POSTGRES_HOST/5432" 2>/dev/null; do
     trial_count=$((trial_count+1))
-    if ((trial_count == 10)); then
+    if ((trial_count == 12)); then
         echo "Postgres took too long to start."
         exit 1
     fi
