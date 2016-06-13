@@ -82,8 +82,8 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
                 id: "glx",
                 icon: "glx",
                 iconCredit: "Scott de Jonge",
-                title: "Green Line Extension",
-                short: "GLX",
+                title: "Train - Green Line Extension",
+                short: "Train",
                 info: "The Green Line Extension plans to bring light rail services to areas of Somerville and Medford currently underserved by the MBTA.",
                 template:
                 ('<strong><%= title %></strong>' +
