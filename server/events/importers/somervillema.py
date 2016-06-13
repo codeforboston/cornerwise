@@ -14,7 +14,6 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 import logging
 import requests
-import re
 import json
 
 
