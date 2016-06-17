@@ -75,7 +75,6 @@ def get_agenda(soup, tr):
     '''
     Get the agenda download link for the event.
     '''
-# /html/body/center/table/tbody/tr[2]/td/table/tbody/tr[1]/td[3]/table/tbody/tr[2]/td[1]/div/div[3]/table[2]/tbody/tr[1]/td[3]/a
 
     css = ('html > body > center > table > tbody > tr:nth-of-type(2) > td > '
            'table > tbody > tr:nth-of-type(1) > td:nth-of-type(3) > table > '
