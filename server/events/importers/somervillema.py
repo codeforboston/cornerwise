@@ -295,4 +295,4 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.INFO)
 
     if args.prettyprint:
-        print json.dumps(get_data(args.all), sort_keys=True, indent=3)
+        print(json.dumps(get_data(args.all), sort_keys=True, indent=3))
