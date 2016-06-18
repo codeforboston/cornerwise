@@ -87,7 +87,7 @@ def get_agenda(soup, tr):
     return link
 
 
-def scrape_page():
+def scrape_page(no_sleep):
     '''
     This is a generator that scrapes the data from each of the links on the main
     page. It returns a single event in dictionary format. Its contents are as
@@ -236,13 +236,13 @@ def scrape_page():
 
         a += 1
     
-        if not args.nosleep:
+        if not no_sleep:
             time.sleep(1)
         
     return
 
 
-def get_data(current_only=True):
+def get_data(current_only=True, no_sleep=False):
     '''
     This function builds a dictionary out of the events returned from the
     scrape_page generator. Returns a dictionary with one key ('events') whose
@@ -254,11 +254,11 @@ def get_data(current_only=True):
     # Get the first event in the iteration. If we see this event again, then we
     # need to break out of the loop -- this means we've read all the available
     # pages.
-    first = next(x for x in scrape_page())
+    first = next(x for x in scrape_page(no_sleep))
     found_first = 0
     
     # Run the generator and build the dictionary.
-    for event in scrape_page():
+    for event in scrape_page(no_sleep):
         if current_only:
             date = dateutil.parser.parse(event['date'])
             if date < datetime.now():
@@ -295,4 +295,4 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.INFO)
 
     if args.prettyprint:
-        print(json.dumps(get_data(args.all), sort_keys=True, indent=3))
+        print(json.dumps(get_data(args.all, args.nosleep), sort_keys=True, indent=3))
