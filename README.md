@@ -18,7 +18,6 @@ pieces:
 - A client-side viewer
 
 
-
 Contributing
 ----------
 
@@ -44,7 +43,7 @@ Technologies used:
 ----------
 
 - [Docker](https://www.docker.com)
-- [Python 3.4](https://www.python.org) and [Django](https://www.djangoproject.com)
+- [Python 3.5](https://www.python.org) and [Django](https://www.djangoproject.com)
 - [Celery](http://www.celeryproject.org/)
 - [PostGIS](http://postgis.net)
 - HTML/CSS

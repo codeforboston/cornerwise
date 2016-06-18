@@ -105,11 +105,16 @@ If you'd like to be able to access the site at http://localhost:4000:
   ~server/cornerwise~.
 
 * Troubleshooting
-  - If the script hangs while fetching a new image (~Using default tag:
-    latest~), or if url fetches hang inside the container, it may be an
-    issue with the VM's networking. I'm not sure exactly what causes it,
-    but you can fix it by running ~docker-machine restart dev~ in a
-    fresh terminal window.
+If the script hangs while fetching a new image (~Using default tag:
+latest~), or if url fetches hang inside the container, it may be an
+issue with the VM's networking. I'm not sure exactly what causes it,
+but you can fix it by running ~docker-machine restart dev~ in a
+fresh terminal window.
+* Starting Fresh
+To start over with a clean database, cd to the the project directory and run
+`docker-compose down -v`. This will shut down the running containers and delete
+them. It will also delete all of the named volumes and any data they may
+contain.
 * Uninstalling
 ** Stop and Remove Containers (Old workflow):
 

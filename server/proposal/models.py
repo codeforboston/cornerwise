@@ -41,18 +41,20 @@ class ProposalManager(models.GeoManager):
 
 
 def make_property_map():
-    def _g(p): lambda d: d.get(p, "")
+    def _g(p):
+        return lambda d: d.get(p, "")
 
-    def _G(p): lambda d: d[p]
+    def _G(p):
+        return lambda d: d[p]
 
-    [("address", _G("address")),
-     ("location", lambda d: Point(d["long"], d["lat"])),
-     ("summary", lambda d: d.get("summary", "")[0:1024]),
-     ("description", _g("description")),
-     ("source", _g("source")),
-     ("region_name", _g("region_name")),
-     ("updated", _G("updated_date")),
-     ("complete", _G("complete"))]
+    return [("address", _G("address")),
+            ("location", lambda d: Point(d["long"], d["lat"])),
+            ("summary", lambda d: d.get("summary", "")[0:1024]),
+            ("description", _g("description")),
+            ("source", _g("source")),
+            ("region_name", _g("region_name")),
+            ("updated", _G("updated_date")),
+            ("complete", _G("complete"))]
 
 property_map = make_property_map()
 
@@ -115,14 +117,15 @@ class Proposal(models.Model):
             try:
                 val = fn(p_dict)
                 if changed and val != old_val:
-                    prop_changes.push({"name": p,
-                                       "new": val,
-                                       "old": old_val})
+                    prop_changes.append({"name": p,
+                                         "new": val,
+                                         "old": old_val})
                 setattr(proposal, p, fn(p_dict))
-            except:
+            except Exception as exc:
                 if old_val:
                     continue
-                return (False, None)
+                raise Exception("Missing required property: %s\n Reason: %s" %
+                                (p, exc))
 
         proposal.save()
 
@@ -158,9 +161,9 @@ class Proposal(models.Model):
                                            published=p_dict["updated_date"])
                 old_val = None
             if changed:
-                attr_changes.push({"name": attr_name,
-                                   "old": old_val,
-                                   "new": attr_val})
+                attr_changes.append({"name": attr_name,
+                                     "old": old_val,
+                                     "new": attr_val})
 
         if changed:
             changeset = Changeset.from_changes(proposal,
@@ -177,14 +180,16 @@ class Attribute(models.Model):
     """
     proposal = models.ForeignKey(Proposal, related_name="attributes")
     name = models.CharField(max_length=128)
-    handle = models.CharField(max_length=128, db_index=True,
-                              unique=True)
+    handle = models.CharField(max_length=128, db_index=True)
 
     # Either the date when the source document was published or the date
     # when the attribute was observed:
     published = models.DateTimeField()
     text_value = models.TextField(null=True)
     date_value = models.DateTimeField(null=True)
+
+    # class Meta:
+    #     unique_together = ("proposal", "handle")
 
     def to_dict(self):
         return {"name": self.name,
