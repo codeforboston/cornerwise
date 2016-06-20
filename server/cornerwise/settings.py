@@ -34,7 +34,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET",
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not IS_PRODUCTION and not IS_CELERY
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -133,8 +133,8 @@ SERVER_DOMAIN = "cornerwise.org"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
+STATIC_URL = "static/"
+MEDIA_URL = "media/"
 
 if not IS_PRODUCTION:
     STATIC_ROOT = '/client/'
