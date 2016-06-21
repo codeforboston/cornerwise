@@ -110,6 +110,27 @@ latest~), or if url fetches hang inside the container, it may be an
 issue with the VM's networking. I'm not sure exactly what causes it,
 but you can fix it by running ~docker-machine restart dev~ in a
 fresh terminal window.
+
+* Docker Native
+Docker also has native clients for Mac and Windows that make it easier to
+interact with containers. At the time of this writing (June 2016), the native
+apps are in public beta, but they are likely to become the preferred approach
+to using Docker on those platforms. The instructions above are mostly unchanged,
+except that the ~docker-machine~ instructions are no longer necessary, and
+container ports are automatically forwarded to `localhost`.
+
+* Production
+** Differences
+Deploying to production differs in a few ways:
+1. The webserver, not Django, is responsible for serving static assets. This
+   should be configured in, e.g., nginx.
+2. Changes to application code are not automatically loaded, since the contents
+   of ~server/~ are copied when the image is built, not when the container
+   starts. You must run ~docker-compose build~ first.
+3. It uses [[http://gunicorn.org][gunicorn]] instead of the built-in development webserver and serves
+   from port 4000 instead of 3000.
+** Running
+1. ~docker-compose -f docker-compose.yml -f docker-compose.prod.yml up~
 * Starting Fresh
 To start over with a clean database, cd to the the project directory and run
 `docker-compose down -v`. This will shut down the running containers and delete
