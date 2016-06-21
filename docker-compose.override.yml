@@ -20,3 +20,4 @@ services:
       APP_MODE: "development"
     volumes:
       - ./server:/app
+      - ./docker-support:/support

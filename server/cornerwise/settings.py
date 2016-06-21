@@ -148,7 +148,7 @@ DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 BROKER_URL = "redis://" + REDIS_HOST
 
 # Persist task results to the database
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":6379/0"
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {

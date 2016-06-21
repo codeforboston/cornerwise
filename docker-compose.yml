@@ -1,12 +1,9 @@
-version: '2'
+version: "2"
 
 services:
   cornerwise:
     build: .
     image: cornerwise
-    depends_on:
-      - postgres
-      - redis
     env_file:
       - ./docker-support/common.env
     links:
@@ -20,8 +17,6 @@ services:
     image: cornerwise
     depends_on:
       - cornerwise
-      - postgres
-      - redis
     env_file:
       - ./docker-support/common.env
     environment:
