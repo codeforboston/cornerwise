@@ -19,6 +19,7 @@
   The Toolbox includes VirtualBox, Docker Machine, and Docker Compose. On
   Windows, it also includes MinGW (w/a Unix-like shell), Git, and some
   other handy tools.
+  ![Docker ToolBox](images/docker_toolbox.png)
 
 *** Linux
 - [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Intall Docker Engine]]
@@ -48,7 +49,7 @@
      to take a few minutes.
 
   2. Once the images have been built and the containers started, you should see
-     something like: 
+     something like:
      ~cornerwise_1  | Starting development server at http://0.0.0.0:4000/~
 
   3. Keep this window open
@@ -71,7 +72,7 @@ To create a Machine manually:
 - ~eval $(docker-machine env dev)~
   Sets up some environment variables for communicating with a running machine
   named ~dev~.
- 
+
 *** Port Forwarding (OS X) (/optional/)
 If you'd like to be able to access the site at http://localhost:4000:
 
@@ -79,7 +80,7 @@ If you'd like to be able to access the site at http://localhost:4000:
   - ~default~ :: name of the Docker Machine
   - 4000 (first occurrence) :: host port
   - 4000 (second occurrence) :: VM port
- 
+
 *** Production
 - ~docker-compose up -f docker-compose.yml -f docker-compose.prod.yml~
 
@@ -89,7 +90,7 @@ If you'd like to be able to access the site at http://localhost:4000:
 - ~docker-machine exec cornerwise bash~
 
 * API Credentials
-  
+
   Many of the features of Cornerwise require the application to communicate with
   third-party APIs. To get them working, you'll need to set up accounts with the
   appropriate vendors. All of them offer services that are free at the volume we
