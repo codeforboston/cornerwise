@@ -4,6 +4,7 @@
 pip install -q -r /support/requirements.txt
 
 cd $(dirname "${BASH_SOURCE[0]}")
+mkdir -p logs
 
 if [ -z "$APP_ROOT" ]; then
     export APP_ROOT=$(pwd)
@@ -34,5 +35,18 @@ $PYTHON_BIN $APP_ROOT/manage.py migrate
 if [ "$APP_MODE" = "production" ]; then
     gunicorn -b "0.0.0.0:$APP_PORT" cornerwise.wsgi
 else
+    export C_FORCE_ROOT=1
+    celery_opts=" -D --loglevel=INFO --logfile=$APP_ROOT/logs/celery.log --autoreload"
+    celery_opts+=" --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS"
+    celery_opts+=" --pidfile=/tmp/celeryd.pid"
+
+    if ((CELERY_MONITOR)); then
+        celery_opts+="-E"
+    fi
+
+    celerybeat --detach -A cornerwise
+    celery worker -A $APP_NAME -D --logfile=$APP_ROOT/logs/celery.log \
+           --loglevel=INFO --autoreload --pidfile=/tmp/celery.pid \
+           --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS $celery_opts
     $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT
 fi

@@ -13,20 +13,6 @@ services:
     volumes:
       - runinfo:/runinfo
       - media:/media
-  celery:
-    image: cornerwise
-    depends_on:
-      - cornerwise
-    env_file:
-      - ./docker-support/common.env
-    environment:
-      IS_CELERY: "1"
-    links:
-      - postgres
-      - redis
-    volumes:
-      - media:/media
-    command: bash /app/celery_start.sh
   postgres:
     image: mdillon/postgis:9.4
     volumes:

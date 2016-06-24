@@ -14,10 +14,3 @@ services:
     environment:
       APP_PORT: "4000"
       APP_MODE: "development"
-  celery:
-    image: cornerwise:dev
-    environment:
-      APP_MODE: "development"
-    volumes:
-      - ./server:/app
-      - ./docker-support:/support

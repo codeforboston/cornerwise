@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    "djcelery",
     'parcel',
     'proposal.ProposalConfig',
     'project.ProjectConfig',
@@ -147,7 +148,7 @@ DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 BROKER_URL = "redis://" + REDIS_HOST
 
 # Persist task results to the database
-CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":6379/0"
+CELERY_RESULT_BACKEND = "djcelery.backends.database:DatabaseBackend"
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
