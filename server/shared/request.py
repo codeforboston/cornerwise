@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response
 
 import logging
 import json
@@ -10,13 +11,15 @@ logger = logging.getLogger("logger")
 
 
 class ErrorResponse(Exception):
-    def __init__(self, message, data=None, status=401, err=None):
+    def __init__(self, message, data=None, status=401, err=None,
+                 redirect_back=None):
         super(Exception, self).__init__(self, message)
         self.data = {"error": message}
         if data:
             self.data.update(data)
         self.status = status
         self.exception = err
+        self.redirect_back = redirect_back
 
 
 def make_response(template=None, error_template="error.djhtml",
@@ -32,6 +35,7 @@ def make_response(template=None, error_template="error.djhtml",
         def wrapped_view(req, *args, **kwargs):
             use_template = template
             status = 200
+            redirect = False
             try:
                 data = view(req, *args, **kwargs)
                 if shared_context:
@@ -40,6 +44,8 @@ def make_response(template=None, error_template="error.djhtml",
                 data = err.data
                 use_template = error_template
                 status = err.status
+                redirect_back = err.redirect_back
+
                 # render error template or return JSON with proper error
                 # code
 
@@ -63,6 +69,11 @@ def make_response(template=None, error_template="error.djhtml",
                 # in the future:
                 response["Access-Control-Allow-Origin"] = "*"
                 return response
+
+            if redirect_back and "error" in data:
+                back_url = req.META["HTTP_REFERER"]
+                messages.error(req, data["error"])
+                return redirect(back_url or "/")
 
             return render_to_response(use_template, data, status=status)
 
