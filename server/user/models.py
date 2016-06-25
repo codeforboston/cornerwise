@@ -1,3 +1,4 @@
+import urllib
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
@@ -49,10 +50,12 @@ class UserProfile(models.Model):
 
         return self.token
 
-    def confirmation_link(self):
-        return reverse("confirm-user",
-                       kwargs={"token": self.token,
-                               "pk": self.pk})
+    @property
+    def manage_url(self):
+        return "{base}?token={token}&uid={uid}".format(
+            base=reverse("manage-user"),
+            token=urllib.parse.quote_plus(self.token),
+            uid=self.user_id)
 
 
 class Subscription(models.Model):
