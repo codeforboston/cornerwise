@@ -70,9 +70,7 @@ def send_user_key(user):
         profile.generate_token()
 
     # Render HTML and text templates:
-    path = reverse("user-login", kwargs={"token": profile.token,
-                                         "pk": user.pk})
-    context = {"confirm_url": make_absolute_url(path)}
+    context = {"confirm_url": make_absolute_url(profile.manage_url)}
     send_mail(user, "Cornerwise: Please confirm your email",
               "confirm", context)
 
