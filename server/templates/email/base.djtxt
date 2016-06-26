@@ -1,6 +1,6 @@
 {% block greeting %}
-    {% if user.first_name %}
-        Hi, {{ user.first_name }},
+   {% if user.first_name %}
+      Hi, {{ user.first_name }},
     {% endif %}
 {% endblock %}
 
@@ -8,11 +8,13 @@
 
 {% endblock %}
 
-<hr>
+{% block sig %}
 
 This message was sent to you because you subscribed to receive periodic updates
-from <a href="https://www.cornerwise.org/" >Cornerwise</a> about developments in your area.
+from https://www.cornerwise.org about developments in your area.
 
 Want to change how you receive these updates or unsubscribe?
 
-<a href="{{ user.profile.manage_url }}">Manage</a> your settings.
+Go to {{ user.profile.manage_url }}
+
+{% endblock  %}
