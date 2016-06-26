@@ -6,8 +6,10 @@
     {% for proposal in proposals %}
         <div class="row" >
             <div class="col-md-4">
-                <img src="{{ proposal.images.0.thumb }}"
-                     class="img-thumbnail"/>
+                {% with image=proposal.images.0 %}
+                    <img src="{% firstof image.thumb image.src %}"
+                         class="img-thumbnail"/>
+                {% endwith %}
             </div>
             <div class="col-md-8" >
                 <h3>{{ proposal.address }}</h3>
