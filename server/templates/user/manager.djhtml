@@ -44,16 +44,17 @@
         </table>
     </div>
     {% if user.is_active %}
-        <form action="{% url "deactivate-account" %}">
+        <form action="{% url "deactivate-account" %}" method="post">
             <button class="btn btn-danger">
                 Deactivate Account
             </button>
         </form>
     {% else %}
-        <form action="{% url "activate-account" %}"
+        <form action="{% url "activate-account" %}" method="post">
             <button class=" btn">
                 Reactivate Account
             </button>
+        </form>
     {% endif %}
 
     <script type="text/javascript">
