@@ -35,7 +35,7 @@ def make_response(template=None, error_template="error.djhtml",
         def wrapped_view(req, *args, **kwargs):
             use_template = template
             status = 200
-            redirect = False
+            redirect_back = False
             try:
                 data = view(req, *args, **kwargs)
                 if shared_context:
