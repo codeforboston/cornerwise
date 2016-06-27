@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from cornerwise import celery_app
 from cornerwise.utils import make_absolute_url
 
-from .models import Subscription
+from .models import Subscription, UserProfile
 from .changes import find_updates
 # from proposal.models import Proposal
 # from proposal.query import build_proposal_query
@@ -44,12 +44,12 @@ def send_mail(user, subject, template_name, context={}):
             text=text,
             from_email=settings.EMAIL_ADDRESS)
         if has_name(user):
-            message.add("{first} {last} <{email}>".
-                        format(first=user.first_name,
-                               last=user.last_name,
-                               email=user.email))
+            message.add_to("{first} {last} <{email}>".
+                           format(first=user.first_name,
+                                  last=user.last_name,
+                                  email=user.email))
         else:
-            message.add(user.email)
+            message.add_to(user.email)
         status, msg = SG.send(message)
         logger.info("Sent '%s' email to %s (status %i)",
                     template_name, user.email, status)
@@ -103,11 +103,12 @@ def send_notifications(subscriptions=None, since=None):
 
 
 # Database hooks:
-def user_created(**kwargs):
+def user_profile_created(**kwargs):
     if kwargs["created"]:
-        send_user_key.delay(kwargs["instance"])
+        profile = kwargs["instance"]
+        send_user_key.delay(profile.user)
 
 
 def set_up_hooks():
-    post_save.connect(user_created, settings.AUTH_USER_MODEL,
+    post_save.connect(user_profile_created, UserProfile,
                       dispatch_uid="send_confirmation_email")
