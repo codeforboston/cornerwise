@@ -5,8 +5,9 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
+from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
-
+from django.utils.html import strip_tags
 
 from cornerwise import celery_app
 from cornerwise.utils import make_absolute_url
@@ -35,7 +36,10 @@ def send_mail(user, subject, template_name, context={}):
     context["user"] = user
     context["profile"] = user.profile
     html = render_to_string("email/" + template_name + ".djhtml", context)
-    text = render_to_string("email/" + template_name + ".djtxt", context)
+    try:
+        text = render_to_string("email/" + template_name + ".djtxt", context)
+    except TemplateDoesNotExist:
+        text = strip_tags(html)
 
     if SG:
         message = sendgrid.Mail(
@@ -63,7 +67,7 @@ def send_subscription_updates(user, updates):
               "updates", {})
 
 
-@celery_app.task(name="project.send_user_key")
+@celery_app.task(name="user.send_user_key")
 def send_user_key(user):
     profile = user.profile
     if not profile.token:
@@ -73,6 +77,16 @@ def send_user_key(user):
     context = {"confirm_url": make_absolute_url(profile.manage_url)}
     send_mail(user, "Cornerwise: Please confirm your email",
               "confirm", context)
+
+
+@celery_app.task(name="user.resend_user_key")
+def resend_user_key(user):
+    profile = user.profile
+    if not profile.token:
+        profile.generate_token()
+
+    send_mail(user, "Cornerwise: Your Account",
+              "login_link", { "user": user })
 
 
 @celery_app.task()
