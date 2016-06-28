@@ -1,10 +1,6 @@
 {% extends "base.djhtml" %}
 
 {% block body %}
-    <div class="alert alert-danger" >
-        You must be logged in to manage your subscription settings.
-    </div>
-
     <div class="panel panel-primary">
         <div class="panel-heading">
             Resend Email

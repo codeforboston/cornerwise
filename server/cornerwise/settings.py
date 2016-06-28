@@ -36,9 +36,7 @@ DEBUG = not IS_PRODUCTION and not IS_CELERY
 
 ALLOWED_HOSTS = ["*"]
 
-
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -88,8 +86,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'cornerwise.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+#####################
+# Database and Cache
 
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "")
 DATABASES = {
@@ -145,9 +143,10 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
+#######################
+# Celery configuration
 BROKER_URL = REDIS_HOST
 
-# Celery configuration
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
@@ -169,6 +168,16 @@ CELERYBEAT_SCHEDULE = {
 }
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 60
+
+###########
+# Messages
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.ERROR: "danger"
+}
+
+###############################
+# Cornerwise-specific settings
 
 GEO_BOUNDS = [42.371861543730496, -71.13338470458984,  # northwest
               42.40393908425197, -71.0679817199707]    # southeast
