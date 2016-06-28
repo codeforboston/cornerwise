@@ -23,7 +23,7 @@ APP_MODE = os.environ.get("APP_MODE", "development").lower()
 IS_PRODUCTION = (APP_MODE == "production")
 IS_CELERY = os.environ.get("IS_CELERY") == "1"
 
-REDIS_HOST = os.environ.get("REDIS_HOST", "redis://")
+REDIS_HOST = "redis://" + os.environ.get("REDIS_HOST", "")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -145,7 +145,11 @@ else:
 
 DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
-BROKER_URL = "redis://" + REDIS_HOST
+BROKER_URL = REDIS_HOST
+
+# Celery configuration
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
 
 # Persist task results to the database
 CELERY_RESULT_BACKEND = "djcelery.backends.database:DatabaseBackend"
@@ -177,7 +181,7 @@ GEO_REGION = "Somerville, MA"
 GEOCODER = "arcgis"
 
 # Email address and name for emails:
-EMAIL_ADDRESS = "Cornerwise <cornerwise@somervillema.gov>"
+EMAIL_ADDRESS = "Cornerwise <cornerwise@cornerwise.org>"
 
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
