@@ -8,7 +8,6 @@ from dateutil.parser import parse as dt_parse
 import celery
 from celery.utils.log import get_task_logger
 
-from djcelery.models import PeriodicTask
 from django.conf import settings
 from django.db import transaction
 from django.db.utils import DataError, IntegrityError
@@ -28,20 +27,12 @@ from shared import files_metadata
 logger = get_task_logger(__name__)
 
 
-def last_run():
-    "Determine the date and time of the last run of the task."
-    try:
-        scrape_task = PeriodicTask.objects.get(name="scrape-permits")
-        return scrape_task.last_run_at
-    except PeriodicTask.DoesNotExist:
-        return None
-
-
 @celery_app.task(name="proposal.fetch_document")
-def fetch_document(doc):
+def fetch_document(doc_id):
     """Copy the given document (proposal.models.Document) to a local
     directory.
     """
+    doc = Document.objects.get(pk=doc_id)
     url = doc.url
 
     if doc.document and os.path.exists(doc.document.path):
@@ -49,7 +40,7 @@ def fetch_document(doc):
         updated = proposal_utils.last_modified(doc.url)
         # No?  Then we're good.
         if not updated or updated <= doc.published:
-            return doc
+            return doc.pk
 
         # TODO Special handling of updated documents
 
@@ -80,11 +71,11 @@ def fetch_document(doc):
 
         doc.save()
 
-    return doc
+    return doc.pk
 
 
 @celery_app.task(name="proposal.extract_text")
-def extract_text(doc, encoding="ISO-8859-9"):
+def extract_text(doc_id, encoding="ISO-8859-9"):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
 
@@ -93,6 +84,7 @@ def extract_text(doc, encoding="ISO-8859-9"):
     :returns: The same document
 
     """
+    doc = Document.objects.get(pk=doc_id)
     path = doc.local_path
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
@@ -113,11 +105,11 @@ def extract_text(doc, encoding="ISO-8859-9"):
         doc.encoding = encoding
         doc.save()
 
-        return doc
+        return doc.pk
 
 
 @celery_app.task(name="proposal.extract_images")
-def extract_images(doc):
+def extract_images(doc_id):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
     document's directory (docs/<doc id>/images).
@@ -128,6 +120,7 @@ def extract_images(doc):
     :returns: A list of proposal.model.Image objects
 
     """
+    doc = Document.objects.get(pk=doc_id)
     docfile = doc.document
 
     if not docfile:
@@ -171,13 +164,15 @@ def extract_images(doc):
 
     logger.info("Extracted %i image(s) from %s.", len(images), path)
 
-    return images
+    return [image.pk for image in images]
 
 
 @celery_app.task(name="proposal.add_street_view")
-def add_street_view(proposal):
+def add_street_view(proposal_id):
     api_key = getattr(settings, "GOOGLE_API_KEY")
     secret = getattr(settings, "GOOGLE_STREET_VIEW_SECRET")
+
+    proposal = Proposal.objects.get(pk=proposal_id)
 
     if api_key:
         location = "{0.address}, {0.region_name}".format(proposal)
@@ -206,9 +201,9 @@ def add_street_view(proposal):
 
 
 @celery_app.task(name="proposal.generate_doc_thumbnail")
-def generate_doc_thumbnail(doc):
+def generate_doc_thumbnail(doc_id):
     "Generate a Document thumbnail."
-
+    doc = Document.objects.get(pk=doc_id)
     docfile = doc.document
 
     if not docfile:
@@ -244,7 +239,8 @@ def generate_doc_thumbnail(doc):
 
 
 @celery_app.task(name="proposal.fetch_image")
-def fetch_image(image):
+def fetch_image(image_id):
+    image = Image.objects.get(pk=image_id)
     url = image.url
 
     if url:
@@ -262,7 +258,7 @@ def fetch_image(image):
 
 
 @celery_app.task(name="proposal.generate_thumbnail")
-def generate_thumbnail(image, replace=False):
+def generate_thumbnail(image_id, replace=False):
     """Generate an image thumbnail.
 
     :param image: A proposal.model.Image object with a corresponding
@@ -270,6 +266,7 @@ def generate_thumbnail(image, replace=False):
 
     :returns: Thumbnail path"""
 
+    image = Image.objects.get(pk=image_id)
     thumbnail_path = image.thumbnail and image.thumbnail.name
     if thumbnail_path and os.path.exists(thumbnail_path):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
@@ -295,7 +292,8 @@ def generate_thumbnail(image, replace=False):
 
 @celery_app.task(name="proposal.add_doc_attributes")
 @transaction.atomic
-def add_doc_attributes(doc):
+def add_doc_attributes(doc_id):
+    doc = Document.objects.get(pk=doc_id)
     doc_json = proposal_utils.doc_info(doc)
     properties = extract.get_properties(doc_json)
 
@@ -328,7 +326,8 @@ def add_doc_attributes(doc):
 
 
 @celery_app.task(name="proposal.add_doc_events")
-def add_doc_events(doc, properties):
+def add_doc_events(doc_id, properties):
+    doc = Document.objects.get(pk=doc_id)
     if not doc.proposal:
         return
 
@@ -363,16 +362,16 @@ def add_doc_events(doc, properties):
 
 
 @celery_app.task(name="proposal.generate_thumbnails")
-def generate_thumbnails(images):
-    return generate_thumbnail.map(images)()
+def generate_thumbnails(image_ids):
+    return generate_thumbnail.map(image_ids)()
 
 
 @celery_app.task(name="proposal.process_document")
-def process_document(doc):
+def process_document(doc_id):
     """
     Run all tasks on a Document.
     """
-    (fetch_document.s(doc) |
+    (fetch_document.s(doc_id) |
      celery.group((extract_images.s() | generate_thumbnails.s()),
                   generate_doc_thumbnail.s(),
                   extract_text.s() | add_doc_attributes.s()))()
@@ -413,10 +412,6 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
     # TODO: If `since` is not provided explicitly, we should probably determine
     # the appropriate date on a per-importer basis.
     if not since:
-        # If there was no last run, the scraper will fetch all
-        # proposals.
-        since = last_run()
-
         if not since:
             latest_proposal = Proposal.objects.latest()
             if latest_proposal:
@@ -462,8 +457,7 @@ def pull_updates(since=None, importers_filter=None):
     importers = Importers
     if importers_filter:
         name = importers_filter.lower()
-        importers = list(filter(lambda imp: name in imp.region_name.lower(),
-                                importers))
+        importers = [imp for imp in importers if name in imp.region_name.lower()]
 
     proposals = fetch_proposals(since, importers=importers)
     process_proposal.map(proposals)()
