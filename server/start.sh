@@ -36,17 +36,18 @@ if [ "$APP_MODE" = "production" ]; then
     gunicorn -b "0.0.0.0:$APP_PORT" cornerwise.wsgi
 else
     export C_FORCE_ROOT=1
-    celery_opts=" -D --loglevel=INFO --logfile=$APP_ROOT/logs/celery.log --autoreload"
-    celery_opts+=" --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS"
-    celery_opts+=" --pidfile=/tmp/celeryd.pid"
 
     if ((CELERY_MONITOR)); then
-        celery_opts+="-E"
+        celery_opts="-E"
     fi
 
-    celerybeat --detach -A cornerwise
-    celery worker -A $APP_NAME -D --logfile=$APP_ROOT/logs/celery.log \
-           --loglevel=INFO --autoreload --pidfile=/tmp/celery.pid \
-           --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS $celery_opts
-    $PYTHON_BIN $APP_ROOT/manage.py runserver 0.0.0.0:$APP_PORT
+    rm /tmp/*.pid
+
+    $PYTHON_BIN manage.py celery -A $APP_NAME beat \
+                --pidfile=/tmp/celerybeat.pid &
+    $PYTHON_BIN manage.py celery -A $APP_NAME worker --loglevel=INFO \
+                --pidfile=/tmp/celery.pid \
+                --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
+                $celery_opts &
+    $PYTHON_BIN manage.py runserver 0.0.0.0:$APP_PORT
 fi
