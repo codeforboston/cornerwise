@@ -36,8 +36,6 @@ Getting Started
 See the [Setup](SETUP.org) file for full instructions on getting
 Cornerwise running locally.
 
-For an architectural overview, see the [Overview](docs/Overview.md).
-
 
 Technologies used: 
 ----------
