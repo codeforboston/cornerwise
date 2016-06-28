@@ -24,7 +24,7 @@ Contributing
 We welcome contributions from people of all skillsets.  The best way to
 get involved is by coming to a Tuesday
 [Hack Night](http://www.meetup.com/Code-for-Boston/) and asking about the
-project.  You can also take a look at our [issues](Issues) page to find
+project.  You can also take a look at our [issues](https://github.com/codeforboston/cornerwise/issues) page to find
 unclaimed issues marked *bite-sized* or *self-contained*.  These labels
 refer to issues that are, respectively, small or that require minimal
 familiarity with the existing codebase.
