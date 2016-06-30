@@ -386,12 +386,12 @@ def process_documents(docs=None):
 
 
 @celery_app.task(name="proposal.process_proposal")
-def process_proposal(proposal):
+def process_proposal(proposal_id):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
-    add_street_view(proposal)
+    add_street_view(proposal_id)
 
-    return proposal
+    return proposal_id
 
 
 @celery_app.task(name="proposal.fetch_proposals")

@@ -1,7 +1,8 @@
 from django.db.utils import IntegrityError
+from datetime import datetime
 from cornerwise import celery_app
-from .models import Project
-from .importers.register import Importers
+from project.models import Project
+from project.importers.register import Importers
 
 import logging
 
@@ -10,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 @celery_app.task(name="project.pull_updates")
 def pull_updates(since=None):
-    if not since:
+    if since:
+        since = datetime.fromtimestamp(since)
+    else:
         # Calculate the last time the project scraper ran
         pass
 
