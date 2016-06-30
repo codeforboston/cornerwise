@@ -1,22 +1,19 @@
 from django.contrib.auth import get_user_model
 
+from user.models import UserProfile
+
 User = get_user_model()
 
 
 class TokenBackend(object):
     def authenticate(self, pk=None, token=None):
         try:
-            user = User.objects.get(pk=pk)
-            profile = user.profile
-
-            if profile.token != token:
-                return None
-
-            user.is_active = True
-            user.save()
+            profile = UserProfile.objects.select_related("user")\
+                                         .get(user_id=pk, token=token)
+            user = profile.user
 
             return user
-        except User.DoesNotExist:
+        except UserProfile.DoesNotExist:
             return None
 
     def get_user(self, user_id):
