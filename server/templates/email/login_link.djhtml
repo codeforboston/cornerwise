@@ -1,0 +1,10 @@
+{% load cornerwise_extras %}
+
+<p>
+    Hello from Cornerwise,
+</p>
+
+<p>
+    <a href="{{ user.profile.manage_url|absolutize }}">Click here</a> to manage
+    your Cornerwise settings.
+</p>
