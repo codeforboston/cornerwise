@@ -23,7 +23,7 @@ class ErrorResponse(Exception):
 
 
 def make_response(template=None, error_template="error.djhtml",
-                  shared_context=None):
+                  shared_context=None, redirect_back=False):
     """
     View decorator
 
@@ -35,7 +35,7 @@ def make_response(template=None, error_template="error.djhtml",
         def wrapped_view(req, *args, **kwargs):
             use_template = template
             status = 200
-            redirect_back = False
+            should_redirect_back = redirect_back
             try:
                 data = view(req, *args, **kwargs)
                 if shared_context:
@@ -44,7 +44,7 @@ def make_response(template=None, error_template="error.djhtml",
                 data = err.data
                 use_template = error_template
                 status = err.status
-                redirect_back = err.redirect_back
+                should_redirect_back = err.redirect_back
 
                 # render error template or return JSON with proper error
                 # code
@@ -71,10 +71,14 @@ def make_response(template=None, error_template="error.djhtml",
                 response["Access-Control-Allow-Origin"] = "*"
                 return response
 
-            if redirect_back and "error" in data:
+            if should_redirect_back:
                 back_url = req.META["HTTP_REFERER"]
-                messages.error(req, data["error"])
-                return redirect(back_url or "/")
+                if "error" in data:
+                    messages.error(req, data["error"])
+                    return redirect(back_url or "/")
+                elif "message" in data:
+                    messages.success(req, data["message"])
+                    return redirect(back_url or "/")
 
             return render_to_response(use_template, data, status=status)
 
