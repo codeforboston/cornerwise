@@ -1,6 +1,10 @@
+{% extends "email/base.djtxt" %}
+
+{% block body %}
 Updates this week:
 
 {% for change in changes %}{% with proposal=change.proposal %}
 {{ proposal.address }}
 {% for attrChange in change.changes %}
 {% endfor %}{% endwidth %}{% endfor %}
+{% endblock %}

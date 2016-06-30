@@ -1,30 +1,9 @@
+{% extends "email/base.djhtml %}
+
+{% block body %}
 Updates this week:
 
 <div class="change-list">
-{% for change in changes %}
-    {% with proposal=change.proposal propChanges=changes.properties attrChanges=changes.attributes %}
-    <div class="change" >
-        <div class="">
-            <img src="{{ proposal.images.0.thumb }}"/>
-        </div>
-        <div>
-            <h2>{{ proposal.address }}</h2>
-            {% for propChange in propChanges %}
-                <li>
-                    "{{ propChange.name }}"
-                    {% if propChange.old %}
-                        {% if propChange.new %}
-                            changed from "{{ propChange.old }}" to "{{ propChange.new }}"
-                        {% else %}
-                            was removed
-                        {% endif %}
-                    {% else %}
-                        was set to "{{ propChange.new }}"
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </div>
-    </div>
-    {% endwidth %}
-{% endfor %}
+    {% include "changes.djhtml" %}
 </div>
+{% endblock %}

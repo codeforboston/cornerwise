@@ -7,12 +7,17 @@ from django.template import RequestContext
 
 from django.contrib.auth import login, logout
 
+from datetime import datetime, timedelta
 import json
+import logging
 
+from cornerwise.utils import today
 from shared.request import make_response, ErrorResponse
+from . import changes, tasks
 from .models import Subscription, UserProfile
-from .tasks import send_user_key
 
+
+logger = logging.getLogger(__file__)
 
 def user_dict(user):
     return {}
@@ -74,7 +79,8 @@ def subscribe(request):
         except User.DoesNotExist:
             user = User.objects.create(username=email,
                                        email=email)
-            UserProfile.objects.create(user=user)
+            profile = UserProfile.objects.create(user=user)
+            profile.save()
             new_user = True
 
     try:
@@ -110,38 +116,29 @@ def resend_email(request):
     if request.method == "GET":
         return not_logged_in(request)
 
-def do_login(request, token, uid):
-    try:
-        user = User.objects.get(pk=uid)
-        if user.token == token:
-            login(request, user)
-            # Should the old token be invalidated at each login, or should it
-            #  only be regenerated when emails are sent?
-
-            # user.generate_token()
-            return user
-    except User.DoesNotExist:
-        return None
+    return do_resend_email(request)
 
 
 def with_user(view_fn):
-    def wrapped_fn(request, **kwargs):
-        if request.user:
-            return view_fn(request, request.user, **kwargs)
+    def wrapped_fn(request, *args, **kwargs):
+        if not request.user.is_anonymous():
+            return view_fn(request, request.user, *args, **kwargs)
         else:
             try:
-                user = do_login(request,
-                                request.GET["token"],
-                                request.GET["uid"])
+                user = authenticate(pk=request.GET["uid"],
+                                    token=request.GET["token"])
                 if user:
-                    return view_fn(request, user, **kwargs)
+                    messages.success(request, "Welcome back!")
+                    login(request, user)
+                    return view_fn(request, user, *args, **kwargs)
             except KeyError:
                 messages.error(request,
                                "You must be logged in to view that page.")
 
-            return redirect("/")
+            return not_logged_in(request)
 
     return wrapped_fn
+
 
 
 def user_login(request, token, pk):
@@ -152,6 +149,10 @@ def user_login(request, token, pk):
 
     login(request, user)
     return redirect(reverse(manage))
+
+
+def not_logged_in(request):
+    return render(request, "user/not_logged_in.djhtml")
 
 
 @with_user
@@ -170,13 +171,9 @@ def deactivate_account(request, user):
 
 @with_user
 def manage(request, user):
-    if user.is_anonymous():
-        return render(request, "user/not_logged_in.djhtml", {})
-
     if not user.is_active:
-        user.activate()
-        # messages.success(request,
-        #                  "Thank you for confirming your account.")
+        user.is_active = True
+        user.save()
 
     return render(request, "user/manager.djhtml",
                   {"user": user,
@@ -185,11 +182,60 @@ def manage(request, user):
 
 
 def default_view(request):
-    return redirect(reverse(manage))
+    return redirect(reverse("manage-user"))
+
+
+@make_response("user/subscription.djhtml")
+def show_change_summary(request, user, sub_id, since, until=None):
+    """
+    Displays a summary of the changes recorded for a given subscription within
+    a time period specified by `since` and `until`.
+    """
+    print("Showing change summary", user, sub_id)
+    try:
+        sub = Subscription.objects.get(user=user, pk=sub_id)
+        summary = changes.summarize_subscription_updates(sub, since, until)
+        return {"since": since,
+                "until": until,
+                "subscription": sub,
+                "changes": summary}
+    except Subscription.DoesNotExist:
+        raise ErrorResponse("Invalid subscription ID",
+                            status=404,
+                            redirect_back=True)
+
+@with_user
+#def change_summary(request, user, sub_id):
+def change_summary(request, user):
+    sub_id = 8
+    since = None
+    until = None
+    days = None
+
+    if "since" in request.POST:
+        try:
+            since = datetime.fromtimestamp(float(request.POST["since"]))
+        except ValueError:
+            since = None
+    else:
+        try:
+            days = abs(int(request.POST["days"]))
+        except (KeyError, ValueError):
+            days = 7
+
+    if days:
+        since = today() - timedelta(days=days)
+    elif "until" in request.POST:
+        try:
+            until = datetime.fromtimestamp(float(request.POST["until"]))
+        except (TypeError, ValueError):
+            pass
+
+    return show_change_summary(request, user, sub_id, since, until)
 
 
 @with_user
-def delete_subscription(request, user, sub_id):
+def delete_subscription(request, user):
     try:
         subscription = user.subscriptions.get(pk=sub_id)
         subscription.delete()
@@ -204,3 +250,4 @@ def user_logout(request):
     logout(request)
 
     return redirect("/")
+

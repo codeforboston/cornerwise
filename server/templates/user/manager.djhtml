@@ -5,35 +5,43 @@
         Manage Subscription Settings
     </h1>
 
-    <h4>
+    <h5>
         User: {{ user.email }}
-    </h4>
+    </h5>
 
     {% if not user.is_active %}
-        <p>
+        <div class="alert alert-info">
+            <div class="glyphicon glyphicon-exclamation-sign" />
             This email is currently deactivated and will not receive emails until
             you reactivate it.
-        </p>
+        </div>
     {% endif %}
 
     <div class="panel panel-primary">
         <div class="panel-heading">
-            Notifications:
+            Current Notifications:
         </div>
-        <table id="subscriptions"
-               class="table">
+        <table id="subscriptions" class="table">
+            <tr>
+                <th>Keep me informed about:</th>
+                <th></th>
+            </tr>
             {% for sub in user.subscriptions.all %}
                 <tr>
                     <td>
+                        {{ sub.readable_description }}
+                    </td>
+                    <td>
                         <form class="delete-button-form"
                               action="{% url "delete-subscription" sub_id=sub.pk %}" >
+                            <a class="btn btn-primary"
+                               href="{% url "view-subscription-changes" sub_id=sub.pk %}">
+                                View Recent Updates
+                            </a>
                             <button type="submit" class="btn btn-danger">
                                 Delete
                             </button>
                         </form>
-                    </td>
-                    <td>
-                        {{ sub.readable_description }}
                     </td>
                 </tr>
             {% empty %}
@@ -43,8 +51,13 @@
             {% endfor %}
         </table>
     </div>
+
+    <div class="alert alert-info">
+        To create additional subscriptions, (( insert explanation about how to use filters, etc.))
+    </div>
+
     {% if user.is_active %}
-        <form action="{% url "deactivate-account" %}" method="post">
+        <form action="{% url "deactivate-account" %}" method="post" id="deactivate-form">
             <button class="btn btn-danger">
                 Deactivate Account
             </button>
@@ -69,5 +82,17 @@
                      e.preventDefault();
              });
      });
+
+     var deactivate = document.getElementById("deactivate-form");
+     if (deactivate) {
+         deactivate.addEventListener("submit",
+                                     function(e) {
+                                         if (!confirm("If you deactivate your account, you will " +
+                                                      "no longer receive updates via email. " +
+                                                      "You can always reactivate your account later.")) {
+                                                          e.preventDefault();
+                                         }
+                                     });
+     }
     </script>
 {% endblock %}

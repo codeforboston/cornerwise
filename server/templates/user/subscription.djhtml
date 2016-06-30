@@ -1,0 +1,30 @@
+{% extends "base.djhtml" %}
+
+{% block body %}
+    <h1>
+        Updates to Subscription
+    </h1>
+
+    <p>
+        {{ subscription.readable_description }}
+
+        {% if days %}
+            In the past
+            {% if days == 1 %}
+                day
+            {% else %}
+                {{ days }} days
+            {% endif %}
+        {% elif since %}
+            {% if until %}
+                Between {{ since|date:"D F jS" }} and {{ until|date:"D F js" }}
+            {% else %}
+                Since {{ since|date:"D F jS" }}
+            {% endif %}
+        {% endif %}
+    </p>
+
+    {% include "changes.djhtml" %}
+
+    <a href="{% url "manage-user" %}">Manage your Subscriptions</a>
+{% endblock %}

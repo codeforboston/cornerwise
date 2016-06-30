@@ -1,3 +1,5 @@
 from django.test import TestCase
 
-# Create your tests here.
+from .models import Changeset, Proposal, Document, Image
+from proposal import tasks
+

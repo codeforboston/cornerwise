@@ -1,0 +1,12 @@
+<div class="change-item">
+    "{{ change.name }}"
+    {% if change.old %}
+        {% if change.new %}
+            changed from "{{ change.old }}" to "{{ change.new }}"
+        {% else %}
+            was removed
+        {% endif %}
+    {% else %}
+        was set to "{{ change.new }}"
+    {% endif %}
+</div>

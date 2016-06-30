@@ -1,6 +1,6 @@
 from collections import defaultdict, OrderedDict
 
-from proposal.models import Changeset, Document, Proposal
+from proposal.models import Changeset, Document, Image, Proposal
 from proposal.views import proposal_json
 from proposal.query import build_proposal_query
 
@@ -27,9 +27,9 @@ def summarize_query_updates(query, since, until=None):
     if proposals_changed:
         # Only include changesets for proposals we're interested in:
         ids = [proposal.pk for proposal in proposals_changed]
-        changes = Changeset.objects.filter(created_at__gt=since,
+        changes = Changeset.objects.filter(created__gt=since,
                                            proposal__in=ids)\
-                                   .order_by("created_at")
+                                   .order_by("created")
 
         prop_changes = defaultdict(list)
         attr_changes = defaultdict(list)
@@ -46,22 +46,12 @@ def summarize_query_updates(query, since, until=None):
                               "new": False,
                               "properties": prop_changes[p.id],
                               "attributes": attr_changes[p.id],
-                              "documents": defaultdict(list),
-                              "images": defaultdict(list)}
-    else:
-        # No changed proposals:
-        return None
-
-    # Add the new proposals:
-    for proposal in proposals:
-        summary[proposal.id] = { "proposal": proposal_json(proposal,
-                                                           include_images=1,
-                                                           include_documents=False),
-                                 "new": True }
+                              "documents": [],
+                              "images": []}
 
     # Find new Documents:
     documents = Document.objects.filter(proposal__in=proposals_changed,
-                                        created_at__gt=since)
+                                        created__gt=since)
     if until:
         documents = documents.filter(updated__lte=until)
 
@@ -71,7 +61,7 @@ def summarize_query_updates(query, since, until=None):
 
     # Find new Images:
     images = Image.objects.filter(proposal__in=proposals_changed,
-                                  created_at__gt=since)
+                                  created__gt=since)
     if until:
         images = images.filter(updated__lte=until)
 
@@ -95,11 +85,11 @@ def summarize_subscription_updates(subscription, since, until=None):
     values. The dictionaries 
     """
     query_dict = subscription.query_dict
-    if not query_dict:
+    if query_dict is None:
         return None
 
     query = build_proposal_query(query_dict)
-    return summarize_query_updates(query)
+    return summarize_query_updates(query, since, until)
 
 
 def find_updates(subscriptions, since, until=None):
