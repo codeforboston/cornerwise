@@ -2,8 +2,7 @@ version: "2"
 
 services:
   cornerwise:
-    build: .
-    image: cornerwise
+    image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
     links:

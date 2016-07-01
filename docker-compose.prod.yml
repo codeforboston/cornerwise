@@ -2,13 +2,14 @@ version: "2"
 
 services:
   cornerwise:
+    image: bdsand/cornerwise:latest
     ports:
       - "3000:3000"
     environment:
       APP_PORT: "3000"
       APP_MODE: "production"
   celery:
-    image: cornerwise
+    image: bdsand/cornerwise:latest
     depends_on:
       - cornerwise
     env_file:

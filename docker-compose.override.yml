@@ -3,7 +3,7 @@ version: '2'
 # Mount host volumes when running in development mode:
 services:
   cornerwise:
-    image: cornerwise:dev
+    image: bdsand/cornerwise:development
     ports:
       - "4000:4000"
     volumes:
