@@ -138,7 +138,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    // Fit to visible regions?
                    deferredBounds.done(function(bounds) {
                        // Need to add padding to the bounds
-                       self.map.setMaxBounds(bounds);
+                       self.map.setMaxBounds(bounds.pad(1));
                    });
                },
 
