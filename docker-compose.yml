@@ -12,6 +12,7 @@ services:
     volumes:
       - runinfo:/runinfo
       - media:/media
+    working_dir: /app
   postgres:
     image: mdillon/postgis:9.4
     volumes:

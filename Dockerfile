@@ -5,4 +5,5 @@ ADD ./server /app
 ADD ./client /client
 ADD ./data /data
 RUN ["sh", "/support/setup.sh"]
+WORKDIR "/app"
 EXPOSE 3000
