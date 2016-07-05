@@ -33,11 +33,14 @@
                     </td>
                     <td>
                         <form class="delete-button-form"
-                              action="{% url "delete-subscription" sub_id=sub.pk %}" >
+                              action="{% url "delete-subscription" %}" >
+                            <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
+
                             <a class="btn btn-primary"
-                               href="{% url "view-subscription-changes" sub_id=sub.pk %}">
+                               href="{% url "view-subscription-changes" %}?subscription_id={{ sub.pk }}">
                                 View Recent Updates
                             </a>
+
                             <button type="submit" class="btn btn-danger">
                                 Delete
                             </button>

@@ -191,7 +191,6 @@ def show_change_summary(request, user, sub_id, since, until=None):
     Displays a summary of the changes recorded for a given subscription within
     a time period specified by `since` and `until`.
     """
-    print("Showing change summary", user, sub_id)
     try:
         sub = Subscription.objects.get(user=user, pk=sub_id)
         summary = changes.summarize_subscription_updates(sub, since, until)
@@ -204,10 +203,10 @@ def show_change_summary(request, user, sub_id, since, until=None):
                             status=404,
                             redirect_back=True)
 
+
 @with_user
-#def change_summary(request, user, sub_id):
 def change_summary(request, user):
-    sub_id = 8
+    sub_id = request.GET["subscription_id"]
     since = None
     until = None
     days = None
@@ -237,11 +236,14 @@ def change_summary(request, user):
 @with_user
 def delete_subscription(request, user):
     try:
+        sub_id = request.POST["subscription_id"]
         subscription = user.subscriptions.get(pk=sub_id)
         subscription.delete()
         messages.success(request, "Subscription deleted")
     except Subscription.DoesNotExist:
         messages.error(request, "Invalid subscription ID")
+    except KeyError:
+        messages.error(request, "Missing parameter 'subscription_id'")
     return redirect(reverse(manage))
 
 
