@@ -13,8 +13,8 @@ import logging
 
 from cornerwise.utils import today
 from shared.request import make_response, ErrorResponse
-from . import changes, tasks
-from .models import Subscription, UserProfile
+from user import changes, tasks
+from user.models import Subscription, UserProfile
 
 
 logger = logging.getLogger(__file__)
@@ -211,22 +211,22 @@ def change_summary(request, user):
     until = None
     days = None
 
-    if "since" in request.POST:
+    if "since" in request.GET:
         try:
-            since = datetime.fromtimestamp(float(request.POST["since"]))
+            since = datetime.fromtimestamp(float(request.GET["since"]))
         except ValueError:
             since = None
     else:
         try:
-            days = abs(int(request.POST["days"]))
+            days = abs(int(request.GET["days"]))
         except (KeyError, ValueError):
             days = 7
 
     if days:
         since = today() - timedelta(days=days)
-    elif "until" in request.POST:
+    elif "until" in request.GET:
         try:
-            until = datetime.fromtimestamp(float(request.POST["until"]))
+            until = datetime.fromtimestamp(float(request.GET["until"]))
         except (TypeError, ValueError):
             pass
 
