@@ -22,4 +22,5 @@ services:
       - redis
     volumes:
       - media:/media
+    working_dir: /app/
     command: bash /app/celery_start.sh

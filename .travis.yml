@@ -7,3 +7,6 @@ services:
 
 before_install:
   - docker-compose up
+
+script:
+  - python /app/manage.py test

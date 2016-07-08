@@ -8,6 +8,7 @@ services:
     links:
       - postgres
       - redis
+    working_dir: /app/
     command: bash /app/start.sh
     volumes:
       - runinfo:/runinfo
