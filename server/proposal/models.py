@@ -291,7 +291,7 @@ class Image(models.Model):
                                  help_text="Source document for image")
     image = models.FileField(null=True)
     thumbnail = models.FileField(null=True)
-    url = models.URLField(null=True, unique=True)
+    url = models.URLField(null=True, unique=True, max_length=512)
     # Crude way to specify that an image should not be copied to the
     # local filesystem:
     skip_cache = models.BooleanField(default=False)
