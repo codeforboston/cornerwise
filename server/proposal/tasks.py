@@ -320,7 +320,7 @@ def add_doc_attributes(doc_id):
 
         attr.save()
 
-    add_doc_events(doc, properties)
+    add_doc_events(doc_id, properties)
 
     return doc
 
