@@ -460,8 +460,10 @@ def pull_updates(since=None, importers_filter=None):
         importers = [imp for imp in importers if name in imp.region_name.lower()]
 
     proposals = fetch_proposals(since, importers=importers)
-    process_proposal.map(proposals)()
-    docs = Document.objects.filter(proposal__in=proposals)
-    process_document.map(docs)()
+    proposal_ids = [p.id for p in proposals]
+    process_proposal.map(proposal_ids)()
+    doc_ids = Document.objects.filter(proposal_id__in=proposal_ids)\
+                              .values_list("id", flat=True)
+    process_document.map(doc_ids)()
 
     return proposals
