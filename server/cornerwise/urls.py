@@ -18,21 +18,16 @@ from django.conf import settings
 from django.contrib import admin
 from django.views.static import serve as static_serve
 
-import parcel.urls as parcel_urls
-import project.urls as project_urls
-import proposal.urls as proposal_urls
-import user.urls as user_urls
-from proposal import doc_urls
 
 from cornerwise.views import index
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^parcel/', include(parcel_urls)),
-    url(r'^project/', include(project_urls)),
-    url(r'^proposal/', include(proposal_urls)),
-    url(r"^doc/", include(doc_urls)),
-    url(r"^user/", include(user_urls)),
+    url(r'^parcel/', include("parcel.urls")),
+    url(r'^project/', include("project.urls")),
+    url(r'^proposal/', include("proposal.urls")),
+    url(r"^doc/", include("proposal.doc_urls")),
+    url(r"^user/", include("user.urls")),
     url(r"^$", index),
 
     url(r"^" + settings.MEDIA_URL + "(?P<path>.*)$",
