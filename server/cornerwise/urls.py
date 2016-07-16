@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^project/', include("project.urls")),
     url(r'^proposal/', include("proposal.urls")),
     url(r"^doc/", include("proposal.doc_urls")),
+    url(r"^task/", include("task.urls")),
     url(r"^user/", include("user.urls")),
     url(r"^$", index),
 

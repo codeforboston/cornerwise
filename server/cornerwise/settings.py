@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'django.contrib.gis',
     "djcelery",
     'parcel',
+    "task",
     'proposal.ProposalConfig',
     'project.ProjectConfig',
     'user.UserAppConfig',
