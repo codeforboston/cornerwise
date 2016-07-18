@@ -4,8 +4,7 @@ from django.forms.models import model_to_dict
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=128,
-                            unique=True)
+    name = models.CharField(max_length=128,)
     department = models.CharField(max_length=128,
                                   db_index=True,)
     category = models.CharField(max_length=20,
@@ -17,6 +16,10 @@ class Project(models.Model):
     justification = models.TextField(default="")
     website = models.URLField(null=True)
     approved = models.BooleanField(db_index=True)
+
+    class Meta:
+        unique_together = ("name", "region_name")
+
 
     def to_dict(self, include_budget=True):
         d = model_to_dict(self)
