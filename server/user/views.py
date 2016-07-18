@@ -96,12 +96,12 @@ def subscribe(request):
             "email": user.email}
 
 
-@make_response("success.djhtml", redirect_back=True)
+@make_response("task_message.djhtml", redirect_back=True)
 def do_resend_email(request):
     try:
         email = request.POST["email"]
         user = User.objects.get(email=email)
-        tasks.resend_user_key.delay(user.id)
+        task_id = tasks.resend_user_key.delay(user.id)
     except KeyError:
         raise ErrorResponse("Bad request", status=405)
     except User.DoesNotExist:
@@ -110,7 +110,10 @@ def do_resend_email(request):
             redirect_back=True)
 
     return {"status": "OK",
-            "message": "We've sent a new login link to " + email}
+            "task_id": task_id,
+            "pending_message": "We're sending an email to " + email,
+            "success_message": "We've sent a new login link to " + email,}
+
 
 def resend_email(request):
     if request.method == "GET":

@@ -5,3 +5,13 @@
 .logo img {
     max-height: 40px;
 }
+
+.task-message {
+    display: none;
+}
+
+.task-pending .task-message.pending-message,
+.task-success .task-message.success-message,
+.task-failure .task-message.failure-message {
+    display: block;
+}
