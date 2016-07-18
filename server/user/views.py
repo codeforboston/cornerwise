@@ -205,6 +205,9 @@ def show_change_summary(request, user, sub_id, since, until=None):
         raise ErrorResponse("Invalid subscription ID",
                             status=404,
                             redirect_back=True)
+    except KeyError:
+        raise ErrorResponse("Missing subscription id",
+                            redirect_back=True)
 
 
 @with_user
