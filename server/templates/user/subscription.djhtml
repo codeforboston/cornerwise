@@ -2,27 +2,38 @@
 
 {% block body %}
     <h1>
-        Updates to Subscription
+        Subscription Updates
     </h1>
 
-    <p>
-        {{ subscription.readable_description }}
+    <strong>Updates for:</strong> {{ subscription.readable_description }} /
 
-        {% if days %}
-            In the past
-            {% if days == 1 %}
-                day
-            {% else %}
-                {{ days }} days
-            {% endif %}
-        {% elif since %}
-            {% if until %}
-                Between {{ since|date:"D F jS" }} and {{ until|date:"D F js" }}
-            {% else %}
-                Since {{ since|date:"D F jS" }}
-            {% endif %}
+    {% if days %}
+        In the past
+        {% if days == 1 %}
+            day
+        {% else %}
+            {{ days }} days
         {% endif %}
-    </p>
+    {% elif since %}
+        {% if until %}
+            Between {{ since|date:"D F jS" }} and {{ until|date:"D F js" }}
+        {% else %}
+            Since {{ since|date:"D F jS" }}
+        {% endif %}
+    {% endif %}
+
+    <form method="get" action="." >
+        <input name="subscription_id" type="hidden" value="{{ subscription.id }}"/>
+        <div>
+            Show matches from the past:
+        </div>
+        <div class="input-group" >
+            <span class="input-group-addon">In the past </span>
+            <input name="days" type="number" value="{% firstof days "7" %}" min="1"  max="31"/>
+            <span class="input-group-addon">day(s)</span>
+        </div>
+        <button type="submit">Update</button>
+    </form>
 
     {% include "changes.djhtml" %}
 

@@ -2,21 +2,21 @@
 
 {% for change in changes.values %}
     {% with proposal=change.proposal props=changes.properties attrs=changes.attributes %}
-        <div class="change" >
-            <div class="change-thumb">
+        <div class="change row">
+            <div class="change-thumb col-md-3 col-xs-6 thumbnail">
                 {% with image=proposal.images.0 %}
-                    {% if image %}
+                    {% if image and image.thumb %}
                         <img src="{{ image.thumb|absolutize }}"/>
                     {% else %}
-                        <img src="blank.png" />
+                        <img src="/static/images/marker-normal.png" />
                     {% endif %}
                 {% endwith %}
             </div>
-            <div>
+            <div class="col-md-9 col-xs 6">
                 <h2>{{ proposal.address }}</h2>
 
                 {% if change.new %}
-                    <div class="new" >Added {{ proposal.updated|date:"D F jS" }}</div>
+                    <div class="new" >Added {{ proposal.updated|date:"l, F jS" }}</div>
                     <table class="table table-striped" >
                         <tbody>
                             {% for attribute in proposal.attributes %}
