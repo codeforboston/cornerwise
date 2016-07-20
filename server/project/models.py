@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.forms.models import model_to_dict
@@ -10,7 +11,7 @@ class Project(models.Model):
     category = models.CharField(max_length=20,
                                 db_index=True)
     region_name = models.CharField(max_length=128,
-                                   default="Somerville, MA")
+                                   default=settings.GEO_REGION)
     shape = models.MultiPolygonField(null=True)
     description = models.TextField(default="")
     justification = models.TextField(default="")

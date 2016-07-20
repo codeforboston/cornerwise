@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.core.urlresolvers import reverse
@@ -68,7 +69,7 @@ class Proposal(models.Model):
                                help_text="Street address")
     location = models.PointField(help_text="The latitude and longitude")
     region_name = models.CharField(max_length=128,
-                                   default="Somerville, MA",
+                                   default=settings.GEO_REGION,
                                    null=True,
                                    help_text="")
     # The time when the proposal was last saved:

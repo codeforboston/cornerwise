@@ -132,7 +132,7 @@ SERVER_DOMAIN = "cornerwise.org"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 MEDIA_URL = "media/"
 
 if not IS_PRODUCTION:
@@ -193,7 +193,8 @@ GEOCODER = "arcgis"
 # Email address and name for emails:
 EMAIL_ADDRESS = "Cornerwise <cornerwise@cornerwise.org>"
 
-AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
+AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
+                           "django.contrib.auth.backends.ModelBackend"]
 
 # Load select environment variables into settings:
 for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",
