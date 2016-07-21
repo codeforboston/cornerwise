@@ -3,27 +3,16 @@ import logging
 import imp
 import os
 
+from shared import importers
+
 logger = logging.getLogger(__name__)
 
-IMPORTER_DIR = "/app/parcel/importers"
+IMPORTER_DIR = "/app/parcel/importers" 
 
 
-def get_importer_module(file_name, path=IMPORTER_DIR):
-    try:
-        assert file_name.endswith(".py")
-        mod_name = file_name[0:-3]
-        file_path = os.path.join(path, file_name)
-        mod = imp.load_source(mod_name, file_path)
-        assert hasattr(mod, "run")
-        return mod
-    except:
-        return None
-
-
-def find_importers(path=IMPORTER_DIR):
-    for file_name in os.listdir(path):
-        mod = get_importer_module(file_name, path)
-        if mod: yield mod
+def find_importers():
+    return filter(lambda mod: hasattr(mod, "run"),
+                  importers.find_modules(IMPORTER_DIR))
 
 
 class Command(BaseCommand):
@@ -49,7 +38,7 @@ class Command(BaseCommand):
 
         modules = []
         for mod_name in options["name"]:
-            mod = get_importer_module(mod_name + ".py")
+            mod = importers.get_module(mod_name + ".py")
             if not mod:
                 raise CommandError("Unknown importer '%s'\n" % mod_name)
             modules.append(mod)
