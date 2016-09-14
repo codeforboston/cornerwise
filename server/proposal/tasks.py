@@ -378,11 +378,11 @@ def process_document(doc_id):
 
 
 @celery_app.task(name="proposal.process_documents")
-def process_documents(docs=None):
-    if not docs:
-        docs = Document.objects.filter(document="")
+def process_documents(doc_ids=None):
+    if not doc_ids:
+        doc_ids = Document.objects.filter(document="").values_list("id", flat=True)
 
-    return process_document.map(docs)()
+    return process_document.map(doc_ids)()
 
 
 @celery_app.task(name="proposal.process_proposal")
