@@ -411,11 +411,12 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
 
     # TODO: If `since` is not provided explicitly, we should probably determine
     # the appropriate date on a per-importer basis.
-    if not since:
-        if not since:
-            latest_proposal = Proposal.objects.latest()
-            if latest_proposal:
-                since = latest_proposal.updated
+    if since:
+        since = datetime.fromtimestamp(since)
+    else:
+        latest_proposal = Proposal.objects.latest()
+        if latest_proposal:
+            since = latest_proposal.updated
 
         if not since:
             # If there is no record of a previous run, fetch
