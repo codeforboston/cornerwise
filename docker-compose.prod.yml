@@ -8,6 +8,8 @@ services:
     environment:
       APP_PORT: "3000"
       APP_MODE: "production"
+    links:
+      - celery
   celery:
     image: bdsand/cornerwise:latest
     depends_on:
