@@ -17,6 +17,10 @@ SOCRATA_APP_SECRET = ""
 # Used for sending email:
 SENDGRID_API_KEY = ""
 
+SENDGRID_TEMPLATES = {
+    # Dictionary of human readable names to SendGrid template ids:
+}
+
 # Used by Azure Text Analytics; later--maybe news search
 BING_API_KEY = ""
 

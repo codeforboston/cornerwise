@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from urllib import request
+
 import sendgrid
 
 from celery.utils.log import get_task_logger
@@ -22,8 +24,8 @@ logger = get_task_logger(__name__)
 
 
 if getattr(settings, "SENDGRID_API_KEY", None):
-    SG = sendgrid.SendGridClient(settings.SENDGRID_API_KEY,
-                                 raise_errors=True)
+    SG = sendgrid.SendGridAPIClient(apikey=settings.SENDGRID_API_KEY,
+                                    raise_errors=True)
 else:
     SG = None
 
@@ -32,10 +34,43 @@ def has_name(u):
     return u.first_name and u.last_name
 
 
-def send_mail(user, subject, template_name, context={}):
+def send_mail(user, subject, template_name, context={}, content=None):
+    try:
+        template_id = settings.SENDGRID_TEMPLATES[template_name]
+    except:
+        return send_mail_template(user, subject, template_name, context)
+
+    substitutions = {"-{}-".format(k): str(v) for k, v in context.items() }
+    substitutions["-user-"] = user.profile.addressal()
+
+    data = {
+        "personalizations": [{
+            "to": [{ "email": user.email }],
+            "substitutions": substitutions,
+            "subject": subject,
+        }],
+        "from": {
+            "email": settings.EMAIL_ADDRESS,
+            "name": settings.EMAIL_NAME
+        },
+        "template_id": template_id
+    }
+
+    if content:
+        data["content"] = [{"type": "text/html", "value": content}]
+
+    try:
+        SG.client.mail.send.post(request_body=data)
+    except request.HTTPError as err:
+        return (False, err)
+    else:
+        logger.info("Email sent to {}".format(user.email))
+        return True
+
+
+def send_mail_template(user, subject, template_name, context={}):
     context = context.copy()
-    context["user"] = user
-    context["profile"] = user.profile
+    context["user"] = user.profile.addressal()
     html = render_to_string("email/" + template_name + ".djhtml", context)
     try:
         text = render_to_string("email/" + template_name + ".djtxt", context)
@@ -75,10 +110,13 @@ def send_user_key(user_id):
     if not profile.token:
         profile.generate_token()
 
+    # TODO: We want to send the user a summary of the first subscription created
+
     # Render HTML and text templates:
     context = {"confirm_url": make_absolute_url(profile.manage_url)}
-    send_mail(profile.user, "Cornerwise: Please confirm your email",
-              "confirm", context)
+    # send_mail(profile.user, "Cornerwise: Please confirm your email",
+    #           "confirm", context)
+    send_mail(profile.user, "Cornerwise: Welcome", "welcome", context)
 
 
 @celery_app.task(name="user.resend_user_key")
@@ -129,6 +167,7 @@ def user_profile_created(**kwargs):
         send_user_key.delay(profile.user_id)
 
 
+# TODO May rewrite this to 
 def set_up_hooks():
     post_save.connect(user_profile_created, UserProfile,
                       dispatch_uid="send_confirmation_email")

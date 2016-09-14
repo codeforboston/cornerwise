@@ -31,6 +31,12 @@ class UserProfile(models.Model):
     nickname = models.CharField(max_length=128,
                                 help_text="What do you prefer to be called?")
 
+    def addressal(self):
+        if self.nickname:
+            return self.nickname
+
+        return self.user.email
+
     def activate(self):
         self.user.is_active = True
         self.token = make_token()

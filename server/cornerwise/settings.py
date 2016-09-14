@@ -191,7 +191,13 @@ GEO_REGION = "Somerville, MA"
 GEOCODER = "arcgis"
 
 # Email address and name for emails:
-EMAIL_ADDRESS = "Cornerwise <cornerwise@cornerwise.org>"
+EMAIL_ADDRESS = "cornerwise@cornerwise.org"
+EMAIL_NAME = "Cornerwise"
+
+# Local settings will override this:
+SENDGRID_TEMPLATES = {
+    "welcome": "2aa283ce-e020-48b1-bc5c-d47ff2bb5014"
+}
 
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
@@ -200,6 +206,7 @@ for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",
                "ARCGIS_CLIENT_ID", "ARCGIS_CLIENT_SECRET",
                "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET"]:
     globals()[envvar] = os.environ.get(envvar, "")
+
 
 try:
     # Allow user's local settings to shadow shared settings:
