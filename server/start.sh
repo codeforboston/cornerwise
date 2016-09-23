@@ -43,6 +43,10 @@ if ! getent hosts celery; then
         celery_opts="-E"
     fi
 
+    if ((CELERY_AUTORELOAD)); then
+        celery_opts="$celery_opts --autoreload"
+    fi
+
     $PYTHON_BIN manage.py celery -A $APP_NAME beat \
                 --pidfile=/tmp/celerybeat.pid &
     $PYTHON_BIN manage.py celery -A $APP_NAME worker --loglevel=INFO \
