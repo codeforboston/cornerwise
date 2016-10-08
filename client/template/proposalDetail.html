@@ -1,7 +1,4 @@
 <div class="details">
-    <a href="#" class="prev-button"><div>⟨</div></a>
-    <a href="#" class="next-button"><div>⟩</div></a>
-
     <h4>
         <%- proposal.get("address") %>
     </h4>
@@ -35,7 +32,7 @@
         </tr>
     </table>
     <% } else {
-    var attributes = proposal.getAttributes(["applicant_name", "date", "alderman", "applicant_address", "owner_address", "recommendation"]);
+    var attributes = proposal.getAttributes();
     %>
     <table class="attributes table">
         <% _.each(attributes, function(attr) { %>

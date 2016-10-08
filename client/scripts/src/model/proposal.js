@@ -2,6 +2,14 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
     return B.Model.extend({
         urlRoot: "/proposal/view",
 
+        /**
+           When sorting attributes, display these attributes first, in this
+           order:
+        */
+        promoteAttributes: ["applicant_name", "date", "alderman",
+                            "applicant_address", "owner_address",
+                            "recommendation"],
+
         initialize: function() {
                  this.listenTo(refLocation, "change", this.recalculateDistance)
                 .listenTo(this, "change:_hovered", this.loadParcel)
@@ -133,7 +141,41 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return _.map(handles, this.getAttributeValue, this);
         },
 
+        _makeHandlerComparator: function(promoted) {
+            var m = _.reduce(promoted, function(o, handle, i) {
+                o[handle] = i;
+                return o;
+            }, {});
+
+            return function(a, b) {
+                var aIdx = m[a], bIdx = m[b];
+
+                if (aIdx !== undefined && bIdx !== undefined) {
+                    return aIdx - bIdx;
+                }
+
+                if (aIdx === undefined) {
+                    if (bIdx === undefined)
+                        return a < b ? -1 : a == b ? 0 : -1;
+                    return 1;
+                }
+
+                return -1;
+            };
+        },
+
+        getHandlerCmp: function() {
+            if (!this._handlerCmp) {
+                this._handlerCmp = this._makeHandlerComparator(this.promoteAttributes);
+            }
+            return this._handlerCmp;
+        },
+
         getAttributes: function(handles) {
+            if (!handles) {
+                handles = _.keys(this.get("attributes")).sort(this.getHandlerCmp());
+            }
+
             return _.map(handles, this.getAttribute, this);
         },
 
