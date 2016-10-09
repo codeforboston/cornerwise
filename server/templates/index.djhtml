@@ -186,10 +186,14 @@
         </div>
 
         <div id="mode-controls">
-            <a class="mode main-mode action" href="#view=list"><img src="static/images/list-icon.png" alt="List" width="23" height="23"><br>
+            <a class="mode action list-mode-button" href="#view=list">
+                <img src="static/images/list-icon.png" alt="List" width="23" height="23">
+                <br/>
                 LIST
             </a>
-            <a class="mode list-mode action" href="#view=main"><img src="static/images/map-icon.png" alt="Map" width="23" height="23"><br>
+            <a class="mode action map-mode-button" href="#view=main">
+                <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
+                <br/>
                 MAP
             </a>
         </div>

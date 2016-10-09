@@ -297,6 +297,10 @@ input:focus::-webkit-input-placeholder {
     float: right;
     font-variant: small-caps;
     height: 100%;
+
+/* Keep GO button on the right */
+    width: 0;
+    direction: rtl;
 }
 
 .go-button {
@@ -494,6 +498,11 @@ body.main #filter-controls, body.list #filter-controls {
 }
 
 #mode-controls {
+    display: none;
+}
+
+body.nointro #mode-controls {
+    display: block;
     position: absolute;
     text-align: center;
     top: 0;
@@ -503,9 +512,16 @@ body.main #filter-controls, body.list #filter-controls {
 #mode-controls .mode {
     border-radius: 5px;
     color: white;
+    display: inline-block;
     margin: 0.5em;
+    padding-top: 3px;
     width: 50px;
     height: 50px;
+}
+
+body.main .map-mode-button, body.list .list-mode-button {
+  background-color: #F06037;
+  cursor: default;
 }
 
 .action {
@@ -514,15 +530,7 @@ body.main #filter-controls, body.list #filter-controls {
 
 .action:hover {
     background-color: #7fc87a;
-}
-
-.mode {
-    display: none;
-}
-
-body.main .main-mode, body.list .list-mode {
-    display: block;
-    padding-top: 3px;
+    text-decoration: none;
 }
 
 div.proposal-marker {
@@ -954,7 +962,6 @@ a.glossary:hover {
     overflow: hidden;
     position: absolute;
     height: 0;
-
     transition: max-height 0.2s linear;
 }
 
@@ -1110,6 +1117,10 @@ a.brief-model:hover {
 
 .details {
     overflow-y: auto;
+}
+
+.details::-webkit-scrollbar { 
+    display: block; 
 }
 
 .details h4 {
@@ -1520,7 +1531,17 @@ a.document:before {
     }
 }
 
+/* 
+    Mobile styles:
+ */
 @media screen and (max-width: 768px) {
+    #search-banner {
+        top: 60px;
+    }
+    #geolocate {
+        display: none;
+    }
+    
     .resp-portrait-hide {
         display: none;
     }
@@ -1560,7 +1581,12 @@ a.document:before {
     }
 }
 
+
 @media screen and (max-width: 700px) {
+    body.nointro #logo {
+        display: none;
+    }
+
     body.nointro #search-banner {
         text-align: left;
     }
@@ -1575,6 +1601,14 @@ a.document:before {
 }
 
 @media screen and (max-width: 600px) {
+    body.nointro #search-banner .overlay-contents {
+        width: 100% !important;
+    }
+
+    body #mode-controls {
+        display: none !important;
+    }
+
     h3 {
         font-size: smaller;
     }
