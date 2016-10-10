@@ -20,3 +20,4 @@ local/
 .tern-port
 google_credentials.json
 /logs/
+/docker-support/prod.env

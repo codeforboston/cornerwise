@@ -8,6 +8,8 @@ services:
     environment:
       APP_PORT: "3000"
       APP_MODE: "production"
+    env_file:
+      - ./docker-support/prod.env
     links:
       - celery
   celery:
