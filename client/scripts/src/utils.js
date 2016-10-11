@@ -265,7 +265,7 @@ define(["underscore", "jquery", "locale", "leaflet"],
                var result = [];
                for (var i = 0, l = coll.length; i < l; i++) {
                    var val = fn.call(ctx, coll[i]);
-                   if (val && val !== undefined && val !== null)
+                   if (val || val !== undefined && val !== null)
                        result.push(val);
                }
                return result;
