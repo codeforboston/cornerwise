@@ -55,7 +55,7 @@
   3. Keep this window open
 
 - (OS X and Windows) Determine the IP address of the machine by running
-  ~docker-machine ip default~, then open a browser to http://*ip-address*:4000/.
+  ~docker-machine ip default~, then open a browser to http://192.168.99.100:4000/.
   (On Mac, you can run ~open http://$(docker-machine ip default):4000~ or set up
   port forwarding by following the instructions below.)
 
