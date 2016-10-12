@@ -114,13 +114,13 @@ If you'd like to be able to access the site at http://localhost:4000:
 
     With cornerwise running, open a new window and enter:
 
-    ```bash
+    #+BEGIN_SRC bash
     docker-compose exec cornerwise ./manage.py shell
     >>> import datetime, proposal
     >>> proposal.tasks.pull_updates(datetime.datetime(2016, 10, 10))
     # Or, with celery running, dispatch an asychronous job:
     >>> proposal.tasks.pull_updates_dt(datetime)
-    ```
+    #+END_SRC
 *** Parcels
     Parcels, for our purposes, are shapes representing an area of real property
     (real estate) with some metadata attached. They are stored in shapefiles.
@@ -132,11 +132,11 @@ If you'd like to be able to access the site at http://localhost:4000:
 
     To import the Somerville parcels, run:
 
-    ```bash
+    #+BEGIN_SRC bash
     docker-compose exec cornerwise ./manage.py addparcels somervillema
-    ```
+    #+END_SRC
 
-    (You can also run `./manage.py help addparcels` to view additional options.)
+    (You can also run ~./manage.py help addparcels~ to view additional options.)
 
     The script will import all the Somerville parcel shapes into the Cornerwise
     database running in your postgis container. There are over 30,000 parcels in
@@ -155,7 +155,7 @@ interact with containers. At the time of this writing (June 2016), the native
 apps are in public beta, but they are likely to become the preferred approach
 to using Docker on those platforms. The instructions above are mostly unchanged,
 except that the ~docker-machine~ instructions are no longer necessary, and
-container ports are automatically forwarded to `localhost`.
+container ports are automatically forwarded to ~localhost~.
 
 * Production
 ** Differences
@@ -171,7 +171,7 @@ Deploying to production differs in a few ways:
 1. ~docker-compose -f docker-compose.yml -f docker-compose.prod.yml up~
 * Starting Fresh
 To start over with a clean database, cd to the the project directory and run
-`docker-compose down -v`. This will shut down the running containers and delete
+~docker-compose down -v~. This will shut down the running containers and delete
 them. It will also delete all of the named volumes and any data they may
 contain.
 * Uninstalling
