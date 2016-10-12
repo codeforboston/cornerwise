@@ -13,6 +13,7 @@ require.config({
 
         // APIs:
         "arcgis": "src/api/arcgis",
+        "places": "src/api/places",
 
         // Application: //
         "config": "src/config",

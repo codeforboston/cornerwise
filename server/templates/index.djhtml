@@ -2,18 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <!--duplicate meta description-->
-    <!--<meta name="description" content="Visual map of Planning reports and capital projects">-->
     <link rel="icon" type="image/png" href="/static/images/favicon.png" />
 
     <title>Cornerwise</title>
+
+    <script type="text/javascript">
+     function _placesInit() {
+         if (window._onPlacesReady) onPlacesReady();
+     }
+    </script>
     <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
     <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="description" content="Find and explore current and future zoning projects near you in City of Somerville."/>
+    <meta name="description" content="Find and explore current and future zoning projects near you - City of Somerville."/>
     <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning boardmurban planning,zoning,zoning board" />
     <!-- OpenGraph -->
     <meta name="og:type" content="website" />
@@ -37,7 +42,7 @@
       <div class="time-span"></div>
       <div class="status">
         <div class="<%- project.get('approved') ? 'approved' : 'pending' %>"/>
-      </div>
+      </div
       <div class="budget-year">
         <% var years = project.yearRange();
            if (years[0] == years[1]) {

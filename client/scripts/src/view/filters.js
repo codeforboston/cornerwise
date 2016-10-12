@@ -2,10 +2,10 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis",
+    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis", "places", 
      "app-state", "config"],
 
-    function(B, _, $, refLocation, regions, $u, arcgis, appState, config) {
+    function(B, _, $, refLocation, regions, $u, arcgis, places, appState, config) {
         return B.View.extend({
             el: document.body,
 
@@ -32,6 +32,8 @@ define(
                 appState.onStateKeyChange("f", function(filters) {
                     this.onFiltersChange(filters);
                 }, this);
+
+                places.setup($("#ref-address-form input")[0], {});
             },
 
             toggle: function(shouldShow) {

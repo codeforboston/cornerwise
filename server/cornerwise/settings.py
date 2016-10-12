@@ -202,9 +202,13 @@ SENDGRID_TEMPLATES = {
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
 # Load select environment variables into settings:
-for envvar in ["GOOGLE_API_KEY", "GOOGLE_STREET_VIEW_SECRET",
-               "ARCGIS_CLIENT_ID", "ARCGIS_CLIENT_SECRET",
-               "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET"]:
+for envvar in ["GOOGLE_API_KEY",
+               "GOOGLE_BROWSER_API_KEY",
+               "GOOGLE_STREET_VIEW_SECRET",
+               "ARCGIS_CLIENT_ID",
+               "ARCGIS_CLIENT_SECRET",
+               "SOCRATA_APP_TOKEN",
+               "SOCRATA_APP_SECRET"]:
     globals()[envvar] = os.environ.get(envvar, "")
 
 
