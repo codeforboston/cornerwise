@@ -135,14 +135,20 @@
 
     <div id="search-banner" class="overlay">
         <a href="#view=about" id="logo" class="_setview"></a>
+        <a href="#showmenu=1" id="hamburger"></a>
         <div class="overlay-contents">
             <h3>What&rsquo;s Being Built Near&hellip;</h3>
             <div class="input-group big-input">
                 <form id="ref-address-form">
-                    <input class="input" type="text" name="address" placeholder="enter address" autocomplete="off" autofocus/>
+                    <input class="input"
+                           type="text"
+                           name="address"
+                           placeholder="Enter address, landmark, intersection"
+                           autocomplete="off"
+                           autofocus />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
                     <button type="submit" class="input-button go-button">go</button>
-                    <a id="geolocate" href="#" title="Search near me"  aria-label="Search near me"></a>
+                    <a id="geolocate" href="#" title="Search near me" aria-label="Search near me"></a>
                 </form>
             </div>
         </div>

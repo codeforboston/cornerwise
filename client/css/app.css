@@ -223,6 +223,7 @@ h3 {
     margin: 0.3em;
     padding: 0.1em;
     position: relative;
+    text-align: left;
 }
 
 .input-group label {
@@ -284,6 +285,7 @@ button.big {
 
 .overlay ::-webkit-input-placeholder {
     color: white;
+    font-style: italic;
     font-weight: lighter;
 }
 
@@ -1541,6 +1543,10 @@ a.document:before {
     #geolocate {
         display: none;
     }
+
+    .input-button {
+        display: none;
+    }
     
     .resp-portrait-hide {
         display: none;
@@ -1587,12 +1593,15 @@ a.document:before {
         display: none;
     }
 
-    body.nointro #search-banner {
-        text-align: left;
+    body.nointro #search-banner .overlay-contents {
+        height: 2em;
+        width: 100% !important;
     }
 
-    body.nointro #search-banner .overlay-contents {
-        width: 75% !important;
+    body.nointro #search-banner .input-group {
+        position: absolute;
+        left: 0.25em;
+        right: 130px;
     }
 
     .details .source-link {
@@ -1601,8 +1610,21 @@ a.document:before {
 }
 
 @media screen and (max-width: 600px) {
-    body.nointro #search-banner .overlay-contents {
-        width: 100% !important;
+    body.nointro #hamburger {
+        background: url(/static/images/menu-icon@3x.png) center / contain;
+        position: absolute;
+        height: 40px;
+        width: 40px;
+        background-color: transparent;
+        left: 1em;
+        top: 0.75em;
+    }
+
+    body.nointro #search-banner .input-group {
+        position: absolute;
+        left: 60px;
+        right: 10px;
+        right: 0;
     }
 
     body #mode-controls {
@@ -1619,6 +1641,6 @@ a.document:before {
         background: url(/static/images/cornerwise-owl.png);
         background-repeat: no-repeat;
         background-size: contain;
+        height: 40px;
         width: 40px;
-    }
-}
+  
