@@ -255,6 +255,69 @@
 
     <div id="image-view"></div>
 
+    <div id="side-menu" class="collapsed">
+        <a href="#showmenu=0" class="close">&times;</a>
+
+        <div class="menu-group" >
+            <div class="group-header" >
+                Filter Results
+            </div>
+
+            <select name="" class="filter-selector">
+                <option value="">Application Status</option>
+            </select>
+
+            <select name="" class="filter-selector">
+                <option>Property Type</option>
+            </select>
+
+            <select name="" class="filter-selector">
+                <option>Lot Size</option>
+            </select>
+        </div>
+
+        <hr class="group-separator" />
+
+        <div class="menu-group" >
+            <div class="group-header" >
+                View by
+            </div>
+
+            <a class="mode action list-mode-button" href="#view=list" >
+                <img src="static/images/list-icon.png" alt="List" width="23" height="23">
+                <br/>
+                LIST
+            </a>
+
+            <a class="mode action map-mode-button" href="#view=main">
+                <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
+                <br/>
+                MAP
+            </a>
+        </div>
+
+        <hr class="group-separator" />
+
+        <div class="menu-group" >
+            <div class="group-header" >
+                Show on Map
+            </div>
+            <div class="group-contents">
+
+            </div>
+        </div>
+
+        <hr class="group-separator" />
+
+        <div class="menu-group" >
+            <div class="group-contents">
+                <a href="#" >About Cornerwise</a>
+                <br/>
+                <a href="#" >Contact</a>
+            </div>
+        </div>
+    </div>
+
     <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
     <!-- <script src="/static/scripts/src/outline.js"></script> -->
     <!-- <script type="text/javascript"> -->

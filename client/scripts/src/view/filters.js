@@ -2,7 +2,7 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis", "places", 
+    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis", "places",
      "app-state", "config"],
 
     function(B, _, $, refLocation, regions, $u, arcgis, places, appState, config) {
@@ -23,6 +23,10 @@ define(
                     this.toggle(fc === "1");
                 }, this, true);
 
+                appState.onStateKeyChange("showmenu", function(show) {
+                    this.toggleSideMenu(show == "1");
+                }, this, true);
+
                 appState.onStateKeyChange(
                     "fa",
                     this.showAttributeFilters, this);
@@ -33,7 +37,11 @@ define(
                     this.onFiltersChange(filters);
                 }, this);
 
-                places.setup($("#ref-address-form input")[0], {});
+                var self = this;
+                places.setup($("#ref-address-form input")[0], {})
+                    .done(function(ac) {
+                        ac.addListener("placed_changed", $.bind(self.onPlaceChanged, self, ac));
+                    });
             },
 
             toggle: function(shouldShow) {
@@ -42,8 +50,14 @@ define(
                     .toggleClass("collapsed", !shouldShow);
             },
 
+            toggleSideMenu(show) {
+                $("#side-menu")
+                    .toggleClass("expanded", show)
+                    .toggleClass("collapsed", !show);
+            },
+
             events: {
-                "submit #ref-address-form": "submitAddress",
+                //"submit #ref-address-form": "submitAddress",
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
                 "click #reset": "clearInputs",
@@ -55,8 +69,8 @@ define(
                 "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
-                "change #filter-region": "updateRegion",
-                "click a.ref-loc": "selectAddress"
+                "change #filter-region": "updateRegion"
+                //"click a.ref-loc": "selectAddress"
             },
 
             onFiltersChange: function(filters) {
@@ -88,6 +102,10 @@ define(
             selectAddress: function(e) {
                 $("#ref-address-form input").focus();
                 e.preventDefault();
+            },
+
+            onPlaceChanged: function(ac) {
+                
             },
 
             /**
