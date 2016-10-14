@@ -1,4 +1,4 @@
-#+TITLE: Cornerwise: Server Setup
+#+TITLE: Cornerwise: Setup
 #+AUTHOR: Code for Boston
 #+OPTIONS: toc:nil
 
@@ -15,79 +15,99 @@
 ** Docker Installation
 
 *** OS X and Windows
-- [[https://www.docker.com/toolbox][Install Docker Toolbox]] (Windows and Mac)
-  The Toolbox includes VirtualBox, Docker Machine, and Docker Compose. On
-  Windows, it also includes MinGW (w/a Unix-like shell), Git, and some
-  other handy tools.
-  ![Docker ToolBox](images/docker_toolbox.png)
+    You have two options:
+    - [[https://docs.docker.com/engine/installation/windows/][Docker for Windows]] / [[https://docs.docker.com/engine/installation/mac/][Docker for Mac]] 
+      
+      Newer Macs running 10.10.3 or higher and Windows PCs running Windows 10
+      Pro, Enterprise, or Education edition can choose to run Docker Native.
+
+    - [[https://www.docker.com/toolbox][Install Docker Toolbox]]
+      
+      The Toolbox includes VirtualBox, Docker Machine, and Docker Compose. On
+      Windows, it also includes MinGW (w/a Unix-like shell), Git, and some other
+      handy tools. *Please note:* using Docker Toolbox requires some extra
+      steps, because instead of running application containers directly, it
+      launches them inside a VM. You should make sure you're using the *Docker
+      Quickstart Terminal* whenever you want to interact with Docker.
 
 *** Linux
-- [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Intall Docker Engine]]
-  You can try ~apt-get install docker.io~, but make sure you're running a recent
-  version (>1.10)
-- [[https://docs.docker.com/compose/install/][Install Docker Compose]]
+    - [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Intall Docker Engine]]
+    
+      You can try ~apt-get install docker.io~, but make sure you get a recent
+      version (>1.10)
+    
+    - [[https://docs.docker.com/compose/install/][Install Docker Compose]]
+
+      Compose is a tool built on top of Docker that allows us to organize the
+      application into component services and to wire them together
+      appropriately. It reads the contents of `docker-compose.yml` (possibly
+      merging in other files like `docker-compose.override.yml`) and constructs
+      containers as needed.
 
 ** Startup
 
-  Note: On Linux, you'll typically have to run all ~docker~ commands, including
-  ~docker-compose~ with ~sudo~. This is due to the fact that the Docker daemon
-  must run as root, and the client communicates with it over a socket owned by
-  root. (You can add your user to the ~docker~ group to avoid having to type
-  ~sudo~.)
+   Note: On Linux, you'll typically have to run all ~docker~ commands, including
+   ~docker-compose~, with ~sudo~. This is due to the fact that the Docker daemon
+   must run as root, and the client communicates with it over a socket owned by
+   root. (You can add your user to the ~docker~ group to avoid having to type
+   ~sudo~.)
 
-- (OS X and Windows) Launch the *Docker Quickstart Terminal*. This will
-  provision a new ~default~ Docker Machine if one does not already exist and set
-  up some environment variables for communicating with that machine. See
-  instructions below if you prefer to do this step manually, or in another
-  terminal.
+   1. (Docker Toolbox) Launch the *Docker Quickstart Terminal*. This will
+      provision a new ~default~ Docker Machine if one does not already exist and
+      set up some environment variables for communicating with that machine. See
+      instructions below if you prefer to do this step manually or in another
+      terminal.
 
-- ~cd path/to/cornerwise~
+   2. ~cd path/to/cornerwise~
 
-- ~docker-compose up~
-  1. When you first run ~up~, Compose will retrieve some pre-built images from
-     Docker Hub and then build the ~cornerwise~ image. It is normal for these steps
-     to take a few minutes.
+   3. ~docker-compose up~
+      - When you first run ~up~, Compose will retrieve some pre-built images from
+        Docker Hub and then build the ~cornerwise~ image. It is normal for these steps
+        to take a few minutes.
 
-  2. Once the images have been built and the containers started, you should see
-     something like:
-     ~cornerwise_1  | Starting development server at http://0.0.0.0:4000/~
+   4. Once the images have been built and the containers have started, you
+      should see something like:
 
-  3. Keep this window open
+      ~cornerwise_1  | Starting development server at http://0.0.0.0:4000/~
 
-- (OS X and Windows) Determine the IP address of the machine by running
-  ~docker-machine ip default~, then open a browser to http://*ip-address*:4000/.
-  (On Mac, you can run ~open http://$(docker-machine ip default):4000~ or set up
-  port forwarding by following the instructions below.)
+      Keep this window open; closing it will stop the server.
 
-- (Linux) Open a browser to http://localhost:4000/.
+   6. Open a web browser window and browser to the appropriate URL:
+      - (Docker Toolbox) Determine the IP address of the machine by running
+        ~docker-machine ip default~. The address will have the form:
+        http://*ip-address*:4000/. (On Mac, you can run ~open
+        http://$(docker-machine ip default):4000~ or set up port forwarding by
+        following the instructions below.)
 
-- In the original window, press Ctrl-C to shut down the application.
+      - (Linux or Docker Native) Open a browser to http://localhost:4000/.
+
+   7. In the original window, press Ctrl-C to shut down the application.
 
 *** Without Quickstart Terminal (/optional/)
-To create a Machine manually:
+    To create a Machine manually:
 
-- ~docker-machine create -d virtualbox dev~
-  Where ~dev~ is the name of the container
+    - ~docker-machine create -d virtualbox dev~
+      Where ~dev~ is the name of the container
 
-- ~eval $(docker-machine env dev)~
-  Sets up some environment variables for communicating with a running machine
-  named ~dev~.
+    - ~eval $(docker-machine env dev)~
+      Sets up some environment variables for communicating with a running machine
+      named ~dev~.
 
 *** Port Forwarding (OS X) (/optional/)
-If you'd like to be able to access the site at http://localhost:4000:
+    If you'd like to be able to access the site at http://localhost:4000:
 
-- ~VBoxManage controlvm default natpf1 cornerwise,tcp,127.0.0.1,4000,,4000~
-  - ~default~ :: name of the Docker Machine
-  - 4000 (first occurrence) :: host port
-  - 4000 (second occurrence) :: VM port
+    - ~VBoxManage controlvm default natpf1 cornerwise,tcp,127.0.0.1,4000,,4000~
+      - ~default~ :: name of the Docker Machine
+      - 4000 (first occurrence) :: host port
+      - 4000 (second occurrence) :: VM port
 
 *** Production
-- ~docker-compose up -f docker-compose.yml -f docker-compose.prod.yml~
+    - ~docker-compose up -f docker-compose.yml -f docker-compose.prod.yml~
 
 ** Interacting with Containers
-- (OS X/Windows) Launch *Docker Quickstart Terminal*
-- ~cd path/to/cornerwise~
-- ~docker-machine exec cornerwise bash~
+   - (OS X/Windows) Launch *Docker Quickstart Terminal*
+   - ~cd path/to/cornerwise~
+   - ~docker-machine exec cornerwise bash~
 
 * API Credentials
 
@@ -98,12 +118,12 @@ If you'd like to be able to access the site at http://localhost:4000:
 
 ** Setup
 
-  Rename ~server/cornerwise/local_settings.example.py~ to ~local_settings.py~
-  and replace the values there.
+   Rename ~server/cornerwise/local_settings.example.py~ to ~local_settings.py~
+   and replace the values there.
 
-  Certain Google applications require [[https://developers.google.com/identity/protocols/application-default-credentials][default credentials]].  Rename the
-  credentials ~json~ file to ~google_credentials.json~ and move it to
-  ~server/cornerwise~.
+   Certain Google applications require [[https://developers.google.com/identity/protocols/application-default-credentials][default credentials]].  Rename the
+   credentials ~json~ file to ~google_credentials.json~ and move it to
+   ~server/cornerwise~.
 
 * Getting Data
 *** Proposals
@@ -143,50 +163,37 @@ If you'd like to be able to access the site at http://localhost:4000:
     Somerville alone, so it can take a while for the process to complete.
 
 * Troubleshooting
-If the script hangs while fetching a new image (~Using default tag:
-latest~), or if url fetches hang inside the container, it may be an
-issue with the VM's networking. I'm not sure exactly what causes it,
-but you can fix it by running ~docker-machine restart dev~ in a
-fresh terminal window.
-
-* Docker Native
-Docker also has native clients for Mac and Windows that make it easier to
-interact with containers. At the time of this writing (June 2016), the native
-apps are in public beta, but they are likely to become the preferred approach
-to using Docker on those platforms. The instructions above are mostly unchanged,
-except that the ~docker-machine~ instructions are no longer necessary, and
-container ports are automatically forwarded to ~localhost~.
+** Broken Icons
+   The license agreement for the layer icons forbids us from redistributing them
+   in the repository, but we are allowed to share them individually. Contact an
+   existing team member to get the icons, then copy them to `client/css/font`.
 
 * Production
 ** Differences
-Deploying to production differs in a few ways:
-1. The webserver, not Django, is responsible for serving static assets. This
-   should be configured in, e.g., nginx.
-2. Changes to application code are not automatically loaded, since the contents
-   of ~server/~ are copied when the image is built, not when the container
-   starts. You must run ~docker-compose build~ first.
-3. It uses [[http://gunicorn.org][gunicorn]] instead of the built-in development webserver and serves
-   from port 4000 instead of 3000.
+   Deploying to production differs in a few ways:
+   1. The webserver, not Django, is responsible for serving static assets. This
+      should be configured in your webserver.
+   2. Changes to application code are not automatically loaded, since the contents
+      of ~server/~ are copied when the image is built, not when the container
+      starts. You must run ~docker-compose build~ first.
+   3. It uses [[http://gunicorn.org][gunicorn]] instead of the built-in development webserver and serves
+      from port 3000 instead of 4000.
+   4. Configuration that in development uses ~local_settings.py~ uses
+      environment variables in production . When deploying, ensure that there is
+      a ~production.env~ file in ~docker-support~. It should not be in git.
 ** Running
-1. ~docker-compose -f docker-compose.yml -f docker-compose.prod.yml up~
+   1. ~docker-compose -f docker-compose.yml -f docker-compose.prod.yml up~
 * Starting Fresh
-To start over with a clean database, cd to the the project directory and run
-~docker-compose down -v~. This will shut down the running containers and delete
-them. It will also delete all of the named volumes and any data they may
-contain.
+  To start over with a clean database, cd to the the project directory and run
+  ~docker-compose down -v~. This will shut down the running containers and delete
+  them. It will also delete all of the named volumes and any data they may
+  contain.
 * Uninstalling
-** Stop and Remove Containers (Old workflow):
-
-#+BEGIN_SRC bash
-eval $(docker-machine env dev)
-container_ids=$(docker ps -a --filter="ancestor=bdsand/cornerwise" | awk '{ print $1 }')
-docker stop $container_ids
-docker rm $container_ids
-#+END_SRC
 ** Stop and Remove Containers
-- In the ~cornerwise~ directory, run ~docker-compose down~
+   - In the ~cornerwise~ directory, run ~docker-compose down~
+   - 
 ** Remove the image:
 
-#+BEGIN_SRC bash
+   #+BEGIN_SRC bash
 docker rmi bdsand/cornerwise
-#+END_SRC
+   #+END_SRC

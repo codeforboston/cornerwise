@@ -205,10 +205,12 @@ AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 for envvar in ["GOOGLE_API_KEY",
                "GOOGLE_BROWSER_API_KEY",
                "GOOGLE_STREET_VIEW_SECRET",
+               "GEOCODER",
                "ARCGIS_CLIENT_ID",
                "ARCGIS_CLIENT_SECRET",
                "SOCRATA_APP_TOKEN",
-               "SOCRATA_APP_SECRET"]:
+               "SOCRATA_APP_SECRET",
+               "SENDGRID_API_KEY"]:
     globals()[envvar] = os.environ.get(envvar, "")
 
 
