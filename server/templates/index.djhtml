@@ -148,7 +148,17 @@
                            autofocus />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
                     <button type="submit" class="input-button go-button">go</button>
-                    <a id="geolocate" href="#" title="Search near me" aria-label="Search near me"></a>
+                    <a id="geolocate" href="#"
+                       title="Search near me"
+                       aria-label="Search near me">
+                        <span>Current Location</span>
+                    </a>
+                    <a class="cancel"
+                       href="#"
+                       title="Cancel Search"
+                       aria-label="Cancel search" >
+                        &times;
+                    </a>
                 </form>
             </div>
         </div>
@@ -311,7 +321,7 @@
 
         <div class="menu-group" >
             <div class="group-contents">
-                <a href="#" >About Cornerwise</a>
+                <a href="#view=about&showmenu=0" class="_setview">About Cornerwise</a>
                 <br/>
                 <a href="#" >Contact</a>
             </div>
