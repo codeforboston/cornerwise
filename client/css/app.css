@@ -222,7 +222,7 @@ h3 {
 }
 
 .input-group {
-    background-color: white;
+    border: 1px solid white;
     line-height: 1em;
     margin: 0.3em;
     padding: 0.1em;
@@ -243,6 +243,7 @@ h3 {
 .input-group .input {
     background-color: transparent;
     border: none;
+    color: white;
     font-size: small;
     padding: 0.4em;
     width: 85%;
@@ -268,7 +269,7 @@ body.geolocating #ref-address-form .status {
 }
 
 .overlay .input-group {
-    background-color:transparent;
+    background-color: transparent;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 0 3px rgba(180,180,180,1);
@@ -400,15 +401,6 @@ body.geolocating #ref-address-form .go-button {
 
 .section .more {
     text-align: right;
-}
-
-#subscribe {
-    top: 2em;
-}
-
-#signup {
-    text-align: center;
-    line-height: 5em;
 }
 
 
@@ -1610,18 +1602,39 @@ a.document:before {
     -webkit-appearance: none;
 }
 
+/* Subscription workflow */
+
+body.choosing-bounds #map-container {
+    border-left: 3px solid #FF6005;
+    border-right: 3px solid #FF6005;
+}
+
+body.choosing-bounds #search-banner {
+    border-bottom: 3px solid #FF6005;
+}
+
+body.choosing-bounds #subscribe {
+    border-top: 3px solid #FF6005;
+}
+
+
 /* Google Places Autocomplete */
 .pac-container {
-    background-color: rgba(43, 43, 43, 0.98);
+    background-color: rgba(43, 43, 43, 1);
     border: 1px solid white;
-    color: white !important;
     font-family: inherit;
-    font-size: larger;
 }
 
 .pac-item {
+    color: white !important;
+    font-size: larger;
     border-top: none;
     padding: 0.5em;
+}
+
+.pac-item-selected,
+.pac-item:hover {
+    background-color: rgba(100, 100, 100, 1);
 }
 
 .pac-icon.pac-icon-marker {
@@ -1633,9 +1646,13 @@ a.document:before {
     font-size: large;
 }
 
-.pac-matched {
+.pac-logo:after {
+    display: none;
 }
 
+
+
+/**************/
 /* Responsive */
 
 @media screen and (min-width: 768px) {
@@ -1739,7 +1756,7 @@ a.document:before {
     }
 
     /* Display the Current Location option when the input is focused */
-    #ref-address-form input:focus ~ #geolocate {
+    input:focus ~ #geolocate {
         background-color: rgb(43, 43, 43);
         background-position: 0.5em 50%;
         border: 1px solid white;
@@ -1749,18 +1766,24 @@ a.document:before {
         padding-left: 2.5em;
         position: absolute;
         text-decoration: none;
-        left: 0;
-        right: 0;
+        left: 0.5em;
+        right: 0.5em;
         width: auto;
         top: 100%;
         z-index: 10000;
     }
 
-    #ref-address-form input:focus ~ .cancel {
+    #geolocate:hover {
+        background-color: rgba(100, 100, 100, 1);
+        display: block !important;
+    }
+
+    input:focus ~ #ref-address-form .cancel {
         color: white;
-        display: block;
+        display: block !important;
         position: absolute;
         right: 0;
+        z-index: 10;
     }
 
     body #mode-controls {
@@ -1794,6 +1817,65 @@ a.document:before {
     .details .source-link {
         display: none;
     }
+
+    /* Subscribe/signup controls */
+    body.main #subscribe {
+        background-color: #306B2E;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+
+    #subscribe .screen {
+        color: white;
+        display: none;
+        text-transform: uppercase;
+    }
+
+    #subscribe .screen1 {
+        text-align: center;
+        display: block;
+        font-size: x-large;
+    }
+
+    .signup-screen {
+        display: flex;
+    }
+
+    .signup-screen .form {
+        flex: 1;
+        padding-right: 1em;
+    }
+
+    .signup-screen .cancel {
+        flex: 0 0 1em;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: white;
+        font-size: xx-large;
+        font-weight: 200;
+        width: 2em;
+    }
+
+    .signup-screen .input-group {
+        display: flex;
+    }
+
+    .signup-screen button {
+        border: none;
+    }
+
+    /* List view tweaks for mobile */
+    .proposal-info .thumbnail {
+        float: none;
+        width: auto;
+    }
 }
 
 @media screen and (max-width: 1000px) {
@@ -1803,4 +1885,5 @@ a.document:before {
         background-size: contain;
         height: 40px;
         width: 40px;
-  
+    }
+}

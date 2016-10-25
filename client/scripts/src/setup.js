@@ -97,7 +97,7 @@ define(
 
                             appViews.subscribeView = new SubscribeView({
                                 collection: proposals,
-                                el: "#user-controls"
+                                el: "#subscribe"
                             });
                         });
 

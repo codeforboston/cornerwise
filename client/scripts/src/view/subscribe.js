@@ -2,13 +2,31 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
        function($, B, _, alerts, $u) {
            return B.View.extend({
                events: {
-                   "click #subscribe": "onClickSubscribe",
-                   "submit #subscribe-form": "onSubmit"
+                   "click a.subscribe-link": "onClickSubscribe",
+                   "click .cancel": "reset",
+                   "submit form": "onSubmit"
+               },
+
+               showSubscriptionForm: function() {
+                   this.$(".screen").hide();
+                   this.$(".screen2")
+                       .show()
+                       .find("input").focus();
                },
 
                onClickSubscribe: function() {
-                   $("#subscribe-form").show()
-                       .find("input").focus();
+                   this.showSubscriptionForm();
+                   $("body").addClass("choosing-bounds");
+                   alerts.show("Move and zoom the map to set the " +
+                               "area you want to receive updates " +
+                               "about.", "instructional");
+               },
+
+               reset: function(e) {
+                   this.$(".screen").hide();
+                   this.$(".screen1").show();
+                   $("body").removeClass("choosing-bounds");
+                   e.preventDefault();
                },
 
                onSubmit: function(e) {
