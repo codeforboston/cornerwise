@@ -37,10 +37,15 @@ define(
                     this.onFiltersChange(filters);
                 }, this);
 
-                var self = this;
-                places.setup($("#ref-address-form input")[0], {})
+                // Google Places Autocomplete setup:
+                var self = this,
+                    placesOptions = {types: ["geocode"]},
+                    input = $("#ref-address-form input")[0];
+                places.setup(input, placesOptions)
                     .done(function(ac) {
-                        ac.addListener("placed_changed", $.bind(self.onPlaceChanged, self, ac));
+                        google.maps.event.addListener(ac, "place_changed", function() {
+                            self.onPlaceChanged(ac, input);
+                        });
                     });
             },
 
@@ -69,8 +74,8 @@ define(
                 "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
-                "change #filter-region": "updateRegion"
-                //"click a.ref-loc": "selectAddress"
+                "change #filter-region": "updateRegion",
+                "click a.ref-loc": "selectAddress"
             },
 
             onFiltersChange: function(filters) {
@@ -104,8 +109,21 @@ define(
                 e.preventDefault();
             },
 
-            onPlaceChanged: function(ac) {
-                
+            onPlaceChanged: function(ac, input) {
+                var place = ac.getPlace(),
+                    geo = place.geometry;
+
+                if (geo) {
+                    $(input).removeClass("error");
+                    refLocation.setFromLatLng(geo.location.lat,
+                                              geo.location.lng);
+                } else {
+                    $(input)
+                        .addClass("error")
+                        .find(".error-reason").text("Could not locate that address!");
+
+                }
+                return false;
             },
 
             /**

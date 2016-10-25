@@ -12,6 +12,11 @@ define(["jquery"], function($) {
         /**
          * @param {HTMLElement} input
          * @param {google.maps.places.AutocompleteOptions} options
+         *
+         * @return {$.Deferred} Resolves to the new Autocomplete instance
+         *
+         * Set up the specified input as a Places autocomplete box when the
+         * Places API becomes available.
          */
         setup: function(input, options) {
             var autocomplete = $.Deferred();
