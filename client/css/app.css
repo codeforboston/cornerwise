@@ -192,13 +192,6 @@ span.icon {
     transition: top 0.2s linear, background-color 0.2s linear;
 }
 
-#filter-controls {
-    background-color: #2A749B;
-    height: 0.5em;
-    display: none;
-    text-align: left;
-}
-
 #side-menu {
     display: none;
 }
@@ -248,6 +241,16 @@ h3 {
     padding: 0.4em;
     width: 85%;
 }
+
+/* Don't show focus: */
+.input-group .input:focus {
+    outline: none;
+}
+
+.input-group .input::-moz-focus-inner {
+    border: 0;
+}
+
 
 .input-group .status {
     display: none;
@@ -442,40 +445,6 @@ body.nointro #search-banner .overlay-contents {
     width: 50%;
 
     transition: width 0.2s linear;
-}
-
-body.main #filter-controls, body.list #filter-controls {
-    display: block;
-}
-
-#filter-controls.expanded .filters {
-    display: block;
-    padding: 0.5em;
-}
-
-#filter-controls .filters {
-    background-color: #2A749B;
-    height: 2.5em;
-    margin-bottom: -0.2em;
-    overflow: hidden;
-    box-shadow: 0 2px 3px rgba(180,180,180,1);
-    transition: height 0.2s linear;
-    /* width: 60%; */
-}
-#filter-controls.collapsed .filters {
-    height: 0;
-}
-
-#filter-controls.collapsed .filters * {
-    display: none;
-}
-
-#filter-controls.collapsed #filter-attributes {
-    display: none;
-}
-
-#filter-attributes {
-    float: left;
 }
 
 .filters .filter-group {
@@ -1756,12 +1725,11 @@ body.choosing-bounds #subscribe {
     }
 
     /* Display the Current Location option when the input is focused */
-    input:focus ~ #geolocate {
+    #geolocate {
         background-color: rgb(43, 43, 43);
         background-position: 0.5em 50%;
         border: 1px solid white;
         color: white;
-        display: block;
         padding: 0.5em;
         padding-left: 2.5em;
         position: absolute;
@@ -1773,9 +1741,12 @@ body.choosing-bounds #subscribe {
         z-index: 10000;
     }
 
+    #geolocate:hover, input:focus ~ #geolocate {
+        display: block !important;
+    }
+
     #geolocate:hover {
         background-color: rgba(100, 100, 100, 1);
-        display: block !important;
     }
 
     input:focus ~ #ref-address-form .cancel {
@@ -1787,10 +1758,6 @@ body.choosing-bounds #subscribe {
     }
 
     body #mode-controls {
-        display: none !important;
-    }
-
-    #filter-controls {
         display: none !important;
     }
 
@@ -1816,6 +1783,28 @@ body.choosing-bounds #subscribe {
 
     .details .source-link {
         display: none;
+    }
+
+    #alert-container {
+        /* TODO: Better way to position this? */
+        top: 70px;
+    }
+
+    #alert {
+        border: none;
+        border-radius: none;
+        font-size: large;
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        text-align: justify;
+        width: auto;
+    }
+
+    body.choosing-bounds #alert {
+        left: 3px;
+        right: 3px;
+        top: 3px;
     }
 
     /* Subscribe/signup controls */

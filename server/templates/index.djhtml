@@ -311,6 +311,5 @@
     <script type="text/javascript">
      try{Typekit.load({ async: true });}catch(e){}
     </script>
-    <script src="/static/scripts/src/outline.js"></script>
   </body>
 </html>
