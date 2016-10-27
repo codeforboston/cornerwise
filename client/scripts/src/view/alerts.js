@@ -2,64 +2,94 @@ define(["backbone", "jquery", "underscore"],
        function(B, $, _) {
            var alertElement = $("#alert"),
                alertCount = 0,
-               messages = [],
+               modalMessage,
                lastMessage;
 
-           function showMessage(message) {
-               if (_.isString(message)) {
-                   message = {text: message,
-                              className: ""};
-               }
+           /**
+            * @enum {number}
+            */
+           var AlertType = {
+               DEFAULT: 0,
+               // Must be dismissed explicitly by id.
+               MODAL: 1
+           };
 
-               alertElement.html(message.text)
-                   .addClass("displayed " + message.className);
-           }
-
-           function advance() {
-               if (lastMessage && lastMessage.className)
-                   alertElement.removeClass(lastMessage.className);
-
-               if (messages.length) {
-                   lastMessage = messages.shift();
-                   showMessage(lastMessage);
-               } else {
-                   alertElement.removeClass("displayed");
+           /**
+            * @param {string} [id] If supplied, dismisses the displayed message
+            * only if its id matches this string.
+            *
+            * @return {jQuery} The alert container element
+            */
+           function dismissMessage(id) {
+               if (lastMessage && !id || lastMessage.id == id) {
+                   alertElement
+                       .removeClass("displayed")
+                       .removeClass(lastMessage.className);
                    lastMessage = null;
                }
+
+               if (modalMessage && modalMessage.id === id) {
+                   modalMessage = null;
+               } else {
+                   showMessage(modalMessage);
+               }
+
+               return alertElement;
            }
 
-           function start() {
-               if (!lastMessage) advance();
+           function _doShow(message) {
+               alertElement
+                   .addClass(message.className)
+                   .addClass("displayed")
+                   .text(message.text);
+               lastMessage = message;
+               if (message.type == AlertType.MODAL) {
+                   modalMessage = message;
+               }
+           }
+
+           function showMessage(message) {
+               if (lastMessage) {
+                   dismissMessage().delay(0.2).queue(function() {
+                       _doShow(message);
+                   });
+               } else {
+                   _doShow(message);
+               }
            }
 
            alertElement.click(function() {
-               advance();
+               if (lastMessage.type !== AlertType.MODAL) {
+                   dismissMessage();
+               }
            });
 
            return {
-               remove: function(id) {
-                   if (lastMessage && lastMessage.id === id) {
-                       var m = lastMessage;
-                       advance();
-                       return m;
-                   } else {
-                       var idx = _.findIndex(messages,
-                                             function(m) { return m.id === id; });
-                       if (idx !== -1) {
-                           return messages.splice(idx, 1)[0];
-                       }
+               AlertType: AlertType,
 
-                       return null;
-                   }
+               remove: function(id) {
+                   dismissMessage(id);
                },
 
-               show: function(message, className) {
-                   var id = alertCount++;
-                   messages.push({text: message,
-                                  id: id,
-                                  className: className || ""});
-                   start();
+               /**
+                * @param {string} message
+                * @param {string} className
+                * @param {AlertType} [type=AlertType.DEFAULT]
+                * @param {string} [id]
+                *
+                * @return id
+                */
+               show: function(message, className, type, id) {
+                   var msg =
+                       _.isObject(message) ? message : {text: message,
+                                                        id: id,
+                                                        className: className || "",
+                                                        type: type || AlertType.DEFAULT};
 
+                   if (!msg.id) msg.id = alertCount++;
+                   if (_.isString(msg.type)) msg.type = AlertType[type.toUpperCase()];
+
+                   showMessage(msg);
                    return id;
                }
            };
