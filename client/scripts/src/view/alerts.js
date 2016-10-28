@@ -41,7 +41,9 @@ define(["backbone", "jquery", "underscore"],
                alertElement
                    .addClass(message.className)
                    .addClass("displayed")
-                   .text(message.text);
+                   .toggleClass("modal", message.type == AlertType.MODAL)
+                   .find(".content").text(message.text).end()
+                   .find(".title").text(message.title).toggle(!!message.title);
                lastMessage = message;
                if (message.type == AlertType.MODAL) {
                    modalMessage = message;
@@ -67,9 +69,8 @@ define(["backbone", "jquery", "underscore"],
            return {
                AlertType: AlertType,
 
-               remove: function(id) {
-                   dismissMessage(id);
-               },
+               remove: dismissMessage,
+               dismissMessage: dismissMessage,
 
                /**
                 * @param {string} message

@@ -960,6 +960,7 @@ body.main #info {
     /* overflow-y: scroll; */
     overflow: visible;
     padding-bottom: 2em;
+    z-index: 2;
 }
 
 #info .dragarea {
@@ -1167,6 +1168,7 @@ a.thumb-link:hover {
 }
 
 #alert-container {
+    /* The alert container is positioned relative to the search bar */
     bottom: -65px;
     height: 0;
     pointer-events: none;
@@ -1198,6 +1200,27 @@ a.thumb-link:hover {
 
 #alert.info {
     border: 2px solid #888;
+}
+
+#alert.instructions {
+    background-color: rgba(220, 220, 220, 0.8);
+}
+
+#alert.success {
+    background-color: rgba(57, 127, 52, 0.9);
+}
+
+#alert.notice {
+    background-color: rgba(200, 150, 50, 0.9);
+}
+
+#alert .title {
+    display: none;
+    font-size: larger;
+}
+
+#alert.modal .close {
+    display: none;
 }
 
 body.main .leaflet-control-container {
@@ -1586,6 +1609,10 @@ body.choosing-bounds #subscribe {
     border-top: 3px solid #FF6005;
 }
 
+#subscribe a:hover {
+    text-decoration: none;
+}
+
 
 /* Google Places Autocomplete */
 .pac-container {
@@ -1785,7 +1812,7 @@ body.choosing-bounds #subscribe {
         display: none;
     }
 
-    #alert-container {
+    body.nointro #alert-container {
         /* TODO: Better way to position this? */
         top: 70px;
     }
@@ -1793,6 +1820,7 @@ body.choosing-bounds #subscribe {
     #alert {
         border: none;
         border-radius: none;
+        display: flex;
         font-size: large;
         position: absolute;
         left: 0px;
@@ -1801,10 +1829,23 @@ body.choosing-bounds #subscribe {
         width: auto;
     }
 
+    #alert .close {
+        align-content: center;
+        color: black;
+        font-size: larger;
+        flex: 1 1.5em;
+        justify-content: center;
+    }
+
+    .close:hover {
+        text-decoration: none;
+    }
+
+
     body.choosing-bounds #alert {
         left: 3px;
         right: 3px;
-        top: 3px;
+        top: 2px;
     }
 
     /* Subscribe/signup controls */

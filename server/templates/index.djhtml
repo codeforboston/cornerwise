@@ -144,8 +144,7 @@
                            type="text"
                            name="address"
                            placeholder="Enter address, landmark, intersection"
-                           autocomplete="off"
-                           autofocus />
+                           autocomplete="off" />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
                     <button type="submit" class="input-button go-button">go</button>
                     <a id="geolocate" href="#"
@@ -178,7 +177,11 @@
             </a>
         </div>
         <div id="alert-container">
-            <div id="alert"></div>
+            <div id="alert">
+                <a href="#" class="close" >&times;</a>
+                <h2 class="title"></h2>
+                <span class="content"></span>
+            </div>
         </div>
     </div>
 

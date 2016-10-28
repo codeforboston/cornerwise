@@ -17,15 +17,17 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                onClickSubscribe: function() {
                    this.showSubscriptionForm();
                    $("body").addClass("choosing-bounds");
-                   alerts.show("Move and zoom the map to set the " +
-                               "area you want to receive updates " +
-                               "about.", "instructional");
+                   var instructions = ("Move and zoom the map to set the " +
+                                       "area you want to receive updates " +
+                                       "about.");
+                   alerts.show(instructions, "instructions", "modal", "subscribe-instructions");
                },
 
                reset: function(e) {
                    this.$(".screen").hide();
                    this.$(".screen1").show();
                    $("body").removeClass("choosing-bounds");
+                   alerts.remove("subscribe-instructions");
                    e.preventDefault();
                },
 
@@ -41,17 +43,29 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                        .done(function(resp) {
                            if (resp.new_user) {
                                alerts.show(
-                                   ["Thanks for registering!<br>",
-                                    "We're sending an email to <b>",
-                                    _.escape(resp.email), "</b> with ",
-                                    "instructions on how to complete the ",
-                                    "process"].join(""),
-                                   "info");
+                                   {title: "Please confirm your email",
+                                    text: ["Thanks for registering!",
+                                           "We've sent an email to ",
+                                           resp.email, ". Please use the link ",
+                                           "provided to confirm your email ",
+                                           "before we can send updates"].join(""),
+                                    className: "info",
+                                    type: alerts.AlertType.MODAL});
+                           } else if (resp.has_subscriptions) {
+                               alerts.show(
+                                   {title: "Overwrite existing subscription?",
+                                    text: ("Looks like you have a subscription " +
+                                           "already. We've emailed a link to " +
+                                           resp.email + " that will confirm the new " +
+                                           "subscription. If you do nothing, your " +
+                                           "old subscription will remain intact."),
+                                    className: "notice"});
                            } else if (resp.active) {
                                alerts.show(
-                                   "You will now receive notifications for " +
-                                       "proposals matching the current filters.",
-                                   "info");
+                                   {title: "You're Subscribed!",
+                                    text: ("You will now receive updates when the " +
+                                           "proposals are updated."),
+                                    className: "success"});
                            } else {
                                alerts.show(
                                    ["You will receive notifications for proposals",
