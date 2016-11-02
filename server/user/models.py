@@ -27,7 +27,7 @@ class UserProfile(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name="profile")
     token = models.CharField(max_length=64, default=make_token)
-    # The user should not be able to log in if this is false:
+    language = models.CharField(max_length=10, default="en")
     nickname = models.CharField(max_length=128,
                                 help_text="What do you prefer to be called?")
 
