@@ -69,6 +69,9 @@ class Subscription(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              null=True,
                              related_name="subscriptions")
+    active = models.BooleanField(default=False,
+                                 help_text="Users only receive updates for active subscriptions")
+    token = models.CharField(max_length=64, default=make_token)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
     last_notified = models.DateTimeField(auto_now=True)
