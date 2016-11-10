@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render_to_response
@@ -87,7 +88,12 @@ def make_response(template=None, error_template="error.djhtml",
     return constructor_fn
 
 
-def make_redirect_response(redirect_to="/"):
+def make_redirect_response(redirect_to_url=None, redirect_to=None):
+    """
+    Decorator function that converts the return value of the decorated view
+    function into a message (django.contrib.messsages) then redirects to a
+    specified URL or named url.
+    """
     def constructor_fn(view):
         def wrapped_view(req, *args, **kwargs):
             try:
@@ -98,11 +104,8 @@ def make_redirect_response(redirect_to="/"):
                 elif isinstance(data, dict):
                     level = data.get("level", "success")
                     level = getattr(messages, level.upper())
-                    if "message" in data:
-                        message = data["message"]
-                    else:
-                        message = json.dumps(data)
-                        extra_args = "json"
+                    message = json.dumps(data)
+                    extra_args = "json"
                 elif isinstance(data, tuple):
                     (message, level) = data
 
@@ -114,7 +117,10 @@ def make_redirect_response(redirect_to="/"):
                 data = err.data
                 messages.error(req, error.data["error"])
 
-            return redirect(redirect_to)
+            if redirect_to:
+                redirect_to_url = reverse(redirect_to)
+
+            return redirect(redirect_to_url or "/")
 
         return wrapped_view
 
