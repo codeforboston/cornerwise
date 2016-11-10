@@ -115,6 +115,7 @@ define(["backbone", "jquery", "underscore"],
                    var m = messages[0];
                    if (/\bjson\b/.exec(m.tags)) {
                        var json = JSON.parse(m.message);
+                       this.show(json);
                    } else {
                        this.show(m.message, m.tags);
                    }
