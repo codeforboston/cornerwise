@@ -1,5 +1,5 @@
-define(["leaflet", "underscore"],
-       function(L, _) {
+define(["leaflet", "proposal-popup-view", "underscore"],
+       function(L, ProposalPopupView, _) {
            function projectTypeIcon(p) {
                var cat = p.category.replace(/[&.]+/g, "")
                        .replace(/[\s-]+/g, "_")
@@ -59,7 +59,7 @@ define(["leaflet", "underscore"],
                    proposal
                        .on("change:location", _.bind(this.locationChanged, this))
                        .on("change:_hovered", _.bind(this.updateIcon, this))
-                       .on("change:_selected", _.bind(this.updateIcon, this));
+                       .on("change:_selected", _.bind(this.onSelected, this));
 
                    return this;
                },
@@ -78,6 +78,18 @@ define(["leaflet", "underscore"],
                        this.setZoomed(this.zoomed);
                    else
                        this.setIcon(getBadge(proposal));
+               },
+
+               onSelected: function(proposal) {
+                   var loc = proposal.get("location"),
+                       view = new ProposalPopupView({ model: proposal });
+                   this.updateIcon(proposal);
+                   L.popup({className: "proposal-info-popup",
+                            minWidth: 300,
+                            maxWidth: 300})
+                       .setLatLng(loc)
+                       .setContent(view.render().el)
+                       .openOn(this._map);
                },
 
                setZoomed: function(n) {

@@ -175,7 +175,7 @@ span.icon {
 }
 
 .overlay {
-    background-color: rgba(43, 43, 43, 0.95);
+    background-color: rgba(43, 43, 43, 1);
     color: white;
     overflow: hidden;
 }
@@ -954,20 +954,17 @@ a.glossary:hover {
 }
 
 body.main #info {
-    display: block;
     height: auto;
-    max-height: 500px;
-    /* overflow-y: scroll; */
     overflow: visible;
+    opacity: 1;
     padding-bottom: 2em;
     z-index: 2;
 }
 
-#info .dragarea {
-    position: absolute;
-    top: -1.5em;
-    left: 0;
-    right: 0;
+body.info #info {
+    top: 0;
+    height: auto;
+    bottom: 0;
 }
 
 /* Applied while the user is dragging */
@@ -1008,15 +1005,6 @@ body.main #info {
 a.brief-model:hover {
     color: #54C9D3 !important;
     text-decoration: none;
-}
-
-.dragarea .dragger {
-    color: white;
-    cursor: -webkit-grab;
-    padding: 0.5em;
-    text-align: center;
-    width: 100px;
-    margin: auto;
 }
 
 #info .close {
@@ -1093,11 +1081,11 @@ a.brief-model:hover {
 }
 
 .details {
-    overflow-y: auto;
+    overflow: auto;
 }
 
-.details::-webkit-scrollbar { 
-    display: block; 
+.details::-webkit-scrollbar {
+    display: block;
 }
 
 .details h4 {
@@ -1138,10 +1126,6 @@ a.brief-model:hover {
     font-size: smaller;
 }
 
-#info.empty .dragarea {
-    display: none;
-}
-
 a.thumb-link {
     border: 1px solid #777;
     border-radius: 5px;
@@ -1167,6 +1151,22 @@ a.thumb-link:hover {
     padding-bottom: 5px;
 }
 
+/* Leaflet info popup */
+.proposal-info-popup .leaflet-popup {
+    width: 200px !important;
+}
+
+.proposal-info-popup .leaflet-popup-tip,
+.proposal-info-popup .leaflet-popup-content-wrapper {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.proposal-info-popup .leaflet-popup-content-wrapper {
+    border-radius: 0;
+    color: white;
+    font-size: smaller;
+}
+
 #alert-container {
     /* The alert container is positioned relative to the search bar */
     bottom: -65px;
@@ -1189,7 +1189,6 @@ a.thumb-link:hover {
     padding: 0.5em;
     pointer-events: none;
     width: 50%;
-
     transition: opacity 0.2s ease-out;
 }
 
@@ -1210,13 +1209,19 @@ a.thumb-link:hover {
     background-color: rgba(57, 127, 52, 0.9);
 }
 
+#alert.error, #alert.danger {
+    background-color: rgba(255, 150, 150, 0.9);
+}
+
 #alert.notice {
     background-color: rgba(200, 150, 50, 0.9);
 }
 
 #alert .title {
     display: none;
-    font-size: larger;
+    font-size: x-large;
+    margin: 0;
+    margin-bottom: 0.3em;
 }
 
 #alert.modal .close {
@@ -1241,10 +1246,6 @@ body.nointro #loading-indicator {
 
 body.loading-proposals #loading-indicator {
     display: block;
-}
-
-#map-options {
-
 }
 
 #layers {
@@ -1609,6 +1610,14 @@ body.choosing-bounds #subscribe {
     border-top: 3px solid #FF6005;
 }
 
+body.choosing-bounds #search-banner .overlay-contents,
+body.choosing-bounds #hamburger,
+body.choosing-bounds .leaflet-marker-icon
+{
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 #subscribe a:hover {
     text-decoration: none;
 }
@@ -1819,13 +1828,13 @@ body.choosing-bounds #subscribe {
 
     #alert {
         border: none;
-        border-radius: none;
+        border-radius: 0;
         display: flex;
         font-size: large;
         position: absolute;
         left: 0px;
         right: 0px;
-        text-align: justify;
+        text-align: left;
         width: auto;
     }
 
@@ -1846,6 +1855,15 @@ body.choosing-bounds #subscribe {
         left: 3px;
         right: 3px;
         top: 2px;
+    }
+
+    /* Map controls */
+    #map-options {
+        display: none;
+    }
+
+    #map-controls {
+        top: -10em;
     }
 
     /* Subscribe/signup controls */

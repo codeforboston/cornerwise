@@ -56,6 +56,7 @@ require.config({
         "info-view": "src/view/infoView",
         "list-view": "src/view/list",
         "image-view": "src/view/image",
+        "proposal-popup-view": "src/view/proposalPopup",
 
         // View managers:
         "view-manager": "src/viewManager",

@@ -1,0 +1,30 @@
+<div class="popup-contents">
+    <h4>
+        <%- proposal.get("address") %>
+    </h4>
+    <% if (proposal.get("region_name")) { %>
+    <h5>
+        <%- proposal.get("region_name") %>
+    </h5>
+    <% } %>
+
+    <div class="applicant">
+        <%- proposal.getAttributeValue("applicant_name") %>
+    </div>
+
+    <div class="main-thumb-container">
+        <img class="main-thumb" src="<%= proposal.getThumb() %>" />
+    </div>
+
+    <%
+    var notice = proposal.getAttributeValue("legal_notice");
+
+    if (notice) {
+    %>
+    <div class="legal-notice">
+        <%- abridge(notice) %>
+    </div>
+    <% } %>
+
+    <a href="#" >More&hellip;</a>
+</div>
