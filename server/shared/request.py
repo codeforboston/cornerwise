@@ -85,3 +85,37 @@ def make_response(template=None, error_template="error.djhtml",
         return wrapped_view
 
     return constructor_fn
+
+
+def make_redirect_response(redirect_to="/"):
+    def constructor_fn(view):
+        def wrapped_view(req, *args, **kwargs):
+            try:
+                data = view(req, *args, **kwargs)
+                if isinstance(data, str):
+                    message = data
+                    level = messages.SUCCESS
+                elif isinstance(data, dict):
+                    level = data.get("level", "success")
+                    level = getattr(messages, level.upper())
+                    if "message" in data:
+                        message = data["message"]
+                    else:
+                        message = json.dumps(data)
+                        extra_args = "json"
+                elif isinstance(data, tuple):
+                    (message, level) = data
+
+                if isinstance(level, str):
+                    level = getattr(messages, level.upper())
+
+                messages.add_message(req, level, message)
+            except ErrorResponse as err:
+                data = err.data
+                messages.error(req, error.data["error"])
+
+            return redirect(redirect_to)
+
+        return wrapped_view
+
+    return constructor_fn

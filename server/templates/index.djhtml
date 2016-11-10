@@ -10,6 +10,17 @@
      function _placesInit() {
          if (window._onPlacesReady) onPlacesReady();
      }
+
+     var ResponseMessages = [];
+     {% for message in messages %}
+     ResponseMessages.push(
+         {% templatetag openbrace %}
+         "message": "{{ message.message|escapejs }}",
+         "level": "{{ message.level_tag }}",
+         "tags": "{{ message.tags }}"
+         {% templatetag closebrace %}
+     );
+     {% endfor %}
     </script>
     <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
@@ -179,8 +190,10 @@
         <div id="alert-container">
             <div id="alert">
                 <a href="#" class="close" >&times;</a>
+                <div>
                 <h2 class="title"></h2>
                 <span class="content"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -210,9 +223,6 @@
       <div id="map-controls" class="control">
           <a href="#" class="map-zoom-in" >&#43;</a>
           <a href="#" class="map-zoom-out" >&minus;</a>
-      </div>
-      <div class="dragarea">
-        <div class="action dragger">More</div>
       </div>
       <div class="loading-message" >Loading...</div>
       <div class="content"></div>
