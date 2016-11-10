@@ -196,8 +196,14 @@ EMAIL_NAME = "Cornerwise"
 
 # Local settings will override this:
 SENDGRID_TEMPLATES = {
-    "welcome": "2aa283ce-e020-48b1-bc5c-d47ff2bb5014"
+    "welcome": "2aa283ce-e020-48b1-bc5c-d47ff2bb5014",
+    "replace_subscription": "5d3e9ef4-960b-4fb9-906e-75474dca8720",
+    "delete_account": "e5e4fccd-be70-4abf-b6cf-86382926a0f6",
+    "threshold": "4422c280-ac97-4668-aef0-6c1c9faaf9d1"
 }
+
+# If this is set to True, users are only allowed to have one subscription.
+LIMIT_SUBSCRIPTIONS = True
 
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 

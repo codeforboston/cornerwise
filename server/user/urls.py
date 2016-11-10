@@ -3,6 +3,7 @@ from . import views
 from .mail_parse_views import mail_inbound
 
 urlpatterns = [
+    url(r"^confirm_subscription$",views.confirm_subscription, name="confirm-subscription"),
     url(r"^delete_subscription$", views.delete_subscription, name="delete-subscription"),
     # url(r"^delete_subscriptions", views.delete_subscriptions),
     url(r"^deactivate$", views.deactivate_account, name="deactivate-account"),
@@ -13,6 +14,8 @@ urlpatterns = [
     url(r"^subscribe$", views.subscribe, name="subscribe"),
     url(r"^resend$", views.resend_email, name="resend-confirmation"),
     url(r"^changes/$", views.change_summary, name="view-subscription-changes"),
+
+    url(r"^test_redirect$", views.test_redirect_response),
 
     # Parse incoming mail:
     url(r"^mail_inbound$", mail_inbound),

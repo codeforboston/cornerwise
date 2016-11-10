@@ -38,10 +38,12 @@ def send_mail(user, subject, template_name, context={}, content=None):
     try:
         template_id = settings.SENDGRID_TEMPLATES[template_name]
     except:
+        # Fall back to Django templates
         return send_mail_template(user, subject, template_name, context)
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items() }
-    substitutions["-user-"] = user.profile.addressal()
+    substitutions["-user-"] = user.profile.addressal
+    substitutions["-unsubscribe_link-"] = user.unsubscribe_url
 
     data = {
         "personalizations": [{
@@ -141,6 +143,34 @@ def send_reset_email(user_id):
     send_mail(user, "Cornerwise: Login Reset", "account_reset")
 
 
+@celery_app.task()
+def send_subscription_confirmation_email(sub_id):
+    """"
+    When a new Subscription is created, check if the User has existing
+    Subscription(s). If s/he does and if LIMIT_SUBSCRIPTIONS is set to True,
+    send an email asking the user to confirm the new subscription and replace
+    the old one.
+    """
+    subscription = Subscription.objects.select_related("user").get(pk=sub_id)
+    user = subscription.user
+
+    if not user.is_active or \
+       not settings.LIMIT_SUBSCRIPTIONS or \
+       subscription.active:
+        return
+
+    # The current user flow should make it impossible for a confirmed user to
+    existing = user.subscriptions.filter(active=True).count()
+    if existing <= 1:
+        return
+
+    context = {"subscription": subscription.readable_description,
+               "minimap_src": subscription.minimap_src,
+               "confirmation_link": make_absolute_url(subscription.confirmation_url)}
+    send_mail(user, "Cornerwise: Confirm New Subscription",
+              "replace_subscription", context)
+
+
 @celery_app.task(name="user.send_notifications")
 def send_notifications(subscription_ids=None, since=None):
     """Check the Subscriptions and find those that have new updates since the last
@@ -166,8 +196,14 @@ def user_profile_created(**kwargs):
         profile = kwargs["instance"]
         send_user_key.delay(profile.user_id)
 
+def subscription_created(**kwargs):
+    if kwargs["created"]:
+        subscription = kwargs["instance"]
+        send_subscription_confirmation_email.delay(subscription.id)
 
-# TODO May rewrite this to 
+
 def set_up_hooks():
     post_save.connect(user_profile_created, UserProfile,
                       dispatch_uid="send_confirmation_email")
+    post_save.connect(subscription_created, Subscription,
+                      dispatch_uid="send_subscription_confirmation_email")

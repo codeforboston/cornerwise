@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -10,11 +11,13 @@ from django.contrib.auth import login, logout
 from datetime import datetime, timedelta
 import json
 import logging
+import re
 
 from cornerwise.utils import today
-from shared.request import make_response, ErrorResponse
+from shared.request import make_response, make_redirect_response, ErrorResponse
 from user import changes, tasks
 from user.models import Subscription, UserProfile
+from user.utils import not_logged_in, with_user
 
 
 logger = logging.getLogger(__file__)
@@ -48,8 +51,9 @@ def validate_query(d):
 @make_response("subscribed.djhtml", "subscribe_error.djhtml")
 def subscribe(request):
     """
-    Set up a new subscription. If the supplied
+    Set up a new subscription.
     """
+    # Validate the request:
     if request.method != "POST":
         raise ErrorResponse("Request must use POST method.", status=405)
 
@@ -77,9 +81,12 @@ def subscribe(request):
                 "Missing required key:" + kerr.args[0],
                 {})
         except User.DoesNotExist:
+            language = request.GET.get("language", "en-US")
+            lang, _reg = language.split("-", 1)
             user = User.objects.create(username=email,
-                                       email=email)
-            profile = UserProfile.objects.create(user=user)
+                                       email=email,)
+            profile = UserProfile.objects.create(user=user,
+                                                 language=lang)
             profile.save()
             new_user = True
 
@@ -94,6 +101,28 @@ def subscribe(request):
     return {"new_user": new_user,
             "active": user.is_active,
             "email": user.email}
+
+
+@make_redirect_response()
+def confirm_subscription(request):
+    try:
+        user = authenticate(pk=request.GET["uid"],
+                            token=token.GET["token"])
+
+        if not user:
+            raise ErrorResponse("Invalid user id or token")
+
+        subscription = user.subscriptions.get(id=sub_id)
+        subscription.confirm()
+        return {"title": "Subscription confirmed",
+                "text": ("Now that we know you are who you say you are, "
+                         "we'll send you updates about projects in the "
+                         "area you selected."),
+                "tags": "success"}
+    except KeyError as kwerr:
+        raise ErrorResponse("Missing required param: " + kwerr.args[0])
+    except Subscription.DoesNotExist:
+        raise ErrorResponse("Invalid token or subscription id.")
 
 
 @make_response("task_message.djhtml", redirect_back=True)
@@ -122,28 +151,6 @@ def resend_email(request):
     return do_resend_email(request)
 
 
-def with_user(view_fn):
-    def wrapped_fn(request, *args, **kwargs):
-        if not request.user.is_anonymous():
-            return view_fn(request, request.user, *args, **kwargs)
-        else:
-            try:
-                user = authenticate(pk=request.GET["uid"],
-                                    token=request.GET["token"])
-                if user:
-                    messages.success(request, "Welcome back!")
-                    login(request, user)
-                    return view_fn(request, user, *args, **kwargs)
-            except KeyError:
-                messages.error(request,
-                               "You must be logged in to view that page.")
-
-            return not_logged_in(request)
-
-    return wrapped_fn
-
-
-
 def user_login(request, token, pk):
     user = authenticate(pk=pk, token=token)
     if not user:
@@ -152,10 +159,6 @@ def user_login(request, token, pk):
 
     login(request, user)
     return redirect(reverse(manage))
-
-
-def not_logged_in(request):
-    return render(request, "user/not_logged_in.djhtml")
 
 
 @with_user
@@ -253,7 +256,11 @@ def delete_subscription(request, user):
     return redirect(reverse(manage))
 
 
-# Should there be a user logout?
+@make_redirect_response()
+def test_redirect_response(request):
+    return "All set!"
+
+
 def user_logout(request):
     logout(request)
 

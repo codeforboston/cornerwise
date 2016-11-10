@@ -31,6 +31,7 @@ class UserProfile(models.Model):
     nickname = models.CharField(max_length=128,
                                 help_text="What do you prefer to be called?")
 
+    @property
     def addressal(self):
         if self.nickname:
             return self.nickname
@@ -57,6 +58,13 @@ class UserProfile(models.Model):
         return self.token
 
     @property
+    def unsubscribe_url(self):
+        return "{base}?token={token}&uid={uid}".format(
+            base=reverse("deactivate-account"),
+            token=self.token,
+            uid=self.pk)
+
+    @property
     def manage_url(self):
         return "{base}?token={token}&uid={uid}".format(
             base=reverse("manage-user"),
@@ -71,10 +79,26 @@ class Subscription(models.Model):
                              related_name="subscriptions")
     active = models.BooleanField(default=False,
                                  help_text="Users only receive updates for active subscriptions")
-    token = models.CharField(max_length=64, default=make_token)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
     last_notified = models.DateTimeField(auto_now=True)
+
+    def confirm(self):
+        if settings.LIMIT_SUBSCRIPTIONS:
+            # Disable all this user's other subscriptions:
+            self.user.subscriptions\
+                     .filter(active=True)\
+                     .exclude(pk=self.pk)\
+                     .update(active=False)
+        self.active = True
+        self.save()
+
+    @property
+    def confirmation_url(self):
+        return "{base}?token={token}&uid={uid}".format(
+            base=reverse("confirm-subscription"),
+            token=self.user.token,
+            ui=self.user.pk)
 
     @property
     def query_dict(self):
@@ -130,5 +154,18 @@ class Subscription(models.Model):
 
         return desc
 
+    @property
     def readable_description(self):
         return self.readable_query(self.query_dict)
+
+    @property
+    def minimap_src(self):
+        query = self.query_dict
+        if "box" in query:
+            coords = [float(s) for s in query["box"].split(",")]
+            return "/map?swlat={swlat}&swlon={swlon}&ne={nelat}&nelon={nelon}"\
+                .format(swlat=coords[0], swlon=coords[1],
+                        nelat=coords[2], nelon=coords[3])
+        else:
+            return None
+
