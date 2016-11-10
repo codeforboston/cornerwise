@@ -25,13 +25,20 @@ define(["backbone", "jquery", "underscore"],
                    alertElement
                        .removeClass("displayed")
                        .removeClass(lastMessage.className);
+
+                   if (lastMessage.onDismiss) {
+                       lastMessage.onDismiss(lastMessage);
+                   }
+
                    lastMessage = null;
                }
 
-               if (modalMessage && modalMessage.id === id) {
-                   modalMessage = null;
-               } else {
-                   showMessage(modalMessage);
+               if (modalMessage) {
+                   if (modalMessage.id === id) {
+                       modalMessage = null;
+                   } else {
+                       showMessage(modalMessage);
+                   }
                }
 
                return alertElement;
@@ -47,6 +54,8 @@ define(["backbone", "jquery", "underscore"],
                lastMessage = message;
                if (message.type == AlertType.MODAL) {
                    modalMessage = message;
+               } else if (modalMessage && modalMessage.id === message.id) {
+                   modalMessage = null;
                }
            }
 
@@ -60,10 +69,13 @@ define(["backbone", "jquery", "underscore"],
                }
            }
 
-           alertElement.click(function() {
+           alertElement.click(function(e) {
                if (lastMessage.type !== AlertType.MODAL) {
                    dismissMessage();
+               } else if (lastMessage.onClick) {
+                   lastMessage.onClick(lastMessage);
                }
+               e.preventDefault();
            });
 
            return {
@@ -92,6 +104,20 @@ define(["backbone", "jquery", "underscore"],
 
                    showMessage(msg);
                    return id;
+               },
+
+               /**
+                * @param {} messages
+                *
+                * @returns {null}
+                */
+               showResponses: function(messages) {
+                   var m = messages[0];
+                   if (/\bjson\b/.exec(m.tags)) {
+                       var json = JSON.parse(m.message);
+                   } else {
+                       this.show(m.message, m.tags);
+                   }
                }
            };
        });

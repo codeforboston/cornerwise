@@ -45,6 +45,12 @@ define(
                     }
                 });
 
+                if (window.ResponseMessages && ResponseMessages.length) {
+                    require(["alerts"], function(alerts) {
+                        alerts.showResponses(ResponseMessages);
+                    });
+                }
+
                 // Configure modal views here!
                 // See viewManager.js for documentation and examples.
                 new ViewManager({
