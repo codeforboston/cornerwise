@@ -98,6 +98,7 @@ def make_redirect_response(redirect_to_url=None, redirect_to=None):
         def wrapped_view(req, *args, **kwargs):
             try:
                 data = view(req, *args, **kwargs)
+                extra_tags = None
                 if isinstance(data, str):
                     message = data
                     level = messages.SUCCESS
@@ -105,22 +106,23 @@ def make_redirect_response(redirect_to_url=None, redirect_to=None):
                     level = data.get("level", "success")
                     level = getattr(messages, level.upper())
                     message = json.dumps(data)
-                    extra_args = "json"
+                    extra_tags = "json"
                 elif isinstance(data, tuple):
                     (message, level) = data
 
                 if isinstance(level, str):
                     level = getattr(messages, level.upper())
 
-                messages.add_message(req, level, message)
+                messages.add_message(req, level, message, extra_tags=extra_tags)
             except ErrorResponse as err:
                 data = err.data
                 messages.error(req, error.data["error"])
 
-            if redirect_to:
-                redirect_to_url = reverse(redirect_to)
+            url = redirect_to_url or \
+                  (redirect_to and reverse(redirect_to)) or \
+                  "/#view=main"
 
-            return redirect(redirect_to_url or "/")
+            return redirect(url)
 
         return wrapped_view
 
