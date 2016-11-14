@@ -24,11 +24,11 @@ define(["leaflet", "proposal-popup-view", "underscore"],
                var project = proposal.getProject(),
                    html = "";
 
-               if (project) {
-                   html =
-                       "<img src='" + projectTypeIcon(project) +
-                       "' class='project-type-badge'/>";
-               }
+               // if (project) {
+               //     html =
+               //         "<img src='" + projectTypeIcon(project) +
+               //         "' class='project-type-badge'/>";
+               // }
 
                return html;
            }
