@@ -29,14 +29,12 @@ require.config({
         // Backbone Models:
         "proposal": "src/model/proposal",
         "layer": "src/model/layer",
-        "project": "src/model/project",
 
         // Backbone Collections:
         "selectable": "src/collection/selectableCollection",
         "proposals": "src/collection/proposals",
         "layers": "src/collection/layers",
         "regions": "src/collection/regions",
-        "projects": "src/collection/projects",
         "collection-manager": "src/collection/collectionManager",
 
         "alerts": "src/view/alerts",
