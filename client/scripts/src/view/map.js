@@ -349,20 +349,6 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    this.map.fitBounds(config.bounds);
                },
 
-               fitToModels: function(models) {
-                   var bounds = L.latLngBounds(_.map(models,
-                                                     function(model) {
-                                                         return model.get("location");
-                                                     }));
-                   this.map.fitBounds(bounds, {paddingTopLeft: [5, 20],
-                                               paddingBottomRight: [5, 40]});
-               },
-
-               // Fit the map view to the proposals matching the active filters.
-               fitToCollection: function() {
-                   this.fitToModels(this.collection);
-               },
-
                zoomToRefLocation: function() {
                    var bounds = this._refMarker.getBounds();
                    this.map.fitBounds(bounds, {padding: [5, 5]});
