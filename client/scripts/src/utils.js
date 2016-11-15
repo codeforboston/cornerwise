@@ -198,7 +198,7 @@ define(["underscore", "jquery", "locale", "leaflet"],
            }
 
            function isSimpleObject(o) {
-               return o.constructor && o.constructor === Object;
+               return o && o.constructor && o.constructor === Object;
            }
 
            function setIn(obj, ks, v) {
@@ -434,6 +434,23 @@ define(["underscore", "jquery", "locale", "leaflet"],
                    }
 
                    return promise;
+               },
+
+               /**
+                * Convert a Leaflet LatLng object to a Google Maps LatLng.
+                *
+                * @param coords A Leaflet coordinate
+                *
+                * @returns A Google Maps coordinate
+                */
+               gLatLng: function(coords) {
+                   return new google.maps.LatLng(coords.lat, coords.lng);
+               },
+
+               gBounds: function(bounds) {
+                   return new google.maps.LatLngBounds(
+                       $u.gLatLng(bounds.getSouthWest()),
+                       $u.gLatLng(bounds.getNorthEast()));
                },
 
                // Unit conversions:

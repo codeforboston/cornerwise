@@ -1682,10 +1682,23 @@ body.choosing-bounds .leaflet-marker-icon
 }
 
 .pac-item {
-    color: white !important;
-    font-size: larger;
     border-top: none;
+    color: #eee !important;
+    font-size: small;
     padding: 0.5em;
+}
+
+.pac-item-query {
+    color: #eee;
+    font-size: large;
+}
+
+.pac-matched {
+    color: white;
+}
+
+.pac-item > span > span:first-child {
+    font-size: large;
 }
 
 .pac-item-selected,
@@ -1695,11 +1708,6 @@ body.choosing-bounds .leaflet-marker-icon
 
 .pac-icon.pac-icon-marker {
     display: none;
-}
-
-.pac-item-query {
-    color: white;
-    font-size: large;
 }
 
 .pac-logo:after {

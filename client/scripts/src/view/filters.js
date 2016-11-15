@@ -2,10 +2,12 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis", "places",
-     "app-state", "config"],
+    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils",
+     "arcgis", "places", "app-state", "config"],
 
     function(B, _, $, refLocation, regions, $u, arcgis, places, appState, config) {
+        "use strict";
+
         return B.View.extend({
             el: document.body,
 
@@ -43,9 +45,28 @@ define(
                     input = $("#ref-address-form input")[0];
                 places.setup(input, placesOptions)
                     .done(function(ac) {
-                        google.maps.event.addListener(ac, "place_changed", function() {
-                            self.onPlaceChanged(ac, input);
+                        self.placesSetup(ac, input);
+                        $(input).keypress(function(e) {
+                            if (e.which == 13) {
+                                e.preventDefault();
+                                input.blur();
+                            }
                         });
+                    });
+            },
+
+            placesSetup: function(ac, input) {
+                var self = this;
+
+                google.maps.event.addListener(ac, "place_changed", function() {
+                    self.onPlaceChanged(ac, input);
+                });
+
+                this.listenTo(
+                    regions, "regionBounds",
+                    function(bounds) {
+                        var gbounds = $u.gBounds(bounds);
+                        ac.setBounds(gbounds);
                     });
             },
 
@@ -115,8 +136,8 @@ define(
 
                 if (geo) {
                     $(input).removeClass("error");
-                    refLocation.setFromLatLng(geo.location.lat,
-                                              geo.location.lng);
+                    refLocation.setFromLatLng(geo.location.lat(),
+                                              geo.location.lng());
                 } else {
                     $(input)
                         .addClass("error")

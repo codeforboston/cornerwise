@@ -111,34 +111,43 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    var self = this,
                        bounds = L.latLngBounds([]),
                        deferredBounds = $.Deferred(),
-                       completeCount = 0,
-                       deferreds = _.map(ids, function(id) {
-                           var regionInfo = regions.get(id);
+                       completeCount = 0;
 
-                           if (self.regionLayers[id]) return null;
+                   _.each(ids, function(id) {
+                       if (self.regionLayers[id]) {
+                           var layer = self.regionLayers[id];
+                           bounds.extend(layer.getBounds());
 
-                           return regionInfo.loadShape()
-                               .done(function(shape) {
-                                   var layer = L.geoJson(shape,
-                                                         {style: config.regionStyle});
+                           if (++completeCount == ids.length)
+                               deferredBounds.resolve(bounds);
+
+                           return;
+                       }
+
+                       var regionInfo = regions.get(id);
+                       regionInfo.loadShape()
+                           .done(function(shape) {
+                               var layer = L.geoJson(shape,
+                                                     {style: config.regionStyle});
 
 
-                                   layer.on("dblclick", function(e) {
-                                       self.onDblClick(e);
-                                   });
-                                   bounds.extend(layer.getBounds());
-                                   self.regionLayers[id] = layer;
-                                   self.map.addLayer(layer);
-
-                                   if (++completeCount == ids.length)
-                                       deferredBounds.resolve(bounds);
+                               layer.on("dblclick", function(e) {
+                                   self.onDblClick(e);
                                });
+                               bounds.extend(layer.getBounds());
+                               self.regionLayers[id] = layer;
+                               self.map.addLayer(layer);
+
+                               if (++completeCount == ids.length)
+                                   deferredBounds.resolve(bounds);
+                           });
                        });
 
                    // Fit to visible regions?
                    deferredBounds.done(function(bounds) {
-                       // Need to add padding to the bounds
-                       self.map.setMaxBounds(bounds.pad(1));
+                       var paddedBounds = bounds.pad(1);
+                       self.map.setMaxBounds(paddedBounds);
+                       regions.trigger("regionBounds", paddedBounds);
                    });
                },
 
