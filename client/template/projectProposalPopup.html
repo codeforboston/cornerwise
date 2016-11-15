@@ -1,0 +1,22 @@
+<% var project = proposal.getProject() %>
+
+<div class="popup-contents" >
+    <h4> <%- proposal.get("address") %> </h4>
+    <h5> <%- proposal.get("region_name") %> </h5>
+
+    <div class="department" >
+        <%- project.department %>, <%- proposal.projectYearRange() %>
+    </div>
+
+    <div class="main-thumb-container">
+        <img class="main-thumb" src="<%= proposal.getThumb() %>" />
+    </div>
+    <div class="description" >
+        <% if (project.description) { %>
+        <%- project.description %>
+        <% } else { %>
+        <span class="empty-field">No description available.</span>
+        <% } %>
+    </div>
+    <a href="#view=info" class="more">More&hellip;</a>
+</div>
