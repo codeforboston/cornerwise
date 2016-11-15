@@ -1,7 +1,10 @@
 define(
-    ["jquery", "proposals", "collection-manager", "map-view", "proposal-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, CollectionManager, MapView, ProposalItemView,
-             glossary, config, appState, ViewManager, refLocation) {
+    ["jquery", "proposals", "collection-manager", "map-view",
+     "proposal-info-view", "proposal-view", "glossary", "config", "app-state",
+     "view-manager", "ref-location", "legal-notice"],
+    function($, Proposals, CollectionManager, MapView, ProposalInfoView,
+             ProposalItemView, glossary, config, appState, ViewManager,
+             refLocation) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -63,26 +66,13 @@ define(
                                {url: "/static/template/eventBrowser.html"}],
                     "list": ["list-view",
                              {collection: proposals,
-                              subview: ProposalItemView}]
+                              subview: ProposalItemView}],
+                    "info": ["info-view", {collection: proposals,
+                                           subview: new ProposalInfoView()}]
                 });
 
-                require(["info-view", "proposal-info-view", "layers-view"],
-                        function(InfoView, ProposalInfoView, LayersView) {
-                            var infoView = new InfoView({
-                                el: "#info",
-                                startExpanded: appState.getKey("x") === "1",
-                                subview: new ProposalInfoView(),
-                                collection: proposals
-                            });
-                            appViews.info = infoView;
-
-                            appState.onStateKeyChange(
-                                "view",
-                                function(newKey) {
-                                    infoView.toggle(newKey == "main");
-                                });
-                            infoView.render();
-
+                require(["layers-view"],
+                        function(LayersView) {
                             var layersView = new LayersView({
                                 el: "#map-options"
                             }).render();

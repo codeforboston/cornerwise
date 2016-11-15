@@ -1,10 +1,6 @@
 define(["backbone", "app-state", "jquery", "utils"],
        function(B, appState, $, $u) {
            var ImageView = B.View.extend({
-               template: $u.templateWithUrl(
-                   "/static/template/imageBox.html",
-                   {variable: "image"}),
-
                events: {
                    "click": "onClick"
                },
@@ -37,15 +33,13 @@ define(["backbone", "app-state", "jquery", "utils"],
                },
 
                hide: function() {
-                   this.$el.hide();
+                   this.$el.removeClass("displayed");
                },
 
                render: function(image) {
-                   var $el = this.$el;
-                   this.template(image,
-                                 function(html) {
-                                     $el.html(html).show();
-                                 });
+                   this.$el.html(
+                       "<img class='image-zoom' src='" + image.src + "'/>")
+                       .addClass("displayed");
 
                    return this;
                }

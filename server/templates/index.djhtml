@@ -212,7 +212,6 @@
       </div>
     </div>
 
-    <div id="info" class="overlay default">
       <div id="map-options" class="control">
           <a href="#" class="toggle-layers" >
               <span class="expand-layers">Options</span>
@@ -220,13 +219,16 @@
           </a>
           <div id="layers"></div>
       </div>
+
       <div id="map-controls" class="control">
           <a href="#" class="map-zoom-in" >&#43;</a>
           <a href="#" class="map-zoom-out" >&minus;</a>
       </div>
+
+    <div id="info" class="overlay default">
       <div class="loading-message" >Loading...</div>
       <div class="content"></div>
-      <a href="#" class="close">&times;</a>
+      <a href="#view=main" class="close">&times;</a>
     </div>
 
     <div id="modal" class="_setview" data-goto="main">

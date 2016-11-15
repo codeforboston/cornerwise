@@ -86,7 +86,8 @@ define(["leaflet", "proposal-popup-view", "underscore"],
                    this.updateIcon(proposal);
                    L.popup({className: "proposal-info-popup",
                             minWidth: 300,
-                            maxWidth: 300})
+                            maxWidth: 300,
+                            autoPanPaddingTopLeft: L.point(5, 15)})
                        .setLatLng(loc)
                        .setContent(view.render().el)
                        .openOn(this._map);

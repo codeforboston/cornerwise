@@ -4,15 +4,19 @@ define(["backbone", "jquery", "utils"],
                template: $u.templateWithUrl("/static/template/proposalPopup.html",
                                             {variable: "proposal"}),
 
+               projectTemplate: $u.templateWithUrl("/static/template/projectProposalPopup.html",
+                                                   {variable: "proposal"}),
+
                render: function() {
                    var promise = $.Deferred(),
-                       self = this;
+                       self = this,
+                       template = this.model.getProject() ? this.projectTemplate : this.template;
 
-                   this.template(this.model,
-                                 function(html) {
-                                     self.$el.html(html);
-                                     promise.resolve();
-                                 });
+                   template(this.model,
+                            function(html) {
+                                self.$el.html(html);
+                                promise.resolve();
+                            });
 
                    return this;
                }

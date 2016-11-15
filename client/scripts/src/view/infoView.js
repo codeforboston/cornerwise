@@ -2,17 +2,12 @@ define(["backbone", "underscore", "utils", "app-state"],
        function(B, _, $u, appState) {
            /**
             * - defaultView
-            *
-            * - threshold: When the info pane is dragged open, it will be
-                considered expanded when its height is greater than this value.
             */
            return B.View.extend({
                initialize: function(options) {
                    this.subview = options.subview;
                    this.defaultView = options.defaultView;
-                   this.expanded = !!options.startExpanded;
                    this.currentView = null;
-                   this.threshold = options.threshold || 250;
                    this.shouldShow = false;
 
                    var coll = this.collection;
@@ -22,14 +17,26 @@ define(["backbone", "underscore", "utils", "app-state"],
                        .listenTo(coll, "change", this.modelChanged);
                },
 
+               el: "#info",
+
                events: {
-                   "mousedown .dragarea": "onMousedown",
-                   "click .close": "onClick",
-                   "click .prev-button": "onPrev",
-                   "click .next-button": "onNext"
+                   "click .close": "clearSelection"
+               },
+
+               show: function() {
+                   this.shouldShow = true;
+                   this.render();
+               },
+
+               hide: function() {
+                   this.shouldShow = false;
+                   this.render();
                },
 
                render: function() {
+                   if (!this.shouldShow)
+                       return this;
+
                    var coll = this.collection,
                        view = this.subview || this.defaultView,
                        models = coll ? coll.getSelection() : [],
@@ -57,77 +64,16 @@ define(["backbone", "underscore", "utils", "app-state"],
                        this.currentView = view;
                        view.setElement(this.$(".content"));
                        if (view.showMulti && models.length > 1) {
-                           view.showMulti(models, this.expanded);
+                           view.showMulti(models);
                        } else {
-                           view.show(models[0], this.expanded)
+                           view.show(models[0])
                                .done(function() {
                                    $el.removeClass("loading");
                                });
                        }
                    }
-               },
 
-               setExpanded: function(expanded) {
-                   if (this.expanded === expanded)
-                       return;
-
-                   this.expanded = expanded;
-                   this.render();
-                   this.$el.toggleClass("expanded", expanded);
-
-                   this.$(".dragger").text(expanded ? "LESS" : "MORE");
-               },
-
-               onMousedown: function(e) {
-                   if (e.touches && e.touches.list !== 1)
-                       return true;
-
-                   var $el = this.$el,
-                       position = $el.offset(),
-                       height = $el.height(),
-                       touch = e.touches && e.touches[0],
-                       touchId = touch && touch.identifier,
-                       starty = touch ? touch.pageY : e.pageY,
-                       startTime = new Date().valueOf(),
-                       wasExpanded = this.expanded;
-
-                   $el.addClass("_disable_height_transition");
-
-                   var onMouseMove = _.bind(function(e) {
-                       var y;
-                       if (touchId && e.changedTouches) {
-                           if (e.changedTouches.length !== 1 ||
-                               e.changedTouches[0].identifier !== touchId)
-                               return true;
-                           y = e.changedTouches[0].pageY;
-                       } else {
-                           y = e.pageY;
-                       }
-
-                       var newHeight = height + (starty - y);
-                       $el.height(newHeight);
-
-                       this.setExpanded(newHeight >= this.threshold);
-
-                       return false;
-                   }, this);
-
-                   $(document)
-                       .one("mouseup touchend", _.bind(function() {
-                           $(document).off("mousemove touchmove", onMouseMove);
-
-                           if (new Date().valueOf() - startTime < 300) {
-                               this.setExpanded(!wasExpanded);
-                           }
-
-                           $el.removeClass("_disable_height_transition")
-                               .css("height", "auto");
-
-                           return false;
-                       }, this))
-                       .on("mousemove touchmove", onMouseMove);
-
-                   return false;
+                   return this;
                },
 
                onSelection: function(coll, ids) {
@@ -146,32 +92,22 @@ define(["backbone", "underscore", "utils", "app-state"],
                },
 
                onSelectionRemoved: function(coll, remIds, ids) {
-                   if (!ids.length) {
-                       // No active selection:
-                       this.active = null;
-                   }
-
                    _.each(remIds, function(id) {
                        var model = coll.get(id);
                        if (model)
                            this.stopListening(model, "change", this.modelChanged);
                    }, this);
 
-                   this.render();
+                   if (!ids.length) {
+                       // No active selection:
+                       this.active = null;
+                       this.hide();
+                   }
                },
 
                clearSelection: function() {
                    this.collection.setSelection([]);
                },
-
-               onClick: function(e) {
-                   this.clearSelection();
-                   return false;
-               },
-
-               onNext: function() { return this.onNav(1); },
-
-               onPrev: function() { return this.onNav(-1); },
 
                onNav: function(dir) {
                    var coll = this.collection,

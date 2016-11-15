@@ -932,6 +932,7 @@ a.glossary:hover {
     padding: 1em;
     padding-left: 4em;
     padding-right: 4em;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
@@ -961,24 +962,16 @@ body.main #info {
     z-index: 2;
 }
 
+body.info #search-banner {
+    display: none;
+}
+
 body.info #info {
+    display: block;
     top: 0;
     height: auto;
     bottom: 0;
-}
-
-/* Applied while the user is dragging */
-#info._disable_height_transition {
-    transition: none;
-}
-
-#info.default {
-    max-height: 0 !important;
-    padding: 0 !important;
-}
-
-#info.default .dragger {
-    display: none;
+    overflow: auto;
 }
 
 #info .chart-area {
@@ -1008,10 +1001,10 @@ a.brief-model:hover {
 }
 
 #info .close {
-    font-size: xx-large;
+    font-size: 30pt;
     position: absolute;
-    right: 1em;
-    top: 0em;
+    right: 0.5em;
+    top: 0.5em;
     width: 20px;
     z-index: 5;
 }
@@ -1053,33 +1046,6 @@ a.brief-model:hover {
     max-width: 200px;
 }
 
-#info .prev-button, #info .next-button {
-    border-radius: 10px;
-    font-size: 36pt;
-    position: absolute;
-    padding: 10px;
-    padding-top: 50px;
-    padding-bottom: 50px;
-    top: 50%;
-    margin-top: -70px;
-    z-index: 4;
-}
-
-#info .prev-button:hover, #info .next-button:hover {
-    color: #4EAF48;
-    text-decoration: none;
-}
-
-#info .prev-button {
-    left: 0.5em;
-    margin-left: -10px;
-}
-
-#info .next-button {
-    right: 0.5em;
-    margin-right: -10px;
-}
-
 .details {
     overflow: auto;
 }
@@ -1099,30 +1065,27 @@ a.brief-model:hover {
 }
 
 #info .documents {
-    padding-left: 1em;
+    padding-bottom: 0.5em;
 }
 
 #info a.document {
     color: #4EAF48;
-    display: block;
+    display: inline-block;
+    padding-left: 1em;
 }
 
 
-.attribute th, .attribute td {
-    padding-bottom: 1em;
-}
-
-.attribute th {
-    font-size: x-small;
+.attribute {
+    color: #ccc;
+    font-size: small;
     font-weight: 500;
-    padding: 0.2em;
-    padding-right: 1em;
+    padding-top: 0.5em;
     text-align: left;
     text-transform: uppercase;
     vertical-align: top;
 }
 
-.attribute td {
+.attribute-value {
     font-size: smaller;
 }
 
@@ -1152,8 +1115,22 @@ a.thumb-link:hover {
 }
 
 /* Leaflet info popup */
+.leaflet-container {
+    font-family: Avenir;}
+
 .proposal-info-popup .leaflet-popup {
     width: 200px !important;
+}
+
+.proposal-info-popup .leaflet-popup-tip-container {
+    top: -1px;
+}
+
+.proposal-info-popup .leaflet-popup-close-button {
+    font-size: x-large !important;
+    font-weight: lighter !important;
+    right: 5px !important;
+    top: 5px !important;
 }
 
 .proposal-info-popup .leaflet-popup-tip,
@@ -1164,7 +1141,46 @@ a.thumb-link:hover {
 .proposal-info-popup .leaflet-popup-content-wrapper {
     border-radius: 0;
     color: white;
-    font-size: smaller;
+    font-size: larger
+}
+
+.proposal-info-popup a {
+    color: #4EB04B;
+}
+
+.proposal-info-popup .more {display: inline-block;text-align: right;width: 100%;}
+
+.leaflet-popup h4,
+.leaflet-popup h5 {
+    color: #4EB04B;
+    margin: 0.1em;
+}
+
+.leaflet-popup h4 {
+    font-size: x-large;
+}
+
+.leaflet-popup h5 {
+    font-size: larger;
+    margin-bottom: 0.5em;
+}
+
+.proposal-info-popup .main-thumb-container {
+    max-height: 200px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.proposal-info-popup img.main-thumb {
+    max-width: 100% !important;
+}
+
+.proposal-info-popup .description {
+    line-height: 1.5em;
+    max-height: 7.5em;
+    overflow: hidden;
+    position: relative;
+    text-overflow: ellipsis;
 }
 
 #alert-container {
@@ -1174,6 +1190,7 @@ a.thumb-link:hover {
     pointer-events: none;
     position: absolute;
     text-align: center;
+    margin-top: -1px;
     width: 100%;
     z-index: 2;
 }
@@ -1206,7 +1223,8 @@ a.thumb-link:hover {
 }
 
 #alert.success {
-    background-color: rgba(57, 127, 52, 0.9);
+    background-color: rgba(57, 127, 52, 0.8);
+    color: white;
 }
 
 #alert.error, #alert.danger {
@@ -1214,7 +1232,7 @@ a.thumb-link:hover {
 }
 
 #alert.notice {
-    background-color: rgba(200, 150, 50, 0.9);
+    background-color: rgba(190, 131, 0, 0.9);
 }
 
 #alert .title {
@@ -1222,6 +1240,10 @@ a.thumb-link:hover {
     font-size: x-large;
     margin: 0;
     margin-bottom: 0.3em;
+}
+
+#alert .content {
+    font-size: medium
 }
 
 #alert.modal .close {
@@ -1462,8 +1484,26 @@ ul.model-list li {
     z-index: 11;
 }
 
+#image-view.displayed {
+    display: flex;
+    flex-direction: row;
+}
+
+.image-zoom-container {
+    display: flex;
+    height: 100%;
+}
+
+#image-view > div {
+    display: inline-block;
+    flex: 1;
+    align-items: center;
+}
+
 #image-view img {
-    max-height: 600px;
+    align-self: center;
+    max-height: 100%;
+    max-width: 100%;
 }
 
 /*
@@ -1606,6 +1646,10 @@ body.choosing-bounds #search-banner {
     border-bottom: 3px solid #FF6005;
 }
 
+body.choosing-bounds #alert-container {
+    margin-top: 0;
+}
+
 body.choosing-bounds #subscribe {
     border-top: 3px solid #FF6005;
 }
@@ -1622,6 +1666,13 @@ body.choosing-bounds .leaflet-marker-icon
     text-decoration: none;
 }
 
+#subscribe {
+    background-color: #306B2E;
+}
+
+#subscribe .screen {
+    color: white;
+}
 
 /* Google Places Autocomplete */
 .pac-container {
@@ -1664,6 +1715,13 @@ body.choosing-bounds .leaflet-marker-icon
     .resp-portrait-show {
         display: none;
     }
+
+    #subscribe {
+        padding: 0.5em;
+        position: absolute;
+        right: 1em;
+        top: 5em;
+    }
 }
 
 /*
@@ -1701,7 +1759,7 @@ body.choosing-bounds .leaflet-marker-icon
     }
 
     #info .sidebar {
-        display: none;
+        /* display: none; */
         padding-right: 0;
         padding-top: 2.5em;
         position: relative;
@@ -1831,6 +1889,7 @@ body.choosing-bounds .leaflet-marker-icon
         border-radius: 0;
         display: flex;
         font-size: large;
+        padding: 1em;
         position: absolute;
         left: 0px;
         right: 0px;
@@ -1840,9 +1899,9 @@ body.choosing-bounds .leaflet-marker-icon
 
     #alert .close {
         align-content: center;
-        color: black;
-        font-size: larger;
-        flex: 1 1.5em;
+        color: white;
+        font-size: xx-large;
+        flex: 0 0 1em;
         justify-content: center;
     }
 
@@ -1868,7 +1927,6 @@ body.choosing-bounds .leaflet-marker-icon
 
     /* Subscribe/signup controls */
     body.main #subscribe {
-        background-color: #306B2E;
         padding-top: 0.5em;
         padding-bottom: 0.5em;
         position: absolute;
@@ -1934,4 +1992,3 @@ body.choosing-bounds .leaflet-marker-icon
         height: 40px;
         width: 40px;
     }
-}

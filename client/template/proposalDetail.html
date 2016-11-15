@@ -9,52 +9,44 @@
     if (notice) {
     %>
     <div class="legal-notice">
-        <%= gloss(abridge(notice)) %>
+        <%- notice %>
     </div>
     <% } %>
 
-    <% if (proposal.get("source")) { %>
-    <a class="source-link"  href="<%- proposal.get('source') %>" target="_blank ">
-        Go to Source
-    </a>
+    <%
+    var documents = proposal.get("documents");
+    if (documents && documents.length) { %>
+    <div class="documents">
+        <% _.each(documents.slice(0, 10), function(doc) { %>
+        <a class="document" href="<%= doc.url %>" target="_blank">
+            <%- doc.title %>
+        </a>
+        <% }); %>
+    </div>
+    <!-- end documents -->
     <% } %>
+    <!-- <% if (proposal.get("source")) { %> -->
+    <!-- <a class="source-link"  href="<%- proposal.get('source') %>" target="_blank "> -->
+    <!-- Go to Source -->
+    <!-- </a> -->
+    <!-- <% } %> -->
 
-    <% if (!options.expanded) { %>
-    <table class="attributes table">
-        <tr class="attribute">
-            <th scope="row">APPLICANT</th>
-            <td><%- proposal.getAttributeValue("applicant_name") %></td>
-        </tr>
-
-        <tr class="attribute">
-            <th scope="row">PUBLIC HEARINGS</th>
-            <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
-        </tr>
-    </table>
-    <% } else {
+    <%
     var attributes = proposal.getAttributes();
     %>
-    <table class="attributes table">
+    <div class="attributes">
         <% _.each(attributes, function(attr) { %>
         <% if (attr) { %>
-        <tr class="attribute">
-            <th scope="row"><%- attr.name %>:</th>
-            <td><%- attr.value %></td>
-        </tr>
+        <div class="attribute"><%- attr.name %> </div>
+        <div class="attribute-value"><%- attr.value %></div>
         <% } %>
         <% }); %>
-    </table>
-    <!-- end expanded -->
-    <% } %>
+    </div>
 
     <div class="sidebar">
         <div class="main-thumb-container">
             <img class="main-thumb" src="<%= proposal.getThumb() %>"/>
         </div>
-
-        <% if (options.expanded) { %>
-
-        <!-- Expanded -->
 
         <% if (proposal.get("parcel")) { %>
         <% with(proposal.get("parcel")) { %>
@@ -68,20 +60,8 @@
                 <td><%- commas(properties.RES_AREA) %> square feet</td>
             </tr>
         </table>
-        <% } }  %>
+        <% }  %>
 
-        <%
-        var documents = proposal.get("documents");
-        if (documents && documents.length) { %>
-        <div class="documents">
-            <% _.each(documents.slice(0, 10), function(doc) { %>
-            <a class="document" href="<%= doc.url %>" target="_blank">
-                <%- doc.title %>
-            </a>
-            <% }); %>
-        </div>
-        <!-- end documents -->
-        <% } %>
     </div>
 
     <% var images = proposal.get("images");
@@ -95,7 +75,6 @@
         <br style="clear:both" />
     </div>
     <% } %>
-    <!-- end expanded -->
 
     <% } %>
 </div>

@@ -1,12 +1,6 @@
 <div class="popup-contents">
-    <h4>
-        <%- proposal.get("address") %>
-    </h4>
-    <% if (proposal.get("region_name")) { %>
-    <h5>
-        <%- proposal.get("region_name") %>
-    </h5>
-    <% } %>
+    <h4> <%- proposal.get("address") %> </h4>
+    <h5> <%- proposal.get("region_name") %> </h5>
 
     <div class="applicant">
         <%- proposal.getAttributeValue("applicant_name") %>
@@ -21,10 +15,10 @@
 
     if (notice) {
     %>
-    <div class="legal-notice">
+    <div class="description">
         <%- abridge(notice) %>
     </div>
     <% } %>
 
-    <a href="#" >More&hellip;</a>
+    <a href="#view=info" class="more">More&hellip;</a>
 </div>

@@ -242,6 +242,22 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return this.get("project");
         },
 
+        projectYearRange: function() {
+            var project = this.getProject();
+
+            if (!project) return null;
+
+            var years = _.map(_.keys(project.budget),
+                              function(s) { return parseInt(s); }).sort(),
+                start = years[0],
+                end = years.slice(-1)[0];
+
+            if (start === end)
+                return "FY " + start;
+
+            return ["FY ", start, "– ", end].join("");
+        },
+
         recalculateDistance: function() {
             var dist = this.set("refDistance", this.getDistanceToRef());
         }
