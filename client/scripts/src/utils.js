@@ -97,6 +97,8 @@ define(["underscore", "jquery", "locale", "leaflet"],
 
 
            function prettyDate(d, format) {
+               // TODO: Use the Internationalization API when available
+               // https://marcoscaceres.github.io/jsi18n/
                if (!(d instanceof Date)) {
                    d = new Date(d);
                }

@@ -57,7 +57,7 @@ define(["backbone", "jquery", "utils", "underscore", "app-state"],
                },
 
                /**
-                * @returns {ListView} 
+                * @returns {ListView}
                 */
                render: function() {
                    var coll = this.collection,

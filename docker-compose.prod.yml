@@ -9,6 +9,7 @@ services:
       APP_PORT: "3000"
       APP_MODE: "production"
     env_file:
+      - ./docker-support/common.env
       - ./docker-support/prod.env
     links:
       - celery
@@ -18,7 +19,7 @@ services:
       - cornerwise
     env_file:
       - ./docker-support/common.env
-      - ./docker-support/production_local.env
+      - ./docker-support/prod.env
     environment:
       APP_MODE: "production"
       IS_CELERY: "1"

@@ -1,5 +1,4 @@
 /*
- 
  * View representing a proposal in the proposals list.
  */
 define(["backbone", "underscore", "utils", "ref-location", "config"],

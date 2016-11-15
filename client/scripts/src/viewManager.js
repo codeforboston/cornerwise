@@ -9,7 +9,9 @@
  * 'modal-view' module will be loaded.  The ModalView constructor will
  * then be called with the specified argument.
  *
- * The views used must implement show and hide methods.
+ * The views used must implement `show` and `hide` methods.
+ *
+ * The views can optionally implement `onFirstShow`.
  *
  * @param {Object} view A map of values to view specifications.  A value
  * refers to the value in the URL hash.  A simple view specification can

@@ -3,6 +3,10 @@
 # In case the requirements have changed.
 pip install -q -r /support/requirements.txt
 
+if [ -f "/support/$APP_MODE-requirements.txt" ]; then
+    pip install -q -r /support/$APP_MODE-requirements.txt
+fi
+
 cd $(dirname "${BASH_SOURCE[0]}")
 mkdir -p logs
 
