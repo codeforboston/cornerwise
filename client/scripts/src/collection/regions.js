@@ -7,13 +7,18 @@ define(["backbone", "jquery", "underscore", "selectable", "config"],
                    if (shape)
                        return $.Deferred().resolve(shape);
 
-                   var self = this;
-                   return $.getJSON(this.get("source"))
-                       .done(function(shape) {
-                           self.set("shape", shape);
-                           self.trigger("regionLoaded", shape);
-                       });
+                   if (!this._fetchingShape) {
 
+                   var self = this;
+                   this._fetchingShape =
+                           $.getJSON(this.get("source"))
+                           .done(function(shape) {
+                               self.set("shape", shape);
+                               self.trigger("regionLoaded", shape);
+                               self._fetchingShape = null;
+                           });
+                   }
+                   return this._fetchingShape;
                }
            });
 
