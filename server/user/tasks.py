@@ -43,7 +43,7 @@ def send_mail(user, subject, template_name, context={}, content=None):
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items() }
     substitutions["-user-"] = user.profile.addressal
-    substitutions["-unsubscribe_link-"] = user.unsubscribe_url
+    substitutions["-unsubscribe_link-"] = user.profile.unsubscribe_url
 
     data = {
         "personalizations": [{
