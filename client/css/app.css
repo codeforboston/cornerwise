@@ -58,6 +58,22 @@ body.nointro #event-eater {
     height: 100%;
 }
 
+#loading-indicator {
+    display: none;
+    padding: 0.75em;
+    top: 20px;
+    right: 1em;
+    z-index: 10;
+}
+
+body.nointro #loading-indicator {
+    top: 100px;
+}
+
+body.loading-proposals #loading-indicator {
+    display: block;
+}
+
 .control {
     background-color: rgba(255, 255, 255, 0.6);
     border: 1px solid white;
@@ -82,7 +98,6 @@ body.nointro #event-eater {
 
 #map-controls {
     right: 1em;
-    bottom: 4em;
 
     transition: bottom 0.1s linear;
 }
@@ -91,6 +106,10 @@ body.nointro #event-eater {
     color: #aaa;
     cursor: default;
     pointer-events: none;
+}
+
+body:not(.nointro) #map-controls {
+    display: none;
 }
 
 #map-options {
@@ -138,6 +157,14 @@ button {
 
 .empty {
     display: none;
+}
+
+.when-empty {
+    display: none;
+}
+
+.empty .when-empty {
+    display: block;
 }
 
 #menu {
@@ -499,6 +526,7 @@ body.nointro #mode-controls {
 body.main .map-mode-button, body.list .list-mode-button {
   background-color: #F06037;
   cursor: default;
+  pointer-events: none;
 }
 
 .action {
@@ -524,8 +552,8 @@ div.marker-hovered {
 }
 
 div.marker-selected {
-    animation-duration: 1s;
-    animation-name: selection-highlight;
+/*     animation-duration: 1s;
+    animation-name: selection-highlight; */
     background-image: url(/static/images/marker-orange-active.png) !important;
     border-radius: 15px;
 }
@@ -967,7 +995,15 @@ body.info #search-banner {
     display: none;
 }
 
-body.info #info {
+
+body.info #loading-indicator {
+    background-color: transparent;
+    border: none;
+    right: 4em;
+    top: 1em;
+}
+
+#info.displayed {
     display: block;
     top: 0;
     height: auto;
@@ -1029,7 +1065,7 @@ a.brief-model:hover {
 
 #info .sidebar {
     padding-right: 3em;
-    padding-top: 2.5em;
+    padding-top: 4em;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -1065,13 +1101,9 @@ a.brief-model:hover {
     display: none;
 }
 
-#info .documents {
-    padding-bottom: 0.5em;
-}
-
-#info a.document {
+#info .document {
     color: #4EAF48;
-    display: inline-block;
+    display: block;
     padding-left: 1em;
 }
 
@@ -1168,12 +1200,16 @@ a.thumb-link:hover {
 }
 
 .proposal-info-popup .main-thumb-container {
-    max-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 200px;
     overflow: hidden;
     width: 100%;
 }
 
 .proposal-info-popup img.main-thumb {
+    align-self: center;
     max-width: 100% !important;
 }
 
@@ -1257,22 +1293,6 @@ a.thumb-link:hover {
 }
 
 body.main .leaflet-control-container {
-    display: block;
-}
-
-#loading-indicator {
-    display: none;
-    padding: 0.75em;
-    top: 20px;
-    right: 1em;
-    z-index: 10;
-}
-
-body.nointro #loading-indicator {
-    top: 100px;
-}
-
-body.loading-proposals #loading-indicator {
     display: block;
 }
 
@@ -1446,6 +1466,14 @@ ul.model-list li {
     top: -0.5em;
 }
 
+#list-view .attribute th {
+    color: #555;
+    font-weight: normal;
+    text-align: left;
+    font-size: smaller;
+    text-transform:uppercase;
+}
+
 .button {
     background-color: aliceblue;
     border: 1px solid black;
@@ -1474,6 +1502,11 @@ ul.model-list li {
 
 .button.sorted.desc:after {
     content: "\25be";
+}
+
+#list-view .more {
+    display: block;
+    font-size: small;
 }
 
 
@@ -1571,42 +1604,19 @@ a.document:before {
 
 
 #side-menu {
-/*     box-shadow: 0 0 3px black; */
     box-shadow: 0 2px 3px rgba(180,180,180,1);
 
     padding: 3em;
     padding-top: 3em;
     position: absolute;
-    left: 0;
     top: 0;
     bottom: 0;
     background-color: white;
     width: 20em;
     z-index: 2;
+
+    transition: right 0.2s ease-out;
 }
-
-@keyframes show-side-menu {
-    from {
-        display: block;
-        left: -20em;
-    }
-    to {
-        left: 0;
-    }
-}
-
-@keyframes hide-side-menu {
-    from {
-        display: block;
-        left: 0;
-    }
-
-    to {
-        left: -20em;
-        display: none;
-    }
-}
-
 
 #side-menu .close {
     font-size: xx-large;
@@ -1655,10 +1665,6 @@ body.choosing-bounds #alert-container {
     margin-top: 0;
 }
 
-
-body.choosing-bounds #map-controls {
-    bottom: 6em;
-}
 
 body.choosing-bounds #search-banner .overlay-contents,
 body.choosing-bounds #hamburger,
@@ -1804,6 +1810,15 @@ body.choosing-bounds .leaflet-marker-icon
     body.list #subscribe {
         display: block;
     }
+
+    #map-controls {
+        bottom: 1em;
+    }
+
+    #info .main-thumb {
+        max-height: 300px;
+        max-width: 100%;
+    }
 }
 
 /*
@@ -1839,22 +1854,6 @@ body.choosing-bounds .leaflet-marker-icon
     .layer-button .label {
         display: none;
     }
-
-    #info .sidebar {
-        /* display: none; */
-        padding-right: 0;
-        padding-top: 2.5em;
-        position: relative;
-        width:  auto;
-    }
-
-    #info {
-        padding-right: 4em;
-    }
-
-    #info.expanded .sidebar {
-        display: block;
-    }
 }
 
 
@@ -1862,6 +1861,13 @@ body.choosing-bounds .leaflet-marker-icon
     body.nointro #search-banner .overlay-contents {
         height: 2em;
         width: 100% !important;
+    }
+
+    body:not(.nointro) #loading-indicator {
+        background-color: transparent;
+        border: none;
+        right: 0;
+        top: 0;
     }
 
     body.nointro #logo {
@@ -1938,14 +1944,13 @@ body.choosing-bounds .leaflet-marker-icon
     }
 
     #side-menu.expanded {
-        animation-duration: 0.2s;
-        animation-name: show-side-menu;
         display: block;
+        right: 0;
     }
 
     #side-menu.collapsed {
-        animation-duration: 0.1s;
-        animation-name: hide-side-menu;
+        display: block;
+        right: -26em;
     }
 
     #modal-contents {
@@ -2012,10 +2017,18 @@ body.choosing-bounds .leaflet-marker-icon
         border-top: 3px solid #FF6005;
     }
 
+    body.choosing-bounds #map-controls {
+        bottom: 6em;
+    }
+
     /* Map controls */
     #map-options {
         display: none;
     }
+
+    #map-controls {
+        bottom: 4em;
+    }   
 
     /* Subscribe/signup controls */
     body.main #subscribe {
@@ -2043,6 +2056,35 @@ body.choosing-bounds .leaflet-marker-icon
         float: none;
         width: auto;
     }
+
+    #list-view.empty .no-results {
+        font-size: large;
+        line-height: 50px;
+    }
+
+    /* Info view */
+    #info .sidebar {
+        padding-right: 0;
+        position: relative;
+        width:  auto;
+    }
+
+    #info {
+        padding-right: 4em;
+    }
+
+    #info .document {
+        display: inline-block;
+    }
+
+    #info.expanded .sidebar {
+        display: block;
+    }
+
+    #info .main-thumb {
+        max-height: 200px;
+        max-width: 100%;
+    }
 }
 
 @media screen and (max-width: 1000px) {
@@ -2053,3 +2095,4 @@ body.choosing-bounds .leaflet-marker-icon
         height: 40px;
         width: 40px;
     }
+}
