@@ -158,14 +158,13 @@ define(["backbone", "underscore", "app-state", "utils"],
                },
 
                onUpdate: function(coll) {
-                   var ids = _.pluck(coll.models, "id"),
+                   var ids = _.map(coll.models, function(m) { return "" + m.id; }),
                        keep_ids = _.intersection(this.selection, ids),
                        removed_ids = _.difference(this.selection, keep_ids);
 
                    this.selection = keep_ids;
                    if (removed_ids.length) {
-                       this.trigger("selectionRemoved", this,
-                                    removed_ids, keep_ids);
+                       this.trigger("selectionRemoved", this, removed_ids, keep_ids);
                    }
                },
 
@@ -210,11 +209,14 @@ define(["backbone", "underscore", "app-state", "utils"],
                    return this.selection;
                },
 
+               getSelectionCount: function() {
+                   return this.selection.length;
+               },
+
                // Sorting
 
                /**
                 * A map of fieldName -> comparator function
-                * 
                 */
                comparators: {},
 
