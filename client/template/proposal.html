@@ -27,17 +27,17 @@
     from
     <%= refLocationButton() %>
 </div>
-&bull;
-<a class="source-link"  href="<%- proposal.get('source') %>" target="_blank ">Source</a>
+<!-- &bull; -->
+<!-- <a class="source-link"  href="<%- proposal.get('source') %>" target="_blank ">Source</a> -->
 
 <% if (project) { %>
 <table class="attributes table" >
     <tr class="attribute" >
-        <th scope="row" >DESCRIPTION</th>
+        <th scope="row" >Description</th>
         <td><%- project.description %></td>
     </tr>
     <tr class="attribute" >
-        <th scope="row" >JUSTIFICATION</th>
+        <th scope="row" >Justification</th>
         <td><%- project.justification %></td>
     </tr>
 </table>
@@ -54,16 +54,18 @@ if (notice) {
 
 <table class="attributes table">
     <tr class="attribute">
-        <th scope="row">APPLICANT</th>
+        <th scope="row">Applicant</th>
         <td><%- proposal.getAttributeValue("applicant_name") %></td>
     </tr>
 
     <tr class="attribute">
-        <th scope="row">PUBLIC HEARINGS</th>
+        <th scope="row">Public Hearings</th>
         <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
     </tr>
 </table>
 <% } %>
+
+<a class=" more" href="#view=info&ps=<%- proposal.id %>">More&hellip;</a>
 
 <%
 var documents = proposal.get("documents");
