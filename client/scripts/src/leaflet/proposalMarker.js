@@ -80,17 +80,28 @@ define(["leaflet", "proposal-popup-view", "underscore"],
                        this.setIcon(getBadge(proposal));
                },
 
-               onSelected: function(proposal) {
-                   var loc = proposal.get("location"),
-                       view = new ProposalPopupView({ model: proposal });
+               onSelected: function(proposal, isSelected) {
                    this.updateIcon(proposal);
-                   L.popup({className: "proposal-info-popup",
-                            minWidth: 300,
-                            maxWidth: 300,
-                            autoPanPaddingTopLeft: L.point(5, 15)})
-                       .setLatLng(loc)
-                       .setContent(view.render().el)
-                       .openOn(this._map);
+
+                   if (isSelected) {
+                       var loc = proposal.get("location"),
+                       view = new ProposalPopupView({ model: proposal }),
+                       popup = this.getPopup();
+
+                       if (!popup) {
+                           popup =
+                               L.popup({className: "proposal-info-popup",
+                                        minWidth: 300,
+                                        maxWidth: 300,
+                                        autoPanPaddingTopLeft: L.point(5, 15)});
+                           popup.setContent(view.render().el);
+
+                           this.bindPopup(popup);
+                       }
+                       this.openPopup();
+                   } else {
+                       this.closePopup().unbindPopup();
+                   }
                },
 
                setZoomed: function(n) {
