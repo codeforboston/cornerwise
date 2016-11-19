@@ -24,13 +24,11 @@ define(["backbone", "underscore", "utils", "app-state"],
                },
 
                show: function() {
-                   this.shouldShow = true;
-                   this.render();
+                   this.toggle(true);
                },
 
                hide: function() {
-                   this.shouldShow = false;
-                   this.render();
+                   this.toggle(false);
                },
 
                render: function() {
@@ -54,7 +52,7 @@ define(["backbone", "underscore", "utils", "app-state"],
                            this.defaultView.setElement(this.$(".content"));
                            this.defaultView.render();
                        } else if (this.defaultTemplate) {
-                           this.$(".content").html(this.defaultTemplate());
+                           this.defaultTemplate(null, function(html) { $el.find(".content").html(html); });
                        } else {
                            $el.addClass("empty");
                        }
@@ -77,7 +75,6 @@ define(["backbone", "underscore", "utils", "app-state"],
                },
 
                onSelection: function(coll, ids) {
-                   this.active = name;
                    this.$el.addClass("loading").find(".content").html("");
                },
 
@@ -92,17 +89,8 @@ define(["backbone", "underscore", "utils", "app-state"],
                },
 
                onSelectionRemoved: function(coll, remIds, ids) {
-                   _.each(remIds, function(id) {
-                       var model = coll.get(id);
-                       if (model)
-                           this.stopListening(model, "change", this.modelChanged);
-                   }, this);
-
-                   if (!ids.length) {
-                       // No active selection:
-                       this.active = null;
-                       this.hide();
-                   }
+                   if (this.shouldShow)
+                       this.render();
                },
 
                clearSelection: function() {
@@ -140,7 +128,7 @@ define(["backbone", "underscore", "utils", "app-state"],
 
                toggle: function(shouldShow) {
                    this.shouldShow = shouldShow;
-                   this.$el.toggleClass("collapsed", !shouldShow);
+                   this.$el.toggleClass("displayed", !!shouldShow);
 
                    if (shouldShow)
                        this.render();
