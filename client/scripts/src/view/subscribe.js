@@ -1,5 +1,5 @@
-define(["jquery", "backbone", "underscore", "alerts", "utils"],
-       function($, B, _, alerts, $u) {
+define(["jquery", "backbone", "underscore", "alerts", "app-state", "utils"],
+       function($, B, _, alerts, appState, $u) {
            return B.View.extend({
                events: {
                    "click a.subscribe-link": "onClickSubscribe",
@@ -14,7 +14,13 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                        .find("input").focus();
                },
 
-               onClickSubscribe: function() {
+               onClickSubscribe: function(e) {
+                   this.startSubscribe();
+                   e.preventDefault();
+               },
+
+               startSubscribe: function() {
+                   appState.setHashKey("view", "main");
                    this.showSubscriptionForm();
                    $("body").addClass("choosing-bounds");
                    var instructions = ("Move and zoom the map to set the " +
@@ -22,6 +28,7 @@ define(["jquery", "backbone", "underscore", "alerts", "utils"],
                                        "about.");
                    alerts.show(instructions, "instructions", "modal",
                                "subscription-alert");
+
                },
 
                dismiss: function() {
