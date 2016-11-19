@@ -11,9 +11,9 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                             "recommendation"],
 
         initialize: function() {
-                 this.listenTo(refLocation, "change", this.recalculateDistance)
-                .listenTo(this, "change:_hovered", this.loadParcel)
-                .listenTo(this, "change:_selected", this.loadParcel);
+            this.listenTo(refLocation, "change", this.recalculateDistance)
+                .listenTo(this, "change:_hovered", this.onHovered)
+                .listenTo(this, "change:_selected", this.onHovered);
         },
 
         defaults: function() {
@@ -89,7 +89,11 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return promise;
         },
 
-        loadParcel: function(proposal) {
+        prefetchImage: function() {
+
+        },
+
+        onHovered: function(proposal) {
             if (this._parcelLoadAttempted)
                 return;
 
@@ -127,16 +131,38 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return config.defaultProposalThumb;
         },
 
+        getImage: function() {
+            var images = this.get("images");
+
+            if (images.length)
+                return images[0].src;
+
+            return config.defaultProposalThumb;
+        },
+
         getAttribute: function(handle) {
             return this.get("attributes")[handle];
         },
 
+        /**
+         * @param {string} handle
+         *
+         * @returns {?string}
+         */
         getAttributeValue: function(handle) {
             var attr = this.getAttribute(handle);
 
             return attr && attr.value;
         },
 
+        /**
+         * Retrieve attribute values for the specified keys in the specified
+         * order.
+         *
+         * @param {string[]} handles
+         *
+         * @returns {string[]}
+         */
         getAttributeValues: function(handles) {
             return _.map(handles, this.getAttributeValue, this);
         },
