@@ -227,6 +227,9 @@
 
     <div id="info" class="overlay default">
       <div class="loading-message" >Loading...</div>
+      <div class="when-empty">
+          No proposals selected.
+      </div>
       <div class="content"></div>
       <a href="#view=main" class="close">&times;</a>
     </div>
@@ -267,13 +270,13 @@
                 View by
             </div>
 
-            <a class="mode action list-mode-button" href="#view=list" >
+            <a class="mode action list-mode-button" href="#view=list&showmenu=0" >
                 <img src="static/images/list-icon.png" alt="List" width="23" height="23">
                 <br/>
                 LIST
             </a>
 
-            <a class="mode action map-mode-button" href="#view=main">
+            <a class="mode action map-mode-button" href="#view=main&showmenu=0">
                 <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
                 <br/>
                 MAP
@@ -303,14 +306,14 @@
     </div>
 
     <div id="subscribe">
-        <a href=#" class="screen screen1 subscribe-link">
+        <a href="#" class="screen screen1 subscribe-link">
             Subscribe to Project Updates
         </a>
         <div class="screen screen2">
             <div class="signup-screen" >
                 <a href="#" class="cancel">&times;</a>
                 <form class="form">
-                    &nbsp;Email address
+                    <span>&nbsp;Email address</span>
                     <div class="input-group">
                         <input name="email"
                                class="input"
