@@ -1,5 +1,5 @@
-define(["underscore", "jquery", "locale", "leaflet"],
-       function(_, $, locale, L) {
+define(["underscore", "jquery", "locale", "leaflet", "optional!templates"],
+       function(_, $, locale, L, templates) {
            /**
             * Takes a numeric string s and adds thousands separators.
             * For example: commas("12345678.3") -> "12,345,678.3"
@@ -658,13 +658,16 @@ define(["underscore", "jquery", "locale", "leaflet"],
                    if (this._getting[url])
                        return this._getting[url];
 
+                   if (templates[url])
+                       return $.Deferred().resolve(templates[url]);
+
                    return (this._getting[url] = $.get(url));
                },
 
                /**
                 * @param {string} url
                 * @param {object} options
-                * @param options.helpers 
+                * @param options.helpers
                 */
                templateWithUrl: function(url, options) {
                    var template = null, self = this;

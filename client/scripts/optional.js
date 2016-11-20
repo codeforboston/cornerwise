@@ -1,5 +1,5 @@
 define({
-    load: function(moduleName, req, onload, _config) {
+    load: function(moduleName, req, onload, config) {
         req([moduleName],
             // If the module loads successfully, proceed as usual:
             onload,
@@ -10,7 +10,9 @@ define({
                 requirejs.undef(module);
 
                 // Define the unloaded module as null:
-                define(module, [], function() { return null; });
+                var defaultModule = config.moduleDefaults &&
+                    config.moduleDefaults[moduleName];
+                define(module, [], function() { return defaultModule; });
 
                 req([module], onload);
             });

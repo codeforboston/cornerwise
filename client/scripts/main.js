@@ -64,7 +64,14 @@ require.config({
         "glossary": "src/glossary",
         "legal-notice": "src/legalNotice",
 
+        // Pre-imported templates:
+        "templates": "build/templates",
+
         "setup": "src/setup"
+    },
+
+    moduleDefaults: {
+        "templates": {}
     },
 
     shim: {
