@@ -42,16 +42,17 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    this.parcelLayer = parcelLayer;
                    this.zoningLayer = zoningLayer;
 
-                   map.on("zoomend", _.bind(this.updateControls, this));
-                   map.on("moveend", _.bind(this.updateMarkers, this));
-                   map.on("moveend", function() {
-                       var center = map.getCenter();
-                       appState.extendHash({
-                           lat: center.lat,
-                           lng: center.lng,
-                           zoom: map.getZoom()
+                   map.on("zoomend", _.bind(this.updateControls, this))
+                       .on("moveend", _.bind(this.updateMarkers, this))
+                       .on("popupopen", _.bind(this.onPopupOpened, this))
+                       .on("moveend", function() {
+                           var center = map.getCenter();
+                           appState.extendHash({
+                               lat: center.lat,
+                               lng: center.lng,
+                               zoom: map.getZoom()
+                           });
                        });
-                   });
 
                    // Map from case numbers to L.Markers
                    this.caseMarker = {};
@@ -277,7 +278,12 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        var bounds = L.latLngBounds(ll);
                        this.map.fitBounds(bounds);
                    }
+               },
 
+               onPopupOpened: function(e) {
+                   var pos = this.map.project(e.popup._latlng);
+                   pos.y -= e.popup._container.clientHeight/2;
+                   this.map.panTo(this.map.unproject(pos), {animate: true});
                },
 
                onBoxFilterChanged: function(box) {
