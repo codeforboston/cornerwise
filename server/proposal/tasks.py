@@ -47,9 +47,7 @@ def fetch_document(doc_id):
     url_components = parse.urlsplit(url)
     ext = extension(os.path.basename(url_components.path))
     filename = "download.%s" % ext
-    path = os.path.join(settings.MEDIA_ROOT, "doc",
-                        str(doc.pk),
-                        filename)
+    path = os.path.join(settings.MEDIA_ROOT, "doc", str(doc.pk), filename)
 
     # Ensure that the intermediate directories exist:
     pathdir = os.path.dirname(path)
@@ -99,8 +97,8 @@ def extract_text(doc_id, encoding="ISO-8859-9"):
     if status:
         logger.error("Failed to extract text from %s", path)
     else:
-        logger.info("Extracted text from Document #%i to %s.",
-                    doc.pk, doc.fulltext)
+        logger.info("Extracted text from Document #%i to %s.", doc.pk,
+                    doc.fulltext)
         doc.fulltext = text_path
         doc.encoding = encoding
         doc.save()
@@ -130,8 +128,8 @@ def extract_images(doc_id):
     path = docfile.path
 
     if not os.path.exists(path):
-        logger.error("Document %s is not where it says it is: %s",
-                     doc.pk, path)
+        logger.error("Document %s is not where it says it is: %s", doc.pk,
+                     path)
         return []
 
     images_dir = os.path.join(os.path.dirname(path), "images")
@@ -150,8 +148,7 @@ def extract_images(doc_id):
             os.unlink(image_path)
             continue
 
-        image = Image(proposal=doc.proposal,
-                      document=doc)
+        image = Image(proposal=doc.proposal, document=doc)
         image.image = image_path
         images.append(image)
 
@@ -176,18 +173,18 @@ def add_street_view(proposal_id):
 
     if api_key:
         location = "{0.address}, {0.region_name}".format(proposal)
-        url = street_view.street_view_url(location, api_key,
-                                          secret=secret)
+        url = street_view.street_view_url(location, api_key, secret=secret)
         try:
             # Check that there is not already a Street View image associated
             # with this proposal:
             if not proposal.images\
                            .filter(source="google_street_view")\
                            .exists():
-                image = proposal.images.create(url=url,
-                                               skip_cache=True,
-                                               source="google_street_view",
-                                               priority=1)
+                image = proposal.images.create(
+                    url=url,
+                    skip_cache=True,
+                    source="google_street_view",
+                    priority=1)
                 return image
         except IntegrityError:
             logger.warning("Image with that URL already exists: %s", url)
@@ -219,19 +216,22 @@ def generate_doc_thumbnail(doc_id):
 
     out_prefix = os.path.join(os.path.dirname(path), "thumbnail")
 
-    proc = subprocess.Popen(["pdftoppm", "-jpeg", "-singlefile",
-                             "-scale-to", "200", path, out_prefix],
-                            stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+        [
+            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", path,
+            out_prefix
+        ],
+        stderr=subprocess.PIPE)
     _, err = proc.communicate()
 
     if proc.returncode:
-        logger.error("Failed to generate thumbnail for document %s: %s",
-                     path, err)
+        logger.error("Failed to generate thumbnail for document %s: %s", path,
+                     err)
         raise Exception("Failed for document %s" % doc.pk)
     else:
         thumb_path = out_prefix + os.path.extsep + "jpg"
-        logger.info("Generated thumbnail for Document #%i: '%s'",
-                    doc.pk, thumb_path)
+        logger.info("Generated thumbnail for Document #%i: '%s'", doc.pk,
+                    thumb_path)
         doc.thumbnail = thumb_path
         doc.save()
 
@@ -276,8 +276,8 @@ def generate_thumbnail(image_id, replace=False):
             return
 
         try:
-            thumbnail_path = make_thumbnail(image.image.name,
-                                            fit=settings.THUMBNAIL_DIM)
+            thumbnail_path = make_thumbnail(
+                image.image.name, fit=settings.THUMBNAIL_DIM)
         except Exception as err:
             logger.error(err)
             return
@@ -303,13 +303,13 @@ def add_doc_attributes(doc_id):
         handle = normalize(name)
 
         try:
-            attr = Attribute.objects.get(proposal=doc.proposal,
-                                         handle=handle)
+            attr = Attribute.objects.get(proposal=doc.proposal, handle=handle)
         except Attribute.DoesNotExist:
-            attr = Attribute(proposal=doc.proposal,
-                             name=name,
-                             handle=normalize(name),
-                             published=published)
+            attr = Attribute(
+                proposal=doc.proposal,
+                name=name,
+                handle=normalize(name),
+                published=published)
             attr.set_value(value)
         else:
             # TODO: Either mark the old attribute as stale and create a
@@ -343,13 +343,11 @@ def add_doc_events(doc_id, properties):
     for e in events:
         event = None
         try:
-            event = Event.objects.get(title=e["title"],
-                                      date=e["date"])
+            event = Event.objects.get(title=e["title"], date=e["date"])
 
         except Event.DoesNotExist:
             # Create a new event:
-            event = Event(title=e["title"],
-                          date=e["date"])
+            event = Event(title=e["title"], date=e["date"])
         except KeyError as kerr:
             logger.error("Missing required key in extracted event: %s",
                          kerr.args)
@@ -380,7 +378,8 @@ def process_document(doc_id):
 @celery_app.task(name="proposal.process_documents")
 def process_documents(doc_ids=None):
     if not doc_ids:
-        doc_ids = Document.objects.filter(document="").values_list("id", flat=True)
+        doc_ids = Document.objects.filter(document="").values_list(
+            "id", flat=True)
 
     return process_document.map(doc_ids)()
 
@@ -396,7 +395,8 @@ def process_proposal(proposal_id):
 
 @celery_app.task(name="proposal.fetch_proposals")
 @transaction.atomic
-def fetch_proposals(since=None, coder_type=settings.GEOCODER,
+def fetch_proposals(since=None,
+                    coder_type=settings.GEOCODER,
                     importers=Importers):
     """
     Task that scrapes the reports and decisions page
@@ -421,8 +421,8 @@ def fetch_proposals(since=None, coder_type=settings.GEOCODER,
         if not since:
             # If there is no record of a previous run, fetch
             # proposals posted since the previous Monday.
-            now = datetime.now().replace(hour=0, minute=0,
-                                         second=0, microsecond=0)
+            now = datetime.now().replace(
+                hour=0, minute=0, second=0, microsecond=0)
             since = now - timedelta(days=7 + now.weekday())
 
     proposals_json = []
@@ -458,7 +458,9 @@ def pull_updates(since=None, importers_filter=None):
     importers = Importers
     if importers_filter:
         name = importers_filter.lower()
-        importers = [imp for imp in importers if name in imp.region_name.lower()]
+        importers = [
+            imp for imp in importers if name in imp.region_name.lower()
+        ]
 
     proposals = fetch_proposals(since, importers=importers)
     proposal_ids = [p.id for p in proposals]

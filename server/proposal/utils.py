@@ -18,6 +18,4 @@ def doc_info(doc):
     else:
         lines = []
 
-    return {"field": doc.field,
-            "title": doc.title,
-            "lines": lines}
+    return {"field": doc.field, "title": doc.title, "lines": lines}

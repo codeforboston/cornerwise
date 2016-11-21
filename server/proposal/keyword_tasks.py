@@ -9,7 +9,6 @@ from scripts import idf, keywords
 from scripts.text_analytics import TextAnalyzer
 from .models import Attribute
 
-
 logger = logging.getLogger(__name__)
 
 if hasattr(settings, "AZURE_API_KEY"):
@@ -52,6 +51,8 @@ def top_terms(doc):
 
 
 celery_app.task(name="proposal.build_counts")
+
+
 def build_counts(handles=[]):
     attrs = Attribute.objects.filter(handle__in=handles)
     r = redis.StrictRedis()
@@ -65,5 +66,7 @@ def build_counts(handles=[]):
 
 
 celery_app.task(name="proposal.analyze_text")
+
+
 def analyze_document_text(doc):
     att_keywords = keywords.keywords(doc.get_text())

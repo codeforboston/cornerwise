@@ -10,19 +10,21 @@ from .models import Proposal, Attribute, Document, Event, Image
 from .query import build_proposal_query
 
 default_attributes = [
-    "applicant_name",
-    "legal_notice",
-    "dates_of_public_hearing"
+    "applicant_name", "legal_notice", "dates_of_public_hearing"
 ]
 
 
-def proposal_json(proposal, include_images=True,
+def proposal_json(proposal,
+                  include_images=True,
                   include_attributes=default_attributes,
-                  include_events=False, include_documents=True,
+                  include_events=False,
+                  include_documents=True,
                   include_projects=True):
     pdict = model_to_dict(proposal, exclude=["location", "fulltext"])
-    pdict["location"] = {"lat": proposal.location.y,
-                         "lng": proposal.location.x}
+    pdict["location"] = {
+        "lat": proposal.location.y,
+        "lng": proposal.location.x
+    }
 
     if include_documents:
         pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
@@ -53,14 +55,17 @@ def proposal_json(proposal, include_images=True,
 
 # Views:
 
+
 @make_response("list.djhtml")
 def active_proposals(req):
     proposals = Proposal.objects.filter(build_proposal_query(req.GET))
     if "include_projects" in req.GET:
         proposals = proposals.select_related("project")
 
-    pjson = [proposal_json(proposal, include_images=1)
-             for proposal in proposals]
+    pjson = [
+        proposal_json(
+            proposal, include_images=1) for proposal in proposals
+    ]
 
     return {"proposals": pjson}
 
@@ -80,13 +85,17 @@ def paginated_active_proposals(req):
     except EmptyPage as err:
         raise ErrorResponse("No such page", {"page": page}, err=err)
 
-    pjson = [proposal_json(proposal, include_images=1)
-             for proposal in proposals]
+    pjson = [
+        proposal_json(
+            proposal, include_images=1) for proposal in proposals
+    ]
 
-    return {"proposals": pjson,
-            # "count": proposals.paginator.count,
-            "page": proposals.number,
-            "total_pages": proposals.paginator.num_pages}
+    return {
+        "proposals": pjson,
+        # "count": proposals.paginator.count,
+        "page": proposals.number,
+        "total_pages": proposals.paginator.num_pages
+    }
 
 
 @make_response("list.djhtml")
@@ -103,8 +112,8 @@ def view_proposal(req, pk=None):
 
     proposal = get_object_or_404(Proposal, pk=pk)
 
-    return proposal_json(proposal, include_attributes=True,
-                         include_images=True)
+    return proposal_json(
+        proposal, include_attributes=True, include_images=True)
 
 
 # Document views

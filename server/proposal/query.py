@@ -43,10 +43,7 @@ query_params = {
 }
 
 # TODO: Don't hardcode this
-region_names = {
-    "somerville": "Somerville, MA",
-    "cambridge": "Cambridge, MA"
-}
+region_names = {"somerville": "Somerville, MA", "cambridge": "Cambridge, MA"}
 
 
 def build_proposal_query_dict(d):
@@ -84,8 +81,7 @@ def build_proposal_query_dict(d):
         # Coordinates are submitted to the server as
         # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
         # different order:
-        bbox = Polygon.from_bbox((coords[1], coords[0],
-                                  coords[3], coords[2]))
+        bbox = Polygon.from_bbox((coords[1], coords[0], coords[3], coords[2]))
         subqueries["location__within"] = bbox
 
     # If status is anything other than 'active' or 'closed', find all
