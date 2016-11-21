@@ -24,7 +24,7 @@ define(["backbone", "app-state", "jquery", "utils"],
                            .done(function(image) {
                                self.render(image);
                            })
-                           .error(function() {
+                           .fail(function() {
                                appState.clearHashKey("image");
                            });
                    } else {

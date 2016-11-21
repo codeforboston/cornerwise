@@ -2,10 +2,10 @@ require.config({
     paths: {
         // Dependencies:
         "underscore": "lib/underscore-min",
-        "backbone": "lib/backbone",
-        "leaflet": "//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet",
-        "jquery": "//code.jquery.com/jquery-1.11.3.min",
-        "chartjs": "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min",
+        "backbone": "lib/backbone-min",
+        "leaflet": "lib/leaflet",
+        "jquery": "lib/jquery-3.1.1.min",
+        "chartjs": "lib/Chart.min",
 
         // Utilities:
         "utils": "src/utils",
