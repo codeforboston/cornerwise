@@ -112,42 +112,6 @@ body:not(.nointro) #map-controls {
     display: none;
 }
 
-#map-options {
-    right: 4em;
-    top: -4.65em;
-    height: 2em;
-    line-height: 2em;
-}
-
-#map-options.expanded .expand-layers {
-    display: none;
-}
-
-#map-options .collapse-layers {
-    display: none;
-}
-
-#map-options.expanded .collapse-layers {
-    display: block;
-    height: 2em;
-    line-height: 2em;
-    text-align: center;
-    width: 2em;
-}
-
-#map-options.control a {
-   color: #2A749B;
-}
-
-#map-options.control:hover {
-    background-color: #2A749B;
-}
-
-#map-options.control:hover a.toggle-layers {
-    color: white !important;
-    text-decoration: none;
-}
-
 button {
     background-color:  white;
     border-radius: 0;
@@ -355,18 +319,38 @@ input:focus::-webkit-input-placeholder {
 
 #geolocate {
     background: url(/static/images/geolocate-button.png) no-repeat;
-    display: block;
+    display: none;
+    background-color: rgb(43, 43, 43);
+    background-position: 0.5em 50%;
+    border: 1px solid white;
+    color: white;
     font-size: medium;
-    right: -40px;
-    top: 10px;
+    padding: 0.5em;
+    padding-left: 2.5em;
     position: absolute;
-    text-decoration: underline;
-    height: 25px;
-    width: 25px;
+    text-decoration: none;
+    left: 0.5em;
+    right: 0.5em;
+    width: auto;
+    top: 100%;
+    z-index: 10000;
+}
+
+#geolocate:hover {
+    display: block;
 }
 
 #geolocate span {
-    display: none;
+    display: inline;
+}
+
+/* Display the Current Location option when the input is focused */
+#geolocate:hover, input:focus ~ #geolocate {
+    display: block !important;
+}
+
+#geolocate:hover {
+    background-color: rgba(100, 100, 100, 1);
 }
 
 body.geolocating #geolocate {
@@ -1296,28 +1280,6 @@ body.main .leaflet-control-container {
     display: block;
 }
 
-#layers {
-    bottom: 0;
-    max-width: 0;
-    position: absolute;
-    right: 2em;
-    overflow: hidden;
-
-    transition: max-width 0.3s linear, max-height 0.3s linear;
-}
-
-#map-options.expanded #layers {
-    max-height: 6em;
-    max-width: 1000px;
-
-}
-
-.layer-list {
-    height: 6em;
-    width: 1000px;
-    text-align: right;
-}
-
 .layer-button {
     background-color: rgba(255, 255, 255, 0.4);
     border: 1px solid white;
@@ -1606,7 +1568,6 @@ a.document:before {
 
 #side-menu {
     box-shadow: 0 2px 3px rgba(180,180,180,1);
-
     padding: 3em;
     padding-top: 3em;
     position: absolute;
@@ -1614,8 +1575,8 @@ a.document:before {
     bottom: 0;
     background-color: white;
     width: 20em;
+    max-width: 75%;
     z-index: 2;
-
     transition: right 0.2s ease-out;
 }
 
@@ -1820,6 +1781,10 @@ body.choosing-bounds .leaflet-marker-icon
         max-height: 300px;
         max-width: 100%;
     }
+
+    #info .images {
+        margin-top: 1em;
+    }
 }
 
 /*
@@ -1893,43 +1858,6 @@ body.choosing-bounds .leaflet-marker-icon
         position: absolute;
         left: 10px;
         right: 60px;
-    }
-
-    #geolocate {
-        display: none;
-    }
-
-    #geolocate:hover {
-        display: block;
-    }
-
-    #geolocate span {
-        display: inline;
-    }
-
-    /* Display the Current Location option when the input is focused */
-    #geolocate {
-        background-color: rgb(43, 43, 43);
-        background-position: 0.5em 50%;
-        border: 1px solid white;
-        color: white;
-        padding: 0.5em;
-        padding-left: 2.5em;
-        position: absolute;
-        text-decoration: none;
-        left: 0.5em;
-        right: 0.5em;
-        width: auto;
-        top: 100%;
-        z-index: 10000;
-    }
-
-    #geolocate:hover, input:focus ~ #geolocate {
-        display: block !important;
-    }
-
-    #geolocate:hover {
-        background-color: rgba(100, 100, 100, 1);
     }
 
     input:focus ~ #ref-address-form .cancel {
@@ -2021,15 +1949,6 @@ body.choosing-bounds .leaflet-marker-icon
     body.choosing-bounds #map-controls {
         bottom: 6em;
     }
-
-    /* Map controls */
-    #map-options {
-        display: none;
-    }
-
-    #map-controls {
-        bottom: 4em;
-    }   
 
     /* Subscribe/signup controls */
     body.main #subscribe {

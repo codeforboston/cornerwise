@@ -2,8 +2,8 @@ define(["backbone", "underscore", "jquery", "collection/layers", "utils",
         "appState"],
        function(B, _, $, layers, $u, appState) {
            var LayerItemView = B.View.extend({
-               template: $u.templateWithId("layer-item-template",
-                                           {variable: "layer"}),
+               template: $u.templateWithUrl("/static/template/layerItem.html",
+                                            {variable: "layer"}),
 
                tagName: "a",
 
@@ -29,16 +29,19 @@ define(["backbone", "underscore", "jquery", "collection/layers", "utils",
                },
 
                render: function() {
-                   this.$el
-                       .attr("class", this.className())
-                       .html(this.template(this.model));
+                   var self = this;
+                   this.template(this.model,
+                                 function(html) {
+                                     self.$el.addClass(this.className)
+                                         .html(html);
+                                 });
 
                    return this;
                },
 
                onClick: function(e) {
-                   e.preventDefault();
                    this.model.collection.toggleLayer(this.model.id);
+                   e.preventDefault();
                },
 
                onMouseover: function(e) {
@@ -73,53 +76,11 @@ define(["backbone", "underscore", "jquery", "collection/layers", "utils",
                    return "blorg";
                },
 
-               initialize: function(options) {
-                   B.View.prototype.initialize.call(this, options);
-
-                   appState.onStateKeyChange(
-                       this.hashParam,
-                       function(newLy, oldLy) {
-                           if (newLy === "1")
-                               this._show();
-                           else
-                               this._hide();
-                       }, this);
-               },
-
-               events: {
-                   "click .toggle-layers": "toggle"
-               },
-
-               toggle: function(e) {
-                   appState.changeHashKey(this.hashParam,
-                                          function(v) {
-                                              return v === "1" ? undefined : "1";
-                                          });
-                   e.preventDefault();
-               },
-
-               show: function() {
-                   appState.setHashKey(this.hashParam, "1");
-               },
-
-               hide: function() {
-                   appState.clearHashKey(this.hashParam);
-               },
-
-               _show: function() {
-                   this.$el.addClass("expanded");
-               },
-
-               _hide: function() {
-                   this.$el.removeClass("expanded");
-               },
-
                render: function() {
-                   var $el = $("#layers"),
-                       div = $('<div class="layer-list"></div>').appendTo($el);
+                   var $el = this.$el.html("");
                    this.collection.forEach(function(layer) {
                        var view = new LayerItemView({model: layer});
-                       div.append(view.render().el);
+                       $el.append(view.render().el);
                    }, this);
 
                    return this;

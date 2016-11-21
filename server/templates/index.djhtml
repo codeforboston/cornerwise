@@ -35,97 +35,6 @@
     <meta name="og:type" content="website" />
     <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
 
-    <script type="text/template" id="project-template">
-      <div class="thumbnail">
-        <img src="<%- project.thumbnail() %>">
-      </div>
-      <div class="name" title="<%- project.get('name') %>">
-        <%- project.get("name") %>
-      </div>
-      <div class="category" title="<%- project.get('category') %>">
-          <img class="icon" src="<%- project.categoryIcon() %>"
-               title="<%- project.get('category') %>"/>
-          <%- project.get("category") %>
-      </div>
-      <div class="department">
-          <%- project.departmentName() %>
-      </div>
-      <div class="time-span"></div>
-      <div class="status">
-        <div class="<%- project.get('approved') ? 'approved' : 'pending' %>"/>
-      </div
-      <div class="budget-year">
-        <% var years = project.yearRange();
-           if (years[0] == years[1]) {
-        %>
-        <%= years[0] %>
-        <% } else { %>
-        <%= years[0] %>&ndash;<%= years[1] %>
-        <% } %>
-      </div>
-      <div class="budget">
-        <%- prettyAmount(project.totalBudget()) %>
-      </div>
-      <div class="description" >
-          <%- project.get("description") %>
-      </div>
-    </script>
-
-    <script type="text/template" id="proposal-preview-template">
-      <div class="proposal-preview">
-        <img src="<%- proposal.getThumb() %>" class="thumb"/>
-        <h3 class="address"><%- proposal.get("address") %></h3>
-        <div class="case-number"><%- proposal.get("caseNumber") %></div>
-        <div class="applicant">
-          <%
-             var applicant = proposal.getAttributeValueOrFetch("applicant_name"),
-             notice = proposal.getAttributeValue("legal_notice"),
-             owner = proposal.getAttributeValue("owner_name");
-             if (applicant) {
-             %>
-          <div class="applicant-name"><%- applicant %></div>
-          <% }
-             if (owner) {
-             %>
-          <div class="applicant-name"><%- owner %></div>
-          <%
-             }
-             if (notice) {
-             %>
-          <div class="legal-notice"><%= gloss(abridge(notice)) %></div>
-          <% } %>
-        </div>
-        <div id="details-minimap"></div>
-
-        <div class="controls">
-          <a class="more" href="#view=details">View more&hellip;</a>
-          <a class="calendar" aria-label="View related event" href="#">
-            <img src="/static/images/calendar.png">
-          </a>
-        </div>
-      </div>
-    </script>
-
-    <script type="text/template" id="project-preview-template">
-      <h3><%- project.get("name") %></h3>
-      <div class="category"><%- project.get("category") %></div>
-      <div class="department"><%- project.departmentName() %></div>
-      <div class="desription">
-        Making the City’s streets and sidewalks safe and accessible to everyone is a top priority. Given Somerville’s density, city streets and sidewalks are heavily utilized and thus require frequent maintenance.
-      </div>
-
-      <canvas class="budget-chart" height="200" width="300"></canvas>
-      <div class="controls">
-        <a class="more" href="#view=projectDetails">View More&hellip;</a>
-      </div>
-    </script>
-
-    <script type="text/template" id="layer-item-template">
-        <div class="flaticon-<%- layer.get('icon') %> layer-icon"/>
-        <div class="label"><%- layer.get('short') %></div>
-    </script>
-  </head>
-
   <body>
     <div id="loading-indicator" class="control">
         <img src="/static/images/loading.gif">
@@ -157,7 +66,6 @@
                            placeholder="Enter address, landmark, intersection"
                            autocomplete="off" />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
-                    <button type="submit" class="input-button go-button">go</button>
                     <a id="geolocate" href="#"
                        title="Search near me"
                        aria-label="Search near me">
@@ -212,14 +120,6 @@
       </div>
     </div>
 
-      <div id="map-options" class="control">
-          <a href="#" class="toggle-layers" >
-              <span class="expand-layers">Options</span>
-              <span class="collapse-layers">&raquo;</span>
-          </a>
-          <div id="layers"></div>
-      </div>
-
       <div id="map-controls" class="control">
           <a href="#" class="map-zoom-in" >&#43;</a>
           <a href="#" class="map-zoom-out" >&minus;</a>
@@ -246,12 +146,15 @@
         <a href="#showmenu=0" class="close">&times;</a>
 
         <div class="menu-group" >
-            <div class="group-header" >
+            <div class="group-header">
                 Filter Results
             </div>
 
-            <select name="" class="filter-selector">
-                <option value="">Application Status</option>
+            <select name="application_status" class="filter-selector">
+                <option>Application Status</option>
+                <option value="Pending">Pending</option>
+                <option value=""></option>
+                <option>Application Status</option>
             </select>
 
             <select name="" class="filter-selector">
@@ -289,8 +192,8 @@
             <div class="group-header" >
                 Show on Map
             </div>
-            <div class="group-contents">
-
+            <div id="map-options"  class="group-contents">
+                <div id="layers"></div>
             </div>
         </div>
 

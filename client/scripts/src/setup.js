@@ -73,7 +73,7 @@ define(
                 });
 
                 appViews.layers = new LayersView({
-                    el: "#map-options"
+                    el: "#layers"
                 }).render();
 
 

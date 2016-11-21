@@ -632,24 +632,6 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                },
 
                /**
-                * @param {string} id Element ID of the template element in the
-                * DOM.
-                * @param {object} options
-                * @param o
-                *
-                * @return {Function}
-                */
-               templateWithId: function(id, options) {
-                   var templateString = $("#" + id).text();
-
-                   if (!templateString) {
-                       throw new Error("Unknown template: " + id);
-                   }
-                   options = options || {};
-                   return $u.template(templateString, options, options.helpers);
-               },
-
-               /**
                 * Store a map of URLs to jQuery xhr objects, so that overlapping
                 * requests to the same URL will not create multiple requests.
                 */
