@@ -1,10 +1,13 @@
 define(
-    ["jquery", "proposals", "collection-manager", "map-view",
-     "proposal-info-view", "proposal-view", "glossary", "config", "app-state",
-     "view-manager", "ref-location", "legal-notice"],
+    ["jquery", "collection/proposals", "collection/manager", "view/map",
+     "view/proposalInfo", "view/proposal", "glossary", "config", "appState",
+     "viewManager", "refLocation", "view/layers", "view/alerts",
+     "view/filters", "view/image", "view/subscribe", "legalNotice",
+     "view/modal", "view/list", "view/info"],
     function($, Proposals, CollectionManager, MapView, ProposalInfoView,
              ProposalItemView, glossary, config, appState, ViewManager,
-             refLocation) {
+             refLocation, LayersView, alerts, FiltersView, ImageView,
+             SubscribeView) {
         return {
             start: function() {
                 var proposals = new Proposals(),
@@ -49,9 +52,7 @@ define(
                 });
 
                 if (window.ResponseMessages && ResponseMessages.length) {
-                    require(["alerts"], function(alerts) {
-                        alerts.showResponses(ResponseMessages);
-                    });
+                    alerts.showResponses(ResponseMessages);
                 }
 
                 // Configure modal views here!
@@ -60,23 +61,20 @@ define(
                     // Simple view that will load the about page from a
                     // static URL into a modal overlay when the 'view'
                     // parameter in the hash.
-                    "about": ["modal-view", {url: "/static/template/about.html",
+                    "about": ["view/modal", {url: "/static/template/about.html",
                                              context: {config: config}}],
-                    "events": ["modal-view",
+                    "events": ["view/modal",
                                {url: "/static/template/eventBrowser.html"}],
-                    "list": ["list-view",
+                    "list": ["view/list",
                              {collection: proposals,
                               subview: ProposalItemView}],
-                    "info": ["info-view", {collection: proposals,
+                    "info": ["view/info", {collection: proposals,
                                            subview: new ProposalInfoView()}]
                 });
 
-                require(["layers-view"],
-                        function(LayersView) {
-                            var layersView = new LayersView({
-                                el: "#map-options"
-                            }).render();
-                        });
+                appViews.layers = new LayersView({
+                    el: "#map-options"
+                }).render();
 
 
                 appViews.mapView = new MapView({
@@ -84,25 +82,19 @@ define(
                     el: "#map"
                 });
 
-                require(["filters-view", "subscribe-view"],
-                        function(FiltersView, SubscribeView) {
-                            appViews.filtersView = new FiltersView({
-                                collection: proposals,
-                                mapView: appViews.mapView
-                            });
+                appViews.filtersView = new FiltersView({
+                    collection: proposals,
+                    mapView: appViews.mapView
+                });
 
-                            appViews.subscribeView = new SubscribeView({
-                                collection: proposals,
-                                el: "#subscribe"
-                            });
-                        });
+                appViews.subscribeView = new SubscribeView({
+                    collection: proposals,
+                    el: "#subscribe"
+                });
 
-                require(["image-view"],
-                        function(ImageView) {
-                            appViews.imageView = new ImageView({
-                                el: "#image-view"
-                            });
-                        });
+                appViews.imageView = new ImageView({
+                    el: "#image-view"
+                });
 
                 appState.init();
                 glossary.init();

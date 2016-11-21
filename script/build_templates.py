@@ -40,7 +40,7 @@ def do_main():
     template_dir = os.path.join(file_dir, "../client/template")
     url_base = "/static/template"
     out_dir = os.path.join(
-        os.path.dirname(__file__), "../client/scripts/build/")
+        os.path.dirname(__file__), "../client/scripts/src/build/")
 
     os.makedirs(out_dir, exist_ok=True)
 

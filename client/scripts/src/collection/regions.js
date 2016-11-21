@@ -1,4 +1,4 @@
-define(["backbone", "jquery", "underscore", "selectable", "config"],
+define(["backbone", "jquery", "underscore", "collection/selectable", "config"],
        function(B, $, _, SelectableCollection, config) {
            var RegionModel = B.Model.extend({
                loadShape: function() {

@@ -1,4 +1,4 @@
-define(["jquery", "backbone", "underscore", "alerts", "app-state", "utils"],
+define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
        function($, B, _, alerts, appState, $u) {
            return B.View.extend({
                events: {

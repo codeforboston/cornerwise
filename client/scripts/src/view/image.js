@@ -1,4 +1,4 @@
-define(["backbone", "app-state", "jquery", "utils"],
+define(["backbone", "appState", "jquery", "utils"],
        function(B, appState, $, $u) {
            var ImageView = B.View.extend({
                events: {

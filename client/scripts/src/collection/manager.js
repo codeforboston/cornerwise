@@ -1,4 +1,4 @@
-define(["backbone", "underscore", "app-state"],
+define(["backbone", "underscore", "appState"],
        function(B, _, appState) {
            /**
             * The collection manager keeps track of the active collection and

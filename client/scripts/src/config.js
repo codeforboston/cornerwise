@@ -4,7 +4,7 @@
  * Application configuration options
  */
 
-define(["optional!local-config", "underscore"], function(localConfig, _) {
+define(["optional!localConfig", "underscore"], function(localConfig, _) {
     var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.

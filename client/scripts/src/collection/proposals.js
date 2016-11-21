@@ -2,11 +2,10 @@
  * ProposalsCollection
  */
 define(
-    ["backbone", "jquery", "underscore", "leaflet", "proposal", "ref-location",
-     "selectable", "config", "utils", "app-state"],
+    ["backbone", "jquery", "underscore", "lib/leaflet", "model/proposal",
+     "refLocation", "collection/selectable", "config", "utils", "appState"],
     function(B, $, _, L, Proposal, refLocation, Selectable, config, $u,
              appState) {
-        window.$u = $u;
         return Selectable.extend({
             model: Proposal,
 

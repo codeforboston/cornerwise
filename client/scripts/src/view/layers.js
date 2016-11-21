@@ -1,5 +1,5 @@
-define(["backbone", "underscore", "jquery", "layers", "utils",
-       "app-state"],
+define(["backbone", "underscore", "jquery", "collection/layers", "utils",
+        "appState"],
        function(B, _, $, layers, $u, appState) {
            var LayerItemView = B.View.extend({
                template: $u.templateWithId("layer-item-template",

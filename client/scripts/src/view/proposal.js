@@ -1,7 +1,7 @@
 /*
  * View representing a proposal in the proposals list.
  */
-define(["backbone", "underscore", "utils", "ref-location", "config"],
+define(["backbone", "underscore", "utils", "refLocation", "config"],
        function(B, _, $u, refLocation, config) {
            var proposalHelpers = {
                refLocationButton: function() {

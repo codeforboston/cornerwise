@@ -1,8 +1,8 @@
 /*
  * The reference location is used to determine the distance to
  */
-define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
-        "app-state"],
+define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
+        "collection/regions", "utils", "appState"],
        function(B, L, alerts, config, arcgis, regions, $u, appState) {
            var bounds;
 

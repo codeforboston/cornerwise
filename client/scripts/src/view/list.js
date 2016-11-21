@@ -1,4 +1,4 @@
-define(["backbone", "jquery", "utils", "underscore", "app-state"],
+define(["backbone", "jquery", "utils", "underscore", "appState"],
        function(B, $, $u, _, appState) {
            window.$ = $;
            var ListView = B.View.extend({

@@ -1,6 +1,6 @@
-define(["backbone", "config", "leaflet", "jquery", "underscore",
-        "ref-location", "ref-marker", "proposal-marker", "layers",
-        "regions", "info-layer-helper", "app-state", "utils"],
+define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocation",
+        "leaflet/refMarker", "leaflet/proposalMarker", "collection/layers",
+        "collection/regions", "leaflet/infoLayer", "appState", "utils"],
        function(B, config, L, $, _, refLocation, RefMarker,
                 ProposalMarker, infoLayers, regions, info, appState, $u) {
 

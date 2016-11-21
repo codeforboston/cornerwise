@@ -1,4 +1,4 @@
-define(["underscore", "jquery", "locale", "leaflet", "optional!templates"],
+define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templates"],
        function(_, $, locale, L, templates) {
            /**
             * Takes a numeric string s and adds thousands separators.

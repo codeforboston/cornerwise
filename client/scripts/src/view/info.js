@@ -1,4 +1,4 @@
-define(["backbone", "underscore", "utils", "app-state"],
+define(["backbone", "underscore", "utils", "appState"],
        function(B, _, $u, appState) {
            /**
             * - defaultView

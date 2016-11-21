@@ -1,8 +1,8 @@
 /**
  * Defines the 'info view' shown at the bottom of the map.
  */
-define(["jquery", "backbone", "app-state", "underscore", "config",
-        "utils", "budget"],
+define(["jquery", "backbone", "appState", "underscore", "config", "utils",
+        "view/budget"],
        function($, B, appState, _, config, $u, budget) {
            return B.View.extend({
                detailsTemplate: $u.templateWithUrl(

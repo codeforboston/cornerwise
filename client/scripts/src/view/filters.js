@@ -2,8 +2,8 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils",
-     "arcgis", "places", "app-state", "config"],
+    ["backbone", "underscore", "jquery", "refLocation", "collection/regions",
+     "utils", "api/arcgis", "api/places", "appState", "config"],
 
     function(B, _, $, refLocation, regions, $u, arcgis, places, appState, config) {
         "use strict";
@@ -76,7 +76,7 @@ define(
                     .toggleClass("collapsed", !shouldShow);
             },
 
-            toggleSideMenu(show) {
+            toggleSideMenu: function(show) {
                 $("#side-menu")
                     .toggleClass("expanded", show)
                     .toggleClass("collapsed", !show);

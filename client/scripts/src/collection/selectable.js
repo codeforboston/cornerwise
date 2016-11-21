@@ -1,4 +1,4 @@
-define(["backbone", "underscore", "app-state", "utils"],
+define(["backbone", "underscore", "appState", "utils"],
        function(B, _, appState, $u) {
            /**
             * @constructor

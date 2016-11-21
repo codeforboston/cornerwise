@@ -1,4 +1,4 @@
-define(["leaflet", "proposal-popup-view", "underscore"],
+define(["lib/leaflet", "view/proposalPopup", "underscore"],
        function(L, ProposalPopupView, _) {
            function projectTypeIcon(p) {
                var cat = p.category.replace(/[&.]+/g, "")
