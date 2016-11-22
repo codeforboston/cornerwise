@@ -285,7 +285,7 @@ define(["backbone", "lib/leaflet", "refLocation", "config"], function(B, L, refL
         },
 
         recalculateDistance: function() {
-            var dist = this.set("refDistance", this.getDistanceToRef());
+            this.set("refDistance", this.getDistanceToRef());
         }
     }, {
         // Class properties:

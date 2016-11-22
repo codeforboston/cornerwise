@@ -39,7 +39,8 @@ define(["backbone", "underscore", "appState", "utils"],
                    this.pending = [];
 
                    this.on("add", this.onAdd, this)
-                       .on("update", this.onUpdate, this);
+                       .on("update", this.onUpdate, this)
+                       .on("change", this.onModelChange, this);
 
                    if (this.hashParam) {
                        appState.onStateKeyChange(this.hashParam, function(ids, oldIds) {
@@ -167,6 +168,18 @@ define(["backbone", "underscore", "appState", "utils"],
                        this.trigger("selectionRemoved", this, removed_ids, keep_ids);
                    }
                },
+
+               onModelChange: function(model) {
+                   var sortField = this.sortField;
+
+                   if (sortField && model.changed[sortField]) {
+                       this.debouncedSort();
+                   }
+               },
+
+               debouncedSort: _.debounce(function() {
+                   this.sort();
+               }, 50),
 
                getSelectedIndex: function() {
                    var id = this.selection[0];

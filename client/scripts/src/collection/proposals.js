@@ -27,8 +27,6 @@ define(
 
                 appState.onStateKeyChange(
                     "f", this.onFiltersChange, this);
-
-                //refLocation.on("change")
             },
 
             url: function() {
