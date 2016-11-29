@@ -72,24 +72,28 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                return currency + commas(amount);
            }
 
+           function prettyFraction(dec) {
+               var whole = Math.floor(dec),
+                   frac = dec - whole,
+                   denom, num;
+
+               if (frac > 0.5) {
+                   denom = Math.round(1/(1-frac));
+                   num = Math.round(frac*denom);
+               } else {
+                   denom = Math.min(Math.round(1/frac), 10);
+                   num = Math.round(frac*denom);
+               }
+
+               return [whole, num, denom];
+           }
+
            function prettyDistance(ft) {
                var miles = ft/5280;
 
-               if (miles >= 1) {
+               if (miles >= 0.2) {
                    var m = miles.toFixed(1).replace(/\.0$/, "");
-                   return m + " mile" + (miles - 1 < 0.1 ? "" : "s");
-               } else if (miles >= 0.2) {
-                   var denom, num;
-                   if (miles > 0.5) {
-                       denom = Math.round(1/(1-miles));
-                       num = Math.round(miles*denom);
-
-                   } else {
-                       denom = Math.round(1/miles);
-                       num = 1;
-                   }
-
-                   return "about <sup>" + num + "</sup>&frasl;<sub>" + denom + "</sub> mile";
+                   return m + " mile" + (Math.abs(miles - 1) < 0.1 ? "" : "s");
                }
 
                return commas(ft) + " feet";
