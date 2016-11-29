@@ -91,8 +91,15 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                        });
                },
 
-               setFromLatLng: function(lat, long) {
-                   this.set("setMethod", "map");
+               setFromLatLng: function(lat, long, address) {
+                   if (address) {
+                       this.set({
+                           setMethod: "address",
+                           address: address
+                       });
+                   } else {
+                       this.set("setMethod", "map");
+                   }
                    appState.setHashKey("ref", {
                        lat: lat,
                        lng: long

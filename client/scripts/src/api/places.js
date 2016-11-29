@@ -9,6 +9,13 @@ define(["jquery"], function($) {
     }
 
     var module = {
+        shortAddress: function(place) {
+            var pieces = place.address_components;
+
+            return [pieces[0].short_name,
+                    pieces[1].short_name].join(" ");
+        },
+
         /**
          * @param {HTMLElement} input
          * @param {google.maps.places.AutocompleteOptions} options
