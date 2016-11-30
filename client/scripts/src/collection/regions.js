@@ -27,11 +27,12 @@ define(["backbone", "jquery", "underscore", "collection/selectable", "config"],
            });
 
            var RegionCollection = SelectableCollection.extend({
-               selection: ["somerville"],
+               selection: [config.regions[0].id],
 
                model: RegionModel,
 
                hashParam: "f.region"
+
            });
 
            return new RegionCollection(regions);

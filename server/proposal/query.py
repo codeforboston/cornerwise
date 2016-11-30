@@ -15,7 +15,6 @@ def build_attributes_query(d):
 
     :returns: A
     """
-    # Query attributes:
     subqueries = []
 
     for k, val in d.items():
@@ -42,9 +41,6 @@ query_params = {
     "source": "source"
 }
 
-# TODO: Don't hardcode this
-region_names = {"somerville": "Somerville, MA", "cambridge": "Cambridge, MA"}
-
 
 def build_proposal_query_dict(d):
     subqueries = {}
@@ -57,12 +53,8 @@ def build_proposal_query_dict(d):
         subqueries["address__icontains"] = d["text"]
 
     if d.get("region"):
-        regions = re.split(r"\s*,\s*", d["region"])
-        regions = [region_names[r] for r in regions if r in region_names]
-        if len(regions) == 1:
-            subqueries["region_name"] = regions[0]
-        else:
-            subqueries["region_name__in"] = regions
+        regions = re.split(r"\s*;\s*", d["region"])
+        subqueries["region_name__in"] = regions
 
     if ids:
         subqueries["pk__in"] = ids

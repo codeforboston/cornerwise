@@ -3,8 +3,8 @@
  */
 define(
     ["backbone", "jquery", "underscore", "lib/leaflet", "model/proposal",
-     "refLocation", "collection/selectable", "config", "utils", "appState"],
-    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u,
+     "refLocation", "collection/regions", "collection/selectable", "config", "utils", "appState"],
+    function(B, $, _, L, Proposal, refLocation, Regions, Selectable, config, $u,
              appState) {
         return Selectable.extend({
             model: Proposal,
@@ -159,9 +159,6 @@ define(
                     });
                 }
 
-                if (query.range) {
-                }
-
                 if (query.box) {
                     var bounds = $u.boxStringToBounds(query.box);
                     preds.push(function(proposal) {
@@ -171,9 +168,15 @@ define(
                 }
 
                 if (query.region) {
-                    preds.push(function(proposal) {
-                        return proposal.region_name == query.region;
-                    });
+                    var regions = (query.region||"").split(";");
+                    if (regions.length == 1) 
+                        preds.push(function(proposal) {
+                            return proposal.region_name == query.region;
+                        });
+                    else
+                        preds.push(function(proposal) {
+                            return regions.indexOf(proposal.region_name) > -1;
+                        });
                 }
 
                 return function(proposal) {
@@ -266,8 +269,11 @@ define(
                 query.box = val;
             },
 
-            regionFilter: function(query, val) {
-                query.region = val;
+            regionFilter: function(query, regions) {
+                query.region = $u.keep(regions.split(/\s*,\s*/), function(id) {
+                    var r = Regions.get(id);
+                    return r ? r.get("name") : undefined;
+                }).join(";");
             },
 
             // Returns a LatLngBounds object for the proposals that are

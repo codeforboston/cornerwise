@@ -148,6 +148,13 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    deferredBounds.done(function(bounds) {
                        var paddedBounds = bounds.pad(1);
                        self.map.setMaxBounds(paddedBounds);
+                       self.map.fitBounds(paddedBounds);
+
+                       // HACK Do this here rather than inside the bounds
+                       // collection because this is where we actually load the
+                       // region geometries and therefore have access to the
+                       // layers and their bounds methods.
+                       regions._bounds = paddedBounds;
                        regions.trigger("regionBounds", paddedBounds);
                    });
                },
@@ -264,6 +271,15 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        e.latlng.lng);
                },
 
+               /**
+                * Triggered on the appState when the map should focus on a group
+                * of models. It's a hack, but the pattern could be generalized.
+                * Right now, appState is only designed to cope with state that
+                * is persisted to the location hash.
+                *
+                * @param {Backbone.Model[]} models
+                * @param {boolean} zoom
+                */
                onFocused: function(models, zoom) {
                    var self = this,
                        ll = _.map(models, function(model) {
@@ -281,6 +297,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                },
 
                onPopupOpened: function(e) {
+                   // Recenter the map view on the popup when it opens.
                    var pos = this.map.project(e.popup._latlng);
                    pos.y -= e.popup._container.clientHeight/2;
                    this.map.panTo(this.map.unproject(pos), {animate: true});

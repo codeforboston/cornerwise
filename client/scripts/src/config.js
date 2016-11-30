@@ -58,12 +58,12 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         regions: [
             {
                 id: "somerville",
-                regionName: "Somerville, MA",
+                name: "Somerville, MA",
                 source: "/static/scripts/src/layerdata/somerville.geojson"
             },
             {
                 id: "cambridge",
-                regionName: "Cambridge, MA",
+                name: "Cambridge, MA",
                 source: "/static/scripts/src/layerdata/cambridge.geojson"
             }
         ],
