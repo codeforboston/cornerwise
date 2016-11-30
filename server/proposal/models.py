@@ -80,7 +80,8 @@ class Proposal(models.Model):
     # A misnomer; if True, indicates that the proposal has been approved:
     complete = models.BooleanField(default=False)
 
-    # To enable geo queries
+    parcel = models.ForeignKey("parcel.Parcel", null=True)
+
     objects = ProposalManager()
 
     def get_absolute_url(self):
