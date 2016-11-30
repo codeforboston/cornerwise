@@ -1,6 +1,10 @@
 define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
        function($, B, _, alerts, appState, $u) {
            return B.View.extend({
+               initialize: function(options) {
+                   this.mapView = options.mapView;
+               },
+
                events: {
                    "click a.subscribe-link": "onClickSubscribe",
                    "click .cancel": "onCancel",
@@ -45,10 +49,12 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
 
                onSubmit: function(e) {
                    var form = e.target,
-                       self = this;
+                       self = this,
+                       query = _.clone(this.collection.query);
+                   query.box = $u.boundsToBoxString(this.mapView.getBounds());
                    $.ajax("/user/subscribe",
                           {method: "POST",
-                           data: {query: JSON.stringify(this.collection.query),
+                           data: {query: JSON.stringify(query),
                                   csrfmiddlewaretoken: $u.getCookie("csrftoken"),
                                   email: form.email.value,
                                   language: navigator.language},
@@ -88,10 +94,6 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                        .fail(function(err) {
                            if (err.responseJSON)
                                self.showError(err.responseJSON.error);
-                           else if (console)
-                               console.warn(
-                                   "The server returned an invalid response!",
-                                   err);
                        })
                        .always(function() {
                            // Hide the subscription interface.
@@ -104,6 +106,7 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                showError: function(message) {
                    if (message) {
                        this._errorId = alerts.show({text: message,
+                                                    title: "Whoops!",
                                                     className: "error"});
                    } else {
                        this.hideError();

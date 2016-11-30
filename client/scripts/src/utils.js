@@ -606,6 +606,20 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                },
 
                /**
+                * Converts a latLngBounds to a string.
+                *
+                * @param {L.LatLngBounds} bounds
+                *
+                * @returns {string}
+                */
+               boundsToBoxString: function(bounds) {
+                   var sw = bounds.getSouthWest(),
+                       ne = bounds.getNorthEast();
+
+                   return [sw.lat, sw.lng, ne.lat, ne.lng].join(",");
+               },
+
+               /**
                 * Like _.template, except that it adds helper functions to the
                 * data passed to the resulting template function.
                 *

@@ -89,7 +89,8 @@ define(
 
                 appViews.subscribeView = new SubscribeView({
                     collection: proposals,
-                    el: "#subscribe"
+                    el: "#subscribe",
+                    mapView: appViews.mapView
                 });
 
                 appViews.imageView = new ImageView({

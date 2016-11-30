@@ -377,6 +377,10 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    }
                },
 
+               getBounds: function() {
+                   return this.map.getBounds();
+               },
+
                resetBounds: function() {
                    this.map.fitBounds(config.bounds);
                },

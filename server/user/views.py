@@ -39,11 +39,6 @@ def validate_query(d):
         if d["projects"] not in {"all", "null"}:
             del d["projects"]
 
-    if "region" in d:
-        d["region"] = d["region"].lower()
-        if d["region"] not in {"somerville", "cambridge"}:
-            del d["region"]
-
     # Verify that all the keys are well-formed
     return d
 
@@ -67,7 +62,7 @@ def subscribe(request):
     if query_dict != {}:
         query_dict = validate_query(query_dict)
         if not query_dict:
-            raise ErrorResponse("Invalid query", {"query": query_dict})
+            raise ErrorResponse("Invalid filter options", {"query": query_dict})
 
     user = request.user
     new_user = False
