@@ -17,17 +17,18 @@
         </div>
 
         <% if (proposal.get("parcel")) { %>
-        <% with(proposal.get("parcel")) { %>
-            <table class="table parcel-info">
-                <tr class="attribute">
-                    <th>Lot Size:</th>
-                    <td><%- properties.LOT_SIZE %> acres</td>
-                </tr>
-                <tr class="attribute">
-                    <th>Residential Area</th>
-                    <td><%- commas(properties.RES_AREA) %> square feet</td>
-                </tr>
-            </table>
+            <% with(proposal.get("parcel")) { %>
+                <table class="table parcel-info">
+                    <tr class="attribute">
+                        <th>Lot Size:</th>
+                        <td><%- properties.LOT_SIZE %> acres</td>
+                    </tr>
+                    <tr class="attribute">
+                        <th>Residential Area</th>
+                        <td><%- commas(properties.RES_AREA) %> square feet</td>
+                    </tr>
+                </table>
+            <% }  %>
         <% }  %>
 
         <%
@@ -72,8 +73,6 @@
         <% }); %>
         <br style="clear:both" />
     </div>
-    <% } %>
-
     <% } %>
 </div>
 
