@@ -54,14 +54,11 @@ def to_cases(lines):
                 yield current_case
             current_case = {"number": m.group(1), "lines": []}
         elif current_case:
+            # TODO: Extract more structured data from these lines!
             current_case["lines"].append(line)
 
     if current_case:
         yield current_case
-
-
-def to_properties(lines):
-    pass
 
 
 def html_contents(title, tag):

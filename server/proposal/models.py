@@ -192,11 +192,15 @@ class Attribute(models.Model):
     #     unique_together = ("proposal", "handle")
 
     def to_dict(self):
-        return {
-            "name": self.name,
-            "handle": self.handle,
-            "value": self.text_value or self.date_value
-        }
+        d = {"name": self.name, "handle": self.handle}
+        if self.text_value:
+            d["value"] = self.text_value
+            d["value_type"] = "text"
+        elif self.date_value:
+            d["value"] = self.date_value.isoformat()
+            d["value_type"] = "date"
+
+        return d
 
     def set_value(self, v):
         if isinstance(v, str):
@@ -219,10 +223,17 @@ class Event(models.Model):
     Meeting or hearing associated with a proposal.
     """
     title = models.CharField(max_length=256, db_index=True)
+    created = models.DateTimeField(auto_now_add=True)
     date = models.DateTimeField(db_index=True)
     duration = models.DurationField(null=True)
+    location = models.CharField(
+        max_length=256, default="Somerville City Hall, 93 Highland Ave")
+    region_name = models.CharField(max_length=128, default="Somerville, MA")
     description = models.TextField()
     proposals = models.ManyToManyField(Proposal, related_name="proposals")
+
+    class Meta:
+        unique_together = (("date", "title", "region_name"))
 
     def to_dict(self):
         return model_to_dict(self, exclude=["proposals"])
