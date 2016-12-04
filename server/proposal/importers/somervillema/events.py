@@ -56,7 +56,8 @@ def to_cases(lines):
         elif current_case:
             current_case["lines"].append(line)
 
-    yield current_case
+    if current_case:
+        yield current_case
 
 
 def to_properties(lines):
@@ -105,11 +106,13 @@ def page_events(url, filt=lambda _: True):
         agenda_lines = pdf_lines(get_pdf(agenda_url))
         case_numbers = [case["number"] for case in to_cases(agenda_lines)]
 
+        # Record as local datetime!
         date = row["Date"]
         date.replace(hour=6, minute=0)
         date = TIMEZONE.localize(date)
 
-        posted = TIMEZONE.localize(row["Agenda Posting Date"])
+        # Record this in UTC!
+        posted = TIMEZONE.localize(row["Agenda Posting Date"]).astimezone(pytz.UTC)
 
         yield {
             "date": date,
@@ -118,7 +121,7 @@ def page_events(url, filt=lambda _: True):
             "agenda_url": agenda_url,
             "cases": case_numbers,
             "location": DEFAULT_LOCATION,
-            "region": "Somerville, MA"
+            "region_name": "Somerville, MA"
         }
 
 
