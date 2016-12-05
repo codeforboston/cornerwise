@@ -1,4 +1,4 @@
-define(["backbone", "lib/leaflet", "refLocation", "config"], function(B, L, refLocation, config) {
+define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function($, B, L, refLocation, config) {
     return B.Model.extend({
         urlRoot: "/proposal/view",
 
