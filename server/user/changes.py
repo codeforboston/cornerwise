@@ -19,10 +19,11 @@ def summarize_query_updates(query, since, until=None):
         proposals_changed = proposals_changed.filter(updated__lte=until)
 
         # Start with the new proposals:
-    summary = OrderedDict((p.id, { "proposal": proposal_json(p,
-                                                             include_images=1,
-                                                             include_documents=False),
-                                   "new": True }) for p in proposals)
+    summary = OrderedDict((p.id, {
+        "proposal": proposal_json(
+            p, include_images=1, include_documents=False),
+        "new": True
+    }) for p in proposals)
 
     if proposals_changed:
         # Only include changesets for proposals we're interested in:
@@ -41,17 +42,19 @@ def summarize_query_updates(query, since, until=None):
             achange_list.extend(change_dict["attributes"])
 
         for p in proposals_changed:
-            summary[p.id] = { "proposal": proposal_json(p, include_images=1,
-                                                       include_documents=False),
-                              "new": False,
-                              "properties": prop_changes[p.id],
-                              "attributes": attr_changes[p.id],
-                              "documents": [],
-                              "images": []}
+            summary[p.id] = {
+                "proposal": proposal_json(
+                    p, include_images=1, include_documents=False),
+                "new": False,
+                "properties": prop_changes[p.id],
+                "attributes": attr_changes[p.id],
+                "documents": [],
+                "images": []
+            }
 
     # Find new Documents:
-    documents = Document.objects.filter(proposal__in=proposals_changed,
-                                        created__gt=since)
+    documents = Document.objects.filter(
+        proposal__in=proposals_changed, created__gt=since)
     if until:
         documents = documents.filter(updated__lte=until)
 
@@ -60,8 +63,8 @@ def summarize_query_updates(query, since, until=None):
             summary[doc.proposal_id]["documents"].append(doc.to_dict())
 
     # Find new Images:
-    images = Image.objects.filter(proposal__in=proposals_changed,
-                                  created__gt=since)
+    images = Image.objects.filter(
+        proposal__in=proposals_changed, created__gt=since)
     if until:
         images = images.filter(updated__lte=until)
 
@@ -92,25 +95,19 @@ def summarize_subscription_updates(subscription, since, until=None):
     return summarize_query_updates(query, since, until)
 
 
-def find_updates(subscriptions, since, until=None):
+def find_updates(subscription, since, until=None):
     """Find and summarize changes that are relevant to the given subscriptions.
 
     Note that this is not very scalable, but frankly, I don't think it needs to
     be. There are operations-level strategies for scaling that wouldn't require
     too much to be changed here.
 
-    :subscriptions: A collection of Subscription objects
+    :subscription: A collection of Subscription objects
     :since: datetime
     :until: datetime
 
     """
     for subscription in subscriptions:
-        summary = summarize_subscription_updates(subscription,
-                                                 since,
-                                                 until)
-
-        if summary:
-            pass
-
+        summary = summarize_subscription_updates(subscription, since, until)
 
     return summary

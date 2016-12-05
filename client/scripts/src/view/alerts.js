@@ -100,7 +100,7 @@ define(["backbone", "jquery", "underscore"],
                                                         type: type || AlertType.DEFAULT};
 
                    if (!msg.id) msg.id = alertCount++;
-                   if (_.isString(msg.type)) msg.type = AlertType[type.toUpperCase()];
+                   if (_.isString(msg.type)) msg.type = AlertType[msg.type.toUpperCase()];
 
                    showMessage(msg);
                    return id;

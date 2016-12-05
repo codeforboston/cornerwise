@@ -68,7 +68,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    return $u.promiseLocation()
                        .then(function(loc) {
                            if (bounds && !bounds.contains(loc)) {
-                               alerts.show("You are outside " + config.regionName,
+                               alerts.show("You are outside " + config.name,
                                            "error");
                                return loc;
                            }
@@ -111,7 +111,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    this.set("geolocating", true);
                    return arcgis.geocode(addr).then(arcgis.getLatLngForFirstAddress).done(function(loc) {
                        if (bounds && !bounds.contains(loc)) {
-                           alerts.show("That address is outside " + config.regionName,
+                           alerts.show("That address is outside " + config.name,
                                        "error");
                            return loc;
                        }

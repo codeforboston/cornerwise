@@ -136,8 +136,11 @@ define(
 
                 if (geo) {
                     $(input).removeClass("error");
-                    refLocation.setFromLatLng(geo.location.lat(),
-                                              geo.location.lng());
+                    var loc = geo.location,
+                        addr = places.shortAddress(place);
+                    refLocation.setFromLatLng(loc.lat(),
+                                              loc.lng(),
+                                              addr);
                 } else {
                     $(input)
                         .addClass("error")
@@ -225,7 +228,7 @@ define(
             buildRegionSelection: function() {
                 var html = regions.map(function(region) {
                     return ("<option value='" + region.id +
-                        "'>" + _.escape(region.get("regionName")) +
+                        "'>" + _.escape(region.get("name")) +
                             "</option>");
                 });
 
