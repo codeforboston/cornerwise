@@ -92,7 +92,6 @@ define(
                 // "change #filter-text": "filterText",
                 "keyup #filter-text": "filterText",
                 "search #filter-text": "filterText",
-                "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
                 "change #filter-region": "updateRegion",
@@ -241,19 +240,10 @@ define(
 
             // Filter the collection to only include models that lie within the
             // visible bounds.
-            filterBounds: function() {
-                this.collection.filterByViewBox(
-                    this.mapView.getMap().getBounds()); 
-            },
-
             updateProjectTypeFilter: function() {
                 this.collection.filterByProjectType(
                     $("#filter-private").prop("checked"),
                     $("#filter-public").prop("checked"));
-            },
-
-            clearFilterBounds: function() {
-                this.collection.filterByViewBox(null);
             }
         });
     });

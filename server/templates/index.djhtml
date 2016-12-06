@@ -150,19 +150,26 @@
                 Filter Results
             </div>
 
-            <select name="application_status" class="filter-selector">
-                <option>Application Status</option>
-                <option value="Pending">Pending</option>
-                <option value=""></option>
-                <option>Application Status</option>
+            <input id="filter-text" type="text" placeholder="Find text" />
+
+            <select name="complete" class="filter-selector">
+                <option value="1">Complete</option>
+                <option value="0">Pending</option>
             </select>
 
-            <select name="" class="filter-selector">
-                <option>Property Type</option>
-            </select>
 
-            <select name="" class="filter-selector">
+            <input id="filter-private" type="checkbox" checked/> Private
+            &mdash;
+            <input id="filter-public" type="checkbox" checked/> Public
+
+            <select name="property_size" class="filter-selector">
                 <option>Lot Size</option>
+                <option value="">Lot Size</option>
+            </select>
+
+            <select id="filter-region" name="region" class="filter-selector">
+                <option value="cambridge" selected>Somerville, MA</option>
+                <option value="somerville">Cambridge, MA</option>
             </select>
         </div>
 
