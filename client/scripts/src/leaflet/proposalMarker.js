@@ -42,7 +42,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
            }
 
            return L.Marker.extend({
-               initialize: function(proposal, zoom) {
+               initialize: function(proposal) {
                    var loc = proposal.get("location");
 
                    if (loc) {
@@ -53,7 +53,6 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                             title: proposal.get("address")});
                    }
                    this.proposal = proposal;
-                   this.zoomed = zoom;
 
                    var self = this;
                    proposal

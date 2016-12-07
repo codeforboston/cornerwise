@@ -25,9 +25,6 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
                 // the currently applied filter(s).
                 _excluded: false,
 
-                // Cached calculation; true if the proposal marker lies within
-                // the bounds of the visible map area.
-                _visible: true,
                 // GeoJSON representing the shape of the corresponding
                 // tax parcel, if one is found.
                 parcel: null

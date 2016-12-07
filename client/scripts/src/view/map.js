@@ -25,7 +25,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    if (_.isFinite(zoom))
                        mapOptions.zoom = zoom;
-                   else 
+                   else
                        mapOptions.zoom = 14;
 
                    var map = L.map(this.el, mapOptions),
@@ -146,16 +146,17 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    // Fit to visible regions?
                    deferredBounds.done(function(bounds) {
-                       var paddedBounds = bounds.pad(1);
-                       self.map.setMaxBounds(paddedBounds);
-                       self.map.fitBounds(paddedBounds);
+                       self.map.setMaxBounds(bounds.pad(1));
+
+                       if (!bounds.contains(self.map.getBounds()))
+                           self.map.fitBounds(bounds.pad(-1));
 
                        // HACK Do this here rather than inside the bounds
                        // collection because this is where we actually load the
                        // region geometries and therefore have access to the
                        // layers and their bounds methods.
-                       regions._bounds = paddedBounds;
-                       regions.trigger("regionBounds", paddedBounds);
+                       regions._bounds = bounds;
+                       regions.trigger("regionBounds", bounds);
                    });
                },
 
@@ -190,7 +191,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    if (!loc) return;
 
                    var z = this.map.getZoom() - zoomThreshold,
-                       marker = new ProposalMarker(proposal, z >= 0 ? z : null),
+                       marker = new ProposalMarker(proposal),
                        proposals = this.collection;
 
                    marker.addTo(this.zoningLayer);
@@ -210,6 +211,10 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        .on("dblclick", function(e) {
                            appState.focusModels([proposal], true);
                        });
+
+                   if (z >= 0 && this.map.getBounds().contains(marker.getLatLng())) {
+                       marker.setZoomed(z);
+                   }
 
                    this.listenTo(proposal, "change", this.changed);
                },
@@ -333,7 +338,6 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    _.each(this.caseMarker, function(marker) {
                        var inBounds = bounds.contains(marker.getLatLng());
-                       marker.getModel().set("_visible", inBounds);
 
                        if (zoom >= zoomThreshold) {
                            if (!inBounds)
