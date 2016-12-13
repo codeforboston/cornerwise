@@ -11,7 +11,6 @@ services:
     working_dir: /app/
     command: bash /app/start.sh
     volumes:
-      - runinfo:/runinfo
       - media:/media
     working_dir: /app
   postgres:
@@ -27,8 +26,6 @@ volumes:
   redis_data:
     driver: local
   data:
-    driver: local
-  runinfo:
     driver: local
   media:
     driver: local
