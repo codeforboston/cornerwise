@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from utils import prettify_lat, prettify_long
 
 from base64 import b64encode
+from datetime import datetime
 import pickle
 import random
 import re
@@ -79,9 +80,15 @@ class Subscription(models.Model):
                              related_name="subscriptions")
     active = models.BooleanField(default=False,
                                  help_text="Users only receive updates for active subscriptions")
+    created = models.DateTimeField()
+    updated = models.DateTimeField(default=datetime.now)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
-    last_notified = models.DateTimeField(auto_now=True)
+    last_notified = models.DateTimeField(default=datetime.now)
+
+    def save(self, *args, **kwargs):
+        self.updated = datetime.now()
+        super().save(*args, **kwargs)
 
     def confirm(self):
         if settings.LIMIT_SUBSCRIPTIONS:
