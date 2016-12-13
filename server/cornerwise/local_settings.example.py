@@ -45,3 +45,6 @@ BING_API_KEY = ""
 # Used for finding businesses related to a proposal
 FOURSQUARE_CLIENT = ""
 FOURSQUARE_SECRET = ""
+
+# Used to generate absolute URLS, e.g., for emails
+SERVER_DOMAIN = "localhost:4000"
