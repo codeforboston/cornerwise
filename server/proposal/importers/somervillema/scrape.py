@@ -85,7 +85,7 @@ def add_geocode(geocoder, proposals):
         loc = location and location.get("location", None)
         if not loc:
             logger.error("Skipping proposal {id}; geolocation failed."
-                         .format(id=proposal["caseNumber"]))
+                         .format(id=proposal["case_number"]))
             continue
 
         proposal["lat"] = loc["lat"]
@@ -209,7 +209,7 @@ def get_proposals_since(dt=None,
 
     def guard(case):
         return (not dt or case[date_column] > dt) and \
-            (not stop_at_case or case["caseNumber"] != stop_at_case)
+            (not stop_at_case or case["case_number"] != stop_at_case)
 
     all_cases = list(takewhile(guard, get_cases()))
 

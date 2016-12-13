@@ -10,9 +10,12 @@ from celery.utils.log import get_task_logger
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
-from .models import Proposal, Attribute, Event, Document, Image
+from PyPDF2 import PdfFileReader
+
+from .models import Proposal, Attribute, Document, Image
 from utils import extension, normalize
 from . import extract
 from . import utils as proposal_utils
@@ -196,6 +199,18 @@ def add_street_view(proposal_id):
         logger.warn("Add a local_settings file with your Google API key " +
                     "to add Street View images.")
 
+@celery_app.task(name="proposal.add_parcel")
+def add_parcel(proposal_id):
+    from parcel.models import Parcel
+
+    proposal = Proposal.objects.get(pk=proposal_id)
+    parcels = Parcel.objects.containing(proposal.location)
+    if parcels:
+        proposal.parcel = parcels[0]
+        proposal.save()
+
+        return proposal.id
+
 
 @celery_app.task(name="proposal.generate_doc_thumbnail")
 def generate_doc_thumbnail(doc_id):
@@ -320,43 +335,8 @@ def add_doc_attributes(doc_id):
 
         attr.save()
 
-    add_doc_events(doc_id, properties)
-
     return doc
 
-
-@celery_app.task(name="proposal.add_doc_events")
-def add_doc_events(doc_id, properties):
-    doc = Document.objects.get(pk=doc_id)
-    if not doc.proposal:
-        return
-
-    doc_json = proposal_utils.doc_info(doc)
-
-    # Find events and create them:
-    events = extract.get_events(doc_json, properties)
-
-    if not events:
-        return
-
-    event = None
-    for e in events:
-        event = None
-        try:
-            event = Event.objects.get(title=e["title"], date=e["date"])
-
-        except Event.DoesNotExist:
-            # Create a new event:
-            event = Event(title=e["title"], date=e["date"])
-        except KeyError as kerr:
-            logger.error("Missing required key in extracted event: %s",
-                         kerr.args)
-
-    if event:
-        event.save()
-        event.proposals.add(doc.proposal)
-
-    return properties
 
 
 @celery_app.task(name="proposal.generate_thumbnails")
@@ -389,6 +369,8 @@ def process_proposal(proposal_id):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
     add_street_view(proposal_id)
+
+    add_parcel(proposal_id)
 
     return proposal_id
 
@@ -450,11 +432,12 @@ def fetch_proposals(since=None,
                          p_dict)
             logger.error("%s", exc)
 
-    return proposals
+    return [p.id for p in proposals]
 
 
 @celery_app.task(name="proposal.pull_updates")
 def pull_updates(since=None, importers_filter=None):
+    "Run all registered proposal importers."
     importers = Importers
     if importers_filter:
         name = importers_filter.lower()
@@ -462,11 +445,19 @@ def pull_updates(since=None, importers_filter=None):
             imp for imp in importers if name in imp.region_name.lower()
         ]
 
-    proposals = fetch_proposals(since, importers=importers)
-    proposal_ids = [p.id for p in proposals]
-    process_proposal.map(proposal_ids)()
-    doc_ids = Document.objects.filter(proposal_id__in=proposal_ids)\
-                              .values_list("id", flat=True)
-    process_document.map(doc_ids)()
+    return fetch_proposals(since, importers=importers)
 
-    return proposals
+
+def proposal_hook(**kwargs):
+    if kwargs["created"]:
+        process_proposal.delay(kwargs["instance"].pk)
+
+def document_hook(**kwargs):
+    if kwargs["created"]:
+        process_document.delay(kwargs["instance"].pk)
+
+def set_up_hooks():
+    post_save.connect(
+        proposal_hook, Proposal, dispatch_uid="process_new_proposal")
+    post_save.connect(
+        document_hook, Document, dispatch_uid="process_new_document")
