@@ -80,7 +80,7 @@ class Subscription(models.Model):
                              related_name="subscriptions")
     active = models.BooleanField(default=False,
                                  help_text="Users only receive updates for active subscriptions")
-    created = models.DateTimeField()
+    created = models.DateTimeField(default=datetime.now)
     updated = models.DateTimeField(default=datetime.now)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
