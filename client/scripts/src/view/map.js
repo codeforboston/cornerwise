@@ -208,8 +208,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        .on("click", function(e) {
                            proposals.setSelection(proposal.id);
                        })
-                       .on("dblclick", function(e) {
-                           appState.focusModels([proposal], true);
+                       .on("popupclose", function(e) {
+                           proposals.removeFromSelection(proposal.id);
                        });
 
                    if (z >= 0 && this.map.getBounds().contains(marker.getLatLng())) {

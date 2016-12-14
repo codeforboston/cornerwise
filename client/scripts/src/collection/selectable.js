@@ -14,6 +14,7 @@ define(["backbone", "underscore", "appState", "utils"],
             *   Triggered when the entire selection is loaded (meaning that
             *   there is local data for id in the selection).
             *   ids: ids of all selected children
+            *   loadedIds: ids of the newly loaded ids
             *
             * - selectionRemoved (collection, ids, selectedIds)
             *   ids: ids of all deselected children
@@ -90,6 +91,14 @@ define(["backbone", "underscore", "appState", "utils"],
                    appState.setHashKey(this.hashParam,
                                        selection.join(","));
                    return null;
+               },
+
+               addToSelection: function(id) {
+                   this.setSelection(_.union(this.selection, [""+id]));
+               },
+
+               removeFromSelection: function(id) {
+                   this.setSelection(_.without(this.selection, ""+id));
                },
 
                /**
