@@ -17,16 +17,31 @@
         </div>
 
         <% if (proposal.get("parcel")) { %>
-            <% with(proposal.get("parcel")) { %>
+        <% with(proposal.get("parcel")) {
+        var lotSize = properties.LOT_SIZE,
+        area = properties.BLD_AREA,
+        zone = properties.ZONING;
+        %>
                 <table class="table parcel-info">
+                    <% if (lotSize) { %>
                     <tr class="attribute">
                         <th>Lot Size:</th>
-                        <td><%- properties.LOT_SIZE %> acres</td>
+                        <td><%- lotSize %> acres</td>
                     </tr>
+                    <% } %>
+
+                    <% if (area) { %>
                     <tr class="attribute">
                         <th>Residential Area</th>
-                        <td><%- commas(properties.RES_AREA) %> square feet</td>
+                        <td><%- commas(area) %> square feet</td>
                     </tr>
+                    <% } %>
+                    <% if (zone) { %>
+                    <tr class="attribute">
+                        <th>Current Zone:</th>
+                        <td><%- zone %></td>
+                    </tr>
+                    <% } %>
                 </table>
             <% }  %>
         <% }  %>
