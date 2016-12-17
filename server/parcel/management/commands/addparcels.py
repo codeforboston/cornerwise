@@ -34,11 +34,12 @@ class Command(BaseCommand):
             self.run_all()
 
         if not options["name"]:
-            raise CommandError("You did not tell me what to import!")
+            raise CommandError("You did not tell me what to import!\n"
+                               "Run again with --help argument for usage.")
 
         modules = []
         for mod_name in options["name"]:
-            mod = importers.get_module(mod_name + ".py")
+            mod = importers.get_module(mod_name + ".py", IMPORTER_DIR)
             if not mod:
                 raise CommandError("Unknown importer '%s'\n" % mod_name)
             modules.append(mod)
@@ -61,5 +62,6 @@ class Command(BaseCommand):
             run_fn = getattr(module, "run")
             mod_name = getattr(module, "name", module.__name__)
             self.stdout.write("Running importer for '%s'\n" % mod_name)
+            self.stdout.write("This will take a while!")
             run_fn(logger)
         self.stdout.write("Import complete")
