@@ -13,7 +13,7 @@ class Parcel(models.Model):
     shape_area = models.DecimalField(
         max_digits=1000, decimal_places=24, blank=True, null=True)
     map_par_id = models.CharField(max_length=26, blank=True, null=True)
-    loc_id = models.CharField(max_length=18, blank=True, null=True)
+    loc_id = models.CharField(max_length=18, blank=True, null=True, unique=True)
     poly_type = models.CharField(max_length=15, blank=True, null=True)
     map_no = models.CharField(max_length=4, blank=True, null=True)
     source = models.CharField(max_length=15, blank=True, null=True)
