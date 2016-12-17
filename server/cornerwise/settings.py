@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
-    "djcelery",
+    "django_celery_results",
     'parcel',
     "task",
     'proposal.ProposalConfig',
@@ -143,7 +143,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
 # Persist task results to the database
-CELERY_RESULT_BACKEND = "djcelery.backends.database:DatabaseBackend"
+CELERY_RESULT_BACKEND = 'django-cache'
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {

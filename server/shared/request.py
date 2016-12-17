@@ -58,7 +58,7 @@ def make_response(template=None, error_template="error.djhtml",
                                                    json=content)
 
                 response = HttpResponse(body, status=status)
-                response["Content-Type"] = "application/javascript"
+                response["Content-type"] = "application/javascript"
                 return response
 
             accepts = req.META["HTTP_ACCEPT"]
@@ -87,6 +87,14 @@ def make_response(template=None, error_template="error.djhtml",
 
     return constructor_fn
 
+
+def json_view(view):
+    def json_handler(req, *args, **kwargs):
+        resp = HttpResponse(json.dumps(view(req, *args, **kwargs)))
+        resp["Content-type"] = "application/json"
+        return resp
+
+    return json_handler
 
 def make_redirect_response(redirect_to_url=None, redirect_to=None):
     """
