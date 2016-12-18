@@ -51,7 +51,8 @@
         if (documents && documents.length) { %>
         <div class="documents">
             <% _.each(documents.slice(0, 10), function(doc) { %>
-            <a class="document" href="<%= doc.url %>" target="_blank">
+            <a class="document" href="<%= doc.url %>"
+               target="_blank" title="<%- doc.title %>">
                 <%- doc.title %>
             </a>
             <% }); %>

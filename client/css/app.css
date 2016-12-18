@@ -1089,9 +1089,9 @@ a.brief-model:hover {
 #info .document {
     color: #4EAF48;
     display: block;
+    line-height: 1.5em;
     padding-left: 1em;
 }
-
 
 #info .attribute {
     color: #ccc;
@@ -1614,6 +1614,11 @@ a.document:before {
     -webkit-appearance: none;
 }
 
+#filter-text {
+    font-size: larger;
+    width: 100%;
+}
+
 /* Subscription workflow */
 
 body.choosing-bounds #map-container {
@@ -1785,6 +1790,12 @@ body.choosing-bounds .leaflet-marker-icon
 
     #info .images {
         margin-top: 1em;
+    }
+
+    #info .document {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
