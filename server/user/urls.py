@@ -14,6 +14,7 @@ urlpatterns = [
     url(r"^subscribe$", views.subscribe, name="subscribe"),
     url(r"^resend$", views.resend_email, name="resend-confirmation"),
     url(r"^changes/$", views.change_summary, name="view-subscription-changes"),
+    url(r"^changelog/$", views.change_log, name="view-change-log"),
 
     url(r"^test_redirect$", views.test_redirect_response),
 
