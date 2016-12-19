@@ -1207,6 +1207,12 @@ a.thumb-link:hover {
 }
 
 #alert-container {
+    position: absolute;
+    bottom: -100px;
+    width: 100%;
+}
+
+.nointro #alert-container {
     /* The alert container is positioned relative to the search bar */
     top: 70px;
     height: 0;
@@ -1220,16 +1226,26 @@ a.thumb-link:hover {
 
 #alert {
     background-color: whitesmoke;
-    border: 2px solid #BA252A;
-    border-radius: 0.2em;
     color: black;
     cursor: pointer;
-    display: inline-block;
+    display: flex;
+    margin: auto;
     opacity: 0;
     padding: 0.5em;
     pointer-events: none;
     width: 50%;
     transition: opacity 0.2s ease-out;
+}
+
+#alert .close {
+    color: black;
+    font-size: xx-large;
+    flex: 0 0 1em;
+    justify-content: center;
+}
+
+#alert .close:hover {
+    text-decoration: none;
 }
 
 #alert.displayed {
@@ -1241,8 +1257,8 @@ a.thumb-link:hover {
     border: 2px solid #888;
 }
 
-#alert.info .close {
-    color: black;
+#alert.instructions .close {
+    color: white;
 }
 
 #alert.instructions {
@@ -1255,7 +1271,7 @@ a.thumb-link:hover {
 }
 
 #alert.error, #alert.danger {
-    background-color: rgba(255, 150, 150, 0.9);
+    background-color: lightpink;
 }
 
 #alert.notice {
@@ -1910,7 +1926,6 @@ body.choosing-bounds .leaflet-marker-icon
     #alert {
         border: none;
         border-radius: 0;
-        display: flex;
         font-size: large;
         padding: 1em;
         position: absolute;
@@ -1918,14 +1933,6 @@ body.choosing-bounds .leaflet-marker-icon
         right: 0px;
         text-align: left;
         width: auto;
-    }
-
-    #alert .close {
-        align-content: center;
-        color: white;
-        font-size: xx-large;
-        flex: 0 0 1em;
-        justify-content: center;
     }
 
     .close:hover {
