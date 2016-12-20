@@ -97,10 +97,10 @@
         </div>
         <div id="alert-container">
             <div id="alert">
-                <a href="#" class="close" >&times;</a>
+                <a href="#" class="close">&times;</a>
                 <div>
-                <h2 class="title"></h2>
-                <span class="content"></span>
+                    <h2 class="title"></h2>
+                    <span class="content"></span>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@
           No proposals selected.
       </div>
       <div class="content"></div>
-      <a href="#view=main" class="close">&times;</a>
+      <a href="#" class="close _back">&times;</a>
     </div>
 
     <div id="modal" class="_setview" data-goto="main">
@@ -193,16 +193,16 @@
             </a>
         </div>
 
-        <hr class="group-separator" />
+        <!-- <hr class="group-separator" /> -->
 
-        <div class="menu-group" >
-            <div class="group-header" >
-                Show on Map
-            </div>
-            <div id="map-options"  class="group-contents">
-                <div id="layers"></div>
-            </div>
-        </div>
+        <!-- <div class="menu-group" > -->
+        <!-- <div class="group-header" > -->
+        <!-- Show on Map -->
+        <!-- </div> -->
+        <!-- <div id="map-options"  class="group-contents"> -->
+        <!-- <div id="layers"></div> -->
+        <!-- </div> -->
+        <!-- </div> -->
 
         <hr class="group-separator" />
 
