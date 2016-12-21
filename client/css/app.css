@@ -232,6 +232,7 @@ h3 {
     border: none;
     color: white;
     font-size: small;
+    flex: 1;
     padding: 0.4em;
     width: 85%;
 }
@@ -1231,7 +1232,7 @@ a.thumb-link:hover {
     display: flex;
     margin: auto;
     opacity: 0;
-    padding: 0.5em;
+    padding: 1em;
     pointer-events: none;
     width: 50%;
     transition: opacity 0.2s ease-out;
@@ -1286,7 +1287,8 @@ a.thumb-link:hover {
 }
 
 #alert .content {
-    font-size: medium
+    font-size: medium;
+    text-align: left;
 }
 
 #alert.modal .close {
@@ -1757,48 +1759,6 @@ body.choosing-bounds .leaflet-marker-icon
         display: none;
     }
 
-    #subscribe {
-        display: none;
-        padding: 0.5em;
-        position: absolute;
-        right: 10px;
-        top: 75px;
-        transition-property: width;
-        transition-duration: 0.1s;
-    }
-
-    .signup-screen .form {
-        flex-direction: row;
-    }
-
-    .signup-screen .form > span {
-        align-self: center;
-        flex: 0;
-        padding-right: 1em;
-        /* text-transform: uppercase; */
-        white-space: nowrap;
-    }
-
-    .signup-screen .form > .input-group {
-        flex: 1;
-    }
-
-    body.choosing-bounds #subscribe {
-        border-bottom: 3px solid #FF6005;
-        left: 0;
-        top: 65px;
-        right: 0;
-    }
-
-    body.main #subscribe,
-    body.list #subscribe {
-        display: block;
-    }
-
-    #map-controls {
-        bottom: 1em;
-    }
-
     #info .main-thumb {
         max-height: 300px;
         max-width: 100%;
@@ -1815,9 +1775,82 @@ body.choosing-bounds .leaflet-marker-icon
     }
 }
 
+@media screen and (min-width: 700px) {
+    .signup-screen .form {
+        flex-direction: row;
+    }
+
+    .signup-screen .form > span {
+        align-self: center;
+        flex: 0;
+        padding-right: 1em;
+        /* text-transform: uppercase; */
+        white-space: nowrap;
+    }
+
+    .signup-screen .form > .input-group {
+        flex: 1;
+    }
+
+    .nointro #alert-container {
+        top: 120px; 
+    }
+
+    #subscribe {
+        display: none;
+        padding: 0.5em;
+        position: absolute;
+        right: 10px;
+        top: 75px;
+        transition-property: width;
+        transition-duration: 0.1s;
+    }
+
+    body.choosing-bounds #subscribe {
+        border-bottom: 3px solid #FF6005;
+        left: 0;
+        top: 65px;
+        right: 0;
+    }
+
+    body.main #subscribe,
+    body.list #subscribe {
+        display: block;
+    }
+
+    body.choosing-bounds #search-banner > * {
+        filter: grayscale(60%);
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    body.choosing-bounds #search-banner > #alert-container {
+        filter: none;
+        opacity: 1;
+        pointer-events: all;
+        top: 130px;
+    }
+
+    #map-controls {
+        bottom: 1em;
+    }
+
+    .nointro #alert-container {
+        text-align: left;
+    }
+}
+
+@media screen and (min-width: 1000px) {
+    .nointro #alert-container {
+        top: 75px;
+    }
+}
+
 /*
     Mobile styles:
  */
+
+ /* Intermediate size: */
 @media screen and (max-width: 768px) {
     #search-banner {
         top: 60px;

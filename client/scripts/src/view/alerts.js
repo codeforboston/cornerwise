@@ -61,9 +61,11 @@ define(["backbone", "jquery", "underscore"],
 
            function showMessage(message) {
                if (lastMessage) {
-                   dismissMessage().delay(0.2).queue(function() {
+                   dismissMessage().delay(0.2, "alerts").queue("alerts", function(next) {
                        _doShow(message);
-                   });
+                       next();
+                   })
+                       .dequeue("alerts");
                } else {
                    _doShow(message);
                }
