@@ -44,10 +44,12 @@ def proposal_json(proposal,
         pdict["attributes"] = [a.to_dict() for a in attributes]
 
     if include_events:
-        pdict["events"] = [e.to_dict for e in proposal.events.all()]
+        pdict["events"] = [e.to_dict() for e in proposal.events.all()]
 
     if include_projects and proposal.project:
         pdict["project"] = proposal.project.to_dict()
+
+    # TODO: Filter on parcel attributes
 
     # TODO: fulltext query
 
@@ -57,7 +59,7 @@ def proposal_json(proposal,
 
 
 @make_response("list.djhtml")
-def active_proposals(req):
+def list_proposals(req):
     proposals = Proposal.objects.filter(build_proposal_query(req.GET))
     if "include_projects" in req.GET:
         proposals = proposals.select_related("project")
@@ -113,7 +115,9 @@ def view_proposal(req, pk=None):
     proposal = get_object_or_404(Proposal, pk=pk)
 
     return proposal_json(
-        proposal, include_attributes=True, include_images=True)
+        proposal,
+        include_attributes=True,
+        include_images=True)
 
 
 # Document views
