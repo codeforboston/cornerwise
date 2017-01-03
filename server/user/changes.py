@@ -7,14 +7,13 @@ from proposal.query import build_proposal_query
 
 def summarize_query_updates(query, since, until=None):
     # Find proposals that are NEW since the given date:
-    proposals = Proposal.objects.filter(query, created__gt=since)
+    proposals = Proposal.objects.filter(created__gt=since, **query,)
     new_ids = {proposal.pk for proposal in proposals}
 
     # Find proposals that have *changed*, but which are not new:
     proposals_changed = Proposal.objects\
                                 .exclude(pk__in=new_ids)\
-                                .filter(query,
-                                        updated__gt=since)
+                                .filter(updated__gt=since, **query)
     if until:
         proposals_changed = proposals_changed.filter(updated__lte=until)
 
@@ -85,13 +84,15 @@ def summarize_subscription_updates(subscription, since, until=None):
     :until: datetime
 
     :returns: a dictionary with proposal ids as keys and dictionaries as
-    values. The dictionaries 
+    values. The dictionaries
     """
     query_dict = subscription.query_dict
     if query_dict is None:
         return None
 
     query = build_proposal_query(query_dict)
+    # Don't include changes that predate the Subscription:
+    since = max(subscription.created, since)
     return summarize_query_updates(query, since, until)
 
 
