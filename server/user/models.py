@@ -40,16 +40,18 @@ class UserProfile(models.Model):
         return self.user.email
 
     def activate(self):
-        self.user.is_active = True
-        self.token = make_token()
-        self.user.save()
-        self.save()
+        if not self.user.is_active:
+            self.user.is_active = True
+            self.token = make_token()
+            self.user.save()
+            self.save()
 
     def deactivate(self):
-        self.user.is_active = False
-        self.token = make_token()
-        self.user.save()
-        self.save()
+        if self.user.is_active:
+            self.user.is_active = False
+            self.token = make_token()
+            self.user.save()
+            self.save()
 
     def generate_token(self):
         "Creates a new verification token for the user and saves it."
@@ -58,19 +60,23 @@ class UserProfile(models.Model):
 
         return self.token
 
+    def url(self, url):
+        return "{base}?token={token}&uid={uid}".format(
+            base=url,
+            token=urllib.parse.quote_plus(self.token),
+            uid=self.user_id)
+
     @property
     def unsubscribe_url(self):
-        return "{base}?token={token}&uid={uid}".format(
-            base=reverse("deactivate-account"),
-            token=self.token,
-            uid=self.pk)
+        return self.url(reverse("deactivate-account"))
 
     @property
     def manage_url(self):
-        return "{base}?token={token}&uid={uid}".format(
-            base=reverse("manage-user"),
-            token=urllib.parse.quote_plus(self.token),
-            uid=self.user_id)
+        return self.url(reverse("manage-user"))
+
+    @property
+    def confirm_url(self):
+        return self.url(reverse("confirm"))
 
 
 class Subscription(models.Model):
@@ -97,15 +103,17 @@ class Subscription(models.Model):
                      .filter(active=True)\
                      .exclude(pk=self.pk)\
                      .update(active=False)
+        self.user.profile.activate()
         self.active = True
         self.save()
 
     @property
-    def confirmation_url(self):
-        return "{base}?token={token}&uid={uid}".format(
-            base=reverse("confirm-subscription"),
+    def confirm_url(self):
+        return "{base}?token={token}&uid={uid}&sub={sub_id}".format(
+            base=reverse("confirm"),
             token=self.user.token,
-            ui=self.user.pk)
+            uid=self.user.pk,
+            sub_id=self.pk)
 
     @property
     def query_dict(self):

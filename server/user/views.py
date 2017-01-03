@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -14,7 +15,7 @@ import pytz
 import re
 
 from cornerwise.utils import today
-from shared.request import make_response, make_redirect_response, json_view, ErrorResponse
+from shared.request import make_response, make_redirect_response, ErrorResponse
 from user import changes, tasks
 from user.models import Subscription, UserProfile
 from user.utils import not_logged_in, with_user
@@ -88,9 +89,6 @@ def subscribe(request):
             new_user = True
 
     try:
-        # if has_subscriptions and not user.is_active:
-        #     subscription = user.subscriptions[0]
-        # else:
         subscription = Subscription()
         subscription.set_validated_query(query_dict)
         subscription.save()
@@ -107,14 +105,17 @@ def subscribe(request):
 
 
 @make_redirect_response()
-def confirm_subscription(request):
+def confirm(request):
     try:
-        user = authenticate(pk=request.GET["uid"], token=token.GET["token"])
+        user = authenticate(pk=request.GET["uid"], token=request.GET["token"])
 
         if not user:
             raise ErrorResponse("Invalid user id or token")
 
-        subscription = user.subscriptions.get(id=sub_id)
+        if "sub" in request.GET:
+            subscription = user.subscriptions.get(pk=request.GET["sub"])
+        else:
+            subscription = user.subscriptions.all().order_by("-created")[0]
         subscription.confirm()
         return {
             "title": "Subscription confirmed",
@@ -127,6 +128,8 @@ def confirm_subscription(request):
         raise ErrorResponse("Missing required param: " + kwerr.args[0])
     except Subscription.DoesNotExist:
         raise ErrorResponse("Invalid token or subscription id.")
+    except IndexError:
+        raise ErrorResponse("That user does not have a subscription")
 
 
 @make_response("task_message.djhtml", redirect_back=True)
@@ -134,7 +137,7 @@ def do_resend_email(request):
     try:
         email = request.POST["email"]
         user = User.objects.get(email=email)
-        task_id = tasks.resend_user_key.delay(user.id)
+        task_id = tasks.resend_user_key.delay(user.pk)
     except KeyError:
         raise ErrorResponse("Bad request", status=405)
     except User.DoesNotExist:
@@ -166,40 +169,10 @@ def user_login(request, token, pk):
     return redirect(reverse(manage))
 
 
-@with_user
-def activate_account(request, user):
-    user.activate()
-
-    return redirect(reverse("manage-user"))
-
-
-@with_user
-def deactivate_account(request, user):
-    user.deactivate()
-
-    return redirect("/")
-
-
-@with_user
-def manage(request, user):
-    if not user.is_active:
-        user.is_active = True
-        user.save()
-
-    return render(request, "user/manager.djhtml",
-                  {"user": user,
-                   "subscriptions": user.subscriptions})
-
-
-def default_view(request):
-    return redirect(reverse("manage-user"))
-
-
 @make_response("changes.djhtml")
 def change_log(request):
     """
-    Show a summary of changes based on criteria that the user specifies in the
-    request.
+    Show a summary of changes based on criteria in the query string.
     """
     params = request.GET.copy()
     try:
@@ -217,74 +190,11 @@ def change_log(request):
     return {"since": since, "until": until, "changes": summary}
 
 
-@make_response("user/subscription.djhtml")
-def show_change_summary(request, user, sub_id, since, until=None):
-    """
-    Displays a summary of the changes recorded for a given subscription within
-    a time period specified by `since` and `until`.
-    """
-    try:
-        sub = Subscription.objects.get(user=user, pk=sub_id)
-        summary = changes.summarize_subscription_updates(sub, since, until)
-        return {
-            "since": since,
-            "until": until,
-            "subscription": sub,
-            "changes": summary
-        }
-    except Subscription.DoesNotExist:
-        raise ErrorResponse(
-            "Invalid subscription ID", status=404, redirect_back=True)
-    except KeyError:
-        raise ErrorResponse("Missing subscription id", redirect_back=True)
-
-
-@json_view
-def change_summary(request, user):
-    sub_id = request.GET["subscription_id"]
-    since = None
-    until = None
-    days = None
-
-    if "since" in request.GET:
-        try:
-            since = datetime.fromtimestamp(float(request.GET["since"]))
-        except ValueError:
-            since = None
-    else:
-        try:
-            days = abs(int(request.GET["days"]))
-        except (KeyError, ValueError):
-            days = 7
-
-    if days:
-        since = today() - timedelta(days=days)
-    elif "until" in request.GET:
-        try:
-            until = datetime.fromtimestamp(float(request.GET["until"]))
-        except (TypeError, ValueError):
-            pass
-
-    return show_change_summary(request, user, sub_id, since, until)
-
-
 @with_user
-def delete_subscription(request, user):
-    try:
-        sub_id = request.POST["subscription_id"]
-        subscription = user.subscriptions.get(pk=sub_id)
-        subscription.delete()
-        messages.success(request, "Subscription deleted")
-    except Subscription.DoesNotExist:
-        messages.error(request, "Invalid subscription ID")
-    except KeyError:
-        messages.error(request, "Missing parameter 'subscription_id'")
-    return redirect(reverse(manage))
+def deactivate_account(request, user):
+    user.deactivate()
 
-
-@make_redirect_response()
-def test_redirect_response(request):
-    return "All set!"
+    return redirect("/")
 
 
 def user_logout(request):

@@ -6,7 +6,6 @@ import sendgrid
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
@@ -34,6 +33,14 @@ def has_name(u):
 
 
 def send_mail(user, subject, template_name, context={}, content=None):
+    """
+    Send an email to a user. If there is a SendGrid template id configured for
+    the given template name, create substitutions from `context` so that `-key`
+    in the template is replaced by the value of `key` in `context`.
+
+    If there is no such SendGrid template, falls back to using a Django
+    template in <templates>/email.
+    """
     try:
         template_id = settings.SENDGRID_TEMPLATES[template_name]
     except:
@@ -98,10 +105,13 @@ def send_mail_template(user, subject, template_name, context={}):
         logger.info("SendGrid not available. Generated email: %s", html)
 
 
-@celery_app.task()
+@celery_app.task(name="user.send_updates")
 def send_subscription_updates(user_id, updates):
     user = User.objects.get(pk=user_id)
-    send_mail(user, "Cornerwise: New Updates", "updates", {})
+    updates_html = render_to_string("email/changes.djhtml",
+                                    {"changes": updates})
+    send_mail_template(user, "Cornerwise: New Updates", "updates",
+                       {"updates": updates_html})
 
 
 @celery_app.task(name="user.send_user_key")
@@ -113,9 +123,7 @@ def send_user_key(user_id):
     # TODO: We want to send the user a summary of the first subscription created
 
     # Render HTML and text templates:
-    context = {"confirm_url": make_absolute_url(profile.manage_url)}
-    # send_mail(profile.user, "Cornerwise: Please confirm your email",
-    #           "confirm", context)
+    context = {"confirm_url": make_absolute_url(profile.confirm_url)}
     send_mail(profile.user, "Cornerwise: Welcome", "welcome", context)
 
 
@@ -158,6 +166,7 @@ def send_subscription_confirmation_email(sub_id):
         return
 
     # The current user flow should make it impossible for a confirmed user to
+    # get to this point:
     existing = user.subscriptions.filter(active=True).count()
     if existing <= 1:
         return
@@ -165,7 +174,7 @@ def send_subscription_confirmation_email(sub_id):
     context = {
         "subscription": subscription.readable_description,
         "minimap_src": subscription.minimap_src,
-        "confirmation_link": make_absolute_url(subscription.confirmation_url)
+        "confirmation_link": make_absolute_url(subscription.confirm_url)
     }
     send_mail(user, "Cornerwise: Confirm New Subscription",
               "replace_subscription", context)
