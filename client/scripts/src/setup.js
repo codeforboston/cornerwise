@@ -12,6 +12,7 @@ define(
             start: function() {
                 var proposals = new Proposals(),
                     appViews = {
+                        alerts: alerts,
                         proposals: proposals,
                         glossary: glossary
                     };

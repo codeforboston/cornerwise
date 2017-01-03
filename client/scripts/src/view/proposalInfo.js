@@ -5,12 +5,8 @@ define(["jquery", "backbone", "appState", "underscore", "config", "utils",
         "view/budget"],
        function($, B, appState, _, config, $u, budget) {
            return B.View.extend({
-               detailsTemplate: $u.templateWithUrl(
+               template: $u.templateWithUrl(
                    "/static/template/proposalDetail.html",
-                   {variable: "proposal"}),
-
-               projectDetailsTemplate: $u.templateWithUrl(
-                   "/static/template/projectProposalDetail.html",
                    {variable: "proposal"}),
 
                show: function(proposal) {
@@ -23,7 +19,7 @@ define(["jquery", "backbone", "appState", "underscore", "config", "utils",
                    var self = this,
                        promise = $.Deferred();
 
-                   this.detailsTemplate(proposal,
+                   this.template(proposal,
                             function(html) {
                                 self.$el.html(html);
                                 promise.resolve();
@@ -40,7 +36,7 @@ define(["jquery", "backbone", "appState", "underscore", "config", "utils",
                        self = this,
                        promise = $.Deferred();
 
-                   this.projectDetailsTemplate(proposal,
+                   this.template(proposal,
                             function(html) {
                                 self.$el.html(html);
                                 var canvas = self.$("canvas")[0];

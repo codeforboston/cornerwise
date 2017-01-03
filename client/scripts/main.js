@@ -13,6 +13,7 @@ require.config({
     },
 
     shim: {
+        chartjs: {exports: "Chart"},
         leaflet: {exports: "L"},
         underscore: {exports: "_"},
         backbone: {deps: ["underscore", "jquery"],
