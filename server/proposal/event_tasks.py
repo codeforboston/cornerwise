@@ -54,16 +54,20 @@ def pull_events(since=None):
     events = []
     for importer in EventImporters:
         if not since:
-            last_event = Event.objects.filter(
-                region_name=importer.region_name).order_by("-created")[0]
-            since = pytz.utc.localize(last_event.created)
+            all_events = Event.objects.filter(
+                region_name=importer.region_name).order_by("-created")
+            try:
+                last_event = all_events[0]
+                since = pytz.utc.localize(last_event.created)
+            except IndexError:
+                pass
 
         importer_events = [
             make_event(ejson) for ejson in importer.updated_since(since)
         ]
         events += importer_events
 
-        logger.info("Fetched %i proposals from %s",
+        logger.info("Fetched %i events from %s",
                     len(importer_events), type(importer).__name__)
 
     return [event.pk for event in events]
