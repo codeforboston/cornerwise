@@ -70,10 +70,13 @@ def skip_match(patt, n=0):
 
     def skipper(line):
         if re.match(patt, line):
+
             def skip(inlines):
                 for i in range(n):
                     next(inlines)
+
             return skip
+
     return skipper
 
 
@@ -88,11 +91,11 @@ def subsection_matcher(line):
                     if isinstance(inlines, pushback_iter):
                         inlines.pushback(line[m.end():])
                     return m.group(1)
+
         return get_subsection_name
 
 
-top_section_matcher = make_matcher(r"^([^a-z]{2,}):$", group=1,
-                                   fn=str.lower)
+top_section_matcher = make_matcher(r"^([^a-z]{2,}):$", group=1, fn=str.lower)
 
 
 def generate_sections(lines, matchers):
@@ -149,11 +152,11 @@ def make_sections(lines, matchers):
     return OrderedDict(generate_sections(lines, matchers))
 
 
-def get_lines(doc_json):
+def get_lines(doc):
     """Returns a generator that successively produces lines from the
     document."""
-    enc = doc_json.encoding
-    lines = (line.decode(enc) for line in doc_json.fulltext)
+    enc = doc.encoding
+    lines = (line.decode(enc) for line in doc.fulltext)
 
     return lines
 
@@ -161,20 +164,14 @@ def get_lines(doc_json):
 staff_report_section_matchers = [
     skip_match(r"CITY HALL", 2),
     skip_match(r"Page \d+ of \d+"),
-    make_matcher(r"PLANNING STAFF REPORT",
-                 fn=str.lower),
-    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)",
-                 group=1,
-                 fn=str.lower)
+    make_matcher(r"PLANNING STAFF REPORT", fn=str.lower),
+    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1, fn=str.lower)
 ]
 
 
 def staff_report_sections(doc_json):
     lines = doc_json["lines"]
     return make_sections(lines, staff_report_section_matchers)
-
-
-# TODO: Clean up the dates of public hearing
 
 
 def staff_report_properties(doc_json):
@@ -189,11 +186,11 @@ def staff_report_properties(doc_json):
 
     pd = sections.get("project description")
     if pd:
-        subsections = make_sections(pushback_iter(pd),
-                                    [subsection_matcher])
+        subsections = make_sections(pushback_iter(pd), [subsection_matcher])
 
-        for pname in ["Proposal", "Subject Property",
-                      "Green Building Practices"]:
+        for pname in [
+                "Proposal", "Subject Property", "Green Building Practices"
+        ]:
             v = subsections.get(pname)
             if v:
                 props[pname] = "\n".join(paragraphize(v))
@@ -206,7 +203,7 @@ def find_vote(decision):
     """From the decision text, perform a very crude pattern match that extracts
     the vote (for/against).
     """
-    patt = re.compile(r"voted (\d+-\d+)", re.I)
+    patt = re.compile(r"voted (\d+-\d+) to (approve|deny)", re.I)
     m = re.search(patt, decision)
 
     if m:
@@ -214,12 +211,12 @@ def find_vote(decision):
 
     return None, None
 
+
 decision_section_matchers = [
-    skip_match(r"CITY HALL", 2),
-    make_matcher(r"(ZBA DECISION|DESCRIPTION|PLANNING BOARD DECISION):?",
-                 value="properties"),
-    make_matcher(r"DECISION:", value="decision"),
-    top_section_matcher
+    skip_match(r"CITY HALL", 2), make_matcher(
+        r"(ZBA DECISION|DESCRIPTION|PLANNING BOARD DECISION):?",
+        value="properties"), make_matcher(
+            r"DECISION:", value="decision"), top_section_matcher
 ]
 
 
@@ -229,8 +226,10 @@ def decision_sections(doc_json):
 
 
 def decision_properties(doc_json):
-    """Extract a dictionary of properties from the contents of a Decision
-    Document."""
+    """
+    Extract a dictionary of properties from the contents of a Decision
+    Document.
+    """
     sections = decision_sections(doc_json)
     props = {}
     if "properties" in sections:
@@ -255,10 +254,6 @@ def doc_type(doc_json):
         return "decision"
 
     return ""
-
-
-def get_decision(prop):
-    pass
 
 
 def get_properties(doc_json):
@@ -295,24 +290,3 @@ def split_event(desc):
         event_desc = ""
 
     return {"date": dt, "title": event_desc}
-
-event_fields = [("Dates of Public Hearing", "Public Hearing"),
-                ("Date of Public Meeting", "Public Hearing")]
-
-
-def get_events(doc_json, props=None, fields=event_fields):
-    if doc_json["field"] == "reports":
-        if not props:
-            props = get_properties(doc_json)
-
-        events = []
-        for (field, title) in fields:
-            date_prop = props.get(field)
-            if date_prop:
-                event = split_event(date_prop)
-                if not event["title"]:
-                    event["title"] = title
-
-                events.append(event)
-
-        return events
