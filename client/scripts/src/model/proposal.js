@@ -32,6 +32,9 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
         },
 
         parse: function(attrs) {
+            attrs.parcelId = attrs.parcel;
+            delete attrs.parcel;
+
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
@@ -86,25 +89,23 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
             return promise;
         },
 
-        prefetchImage: function() {
-
-        },
-
         onHovered: function(proposal) {
             if (this._parcelLoadAttempted)
                 return;
 
             var loc = this.get("location"),
+                pk = this.get("parcelId"),
                 self = this;
 
             this._parcelLoadAttempted = true;
 
-            $.getJSON(config.backendURL + "/parcel/find",
-                      {lat: loc.lat,
-                       lng: loc.lng,
-                       attributes: true,
-                       mode: "or",
-                       address: this.get("address")})
+            var query = pk ? {id: pk} : {lat: loc.lat,
+                                         lng: loc.lng,
+                                         attributes: true,
+                                         mode: "or",
+                                         address: this.get("address")};
+
+            $.getJSON(config.backendURL + "/parcel/find", query)
                 .done(function(parcel) {
                     self.set("parcel", parcel);
                 })
