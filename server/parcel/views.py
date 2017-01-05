@@ -15,6 +15,9 @@ from .models import Parcel, Attribute
 def make_query(d, reducer=operator.and_):
     subqueries = []
 
+    if "id" in d:
+        return Q(pk=d["id"])
+
     if "lng" in d and "lat" in d:
         try:
             lat = float(d["lat"])
@@ -75,10 +78,11 @@ def parcels_for_request(req):
 
 
 def parcels_for_multi_request(req):
-    #
-    # [{ "lat": <lat>,
-    #    "lng": <lng>,
-    #    "id": <id> }]
+    """
+    Find parcels using the "points" parameter of a GET request. The value
+    should be a JSON-encoded array of dictionaries with "lat", "lng", and "id"
+    values. UNUSED.
+    """
     try:
         print(req.GET["points"])
         points = json.loads(req.GET["points"])
