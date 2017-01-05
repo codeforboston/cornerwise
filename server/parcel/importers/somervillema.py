@@ -36,7 +36,8 @@ def import_shapes(logger):
 
 
 def add_assessor_data(logger, file_name="M274Assess.dbf"):
-    logger.info("Adding assessor data...")
+    if logger:
+        logger.info("Adding assessor data...")
     # This could be done more efficiently, but it only needs to run once.
     path = os.path.join("/data/shapefiles", file_name)
     dbf = dbfread.DBF(path)
@@ -44,9 +45,15 @@ def add_assessor_data(logger, file_name="M274Assess.dbf"):
         "LOT_SIZE", "USE_CODE", "YEAR_BUILT", "BLD_AREA", "UNITS", "STYLE",
         "STORIES", "NUM_ROOMS", "ZONING"
     ]
+    processed_ids = set()
     for entry in dbf:
+        loc_id = entry["LOC_ID"]
+        if loc_id in processed_ids:
+            continue
+        processed_ids.add(loc_id)
+
         try:
-            parcel = Parcel.objects.get(loc_id=entry["LOC_ID"])
+            parcel = Parcel.objects.get(loc_id=loc_id)
             parcel.address_num = entry["ADDR_NUM"]
             parcel.full_street = entry["FULL_STR"]
             parcel.save()
