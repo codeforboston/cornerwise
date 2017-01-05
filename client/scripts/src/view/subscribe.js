@@ -60,6 +60,7 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                                   language: navigator.language},
                            dataType: "json"})
                        .done(function(resp) {
+                           form.email.value = "";
                            if (resp.new_user) {
                                alerts.show(
                                    {title: "Please confirm your email",
