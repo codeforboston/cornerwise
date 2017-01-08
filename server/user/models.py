@@ -178,7 +178,7 @@ class Subscription(models.Model):
         query = self.query_dict
         if "box" in query:
             coords = [float(s) for s in query["box"].split(",")]
-            return "/map?swlat={swlat}&swlon={swlon}&ne={nelat}&nelon={nelon}"\
+            return settings.MINIMAP_SRC\
                 .format(swlat=coords[0], swlon=coords[1],
                         nelat=coords[2], nelon=coords[3])
         else:

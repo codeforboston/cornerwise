@@ -121,8 +121,6 @@ USE_TZ = True
 
 SERVER_DOMAIN = "cornerwise.org"
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
 STATIC_URL = "static/"
 MEDIA_URL = "media/"
 
@@ -132,8 +130,6 @@ if not IS_PRODUCTION:
 else:
     STATIC_ROOT = os.environ.get("APP_STATIC_ROOT", "/client/")
     MEDIA_ROOT = os.environ.get("APP_MEDIA_ROOT", "/media/")
-
-DOC_ROOT = os.path.join(MEDIA_ROOT, "doc")
 
 #######################
 # Celery configuration
@@ -206,6 +202,13 @@ SENDGRID_TEMPLATES = {
 
 # If this is set to True, users are only allowed to have one subscription.
 LIMIT_SUBSCRIPTIONS = True
+
+# URL to use for generating minimap raster images for emails, etc.
+MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
+               "tile-provider=cartodb-light&"
+               "sw-lat={swlat}&sw-lng={swlon}&"
+               "ne-lat={nelat}&ne-lng={nelon}&clip=1")
+
 
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 

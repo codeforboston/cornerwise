@@ -165,15 +165,21 @@ def send_subscription_confirmation_email(sub_id):
        subscription.active:
         return
 
-    # The current user flow should make it impossible for a confirmed user to
-    # get to this point:
-    existing = user.subscriptions.filter(active=True).count()
-    if existing <= 1:
+    try:
+        existing = user.subscriptions.filter(active=True)[0]
+    except:
+        # The user doesn't have any active Subscriptions
         return
+
+    # Prefetch the minimap images. The CDN will cache it, and subsequent loads
+    # will have much lower latency:
+    request.urlopen(subscription.minimap_src).close()
+    request.urlopen(existing.minimap_src).close()
 
     context = {
         "subscription": subscription.readable_description,
         "minimap_src": subscription.minimap_src,
+        "old_minimap_src": existing.minimap_src,
         "confirmation_link": make_absolute_url(subscription.confirm_url)
     }
     send_mail(user, "Cornerwise: Confirm New Subscription",
