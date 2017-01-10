@@ -297,6 +297,16 @@ class Document(models.Model):
     move_file = utils.make_file_mover("document")
 
 
+@receiver(models.signals.post_delete, sender=Document)
+def auto_delete_document(sender, document, **kwargs):
+    if document.document:
+        document.document.delete(save=False)
+    if document.thumbnail:
+        document.thumbnail.delete(save=False)
+    if document.fulltext:
+        document.fulltext.delete(save=False)
+
+
 class Image(models.Model):
     """An image associated with a document.
     """
@@ -325,6 +335,14 @@ class Image(models.Model):
             "src": self.get_url(),
             "thumb": self.thumbnail.url if self.thumbnail else None
         }
+
+
+@receiver(models.signals.post_delete, sender=Image)
+def delete_image(send, image, **kwargs):
+    if image.image:
+        image.image.delete(save=False)
+    if image.thumbnail:
+        image.thumbnail.delete(save=False)
 
 
 class Changeset(models.Model):
