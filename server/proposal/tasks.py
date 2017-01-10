@@ -168,7 +168,7 @@ def generate_doc_thumbnail(doc_id):
         task_logger.error("Document has not been copied to the local filesystem")
         return
 
-    path = doc.document.name
+    path = doc.document.path
 
     # TODO: Dispatch on extension. Handle other common file types
     if extension(path) != "pdf":
@@ -193,8 +193,9 @@ def generate_doc_thumbnail(doc_id):
         thumb_path = out_prefix + os.path.extsep + "jpg"
         task_logger.info("Generated thumbnail for Document #%i: '%s'", doc.pk,
                     thumb_path)
-        doc.thumbnail.save("thumbnail.jpg", File(thumb_path))
-        doc.save()
+        with open(thumb_path) as thumb_file:
+            doc.thumbnail.save("thumbnail.jpg", File(thumb_file))
+            doc.save()
 
         return thumb_path
 
