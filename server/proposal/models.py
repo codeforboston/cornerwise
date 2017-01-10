@@ -305,7 +305,8 @@ class Document(models.Model):
 
 
 @receiver(models.signals.post_delete, sender=Document)
-def auto_delete_document(sender, document, **kwargs):
+def auto_delete_document(**kwargs):
+    document = kwargs["instance"]
     if document.document:
         document.document.delete(save=False)
     if document.thumbnail:
@@ -351,7 +352,8 @@ class Image(models.Model):
 
 
 @receiver(models.signals.post_delete, sender=Image)
-def delete_image(send, image, **kwargs):
+def auto_delete_image(**kwargs):
+    image = kwargs["instance"]
     if image.image:
         image.image.delete(save=False)
     if image.thumbnail:
