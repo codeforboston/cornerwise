@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.core.urlresolvers import reverse
+from django.dispatch import receiver
 from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
@@ -230,13 +231,20 @@ class Event(models.Model):
         max_length=256, default="Somerville City Hall, 93 Highland Ave")
     region_name = models.CharField(max_length=128, default="Somerville, MA")
     description = models.TextField()
-    proposals = models.ManyToManyField(Proposal, related_name="proposals")
+    proposals = models.ManyToManyField(
+        Proposal, related_name="events", related_query_name="event")
 
     class Meta:
         unique_together = (("date", "title", "region_name"))
 
     def to_dict(self):
-        return model_to_dict(self, exclude=["proposals"])
+        d = model_to_dict(self, exclude=["created", "proposals"])
+        d["date"] = d["date"].isoformat()
+        return d
+
+
+def upload_document_to(doc, filename):
+    return "doc/%s/%s" % (doc.pk, filename)
 
 
 class Document(models.Model):
@@ -251,8 +259,7 @@ class Document(models.Model):
         max_length=256, help_text="The name of the document")
     field = models.CharField(
         max_length=256,
-        help_text=("The field in which the document"
-                   " was found"))
+        help_text=("The field in which the document was found"))
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
 
@@ -260,13 +267,13 @@ class Document(models.Model):
     published = models.DateTimeField(null=True)
 
     # If the document has been copied to the local filesystem:
-    document = models.FileField(null=True)
+    document = models.FileField(null=True, upload_to=upload_document_to)
 
     # File containing extracted text of the document:
     fulltext = models.FileField(null=True)
     encoding = models.CharField(max_length=20, default="")
     # File containing a thumbnail of the document:
-    thumbnail = models.FileField(null=True)
+    thumbnail = models.FileField(null=True, upload_to=upload_document_to)
 
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
@@ -307,13 +314,19 @@ def auto_delete_document(sender, document, **kwargs):
         document.fulltext.delete(save=False)
 
 
+
+def upload_image_to(doc, filename):
+    fmt = "doc/%s/images/%s" if doc.document else "prop/%s/%s"
+    return fmt % (doc.document_id, filename)
+
+
 class Image(models.Model):
     """An image associated with a document.
     """
     proposal = models.ForeignKey(Proposal, related_name="images")
     document = models.ForeignKey(
         Document, null=True, help_text="Source document for image")
-    image = models.FileField(null=True)
+    image = models.FileField(null=True, upload_to=upload_image_to)
     thumbnail = models.FileField(null=True)
     url = models.URLField(null=True, unique=True, max_length=512)
     # Crude way to specify that an image should not be copied to the

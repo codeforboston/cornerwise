@@ -4,11 +4,11 @@ import shutil
 import subprocess
 from urllib import parse, request
 
-from dateutil.parser import parse as dt_parse
 import celery
 from celery.utils.log import get_task_logger
 
 from django.conf import settings
+from django.core.files import File
 from django.db import transaction
 from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
@@ -18,14 +18,13 @@ from PyPDF2 import PdfFileReader
 from .models import Proposal, Attribute, Document, Image
 from utils import extension, normalize
 from . import extract
-from . import utils as proposal_utils
+from . import documents as doc_utils
 from .importers.register import Importers
 from cornerwise import celery_app
 from scripts import arcgis, gmaps, street_view
 from scripts import pdf
-from scripts.images import is_interesting, make_thumbnail
+from scripts.images import make_thumbnail
 
-from shared import files_metadata
 
 logger = get_task_logger(__name__)
 
@@ -40,37 +39,16 @@ def fetch_document(doc_id):
 
     if doc.document and os.path.exists(doc.document.path):
         # Has the document been updated?
-        updated = proposal_utils.last_modified(doc.url)
+        updated = doc_utils.last_modified(doc.url)
         # No?  Then we're good.
         if not updated or updated <= doc.published:
             return doc.pk
 
         # TODO Special handling of updated documents
 
-    url_components = parse.urlsplit(url)
-    ext = extension(os.path.basename(url_components.path))
-    filename = "download.%s" % ext
-    path = os.path.join(settings.MEDIA_ROOT, "doc", str(doc.pk), filename)
-
-    # Ensure that the intermediate directories exist:
-    pathdir = os.path.dirname(path)
-    os.makedirs(pathdir, exist_ok=True)
-
     logger.info("Fetching Document #%i", doc.pk)
-    with request.urlopen(url) as resp, open(path, "wb") as out:
-        shutil.copyfileobj(resp, out)
-        doc.document = path
-
-        logger.info("Copied Document #%i to %s", doc.pk, path)
-
-        file_published = files_metadata.published_date(path)
-
-        if file_published:
-            doc.published = file_published
-        elif "Last-Modified" in resp.headers:
-            doc.published = dt_parse(resp.headers["Last-Modified"])
-
-        doc.save()
+    doc_utils.save_from_url(doc, url, "download")
+    logger.info("Copied Document #%i to %s", doc.pk, doc.document.path)
 
     return doc.pk
 
@@ -115,56 +93,24 @@ def extract_images(doc_id):
     the local filesystem, extract its images to a subdirectory of the
     document's directory (docs/<doc id>/images).
 
-    :param doc: proposal.models.Document object with a corresponding PDF
-    file that has been copied to the local filesystem
+    :param doc_id: id of a proposal.models.Document object with a corresponding
+    PDF file that has been copied to the local filesystem
 
-    :returns: A list of proposal.model.Image objects
+    :returns: A list of proposal.models.Image objects
 
     """
     doc = Document.objects.get(pk=doc_id)
-    docfile = doc.document
 
-    if not docfile:
-        logger.error("Document has not been copied to the local filesystem.")
+    try:
+        logger.info("Extracting images from Document #%s", doc.pk)
+        images = doc_utils.save_images(doc)
+        logger.info("Extracted %i image(s) from %s.", len(images), path)
+
+        return [image.pk for image in images]
+    except Exception as exc:
+        logger.error(exc)
+
         return []
-
-    path = docfile.path
-
-    if not os.path.exists(path):
-        logger.error("Document %s is not where it says it is: %s", doc.pk,
-                     path)
-        return []
-
-    images_dir = os.path.join(os.path.dirname(path), "images")
-    os.makedirs(images_dir, exist_ok=True)
-
-    logger.info("Extracting images to '%s'", images_dir)
-    image_paths = pdf.extract_images(path, dirname=images_dir)
-
-    images = []
-    # Do stuff with the images in the directory
-    for image_name in image_paths:
-        image_path = os.path.join(images_dir, image_name)
-
-        if not is_interesting(image_path):
-            # Delete 'uninteresting' images
-            os.unlink(image_path)
-            continue
-
-        image = Image(proposal=doc.proposal, document=doc)
-        image.image = image_path
-        images.append(image)
-
-        try:
-            image.save()
-        except IntegrityError:
-            # This can occur if the image has already been fetched
-            # and associated with the Proposal.
-            pass
-
-    logger.info("Extracted %i image(s) from %s.", len(images), path)
-
-    return [image.pk for image in images]
 
 
 @celery_app.task(name="proposal.add_street_view")
@@ -216,13 +162,11 @@ def add_parcel(proposal_id):
 def generate_doc_thumbnail(doc_id):
     "Generate a Document thumbnail."
     doc = Document.objects.get(pk=doc_id)
-    docfile = doc.document
-
-    if not docfile:
+    if not doc.document:
         logger.error("Document has not been copied to the local filesystem")
         return
 
-    path = docfile.name
+    path = doc.document.name
 
     # TODO: Dispatch on extension. Handle other common file types
     if extension(path) != "pdf":
@@ -247,7 +191,7 @@ def generate_doc_thumbnail(doc_id):
         thumb_path = out_prefix + os.path.extsep + "jpg"
         logger.info("Generated thumbnail for Document #%i: '%s'", doc.pk,
                     thumb_path)
-        doc.thumbnail = thumb_path
+        doc.thumbnail.save("thumbnail.jpg", File(thumb_path))
         doc.save()
 
         return thumb_path
@@ -309,7 +253,7 @@ def generate_thumbnail(image_id, replace=False):
 @transaction.atomic
 def add_doc_attributes(doc_id):
     doc = Document.objects.get(pk=doc_id)
-    doc_json = proposal_utils.doc_info(doc)
+    doc_json = doc_utils.doc_info(doc)
     properties = extract.get_properties(doc_json)
 
     for name, value in properties.items():
@@ -344,33 +288,25 @@ def generate_thumbnails(image_ids):
     return generate_thumbnail.map(image_ids)()
 
 
-@celery_app.task(name="proposal.process_document")
 def process_document(doc_id):
     """
     Run all tasks on a Document.
     """
-    (fetch_document.s(doc_id) |
-     celery.group((extract_images.s() | generate_thumbnails.s()),
+
+    # Seems like a new bug in Celery: chain subtasks in a group do not seem to
+    # receive the result from the previous task in the chain.
+    (fetch_document.s() |
+     celery.group(extract_images.s(doc_id) | generate_thumbnails.s(),
                   generate_doc_thumbnail.s(),
-                  extract_text.s() | add_doc_attributes.s()))()
+                  extract_text.s(doc_id) | add_doc_attributes.s()))(doc_id)
 
 
-@celery_app.task(name="proposal.process_documents")
-def process_documents(doc_ids=None):
-    if not doc_ids:
-        doc_ids = Document.objects.filter(document="").values_list(
-            "id", flat=True)
-
-    return process_document.map(doc_ids)()
-
-
-@celery_app.task(name="proposal.process_proposal")
 def process_proposal(proposal_id):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
-    add_street_view(proposal_id)
+    add_street_view.delay(proposal_id)
 
-    add_parcel(proposal_id)
+    add_parcel.delay(proposal_id)
 
     return proposal_id
 
@@ -450,11 +386,11 @@ def pull_updates(since=None, importers_filter=None):
 
 def proposal_hook(**kwargs):
     if kwargs["created"]:
-        process_proposal.delay(kwargs["instance"].pk)
+        process_proposal(kwargs["instance"].pk)
 
 def document_hook(**kwargs):
     if kwargs["created"]:
-        process_document.delay(kwargs["instance"].pk)
+        process_document(kwargs["instance"].pk)
 
 def set_up_hooks():
     post_save.connect(

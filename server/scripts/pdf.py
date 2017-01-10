@@ -43,23 +43,18 @@ def get_images(path, guard_fn=default_guard):
                 yield (Image.frombytes(mode, (xobject["/Width"], xobject["/Height"]), data), "png")
             elif filter == "/DCTDecode":
                 data = xobject._data
-                yield (Image.open(BytesIO(data)), "jpg")
+                yield (Image.open(BytesIO(data)), "jpeg")
             else:
                 continue
 
 
-def extract_images(path, guard_fn=default_guard, name_fn=default_name, limit=10, dirname=None):
-    if not dirname:
-        dirname = os.path.dirname(path)
+def extract_images(path, filter_fn=default_guard, limit=10):
+    limit -= 1
+    for i, (image, ext) in enumerate(get_images(path, filter_fn)):
+        image_out = BytesIO()
+        image.save(image_out, ext)
+        yield (image_out, ext)
 
-    image_paths = []
-    for i, (image, ext) in enumerate(get_images(path, guard_fn)):
-        filename = os.path.join(dirname, name_fn(i, ext, image))
-        image.save(filename)
-        image_paths.append(filename)
-
-        if len(image_paths) == limit:
+        if i == limit:
             break
-
-    return image_paths
 
