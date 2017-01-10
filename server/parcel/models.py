@@ -35,8 +35,8 @@ class Parcel(models.Model):
 
 class Attribute(models.Model):
     parcel = models.ForeignKey(Parcel, related_name="attributes")
-    name = models.CharField(max_length=64)
-    value = models.CharField(max_length=256)
+    name = models.CharField(max_length=64, db_index=True)
+    value = models.CharField(max_length=256, db_index=True)
 
     class Meta:
         unique_together = (("parcel", "name"))
