@@ -42,6 +42,8 @@
 <% } else { %>
 <%
 var notice = proposal.getAttributeValue("legal_notice");
+var applicant = proposal.getAttributeValue("applicant_name");
+var hearing = proposal.getAttributeValue("dates_of_public_hearing");
 
 if (notice) {
 %>
@@ -51,15 +53,19 @@ if (notice) {
 <% } %>
 
 <table class="attributes table">
+    <% if (applicant) { %>
     <tr class="attribute">
         <th scope="row">Applicant</th>
         <td><%- proposal.getAttributeValue("applicant_name") %></td>
     </tr>
+    <% } %>
 
+    <% if (hearing) { %>
     <tr class="attribute">
         <th scope="row">Public Hearings</th>
         <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
     </tr>
+    <% } %>
 </table>
 <% } %>
 
