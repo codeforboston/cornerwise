@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 import os
 import shutil
 import subprocess
@@ -26,7 +27,8 @@ from scripts import pdf
 from scripts.images import make_thumbnail
 
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
+task_logger = get_task_logger(__name__)
 
 
 @celery_app.task(name="proposal.fetch_document")
@@ -46,9 +48,9 @@ def fetch_document(doc_id):
 
         # TODO Special handling of updated documents
 
-    logger.info("Fetching Document #%i", doc.pk)
+    task_logger.info("Fetching Document #%i", doc.pk)
     doc_utils.save_from_url(doc, url, "download")
-    logger.info("Copied Document #%i to %s", doc.pk, doc.document.path)
+    task_logger.info("Copied Document #%i to %s", doc.pk, doc.document.path)
 
     return doc.pk
 
@@ -76,9 +78,9 @@ def extract_text(doc_id, encoding="ISO-8859-9"):
     status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
 
     if status:
-        logger.error("Failed to extract text from %s", path)
+        task_logger.error("Failed to extract text from %s", path)
     else:
-        logger.info("Extracted text from Document #%i to %s.", doc.pk,
+        task_logger.info("Extracted text from Document #%i to %s.", doc.pk,
                     doc.fulltext)
         doc.fulltext = text_path
         doc.encoding = encoding
@@ -102,13 +104,13 @@ def extract_images(doc_id):
     doc = Document.objects.get(pk=doc_id)
 
     try:
-        logger.info("Extracting images from Document #%s", doc.pk)
+        task_logger.info("Extracting images from Document #%s", doc.pk)
         images = doc_utils.save_images(doc)
-        logger.info("Extracted %i image(s) from %s.", len(images), path)
+        task_logger.info("Extracted %i image(s) from %s.", len(images), path)
 
         return [image.pk for image in images]
     except Exception as exc:
-        logger.error(exc)
+        task_logger.error(exc)
 
         return []
 
@@ -136,13 +138,13 @@ def add_street_view(proposal_id):
                     priority=1)
                 return image
         except IntegrityError:
-            logger.warning("Image with that URL already exists: %s", url)
+            task_logger.warning("Image with that URL already exists: %s", url)
         except DataError:
-            logger.error("Image could not be saved.  Was the URL too long? %s",
+            task_logger.error("Image could not be saved.  Was the URL too long? %s",
                          url)
 
     else:
-        logger.warn("Add a local_settings file with your Google API key " +
+        task_logger.warn("Add a local_settings file with your Google API key " +
                     "to add Street View images.")
 
 @celery_app.task(name="proposal.add_parcel")
@@ -163,14 +165,14 @@ def generate_doc_thumbnail(doc_id):
     "Generate a Document thumbnail."
     doc = Document.objects.get(pk=doc_id)
     if not doc.document:
-        logger.error("Document has not been copied to the local filesystem")
+        task_logger.error("Document has not been copied to the local filesystem")
         return
 
     path = doc.document.name
 
     # TODO: Dispatch on extension. Handle other common file types
     if extension(path) != "pdf":
-        logger.warn("Document %s does not appear to be a PDF.", path)
+        task_logger.warn("Document %s does not appear to be a PDF.", path)
         return
 
     out_prefix = os.path.join(os.path.dirname(path), "thumbnail")
@@ -184,12 +186,12 @@ def generate_doc_thumbnail(doc_id):
     _, err = proc.communicate()
 
     if proc.returncode:
-        logger.error("Failed to generate thumbnail for document %s: %s", path,
+        task_logger.error("Failed to generate thumbnail for document %s: %s", path,
                      err)
         raise Exception("Failed for document %s" % doc.pk)
     else:
         thumb_path = out_prefix + os.path.extsep + "jpg"
-        logger.info("Generated thumbnail for Document #%i: '%s'", doc.pk,
+        task_logger.info("Generated thumbnail for Document #%i: '%s'", doc.pk,
                     thumb_path)
         doc.thumbnail.save("thumbnail.jpg", File(thumb_path))
         doc.save()
@@ -228,20 +230,20 @@ def generate_thumbnail(image_id, replace=False):
     image = Image.objects.get(pk=image_id)
     thumbnail_path = image.thumbnail and image.thumbnail.name
     if thumbnail_path and os.path.exists(thumbnail_path):
-        logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
+        task_logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
     else:
         if not image.image:
-            logger.info("No local image for Image #%s", image.pk)
+            task_logger.info("No local image for Image #%s", image.pk)
             return
 
         try:
             thumbnail_path = make_thumbnail(
                 image.image.name, fit=settings.THUMBNAIL_DIM)
         except Exception as err:
-            logger.error(err)
+            task_logger.error(err)
             return
 
-        logger.info("Generate thumbnail for Image #%i: %s", image.pk,
+        task_logger.info("Generate thumbnail for Image #%i: %s", image.pk,
                     thumbnail_path)
         image.thumbnail = thumbnail_path
         image.save()
@@ -257,7 +259,7 @@ def add_doc_attributes(doc_id):
     properties = extract.get_properties(doc_json)
 
     for name, value in properties.items():
-        logger.info("Adding %s attribute", name)
+        task_logger.info("Adding %s attribute", name)
         published = doc.published or datetime.now()
         handle = normalize(name)
 
@@ -349,10 +351,10 @@ def fetch_proposals(since=None,
         try:
             found = list(importer.updated_since(since, geocoder))
         except Exception as err:
-            logger.warning("Error in importer: %s - %s", importer_name, err)
+            task_logger.warning("Error in importer: %s - %s", importer_name, err)
             continue
 
-        logger.info("Fetched %i proposals from %s",
+        task_logger.info("Fetched %i proposals from %s",
                     len(found), type(importer).__name__)
         proposals_json += found
 
@@ -364,9 +366,9 @@ def fetch_proposals(since=None,
             p.save()
             proposals.append(p)
         except Exception as exc:
-            logger.error("Could not create proposal from dictionary: %s",
+            task_logger.error("Could not create proposal from dictionary: %s",
                          p_dict)
-            logger.error("%s", exc)
+            task_logger.error("%s", exc)
 
     return [p.id for p in proposals]
 
@@ -385,10 +387,12 @@ def pull_updates(since=None, importers_filter=None):
 
 
 def proposal_hook(**kwargs):
+    print(kwargs)
     if kwargs["created"]:
         process_proposal(kwargs["instance"].pk)
 
 def document_hook(**kwargs):
+    print(kwargs)
     if kwargs["created"]:
         process_document(kwargs["instance"].pk)
 
