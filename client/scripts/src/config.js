@@ -8,7 +8,7 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
     var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
-        tilesURL: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+        tilesURL: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png",
         tilesCredit: "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL",
 
         backendURL: "",
