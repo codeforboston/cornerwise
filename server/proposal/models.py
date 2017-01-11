@@ -44,7 +44,11 @@ def make_property_map():
     def _G(p):
         return lambda d: d[p]
 
+    def get_other_addresses(d):
+        return ";".join(d["all_addresses"][1:])
+
     return [("address", _G("address")),
+            ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["long"], d["lat"])),
             ("summary", lambda d: d.get("summary", "")[0:1024]),
             ("description", _g("description")), ("source", _g("source")),
@@ -62,6 +66,9 @@ class Proposal(models.Model):
         help_text=("The unique case number "
                    "assigned by the city"))
     address = models.CharField(max_length=128, help_text="Street address")
+    other_addresses = models.CharField(max_length=250,
+                                       null=True,
+                                       help_text="Other addresses covered by this proposal")
     location = models.PointField(help_text="The latitude and longitude")
     region_name = models.CharField(
         max_length=128, default="Somerville, MA", null=True, help_text="")
@@ -313,7 +320,6 @@ def auto_delete_document(**kwargs):
         document.thumbnail.delete(save=False)
     if document.fulltext:
         document.fulltext.delete(save=False)
-
 
 
 def upload_image_to(doc, filename):
