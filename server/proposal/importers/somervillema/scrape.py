@@ -93,6 +93,27 @@ def add_geocode(geocoder, proposals):
         proposal["score"] = location["properties"].get("score")
 
 
+def parse_addresses(number, street):
+    number_sublists = re.split(r"\s*/\s*", number)
+    street_sublists = re.split(r"\s*/\s*", street)
+
+    for number, street in zip(number_sublists, street_sublists):
+        number_range_match = re.match(r"(\d+)-(\d+)", number)
+
+        if number_range_match:
+            yield (number_range_match.group(1), street)
+            yield (number_range_match.group(2), street)
+        else:
+            print(number)
+            number_sublist = re.split(r",? and |,? & |, ", number)
+            for number in number_sublist:
+                yield (number, street)
+
+
+def get_address_list(number, street):
+    return ["{} {}".format(n, s) for (n, s) in parse_addresses(number, street)]
+
+
 def find_cases(doc):
     table = helpers.find_table(doc)
     titles = helpers.col_names(table)
@@ -103,13 +124,13 @@ def find_cases(doc):
 
     cases = []
 
-    # This is ugly, but there's some baaad data out there:
     for i, tr in enumerate(trs):
         try:
             proposal = helpers.get_row_vals(attributes, tr,
                                             processors=field_processors)
-            proposal["address"] = "{} {}".format(proposal["number"],
-                                                 proposal["street"])
+            addresses = get_address_list(proposal["number"], proposal["street"])
+            proposal["address"] = addresses[0]
+            proposal["all_addresses"] = addresses
             proposal["source"] = URL_BASE
             proposal["region_name"] = "Somerville, MA"
 
