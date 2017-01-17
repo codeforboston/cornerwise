@@ -1,4 +1,4 @@
-FROM python:3.5.1
+FROM python:3.6
 
 ADD ./docker-support /support
 ADD ./server /app
