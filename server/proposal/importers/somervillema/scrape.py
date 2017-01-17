@@ -76,8 +76,7 @@ def add_geocode(geocoder, proposals):
     Modifies each proposal in the list (in place), adding 'lat' and 'long'
     matching the proposal address.
     """
-    addrs = ["{0[number]} {0[street]}".format(proposal) for proposal in
-             proposals]
+    addrs = [proposal["address"] for proposal in proposals]
     locations = geocoder.geocode(addrs)
 
     # Assumes the locations are returned in the same order
@@ -104,7 +103,6 @@ def parse_addresses(number, street):
             yield (number_range_match.group(1), street)
             yield (number_range_match.group(2), street)
         else:
-            print(number)
             number_sublist = re.split(r",? and |,? & |, ", number)
             for number in number_sublist:
                 yield (number, street)
