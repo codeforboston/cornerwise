@@ -8,10 +8,11 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from PyPDF2 import PdfFileReader
 
-URL_BASE = "http://www.somervillema.gov/government/public-minutes"
-
 ZBA_URL = "http://www.somervillema.gov/government/public-minutes?field_event_org_unit_nid=216"
 PB_URL = "http://www.somervillema.gov/government/public-minutes?field_event_org_unit_nid=206"
+
+ZBA_URL = "http://archive.somervillema.gov/government/public-minutes?field_event_org_unit_nid=216"
+PB_URL = "http://archive.somervillema.gov/government/public-minutes?field_event_org_unit_nid=206"
 
 # This is hard-coded, because it's difficult to consistently extract from the
 # PDF.
@@ -48,7 +49,7 @@ def pdf_lines(pdf):
 def to_cases(lines):
     current_case = None
     for line in lines:
-        m = re.search(r"\(\s*Case #((ZBA|PB) \d+\-\d+)\s*\)", line)
+        m = re.search(r"\(\s*Case #((ZBA|PB) \d+\-\d+)", line)
         if m:
             if current_case:
                 yield current_case
@@ -153,5 +154,5 @@ class EventsImporter(object):
     region_name = "Somerville, MA"
 
     def updated_since(self, dt):
-        return get_events()
+        return get_events(dt)
 
