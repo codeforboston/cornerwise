@@ -212,6 +212,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                            proposals.removeFromSelection(proposal.id);
                        });
 
+
                    if (z >= 0 && this.map.getBounds().contains(marker.getLatLng())) {
                        marker.setZoomed(z);
                    }
@@ -326,10 +327,6 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                },
 
                /* Getting information about the markers. */
-               getMarkerForPermit: function(permit) {
-                   return this.caseMarker[permit.get("caseNumber")];
-               },
-
                updateMarkers: function() {
                    var map = this.map,
                        pLayer = this.zoningLayer,
