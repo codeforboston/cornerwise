@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proposal',
             name='other_addresses',
-            field=models.CharField(help_text='Other addresses covered by this proposal', max_length=250, null=True),
+            field=models.CharField(help_text='Other addresses covered by this proposal', max_length=250, blank=True),
         ),
         migrations.AlterField(
             model_name='document',

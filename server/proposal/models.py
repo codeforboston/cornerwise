@@ -45,7 +45,7 @@ def make_property_map():
         return lambda d: d[p]
 
     def get_other_addresses(d):
-        return ";".join(d["all_addresses"][1:])
+        return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
 
     return [("address", _G("address")),
             ("other_addresses", get_other_addresses),
@@ -67,7 +67,7 @@ class Proposal(models.Model):
                    "assigned by the city"))
     address = models.CharField(max_length=128, help_text="Street address")
     other_addresses = models.CharField(max_length=250,
-                                       null=True,
+                                       blank=True,
                                        help_text="Other addresses covered by this proposal")
     location = models.PointField(help_text="The latitude and longitude")
     region_name = models.CharField(
@@ -124,7 +124,7 @@ class Proposal(models.Model):
                         "new": val,
                         "old": old_val
                     })
-                setattr(proposal, p, fn(p_dict))
+                setattr(proposal, p, val)
             except Exception as exc:
                 if old_val:
                     continue
