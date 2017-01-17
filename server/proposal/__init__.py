@@ -9,4 +9,3 @@ class ProposalConfig(AppConfig):
         from . import tasks
         from . import event_tasks
 
-        tasks.set_up_hooks()

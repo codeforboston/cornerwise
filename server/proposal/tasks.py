@@ -10,11 +10,9 @@ from celery.utils.log import get_task_logger
 
 from django.conf import settings
 from django.core.files import File
-from django.db import transaction
+from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
-
-from PyPDF2 import PdfFileReader
 
 from .models import Proposal, Attribute, Document, Image
 from utils import extension, normalize
@@ -23,7 +21,6 @@ from . import documents as doc_utils
 from .importers.register import Importers
 from cornerwise import celery_app
 from scripts import arcgis, gmaps, street_view
-from scripts import pdf
 from scripts.images import make_thumbnail
 
 
@@ -168,36 +165,7 @@ def generate_doc_thumbnail(doc_id):
         task_logger.error("Document has not been copied to the local filesystem")
         return
 
-    path = doc.document.path
-
-    # TODO: Dispatch on extension. Handle other common file types
-    if extension(path) != "pdf":
-        task_logger.warn("Document %s does not appear to be a PDF.", path)
-        return
-
-    out_prefix = os.path.join(os.path.dirname(path), "thumbnail")
-
-    proc = subprocess.Popen(
-        [
-            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", path,
-            out_prefix
-        ],
-        stderr=subprocess.PIPE)
-    _, err = proc.communicate()
-
-    if proc.returncode:
-        task_logger.error("Failed to generate thumbnail for document %s: %s", path,
-                     err)
-        raise Exception("Failed for document %s" % doc.pk)
-    else:
-        thumb_path = out_prefix + os.path.extsep + "jpg"
-        task_logger.info("Generated thumbnail for Document #%i: '%s'", doc.pk,
-                    thumb_path)
-        with open(thumb_path) as thumb_file:
-            doc.thumbnail.save("thumbnail.jpg", File(thumb_file))
-            doc.save()
-
-        return thumb_path
+    return doc_utils.generate_thumbnail(doc)
 
 
 @celery_app.task(name="proposal.fetch_image")
@@ -253,7 +221,6 @@ def generate_thumbnail(image_id, replace=False):
 
 
 @celery_app.task(name="proposal.add_doc_attributes")
-@transaction.atomic
 def add_doc_attributes(doc_id):
     doc = Document.objects.get(pk=doc_id)
     doc_json = doc_utils.doc_info(doc)
@@ -291,31 +258,29 @@ def generate_thumbnails(image_ids):
     return generate_thumbnail.map(image_ids)()
 
 
-def process_document(doc_id):
+def process_document(doc):
     """
     Run all tasks on a Document.
     """
-
     # Seems like a new bug in Celery: chain subtasks in a group do not seem to
     # receive the result from the previous task in the chain.
     (fetch_document.s() |
-     celery.group(extract_images.s(doc_id) | generate_thumbnails.s(),
+     celery.group(extract_images.s(doc.id) | generate_thumbnails.s(),
                   generate_doc_thumbnail.s(),
-                  extract_text.s(doc_id) | add_doc_attributes.s()))(doc_id)
+                  extract_text.s(doc.id) | add_doc_attributes.s()))(doc.id)
 
 
-def process_proposal(proposal_id):
+def process_proposal(proposal):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
-    add_street_view.delay(proposal_id)
+    add_street_view.delay(proposal.id)
 
-    add_parcel.delay(proposal_id)
+    add_parcel.delay(proposal.id)
 
-    return proposal_id
+    return proposal.id
 
 
 @celery_app.task(name="proposal.fetch_proposals")
-@transaction.atomic
 def fetch_proposals(since=None,
                     coder_type=settings.GEOCODER,
                     importers=Importers):
@@ -387,18 +352,13 @@ def pull_updates(since=None, importers_filter=None):
     return fetch_proposals(since, importers=importers)
 
 
+@receiver(post_save, sender=Proposal, dispatch_uid="process_new_proposal")
 def proposal_hook(**kwargs):
-    print(kwargs)
     if kwargs["created"]:
-        process_proposal(kwargs["instance"].pk)
+        process_proposal(kwargs["instance"])
 
+
+@receiver(post_save, sender=Document, dispatch_uid="process_new_document")
 def document_hook(**kwargs):
-    print(kwargs)
     if kwargs["created"]:
-        process_document(kwargs["instance"].pk)
-
-def set_up_hooks():
-    post_save.connect(
-        proposal_hook, Proposal, dispatch_uid="process_new_proposal")
-    post_save.connect(
-        document_hook, Document, dispatch_uid="process_new_document")
+        process_document(kwargs["instance"])

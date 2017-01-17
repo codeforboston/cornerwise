@@ -8,10 +8,14 @@ from dateutil.parser import parse as dt_parse
 from os import path
 from dateutil.parser import parse
 import shutil
+import subprocess
 from urllib import parse, request
 
+from scripts import pdf
 from shared import files_metadata
 from utils import extension
+
+from .models import Image
 
 
 def last_modified(url):
@@ -70,3 +74,35 @@ def save_images(doc):
         images.append(image)
 
     return images
+
+
+def generate_thumbnail(doc):
+    "Generate a Document thumbnail."
+    if not doc.document:
+        task_logger.error("Document has not been copied to the local filesystem")
+        return
+
+    path = doc.document.path
+
+    # TODO: Dispatch on extension. Handle other common file types
+    if extension(path) != "pdf":
+        return
+
+    out_prefix = os.path.join(os.path.dirname(path), "thumbnail")
+
+    proc = subprocess.Popen(
+        [
+            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", path,
+            out_prefix
+        ],
+        stderr=subprocess.PIPE)
+    _, err = proc.communicate()
+
+    if proc.returncode:
+        raise Exception("Failed for document %s" % doc.pk, err)
+
+    thumb_path = out_prefix + os.path.extsep + "jpg"
+    with open(thumb_path, "rb") as thumb_file:
+        doc.thumbnail.save("thumbnail.jpg", File(thumb_file))
+
+    return thumb_path
