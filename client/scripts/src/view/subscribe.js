@@ -61,18 +61,7 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                            dataType: "json"})
                        .done(function(resp) {
                            form.email.value = "";
-                           if (resp.new_user) {
-                               alerts.show(
-                                   {title: "Please confirm your email",
-                                    id: "subscription-alert",
-                                    text: ("Thanks for registering! " +
-                                           "We've sent an email to " +
-                                           resp.email + ". Please use the link " +
-                                           "provided to confirm your email " +
-                                           "before we can send updates"),
-                                    className: "info",
-                                    type: "default"});
-                           } else if (resp.has_subscriptions) {
+                           if (resp.has_subscriptions) {
                                alerts.show(
                                    {title: "Overwrite existing subscription?",
                                     id: "subscription-alert",
@@ -90,6 +79,20 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                                     text: ("You will now receive updates when the " +
                                            "proposals are updated."),
                                     className: "success"});
+                           } else {
+                               var text = resp.new_user ?
+                                   ("Thanks for registering! We've sent an email to " + resp.email +
+                                    ". Please use the link provided to confirm your email " +
+                                    "before we can send updates.") :
+                                   ("Looks like you've tried to register more than once! " +
+                                    "We've sent you another email. Please use the link there " +
+                                    "to confirm your account.");
+                               alerts.show(
+                                   {title: "Please confirm your email",
+                                    id: "subscription-alert",
+                                    text: text,
+                                    className: "info",
+                                    type: "default"});
                            }
                        })
                        .fail(function(err) {
