@@ -77,10 +77,24 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                        this._renderZoomed(proposal, this.zoomed);
                    else
                        this.setIcon(getBadge(proposal));
+
+                   if (proposal.changed._hovered && !proposal.get("_selected")) {
+                       var text = proposal.get("address"),
+                           others = proposal.get("other_addresses");
+
+                       if (others) {
+                           text += "<br/>" + others.split(";").join("<br/>");
+                       }
+                       this.bindTooltip(text, {permanent: true});
+                   } else if (proposal.changed._hovered === false) {
+                       this.unbindTooltip();
+                   }
                },
 
                onSelected: function(proposal, isSelected) {
                    this.updateIcon(proposal);
+
+                   this.unbindTooltip();
 
                    if (isSelected) {
                        var loc = proposal.get("location"),
