@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from urllib import request
+import pytz
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -97,7 +98,7 @@ def send_notifications(subscription_ids=None, since=None):
         subscriptions = Subscription.objects.filter(pk__in=subscription_ids)
 
     if since is None:
-        since = datetime.now() - timedelta(days=7)
+        since = pytz.utc.localize(datetime.utcnow() - timedelta(days=7))
 
     for subscription in subscriptions:
         updates = changes.summarize_subscription_updates(subscription, since)
