@@ -131,7 +131,7 @@
           No proposals selected.
       </div>
       <div class="content"></div>
-      <a href="#" class="close _back">&times;</a>
+      <a href="#view=main" class="close _back">&times;</a>
     </div>
 
     <div id="modal" class="_setview" data-goto="main">
@@ -153,6 +153,7 @@
             <input id="filter-text" type="text" placeholder="Find text" />
 
             <select name="complete" class="filter-selector">
+                <option class="selector-name">Application Status</option>
                 <option value="1">Complete</option>
                 <option value="0">Pending</option>
             </select>
@@ -163,7 +164,7 @@
             <input id="filter-public" type="checkbox" checked/> Public
 
             <select name="property_size" class="filter-selector">
-                <option>Lot Size</option>
+                <option class="selector-name">Lot Size</option>
                 <option value="">Lot Size</option>
             </select>
 

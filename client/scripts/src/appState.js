@@ -115,8 +115,9 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        goBack: function() {
-                           if (this.lastView)
+                           if (this.lasView)
                                this.setHashKey("view", this.lastView);
+                           return !!this.lastView;
                        },
 
                        triggerHashState: function(o) {
@@ -232,9 +233,8 @@ define(["backbone", "underscore", "config", "utils"],
                                return true;
                            })
                                .on("click", "a._back", function(e) {
-                                   appState.goBack();
-                                   e.preventDefault();
-                                   return false;
+                                   if (appState.goBack())
+                                       e.preventDefault();
                                });
                        },
 
