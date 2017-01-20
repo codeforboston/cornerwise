@@ -91,8 +91,8 @@ def subscribe(request):
     try:
         subscription = Subscription()
         subscription.set_validated_query(query_dict)
+        subscription.user = user
         subscription.save()
-        user.subscriptions.add(subscription)
     except Exception as exc:
         raise ErrorResponse("Invalid subscription", {"exception": exc.args})
 

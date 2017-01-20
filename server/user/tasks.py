@@ -26,19 +26,14 @@ def send_subscription_updates(user_id, updates):
                        {"updates": updates_html})
 
 
-@celery_app.task(name="user.send_user_key")
-def send_user_key(user_id, created):
-    if not created:
-        return
-
-    profile = UserProfile.objects.get(user_id=user_id)
+def send_user_welcome(user, subscription):
+    profile = user.profile
     if not profile.token:
         profile.generate_token()
 
-    # TODO: We want to send the user a summary of the first subscription created
-
     # Render HTML and text templates:
-    context = {"confirm_url": make_absolute_url(profile.confirm_url)}
+    context = {"confirm_url": make_absolute_url(profile.confirm_url),
+               "minimap_src": subscription.minimap_src}
     mail.send(profile.user, "Cornerwise: Welcome", "welcome", context)
 
 
@@ -59,8 +54,13 @@ def send_subscription_confirmation_email(sub_id):
     subscription = Subscription.objects.select_related("user").get(pk=sub_id)
     user = subscription.user
 
-    if not user.is_active or \
-       not settings.LIMIT_SUBSCRIPTIONS or \
+    if not user.is_active:
+        send_user_welcome(user, subscription)
+        return
+
+    # Revisit this if we turn off subscription limiting. We'd still want the
+    # user to confirm the new subscription, since we don't have logins.
+    if not settings.LIMIT_SUBSCRIPTIONS or \
        subscription.active:
         return
 
@@ -105,13 +105,7 @@ def send_notifications(subscription_ids=None, since=None):
             send_subscription_updates(subscription.user, updates)
 
 
-# Database hooks:
-@receiver(post_save, sender=UserProfile, dispatch_uid="send_confirmation_email")
-def user_profile_created(**kwargs):
-    profile = kwargs["instance"]
-    send_user_key.delay(kwargs["instance"].user_id, kwargs["created"])
-
-
+# Database hook:
 @receiver(post_save, sender=Subscription, dispatch_uid="send_subscription_confirmation_email")
 def subscription_created(**kwargs):
     if kwargs["created"]:

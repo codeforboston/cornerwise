@@ -13,6 +13,8 @@ if getattr(settings, "SENDGRID_API_KEY", None):
 else:
     SG = None
 
+logger = get_task_logger(__name__)
+
 
 def has_name(u):
     return u.first_name and u.last_name
@@ -35,7 +37,7 @@ def send(user, subject, template_name, context={}, content=None):
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items()}
     substitutions["-user-"] = user.profile.addressal
-    substitutions["-unsubscribe_link-"] = user.profile.unsubscribe_url
+    substitutions["-unsubscribe_url-"] = user.profile.unsubscribe_url
 
     data = {
         "personalizations": [{
