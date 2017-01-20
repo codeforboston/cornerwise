@@ -82,7 +82,6 @@ class UserProfile(models.Model):
 class Subscription(models.Model):
     # The subscription belong to a registered user:
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             null=True,
                              related_name="subscriptions")
     active = models.BooleanField(default=False,
                                  help_text="Users only receive updates for active subscriptions")
@@ -90,6 +89,8 @@ class Subscription(models.Model):
     updated = models.DateTimeField(default=datetime.now)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
+    include_events = models.CharField(max_length=256, default="", blank=True,
+                                      help_text="Include events for a specified region")
     last_notified = models.DateTimeField(default=datetime.now)
 
     def save(self, *args, **kwargs):
