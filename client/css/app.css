@@ -1083,6 +1083,13 @@ a.brief-model:hover {
     margin-bottom: 0.3em;
 }
 
+.details h5 {
+    color: #bbb;
+    font-size: large;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
+
 .details .case-number {
     display: none;
 }
@@ -1140,10 +1147,6 @@ a.thumb-link:hover {
 
 .proposal-info-popup .leaflet-popup {
     width: 200px !important;
-}
-
-.proposal-info-popup .leaflet-popup-tip-container {
-    top: -1px;
 }
 
 .proposal-info-popup .leaflet-popup-close-button {

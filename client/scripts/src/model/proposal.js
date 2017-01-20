@@ -120,6 +120,11 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
             return this.get("address");
         },
 
+        getOtherAddresses: function() {
+            var others = this.get("other_addresses");
+            return others ? others.split(";") : [];
+        },
+
         getThumb: function() {
             var images = this.get("images");
 

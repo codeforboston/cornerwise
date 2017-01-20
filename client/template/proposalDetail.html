@@ -14,7 +14,16 @@
     <h4>
         <%- proposal.get("address") %>
     </h4>
-    <% } %>
+
+    <% var others = proposal.getOtherAddresses();
+
+    if (others.length) { %>
+    <h5>
+        <%- others.join(", ") %>
+    </h5>
+    <%
+    }
+    } %>
 
     <div class="case-number"><%- proposal.get("caseNumber") %></div>
     <%
