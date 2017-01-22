@@ -20,9 +20,7 @@ from . import extract
 from . import documents as doc_utils
 from .importers.register import Importers
 from cornerwise import celery_app
-from scripts import arcgis, gmaps, street_view
-from scripts.images import make_thumbnail
-
+from scripts import arcgis, foursquare, gmaps, images, street_view
 
 logger = logging.getLogger(__name__)
 task_logger = get_task_logger(__name__)
@@ -78,7 +76,7 @@ def extract_text(doc_id, encoding="ISO-8859-9"):
         task_logger.error("Failed to extract text from %s", path)
     else:
         task_logger.info("Extracted text from Document #%i to %s.", doc.pk,
-                    doc.fulltext)
+                         doc.fulltext)
         doc.fulltext = text_path
         doc.encoding = encoding
         doc.save()
@@ -137,19 +135,47 @@ def add_street_view(proposal_id):
         except IntegrityError:
             task_logger.warning("Image with that URL already exists: %s", url)
         except DataError:
-            task_logger.error("Image could not be saved.  Was the URL too long? %s",
-                         url)
+            task_logger.error(
+                "Image could not be saved.  Was the URL too long? %s", url)
 
     else:
-        task_logger.warn("Add a local_settings file with your Google API key " +
-                    "to add Street View images.")
+        task_logger.warn("Add a local_settings file with your Google API key "
+                         + "to add Street View images.")
+
+
+@celery_app.task(name="proposal.add_venue_info")
+def add_venue_info(proposal_id):
+    client_id = getattr(settings, "FOURSQUARE_CLIENT", None)
+    client_secret = getattr(settings, "FOURSQUARE_SECRET")
+
+    if not (client_id and client_secret):
+        return
+
+    proposal = Proposal.objects.get(pk=proposal_id)
+    lng, lat = proposal.location.coords
+    params = {"lat": lat, "lng": lng, "address": proposal.address}
+    venue = foursquare.find_venue(params, client_id, client_secret)
+
+    if venue:
+        logger.info("Found matching venue for proposal #{}: {}"\
+                    .format(proposal.id, venue["id"]))
+        proposal.attributes.create(
+            name="foursquare_id", text_value=venue["id"])
+        proposal.attributes.create(
+            name="foursquare_name", text_value=venue["name"])
+        if venue["url"]:
+            proposal.attributes.create(
+                name="foursquare_url", text_value=venue["url"])
+
+    return proposal_id
+
 
 @celery_app.task(name="proposal.add_parcel")
 def add_parcel(proposal_id):
     from parcel.models import Parcel
 
     proposal = Proposal.objects.get(pk=proposal_id)
-    parcels = Parcel.objects.containing(proposal.location)
+    parcels = Parcel.objects.containing(proposal.location).exclude(poly_type="ROW")
     if parcels:
         proposal.parcel = parcels[0]
         proposal.save()
@@ -162,7 +188,8 @@ def generate_doc_thumbnail(doc_id):
     "Generate a Document thumbnail."
     doc = Document.objects.get(pk=doc_id)
     if not doc.document:
-        task_logger.error("Document has not been copied to the local filesystem")
+        task_logger.error(
+            "Document has not been copied to the local filesystem")
         return
 
     return doc_utils.generate_thumbnail(doc)
@@ -206,14 +233,14 @@ def generate_thumbnail(image_id, replace=False):
             return
 
         try:
-            thumbnail_path = make_thumbnail(
+            thumbnail_path = iamges.make_thumbnail(
                 image.image.name, fit=settings.THUMBNAIL_DIM)
         except Exception as err:
             task_logger.error(err)
             return
 
         task_logger.info("Generate thumbnail for Image #%i: %s", image.pk,
-                    thumbnail_path)
+                         thumbnail_path)
         image.thumbnail = thumbnail_path
         image.save()
 
@@ -252,7 +279,6 @@ def add_doc_attributes(doc_id):
     return doc
 
 
-
 @celery_app.task(name="proposal.generate_thumbnails")
 def generate_thumbnails(image_ids):
     return generate_thumbnail.map(image_ids)()
@@ -264,16 +290,17 @@ def process_document(doc):
     """
     # Seems like a new bug in Celery: chain subtasks in a group do not seem to
     # receive the result from the previous task in the chain.
-    (fetch_document.s() |
-     celery.group(extract_images.s(doc.id) | generate_thumbnails.s(),
-                  generate_doc_thumbnail.s(),
-                  extract_text.s(doc.id) | add_doc_attributes.s()))(doc.id)
+    (fetch_document.s() | celery.group(
+        extract_images.s(doc.id) | generate_thumbnails.s(),
+        generate_doc_thumbnail.s(),
+        extract_text.s(doc.id) | add_doc_attributes.s()))(doc.id)
 
 
 def process_proposal(proposal):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
     add_street_view.delay(proposal.id)
+    add_venue_info.delay(proposal.id)
 
     add_parcel.delay(proposal.id)
 
@@ -317,11 +344,12 @@ def fetch_proposals(since=None,
         try:
             found = list(importer.updated_since(since, geocoder))
         except Exception as err:
-            task_logger.warning("Error in importer: %s - %s", importer_name, err)
+            task_logger.warning("Error in importer: %s - %s", importer_name,
+                                err)
             continue
 
         task_logger.info("Fetched %i proposals from %s",
-                    len(found), type(importer).__name__)
+                         len(found), type(importer).__name__)
         proposals_json += found
 
     proposals = []
@@ -333,7 +361,7 @@ def fetch_proposals(since=None,
             proposals.append(p)
         except Exception as exc:
             task_logger.error("Could not create proposal from dictionary: %s",
-                         p_dict)
+                              p_dict)
             task_logger.error("%s", exc)
 
     return [p.id for p in proposals]
