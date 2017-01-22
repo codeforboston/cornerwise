@@ -4,6 +4,7 @@ import imp
 import os
 
 from shared import importers
+from parcel.models import LotSize
 
 logger = logging.getLogger(__name__)
 
@@ -65,3 +66,5 @@ class Command(BaseCommand):
             self.stdout.write("This will take a while!")
             run_fn(logger)
         self.stdout.write("Import complete")
+
+        LotSize.refresh()

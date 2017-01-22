@@ -38,12 +38,13 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.gis',
     "django_celery_results",
-    'parcel',
-    "task",
+    "django_pgviews",
+    "parcel.ParcelConfig",
     'proposal.ProposalConfig',
     'project.ProjectConfig',
     'user.UserAppConfig',
-    'shared'
+    "task",
+    "shared",
 )
 
 MIDDLEWARE_CLASSES = (
