@@ -47,10 +47,20 @@ class Attribute(models.Model):
 # Views:
 class LotQuantiles(pg.View):
     sql = """
-    select percentile_disc(array[0.25, 0.5, 0.75]) within
-    group (order by cast(value as numeric)) from parcel_attribute
+    select
+        town_id,
+        percentile_disc(0.20) within group (order by cast(value as numeric))
+                as small_lot,
+        percentile_disc(0.80) within group (order by cast(value as numeric))
+                as medium_lot
+    from parcel_attribute att
+    join parcel_parcel p on p.gid = att.parcel_id
     where name='LOT_SIZE'
+    group by town_id
     """
+    town_id = models.IntegerField(primary_key=True)
+    small_lot = models.DecimalField(max_digits=10, decimal_places=5)
+    medium_lot = models.DecimalField(max_digits=10, decimal_places=5)
 
     class Meta:
         managed = False
