@@ -5,9 +5,34 @@ from functools import reduce
 import re
 
 from .models import Attribute
+from parcel.models import LotSize, LotQuantiles
 
 
-def build_attributes_query(d):
+def get_lot_size_groups():
+    quantiles = LotQuantiles.objects.all()[0]
+    return {
+        "small": {"lot_size__lte": quantiles.small_lot},
+        "medium": {"lot_size__lte": quantiles.medium_lot,
+                   "lot_size__gt": quantiles.small_lot},
+        "large": {"lot_size__gt": quantiles.medium_lot}
+    }
+
+LOT_SIZES = get_lot_size_groups()
+
+def make_size_query(param):
+    size_query = LOT_SIZES.get(param.lower())
+    if size_query:
+        return size_query
+
+    m = re.match(r"([<>])(=?)(\d+(\.\d+)?)", param)
+    if m:
+        size_op = "lot_size__{op}{eq}".format(
+            op="lt" if m.group(1) == "<" else "gt",
+            eq="e" if m.group(2) else "")
+        return {size_op: float(m.group(3))}
+
+
+def run_attributes_query(d):
     """Construct a Proposal query from query parameters.
 
     :param d: A dictionary-like object, typically something like
@@ -44,7 +69,7 @@ query_params = {
 
 def build_proposal_query_dict(d):
     subqueries = {}
-    ids = build_attributes_query(d) or []
+    ids = run_attributes_query(d) or []
 
     if "id" in d:
         ids = re.split(r"\s*,\s*", d["id"])
@@ -64,8 +89,12 @@ def build_proposal_query_dict(d):
             subqueries["project__isnull"] = True
         elif d["projects"] == "all":
             subqueries["project__isnull"] = False
-        # else:
-        #     subqueries["projects"] = d["project"]
+
+    if "lotsize" in d:
+        parcel_query = make_size_query(d["lotsize"])
+        if parcel_query:
+            parcel_ids = LotSize.objects.filter(**parcel_query).values("parcel_id")
+            subqueries["parcel_id__in"] = parcel_ids
 
     bounds = d.get("box")
     if bounds:

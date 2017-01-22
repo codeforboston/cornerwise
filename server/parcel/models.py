@@ -71,7 +71,7 @@ class LotSize(pg.MaterializedView):
     Since the parcel table does not change often, store this in a materialized
     view. Refresh when new parcels are imported.
     """
-    parcel = models.ForeignKey("parcel.Parcel", primary_key=True)
+    parcel = models.OneToOneField("parcel.Parcel", primary_key=True)
     lot_size = models.DecimalField(max_digits=10, decimal_places=5, db_index=True)
 
     concurrent_index = "parcel_id"
