@@ -6,7 +6,6 @@ from functools import reduce
 import json, operator, re
 
 from shared.address import normalize_number, normalize_street, split_address
-from shared.geo import geojson_data
 from shared.request import make_response, ErrorResponse
 
 from .models import Parcel, Attribute
@@ -58,6 +57,12 @@ def make_query(d, reducer=operator.and_):
     elif "include_row" not in d:
         return q & ~Q(poly_type="ROW")
 
+
+def geojson_data(geom):
+    return {
+        "type": geom.__class__.__name__,
+        "coordinates": geom.coords
+    }
 
 def parcels_for_request(req):
     """
