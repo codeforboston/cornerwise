@@ -36,6 +36,9 @@ PYTHON_BIN=$(which python3 || which python)
 echo "Applying any outstanding migrations"
 $PYTHON_BIN $APP_ROOT/manage.py migrate
 
+echo "Creating views"
+$PYTHON_BIN $APP_ROOT/manage.py sync_pgviews
+
 rm /tmp/*.pid
 
 # Start celery in the background of this container if there is not a linked
