@@ -171,9 +171,15 @@
 
             <select id="filter-lotsize" name="property_size" class="filter-selector">
                 <option class="selector-name">Lot Size</option>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
+                <option value="small">
+                    &lt; {{ lot_sizes.small }} ft&#xb2;
+                </option>
+                <option value="medium">
+                    {{ lot_sizes.small }}&ndash;{{ lot_sizes.medium }} ft&#xb2;
+                </option>
+                <option value="large">
+                    &gt; {{ lot_sizes.medium }} ft&#xb2;
+                </option>
             </select>
 
             <select id="filter-region" name="region" class="filter-selector">
