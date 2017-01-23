@@ -72,7 +72,8 @@ define(
                 projects: "typeFilter",
                 text: "textFilter",
                 box: "boxFilter",
-                region: "regionFilter"
+                region: "regionFilter",
+                lotsize: "lotSizeFilter"
             },
 
             /**
@@ -91,6 +92,9 @@ define(
              */
             isNarrowingQuery: function(newQuery, oldQuery) {
                 if (!oldQuery) return false;
+
+                if (newQuery.lotsize || oldQuery.lotsize)
+                    return false;
 
                 if (!newQuery.projects && oldQuery.projects ||
                     (oldQuery.projects && newQuery.projects !== oldQuery.projects))
@@ -219,26 +223,13 @@ define(
                 this.runQuery(query);
             },
 
+            ///- Convenience methods for setting filters:
             clearFilters: function() {
                 appState.clearHashKey("f");
             },
 
             filterByText: function(text) {
                 appState.setHashKey("f.text", text);
-            },
-
-            textFilter: function(query, s) {
-                if (!s)
-                    delete query.text;
-                else
-                    query.text = s;
-            },
-
-            typeFilter: function(query, val) {
-                if (/^(all|null)$/.exec(val))
-                    query.projects = val.toLowerCase();
-                else
-                    delete query.projects;
             },
 
             /**
@@ -265,6 +256,30 @@ define(
                     appState.clearHashKey("f.projects");
             },
 
+            filterByLotSize: function(lotSize) {
+                if (lotSize)
+                    appState.setHashKey("f.lotsize", lotSize);
+                else
+                    appState.clearHashKey("f.lotsize");
+            },
+
+
+            // Filter implementations. Called when the filters change to
+            // construct a new query.
+            textFilter: function(query, s) {
+                if (!s)
+                    delete query.text;
+                else
+                    query.text = s;
+            },
+
+            typeFilter: function(query, val) {
+                if (/^(all|null)$/.exec(val))
+                    query.projects = val.toLowerCase();
+                else
+                    delete query.projects;
+            },
+
             boxFilter: function(query, val) {
                 query.box = val;
             },
@@ -274,6 +289,10 @@ define(
                     var r = Regions.get(id);
                     return r ? r.get("name") : undefined;
                 }).join(";");
+            },
+
+            lotSizeFilter: function(query, size) {
+                query.lotsize = size;
             },
 
             // Returns a LatLngBounds object for the proposals that are

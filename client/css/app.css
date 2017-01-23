@@ -186,10 +186,6 @@ span.icon {
     transition: top 0.2s linear, background-color 0.2s linear;
 }
 
-#side-menu {
-    display: none;
-}
-
 #user-controls {
     float: right;
 }
@@ -234,7 +230,7 @@ h3 {
     font-size: small;
     flex: 1;
     padding: 0.4em;
-    width: 85%;
+    width: 97%;
 }
 
 /* Don't show focus: */
@@ -248,6 +244,7 @@ h3 {
 
 
 .input-group .status {
+    background-color: rgba(43, 43, 43, 0.98);
     display: none;
     position: absolute;
     right: 0.2em;
@@ -366,6 +363,35 @@ body.geolocating #geolocate:hover {
 
 body.geolocating #ref-address-form .go-button {
     display: none;
+}
+
+#filters-button {
+    display: none;
+
+    background-color: rgba(43, 43, 43, 1);
+    border-left: 1px solid white;
+    border-radius: 0 5px 5px 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    font-size: medium;
+    color: white;
+}
+
+#filters-button:hover {
+    background-color: white;
+    color: rgba(43, 43, 43, 1);
+    text-decoration: none;
+}
+
+#filters-button::after {
+    content: "\25be";
 }
 
 #ref-address-form .cancel {
@@ -1593,8 +1619,6 @@ a.document:before {
     padding: 3em;
     padding-top: 3em;
     position: absolute;
-    top: 0;
-    bottom: 0;
     background-color: white;
     width: 20em;
     max-width: 75%;
@@ -1633,6 +1657,11 @@ a.document:before {
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
+}
+
+.selector-name {
+    font-style: italic;
+    color: gray;
 }
 
 #filter-text {
@@ -1799,6 +1828,10 @@ body.choosing-bounds .leaflet-marker-icon
         top: 120px; 
     }
 
+    body.nointro #filters-button {
+        display: block;
+    }
+
     #subscribe {
         display: none;
         padding: 0.5em;
@@ -1840,6 +1873,21 @@ body.choosing-bounds .leaflet-marker-icon
 
     .nointro #alert-container {
         text-align: left;
+    }
+
+    #side-menu.collapsed {
+        display: none;
+    }
+
+    #side-menu {
+        width: 300px;
+        right: 200px;
+
+        top: 60px;
+    }
+
+    ._mobile-only {
+        display: none !important;
     }
 }
 
@@ -1934,6 +1982,11 @@ body.choosing-bounds .leaflet-marker-icon
 
     body #mode-controls {
         display: none !important;
+    }
+
+    #side-menu {
+        top: 0;
+        bottom: 0;
     }
 
     #side-menu.expanded {
@@ -2059,6 +2112,10 @@ body.choosing-bounds .leaflet-marker-icon
     #info .main-thumb {
         max-height: 200px;
         max-width: 100%;
+    }
+
+    ._desktop-only {
+        display: none !important;
     }
 }
 

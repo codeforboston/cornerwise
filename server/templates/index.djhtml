@@ -30,7 +30,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta name="description" content="Find and explore current and future zoning projects near you - City of Somerville."/>
-    <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning boardmurban planning,zoning,zoning board" />
+    <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning board,urban planning,zoning,zoning board" />
     <!-- OpenGraph -->
     <meta name="og:type" content="website" />
     <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
@@ -66,6 +66,12 @@
                            placeholder="Enter address, landmark, intersection"
                            autocomplete="off" />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
+
+                    <a id="filters-button" class="filter-results" href="#showmenu=1">
+                        <span>Filter</span>
+                        Filter
+                    </a>
+
                     <a id="geolocate" href="#"
                        title="Search near me"
                        aria-label="Search near me">
@@ -146,11 +152,11 @@
         <a href="#showmenu=0" class="close">&times;</a>
 
         <div class="menu-group" >
-            <div class="group-header">
+            <div class="group-header _mobile-only">
                 Filter Results
             </div>
 
-            <input id="filter-text" type="text" placeholder="Find text" />
+            <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
 
             <select name="complete" class="filter-selector">
                 <option class="selector-name">Application Status</option>
@@ -159,13 +165,15 @@
             </select>
 
 
-            <input id="filter-private" type="checkbox" checked/> Private
-            &mdash;
-            <input id="filter-public" type="checkbox" checked/> Public
+            <!-- <input id="filter-private" type="checkbox" checked/> Private -->
+            <!-- &mdash; -->
+            <!-- <input id="filter-public" type="checkbox" checked/> Public -->
 
-            <select name="property_size" class="filter-selector">
+            <select id="filter-lotsize" name="property_size" class="filter-selector">
                 <option class="selector-name">Lot Size</option>
-                <option value="">Lot Size</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
             </select>
 
             <select id="filter-region" name="region" class="filter-selector">
@@ -174,9 +182,9 @@
             </select>
         </div>
 
-        <hr class="group-separator" />
+        <hr class="group-separator _mobile-only" />
 
-        <div class="menu-group" >
+        <div class="menu-group _mobile-only" >
             <div class="group-header" >
                 View by
             </div>
@@ -205,9 +213,9 @@
         <!-- </div> -->
         <!-- </div> -->
 
-        <hr class="group-separator" />
+        <hr class="group-separator _mobile-only" />
 
-        <div class="menu-group" >
+        <div class="menu-group _mobile-only" >
             <div class="group-contents">
                 <a href="#view=about&showmenu=0" class="_setview">About Cornerwise</a>
                 <br/>

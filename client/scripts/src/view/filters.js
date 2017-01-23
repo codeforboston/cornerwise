@@ -95,6 +95,7 @@ define(
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
                 "change #filter-region": "updateRegion",
+                "change #filter-lotsize": "updateLotSize",
                 "click a.ref-loc": "selectAddress"
             },
 
@@ -104,6 +105,8 @@ define(
                 $("#filter-private").prop("checked", filters.projects != "all");
                 $("#filter-public").prop("checked", filters.projects != "null");
                 $("#filter-region").val(filters.region);
+                if (filters.lotsize)
+                    $("#filter-lotsize").val(filters.lotsize);
             },
 
             submitAddress: function(e) {
@@ -232,6 +235,10 @@ define(
                 });
 
                 $("#filter-region").html(html.join(""));
+            },
+
+            updateLotSize: function(e) {
+                this.collection.filterByLotSize(e.target.value);
             },
 
             updateRegion: function(e) {
