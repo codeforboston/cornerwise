@@ -49,13 +49,13 @@
                     <% if (lotSize) { %>
                     <tr class="attribute">
                         <th>Lot Size:</th>
-                        <td><%- lotSize %> acres</td>
+                        <td><%- commas(acresToSqFt(lotSize)) %> square feet</td>
                     </tr>
                     <% } %>
 
                     <% if (area) { %>
                     <tr class="attribute">
-                        <th>Residential Area</th>
+                        <th>Floor Area</th>
                         <td><%- commas(area) %> square feet</td>
                     </tr>
                     <% } %>

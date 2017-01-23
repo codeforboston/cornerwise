@@ -72,6 +72,10 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                return currency + commas(amount);
            }
 
+           function acresToSqFt(acres) {
+               return Math.round(acres * 43560);
+           }
+
            function prettyFraction(dec) {
                var whole = Math.floor(dec),
                    frac = dec - whole,
@@ -294,7 +298,9 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
 
                prettyDistance: prettyDistance,
 
-               prettyDate: prettyDate
+               prettyDate: prettyDate,
+
+               acresToSqFt: acresToSqFt
            };
 
            var $u = {
