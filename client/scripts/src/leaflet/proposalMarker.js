@@ -49,8 +49,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                        L.Marker.prototype.initialize.call(
                            this, loc,
                            {icon: getBadge(proposal),
-                            riseOnHover: true,
-                            title: proposal.get("address")});
+                            riseOnHover: true});
                    }
                    this.proposal = proposal;
 

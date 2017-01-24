@@ -21,10 +21,6 @@ define(
                 this.buildRegionSelection();
 
                 // Show the filter controls?
-                appState.onStateKeyChange("fc", function(fc) {
-                    this.toggle(fc === "1");
-                }, this, true);
-
                 appState.onStateKeyChange("showmenu", function(show, oldValue) {
                     if (_.isString(show))
                         this.toggleSideMenu(show == "1");
@@ -69,12 +65,6 @@ define(
                         var gbounds = $u.gBounds(bounds);
                         ac.setBounds(gbounds);
                     });
-            },
-
-            toggle: function(shouldShow) {
-                $("#filter-controls")
-                    .toggleClass("expanded", shouldShow)
-                    .toggleClass("collapsed", !shouldShow);
             },
 
             toggleSideMenu: function(show) {

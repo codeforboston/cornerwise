@@ -7,18 +7,18 @@ define(["backbone", "underscore", "config", "utils"],
 
                        getDefaults: function() {
                            return {
-                           // Filters:
-                           "f": {
-                               "projects": "",
-                               "range": "<60",
-                               // Region:
-                               "region": "somerville"
-                           },
-                           "ref": {
-                               "lat": config.refPointDefault.lat,
-                               "lng": config.refPointDefault.lng
-                           },
-                           sort: "-updated"
+                               // Filters:
+                               "f": {
+                                   "projects": "",
+                                   "range": "<60",
+                                   // Region:
+                                   "region": "somerville"
+                               },
+                               "ref": {
+                                   "lat": config.refPointDefault.lat,
+                                   "lng": config.refPointDefault.lng
+                               },
+                               sort: "-updated"
                            };
                        },
 

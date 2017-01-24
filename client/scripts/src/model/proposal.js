@@ -101,9 +101,9 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
 
             var query = pk ? {id: pk} : {lat: loc.lat,
                                          lng: loc.lng,
-                                         attributes: true,
                                          mode: "or",
                                          address: this.get("address")};
+            query.attributes = true;
 
             $.getJSON(config.backendURL + "/parcel/find", query)
                 .done(function(parcel) {

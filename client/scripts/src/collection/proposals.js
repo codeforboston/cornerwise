@@ -202,18 +202,13 @@ define(
             },
 
             updateQuery: function(filters) {
-                var query;
-
-                _.each(filters, function(val, key) {
+                return _.reduce(filters, function(query, val, key) {
                     if (this.queryFilters[key]) {
-                        if (!query) query = {};
-
                         var filter = this[this.queryFilters[key]];
                         filter.call(this, query, val, key, filters);
                     }
-                }, this);
-
-                return query;
+                    return query;
+                }, {}, this);
             },
 
             onFiltersChange: function(newFilters, oldFilters) {
