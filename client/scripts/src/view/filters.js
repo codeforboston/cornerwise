@@ -25,8 +25,9 @@ define(
                     this.toggle(fc === "1");
                 }, this, true);
 
-                appState.onStateKeyChange("showmenu", function(show) {
-                    this.toggleSideMenu(show == "1");
+                appState.onStateKeyChange("showmenu", function(show, oldValue) {
+                    if (_.isString(show))
+                        this.toggleSideMenu(show == "1");
                 }, this, true);
 
                 appState.onStateKeyChange(
@@ -77,6 +78,8 @@ define(
             },
 
             toggleSideMenu: function(show) {
+                $("#show-filters-button").toggle(!show);
+                $("#hide-filters-button").toggle(show);
                 $("#side-menu")
                     .toggleClass("expanded", show)
                     .toggleClass("collapsed", !show);

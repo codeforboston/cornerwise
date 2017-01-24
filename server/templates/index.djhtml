@@ -67,8 +67,10 @@
                            autocomplete="off" />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
 
-                    <a id="filters-button" class="filter-results" href="#showmenu=1">
-                        <span>Filter</span>
+                    <a id="show-filters-button" class="filters-button" href="#showmenu=1">
+                        Filter
+                    </a>
+                    <a id="hide-filters-button" style="display: none" class="filters-button" href="#showmenu=0">
                         Filter
                     </a>
 
@@ -149,7 +151,7 @@
     <div id="image-view"></div>
 
     <div id="side-menu" class="collapsed">
-        <a href="#showmenu=0" class="close">&times;</a>
+        <a href="#showmenu=0" class="close _mobile-only">&times;</a>
 
         <div class="menu-group" >
             <div class="group-header _mobile-only">

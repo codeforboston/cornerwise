@@ -365,7 +365,7 @@ body.geolocating #ref-address-form .go-button {
     display: none;
 }
 
-#filters-button {
+.filters-button {
     display: none;
 
     background-color: rgba(43, 43, 43, 1);
@@ -384,14 +384,18 @@ body.geolocating #ref-address-form .go-button {
     color: white;
 }
 
-#filters-button:hover {
+.filters-button:hover {
     background-color: white;
     color: rgba(43, 43, 43, 1);
     text-decoration: none;
 }
 
-#filters-button::after {
+#show-filters-button::after {
     content: "\25be";
+}
+
+#hide-filters-button::after {
+    content: "\25b2";
 }
 
 #ref-address-form .cancel {
@@ -1613,7 +1617,6 @@ a.document:before {
     padding-left: 0.2em;
 }
 
-
 #side-menu {
     box-shadow: 0 2px 3px rgba(180,180,180,1);
     padding: 3em;
@@ -1624,6 +1627,16 @@ a.document:before {
     max-width: 75%;
     z-index: 2;
     transition: right 0.2s ease-out;
+
+    display: none;
+}
+
+body.nointro #side-menu {
+    display: none;
+}
+
+body.nointro #side-menu.expanded {
+    display: block;
 }
 
 #side-menu .close {
@@ -1828,7 +1841,7 @@ body.choosing-bounds .leaflet-marker-icon
         top: 120px; 
     }
 
-    body.nointro #filters-button {
+    body.nointro .filters-button {
         display: block;
     }
 
@@ -1881,7 +1894,8 @@ body.choosing-bounds .leaflet-marker-icon
 
     #side-menu {
         width: 300px;
-        right: 200px;
+        /* right: 200px; */
+        right: 27%;
 
         top: 60px;
     }
