@@ -88,7 +88,7 @@ def generate_thumbnail(doc):
     if extension(path) != "pdf":
         return
 
-    out_prefix = os.path.join(os.path.dirname(path), "thumbnail")
+    out_prefix = path.join(path.dirname(path), "thumbnail")
 
     proc = subprocess.Popen(
         [
@@ -101,7 +101,7 @@ def generate_thumbnail(doc):
     if proc.returncode:
         raise Exception("Failed for document %s" % doc.pk, err)
 
-    thumb_path = out_prefix + os.path.extsep + "jpg"
+    thumb_path = out_prefix + path.extsep + "jpg"
     with open(thumb_path, "rb") as thumb_file:
         doc.thumbnail.save("thumbnail.jpg", File(thumb_file))
 
