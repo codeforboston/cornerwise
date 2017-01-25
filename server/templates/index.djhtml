@@ -22,10 +22,15 @@
      );
      {% endfor %}
     </script>
-    <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
-    <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
+    {% if production %}
+        <link rel="stylesheet" href="/static/css/app.build.css" type="text/css" media="screen" />
+        <script type="text/javascript"  href="/static/app.js"/>
+    {% else %}
+        <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
+        <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+    {% endif %}
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 

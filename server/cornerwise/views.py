@@ -17,5 +17,5 @@ LOT_SIZES = get_lot_sizes()
 def index(request):
     return render(request, "index.djhtml",
                   {"google_key": settings.GOOGLE_BROWSER_API_KEY,
-                   "app_mode": settings.APP_MODE,
+                   "production": settings.IS_PRODUCTION,
                    "lot_sizes": LOT_SIZES})

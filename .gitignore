@@ -28,3 +28,4 @@ client/css/font
 /client/scripts/src/build
 /client/app.js
 /server/celerybeat-schedule
+/client/css/app.build.css
