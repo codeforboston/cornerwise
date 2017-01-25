@@ -160,10 +160,12 @@
 
             <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
 
-            <select name="complete" class="filter-selector">
-                <option class="selector-name">Application Status</option>
-                <option value="1">Complete</option>
-                <option value="0">Pending</option>
+            <select id="filter-status" class="filter-selector">
+                <option value="" class="selector-name">
+                    - Application Status -
+                </option>
+                <option value="closed">Complete</option>
+                <option value="active">Pending</option>
             </select>
 
 
@@ -172,7 +174,9 @@
             <!-- <input id="filter-public" type="checkbox" checked/> Public -->
 
             <select id="filter-lotsize" name="property_size" class="filter-selector">
-                <option class="selector-name">Lot Size</option>
+                <option value="" class="selector-name">
+                    - Lot Size -
+                </option>
                 <option value="small">
                     &lt; {{ lot_sizes.small }} ft&#xb2;
                 </option>

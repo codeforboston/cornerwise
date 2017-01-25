@@ -89,6 +89,7 @@ define(
                 "change #filter-public": "updateProjectTypeFilter",
                 "change #filter-region": "updateRegion",
                 "change #filter-lotsize": "updateLotSize",
+                "change #filter-status": "updateApplicationStatus",
                 "click a.ref-loc": "selectAddress"
             },
 
@@ -100,6 +101,8 @@ define(
                 $("#filter-region").val(filters.region);
                 if (filters.lotsize)
                     $("#filter-lotsize").val(filters.lotsize);
+                if (filters.status)
+                    $("#filter-status").val(filters.status);
             },
 
             submitAddress: function(e) {
@@ -232,6 +235,10 @@ define(
 
             updateLotSize: function(e) {
                 this.collection.filterByLotSize(e.target.value);
+            },
+
+            updateApplicationStatus: function(e) {
+                this.collection.filterByApplicationStatus(e.target.value);
             },
 
             updateRegion: function(e) {

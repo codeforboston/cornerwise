@@ -73,7 +73,8 @@ define(
                 text: "textFilter",
                 box: "boxFilter",
                 region: "regionFilter",
-                lotsize: "lotSizeFilter"
+                lotsize: "lotSizeFilter",
+                status: "statusFilter"
             },
 
             /**
@@ -189,16 +190,18 @@ define(
             },
 
             runQuery: function(query) {
-                var lastQuery = this.lastQuery;
+                this.fetch();
 
-                if (this.isNarrowingQuery(query, this.lastQuery)) {
-                    // Find the results in the local cache.
-                    var pred = this.makePredicate(query),
-                        found = _.filter(this.resultCache, pred);
-                    this.set(found);
-                } else {
-                    this.fetch();
-                }
+                // var lastQuery = this.lastQuery;
+
+                // if (this.isNarrowingQuery(query, this.lastQuery)) {
+                //     // Find the results in the local cache.
+                //     var pred = this.makePredicate(query),
+                //         found = _.filter(this.resultCache, pred);
+                //     this.set(found);
+                // } else {
+                //     this.fetch();
+                // }
             },
 
             updateQuery: function(filters) {
@@ -258,6 +261,12 @@ define(
                     appState.clearHashKey("f.lotsize");
             },
 
+            filterByApplicationStatus: function(status) {
+                if (status)
+                    appState.setHashKey("f.status", status);
+                else
+                    appState.clearHashKey("f.status");
+            },
 
             // Filter implementations. Called when the filters change to
             // construct a new query.
@@ -286,8 +295,12 @@ define(
                 }).join(";");
             },
 
-            lotSizeFilter: function(query, size) {
-                query.lotsize = size;
+            lotSizeFilter: function(query, lotsize) {
+                query.lotsize = lotsize;
+            },
+
+            statusFilter: function(query, status) {
+                query.status = status;
             },
 
             // Returns a LatLngBounds object for the proposals that are
