@@ -1,13 +1,15 @@
 from collections import defaultdict, OrderedDict
 
-from proposal.models import Changeset, Document, Image, Proposal
+from django.forms.models import model_to_dict
+
+from proposal.models import Changeset, Document, Image, Proposal, Event
 from proposal.views import proposal_json
-from proposal.query import build_proposal_query
+from proposal.query import build_proposal_query_dict
 
 
 def summarize_query_updates(query, since, until=None):
     # Find proposals that are NEW since the given date:
-    proposals = Proposal.objects.filter(created__gt=since, **query,)
+    proposals = Proposal.objects.filter(updated__gt=since, **query,)
     new_ids = {proposal.pk for proposal in proposals}
 
     # Find proposals that have *changed*, but which are not new:
@@ -90,13 +92,34 @@ def summarize_subscription_updates(subscription, since, until=None):
     if query_dict is None:
         return None
 
-    query = build_proposal_query(query_dict)
+    query = build_proposal_query_dict(query_dict)
     # Don't include changes that predate the Subscription:
     since = max(subscription.created, since)
     return summarize_query_updates(query, since, until)
 
 
-def find_updates(subscription, since, until=None):
+def summarize_event(event):
+    d = model_to_dict(event, exclude=["created", "proposals"])
+    d["proposals"] = [{"case_number": p.case_number,
+                       "address": p.address} for p in event.proposals]
+    return d
+
+
+def summarize_event_updates(since, until=None, region=None):
+    query = {"created__gte": since}
+    if until:
+        query["created_lt"] = until
+    if region:
+        query["region_name"] = region
+
+    events = Event.objects.filter(**query)
+
+    if events:
+        return {"events": [{"title": event.title,
+                            "date": event.date} for event in events]}
+
+
+def find_updates(subscriptions, since, until=None):
     """Find and summarize changes that are relevant to the given subscriptions.
 
     Note that this is not very scalable, but frankly, I don't think it needs to
