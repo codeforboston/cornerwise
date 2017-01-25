@@ -58,13 +58,13 @@ define(["backbone", "underscore", "config", "utils"],
                            return $u.decodeQuery(B.history.getHash());
                        },
 
-                       getState: function() {
+                       getState: function(o) {
                            if (this._cachedState)
                                return this._cachedState;
 
                            return $u.deepMerge(
                                this.getDefaults(),
-                               this.getHashState());
+                               o || this.getHashState());
                        },
 
                        getKey: function(k) {
@@ -121,8 +121,7 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        triggerHashState: function(o) {
-                           o = o || $u.decodeQuery(B.history.getHash());
-                           this.trigger("hashState", o);
+                           this.trigger("hashState", this.getState(o));
                        },
 
                        watchers: [],
@@ -213,6 +212,9 @@ define(["backbone", "underscore", "config", "utils"],
                                var goto = $(this).data("goto");
 
                                if (goto) {
+                                   if (e.target !== e.currentTarget && e.target.tagName === "A")
+                                       return true;
+
                                    appState.setHashKey("view", goto);
 
                                    e.preventDefault();
@@ -231,11 +233,11 @@ define(["backbone", "underscore", "config", "utils"],
                                }
 
                                return true;
-                           })
-                               .on("click", "a._back", function(e) {
-                                   if (appState.goBack())
-                                       e.preventDefault();
-                               });
+                           });
+                           $(document).on("click", "a._back", function(e) {
+                               if (appState.goBack())
+                                   e.preventDefault();
+                           });
                        },
 
                        // Events that are not properly considered part of the
