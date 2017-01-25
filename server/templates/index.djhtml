@@ -252,6 +252,11 @@
         </div>
     </div>
 
+    <div id="info-menu" class="_desktop-only">
+        <a href="#view=about">About Cornerwise</a>
+        <a href="#view=contact">Contact</a>
+    </div>
+
     <script src="https://use.typekit.net/wpe7mmw.js"></script>
     <script type="text/javascript">
      try{Typekit.load({ async: true });}catch(e){}

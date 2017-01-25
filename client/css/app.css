@@ -82,16 +82,19 @@ body.loading-proposals #loading-indicator {
     position: absolute;
 }
 
-#map-controls.control a {
+.control a {
     border: 1px solid white;
     color: #2A749B;
-    display: block;
-    font-size: x-large;
     padding-left: 0.25em;
     padding-right: 0.25em;
 }
 
-#map-controls.control a:hover {
+#map-controls.control a {
+    font-size: x-large;
+    display: block;
+}
+
+.control a:hover {
     background-color: #2A749B;
     color: white !important;
     text-decoration: none;
@@ -111,6 +114,32 @@ body.loading-proposals #loading-indicator {
 
 body:not(.nointro) #map-controls {
     display: none;
+}
+
+#info-menu {
+    display: none;
+}
+
+body.main #info-menu {
+    bottom: 1.5em;
+    right: 4em;
+
+    display: block;
+    position: absolute;
+}
+
+#info-menu a {
+    padding: 0.5em;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid white;
+    color: #2A749B;
+    margin: 0;
+}
+
+#info-menu a:hover {
+    background-color: #2A749B;
+    color: white !important;
+    text-decoration: none;
 }
 
 button {
@@ -1025,6 +1054,7 @@ body.info #loading-indicator {
     height: auto;
     bottom: 0;
     overflow: auto;
+    z-index: 3;
 }
 
 #info .chart-area {
@@ -1627,7 +1657,6 @@ a.document:before {
     max-width: 75%;
     z-index: 2;
     transition: right 0.2s ease-out;
-
     display: none;
 }
 
@@ -1898,6 +1927,10 @@ body.choosing-bounds .leaflet-marker-icon
         right: 27%;
 
         top: 60px;
+    }
+
+    #info-menu {
+
     }
 
     ._mobile-only {
