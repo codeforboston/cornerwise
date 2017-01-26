@@ -8,11 +8,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from PyPDF2 import PdfFileReader
 
-ZBA_URL = "http://www.somervillema.gov/government/public-minutes?field_event_org_unit_nid=216"
-PB_URL = "http://www.somervillema.gov/government/public-minutes?field_event_org_unit_nid=206"
-
-ZBA_URL = "http://archive.somervillema.gov/government/public-minutes?field_event_org_unit_nid=216"
-PB_URL = "http://archive.somervillema.gov/government/public-minutes?field_event_org_unit_nid=206"
+EVENTS_URL = "http://archive.somervillema.gov/PubMtgs.cfm"
 
 # This is hard-coded, because it's difficult to consistently extract from the
 # PDF.
@@ -123,19 +119,8 @@ def page_events(url, filt=lambda _: True):
         }
 
 
-def zba_events():
-    return page_events(ZBA_URL)
-
-
-def pb_events():
-    def filt(row):
-        return row["Meeting"]["title"] == "Planning Board"
-
-    return page_events(PB_URL, filt)
-
 def get_events(since=None):
-    zba = zba_events()
-    pb = pb_events()
+    events = page_events(EVENTS_URL)
 
     if since:
         if not since.tzinfo:
@@ -144,10 +129,10 @@ def get_events(since=None):
         def is_recent(row):
             return row["posted"] > since
 
-        zba = itertools.takewhile(is_recent, zba)
-        pb = itertools.takewhile(is_recent, pb)
+        events = itertools.takewhile(is_recent, events)
 
-    return itertools.chain(zba, pb)
+    return (e for e in events if e["title"] in {"Planning Board",
+                                                "Zoning Board of Appeals"})
 
 
 class EventsImporter(object):

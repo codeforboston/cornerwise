@@ -58,7 +58,8 @@ def pull_events(since=None):
                 region_name=importer.region_name).order_by("-created")
             try:
                 last_event = all_events[0]
-                since = pytz.utc.localize(last_event.created)
+                if not last_event.created.tzinfo:
+                    since = pytz.utc.localize(last_event.created)
             except IndexError:
                 pass
 
