@@ -92,8 +92,9 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                return [whole, num, denom];
            }
 
-           function prettyDistance(ft) {
-               var miles = ft/5280;
+           function prettyDistance(meters) {
+               var ft = meters * 3.2808,
+                   miles = ft/5280;
 
                if (miles >= 0.2) {
                    var m = miles.toFixed(1).replace(/\.0$/, "");
@@ -488,9 +489,10 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                prettyAmount: prettyAmount,
 
                /**
-                * Convert a number to a human-friendly distance string.
+                * Convert a number (in meters) to a human-friendly distance
+                * string.
                 *
-                * @param {number} feet Distance in feet
+                * @param {number} meters Distance in meters
                 */
                prettyDistance: prettyDistance,
 
