@@ -8,6 +8,7 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                events: {
                    "click a.subscribe-link": "onClickSubscribe",
                    "click .cancel": "onCancel",
+                   "keyup input[name=email]": "onKeyUp",
                    "submit form": "onSubmit"
                },
 
@@ -29,7 +30,8 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                    $("body").addClass("choosing-bounds");
                    var instructions = ("Move and zoom the map to set the " +
                                        "area you want to receive updates " +
-                                       "about.");
+                                       "about. Your filter settings will " +
+                                       "apply.");
                    alerts.show(instructions, "instructions", "modal",
                                "subscription-alert");
 
@@ -40,6 +42,13 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                    this.$(".screen1").show();
                    $("body").removeClass("choosing-bounds");
                    alerts.remove("subscription-alert");
+               },
+
+               onKeyUp: function(e) {
+                   if (e.keyCode === 27) {
+                       this.dismiss();
+                       e.preventDefault();
+                   }
                },
 
                onCancel: function(e) {
