@@ -20,29 +20,17 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                ].join(" ");
            }
 
-           function getBadgeHTML(proposal) {
-               var project = proposal.getProject(),
-                   html = "";
-
-               // if (project) {
-               //     html =
-               //         "<img src='" + projectTypeIcon(project) +
-               //         "' class='project-type-badge'/>";
-               // }
-
-               return html;
-           }
-
            function getBadge(proposal) {
                return L.divIcon({
                    className: getBadgeClassName(proposal),
-                   iconSize: L.point(30, 30),
-                   html: getBadgeHTML(proposal)
+                   iconSize: L.point(30, 30)
                });
            }
 
            return L.Marker.extend({
                initialize: function(proposal) {
+                   this.proposal = proposal;
+
                    var loc = proposal.get("location");
 
                    if (loc) {
@@ -50,16 +38,20 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                            this, loc,
                            {icon: getBadge(proposal),
                             riseOnHover: true});
+                       var self = this;
+                       proposal
+                           .on("change:location", _.bind(this.locationChanged, this))
+                           .on("change:_hovered", _.bind(this.updateIcon, this))
+                           .on("change:_selected", _.bind(this.onSelected, this));
                    }
-                   this.proposal = proposal;
-
-                   var self = this;
-                   proposal
-                       .on("change:location", _.bind(this.locationChanged, this))
-                       .on("change:_hovered", _.bind(this.updateIcon, this))
-                       .on("change:_selected", _.bind(this.onSelected, this));
 
                    return this;
+               },
+
+               onAdd: function(l) {
+                   L.Marker.prototype.onAdd.call(this, l);
+                   if (this.proposal.get("_selected"))
+                       this.onSelected(this.proposal, true);
                },
 
                getModel: function() {
