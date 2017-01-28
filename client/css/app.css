@@ -1496,6 +1496,12 @@ ul.model-list li {
     padding: 1.5em;
 }
 
+#list-view .documents {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 90%;
+}
+
 #list-view a.document {
     line-height: 2em;
     padding-right: 1em;
