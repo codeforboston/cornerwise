@@ -73,6 +73,21 @@ define(
                 $("#side-menu")
                     .toggleClass("expanded", show)
                     .toggleClass("collapsed", !show);
+
+                if (show) {
+                    var self = this;
+                    if (!this._hideHandler) {
+                        var handler = _.bind(function(e) {
+                            if (!$(e.target).closest("#map-container,#side-menu").length) {
+                                appState.setHashKey("showmenu", "0");
+                                $(document.body).unbind("click", handler);
+                                delete self._hideHandler;
+                            }
+                        }, this);
+                        $(document.body).click(handler);
+                        this._hideHandler = null;
+                    }
+                }
             },
 
             events: {
