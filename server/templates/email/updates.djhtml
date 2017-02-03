@@ -1,9 +1,0 @@
-{% extends "email/base.djhtml %}
-
-{% block body %}
-Updates this week:
-
-<div class="change-list">
-    {% include "changes.djhtml" %}
-</div>
-{% endblock %}
