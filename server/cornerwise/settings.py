@@ -222,7 +222,9 @@ for envvar in ["GOOGLE_API_KEY",
                "ARCGIS_CLIENT_SECRET",
                "SOCRATA_APP_TOKEN",
                "SOCRATA_APP_SECRET",
-               "SENDGRID_API_KEY"]:
+               "SENDGRID_API_KEY",
+               "FOURSQUARE_CLIENT",
+               "FOURSQUARE_SECRET"]:
     globals()[envvar] = os.environ.get(envvar, "")
 
 
