@@ -123,15 +123,16 @@ body:not(.nointro) #map-controls {
 body.main #info-menu {
     bottom: 1.5em;
     right: 4em;
-
     display: block;
     position: absolute;
+
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid white;
 }
 
 #info-menu a {
-    padding: 0.5em;
-    background-color: rgba(255, 255, 255, 0.6);
-    border: 1px solid white;
+    padding-right: 0.25em;
+    padding-left: 0.25em;
     color: #2A749B;
     margin: 0;
 }
@@ -528,10 +529,6 @@ body.nointro #search-banner .overlay-contents {
 
 .filters .input-group {
     width: 250px;
-}
-
-.filters label {
-    font-size: smaller;
 }
 
 .toggle-filters {
@@ -1690,7 +1687,7 @@ body.nointro #side-menu.expanded {
     font-weight: bold;
 }
 
-.filter-selector {
+select {
     background-color: transparent;
     background: url(/static/images/down-arrow.png) right / contain no-repeat;
     border-color: gray;
@@ -1698,13 +1695,23 @@ body.nointro #side-menu.expanded {
     color: #4EAF48;
     display: block;
     font-size: 1em;
-    margin-top: 1em;
     margin-bottom: 1em;
     padding: 0.5em;
     width: 100%;
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
+}
+
+label.select {
+    color: #777;
+    font-size: small;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+textarea {
+    width: 100%;
 }
 
 .selector-name {

@@ -165,9 +165,12 @@
 
             <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
 
+            <label for="filter-status" class="select">
+                Application
+            </label>
             <select id="filter-status" class="filter-selector">
                 <option value="" class="selector-name">
-                    - Application Status -
+                    (all)
                 </option>
                 <option value="closed">Complete</option>
                 <option value="active">Pending</option>
@@ -178,9 +181,12 @@
             <!-- &mdash; -->
             <!-- <input id="filter-public" type="checkbox" checked/> Public -->
 
+            <label for="filter-lotsize" class="select">
+                Lot Size
+            </label>
             <select id="filter-lotsize" name="property_size" class="filter-selector">
                 <option value="" class="selector-name">
-                    - Lot Size -
+                    (all)
                 </option>
                 <option value="small">
                     &lt; {{ lot_sizes.small }} ft&#xb2;
@@ -193,6 +199,9 @@
                 </option>
             </select>
 
+            <label for="filter-region" class="select">
+                Region
+            </label>
             <select id="filter-region" name="region" class="filter-selector">
                 <option value="cambridge" selected>Somerville, MA</option>
                 <option value="somerville">Cambridge, MA</option>
@@ -221,6 +230,7 @@
 
         <!-- <hr class="group-separator" /> -->
 
+        <!-- Layers: -->
         <!-- <div class="menu-group" > -->
         <!-- <div class="group-header" > -->
         <!-- Show on Map -->
@@ -266,9 +276,9 @@
         <a href="#view=contact">Contact</a>
     </div>
 
-    <script src="https://use.typekit.net/wpe7mmw.js"></script>
-    <script type="text/javascript">
-     try{Typekit.load({ async: true });}catch(e){}
-    </script>
+    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
+    <!-- <script type="text/javascript"> -->
+    <!-- try{Typekit.load({ async: true });}catch(e){} -->
+    <!-- </script> -->
   </body>
 </html>
