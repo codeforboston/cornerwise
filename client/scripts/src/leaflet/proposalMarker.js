@@ -125,7 +125,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                        size = L.point(100*factor, 75*factor),
                        html = ["<img class='thumb' src='", proposal.getThumb(),  "'/>",
                                "<div class='", getBadgeClassName(proposal),
-                               "'>", getBadgeHTML(proposal), "</div>"].join("");
+                               "'>", "</div>"].join("");
 
                    this.setIcon(L.divIcon({
                        className: "zoomed-proposal-marker",
