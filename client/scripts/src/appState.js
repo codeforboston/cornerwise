@@ -115,7 +115,7 @@ define(["backbone", "underscore", "config", "utils"],
                        },
 
                        goBack: function() {
-                           if (this.lasView)
+                           if (this.lastView)
                                this.setHashKey("view", this.lastView);
                            return !!this.lastView;
                        },
@@ -209,10 +209,15 @@ define(["backbone", "underscore", "config", "utils"],
                                // if (e.currentTarget != e.target)
                                //     return true;
 
+                               if ($(this).hasClass("_back") && appState.goBack()) {
+                                   e.preventDefault();
+                                   return false;
+                               }
+
                                var goto = $(this).data("goto");
 
                                if (goto) {
-                                   if (e.target !== e.currentTarget && e.target.tagName === "A")
+                                   if (e.target !== e.currentTarget)
                                        return true;
 
                                    appState.setHashKey("view", goto);
@@ -233,10 +238,6 @@ define(["backbone", "underscore", "config", "utils"],
                                }
 
                                return true;
-                           });
-                           $(document).on("click", "a._back", function(e) {
-                               if (appState.goBack())
-                                   e.preventDefault();
                            });
                        },
 
