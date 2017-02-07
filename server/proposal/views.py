@@ -144,18 +144,27 @@ def download_document(req, pk):
 
 @make_response()
 def list_events(req):
-    events = Event.objects.all().order_by("")
+    events = Event.objects.upcoming()
 
-    return {"events": [event.to_dict() for event in events]}
+    return {"events": [event.to_json_dict() for event in events]}
 
 
-@make_response()
+@make_response("event.djhtml")
 def view_event(req, pk=None):
     if not pk:
         pk = req.GET.get("pk")
 
     event = get_object_or_404(Event, pk=pk)
-    return event.to_dict()
+    d = event.to_json_dict()
+    d["proposals"] = [
+        proposal_json(
+            p,
+            include_images=False,
+            include_attributes=["applicant_name", "legal_notice"],
+            include_documents=False)
+        for p in event.proposals.all().select_related("project")
+    ]
+    return {"event": d}
 
 
 @make_response()
