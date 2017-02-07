@@ -7,6 +7,7 @@ from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
 from PyPDF2 import PdfFileReader
+from PyPDF2.utils import PdfReadError
 
 EVENTS_URL = "http://archive.somervillema.gov/PubMtgs.cfm"
 
@@ -14,13 +15,16 @@ EVENTS_URL = "http://archive.somervillema.gov/PubMtgs.cfm"
 # PDF.
 DEFAULT_LOCATION = ("Aldermanic Chambers, Somerville City Hall, "
                     "Second Floor, 93 Highland Ave")
+DEFAULT_DESCRIPTIONS = {"Zoning Board of Appeals": ("The ZBA is the Special Permit Granting Authority for variances; appeals of decisions; Comprehensive Permit Petitions; and some Special Permit applications"),
+
+                        "Planning Board": ("The Planning Board is the Special Permit Granting Authority for special districts and makes recommendations to the Board of Aldermen on zoning amendments.")}
 
 DATE_FORMAT = "%b %d, %Y"
 POSTING_FORMAT = "%m/%d/%Y - %I:%M%p"
 
 # All the dates and times on the Somerville site are in this timezone.
 # Mysterious!
-TIMEZONE = pytz.timezone("US/Eastern")
+TZ = pytz.timezone("US/Eastern")
 
 
 def get_page(url):
@@ -97,21 +101,25 @@ def page_events(url, filt=lambda _: True):
     for row in filter(filt, data_rows(page)):
         agenda_url = row["Agenda"]["url"]
 
-        agenda_lines = pdf_lines(get_pdf(agenda_url))
+        try:
+            agenda_lines = pdf_lines(get_pdf(agenda_url))
+        except PdfReadError:
+            continue
+
         case_numbers = [case["number"] for case in to_cases(agenda_lines)]
 
         # Record as local datetime!
-        date = row["Date"]
-        date.replace(hour=6, minute=0)
-        date = TIMEZONE.localize(date)
+        date = TZ.localize(row["Date"].replace(hour=18, minute=0))
 
         # Record this in UTC!
-        posted = TIMEZONE.localize(row["Agenda Posting Date"]).astimezone(pytz.UTC)
+        posted = TZ.localize(row["Agenda Posting Date"]).astimezone(pytz.UTC)
+        title = row["Meeting"]["title"]
 
         yield {
             "date": date,
             "posted": posted,
-            "title": row["Meeting"]["title"],
+            "title": title,
+            "description": DEFAULT_DESCRIPTIONS.get(title),
             "agenda_url": agenda_url,
             "cases": case_numbers,
             "location": DEFAULT_LOCATION,
@@ -124,7 +132,7 @@ def get_events(since=None):
 
     if since:
         if not since.tzinfo:
-            since = TIMEZONE.localize(since)
+            since = TZ.localize(since)
 
         def is_recent(row):
             return row["posted"] > since
