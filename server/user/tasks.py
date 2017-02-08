@@ -18,13 +18,28 @@ from . import changes, mail
 logger = get_task_logger(__name__)
 
 
-@celery_app.task(name="user.send_updates")
-def send_subscription_updates(user_id, updates):
+@celery_app.task(name="user.send_user_updates")
+def send_user_updates(user_id, updates):
     user = User.objects.get(pk=user_id)
-    updates_html = render_to_string("email/changes.djhtml",
-                                    {"changes": updates})
-    mail.send_template(user, "Cornerwise: New Updates", "updates",
-                       {"updates": updates_html})
+    updates_html = render_to_string("changes.djhtml",
+                                    {"changes": updates["changes"]})
+
+    datefmt = lambda dt: datetime.fromtimestamp(dt).strftime("%A, %B %-d") if dt else ""
+    fmt = "from {start} to {end}" if updates["end"] else "since {start}"
+    date_range = fmt.format(
+        start=datefmt(updates["start"]), end=datefmt(updates["end"]))
+
+    mail.send(user, "Cornerwise: New Updates", "updates", {
+        "updates": updates_html,
+        "update_summary": changes.summary_line(updates),
+        "date_range": date_range
+    })
+
+
+def send_subscription_updates(subscription, since):
+    updates = changes.summarize_subscription_updates(subscription, since)
+    if updates["total"]:
+        send_user_updates.delay(subscription.user_id, updates)
 
 
 def send_user_welcome(user, subscription):
@@ -33,8 +48,11 @@ def send_user_welcome(user, subscription):
         profile.generate_token()
 
     # Render HTML and text templates:
-    context = {"confirm_url": make_absolute_url(profile.confirm_url),
-               "minimap_src": subscription.minimap_src}
+    context = {
+        "confirm_url": make_absolute_url(profile.confirm_url),
+        "minimap_src": subscription.minimap_src,
+        "subscription-preview": subscription.minimap_src
+    }
     mail.send(profile.user, "Cornerwise: Welcome", "welcome", context)
 
 
@@ -79,6 +97,7 @@ def send_subscription_confirmation_email(sub_id):
     context = {
         "subscription": subscription.readable_description,
         "minimap_src": subscription.minimap_src,
+        "subscription-preview": subscription.minimap_src,
         "old_minimap_src": existing.minimap_src,
         "confirmation_link": make_absolute_url(subscription.confirm_url)
     }
@@ -101,13 +120,14 @@ def send_notifications(subscription_ids=None, since=None):
         since = pytz.utc.localize(datetime.utcnow() - timedelta(days=7))
 
     for subscription in subscriptions:
-        updates = changes.summarize_subscription_updates(subscription, since)
-        if updates:
-            send_subscription_updates(subscription.user, updates)
+        send_subscription_updates(subscription, since)
 
 
 # Database hook:
-@receiver(post_save, sender=Subscription, dispatch_uid="send_subscription_confirmation_email")
+@receiver(
+    post_save,
+    sender=Subscription,
+    dispatch_uid="send_subscription_confirmation_email")
 def subscription_created(**kwargs):
     if kwargs["created"]:
         subscription = kwargs["instance"]

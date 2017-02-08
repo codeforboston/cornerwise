@@ -8,14 +8,15 @@ from proposal.query import build_proposal_query_dict
 
 
 def summarize_query_updates(query, since, until=None):
+    query_dict = build_proposal_query_dict(query)
     # Find proposals that are NEW since the given date:
-    proposals = Proposal.objects.filter(updated__gt=since, **query,)
+    proposals = Proposal.objects.filter(created__gt=since, **query_dict)
     new_ids = {proposal.pk for proposal in proposals}
 
     # Find proposals that have *changed*, but which are not new:
     proposals_changed = Proposal.objects\
                                 .exclude(pk__in=new_ids)\
-                                .filter(updated__gt=since, **query)
+                                .filter(updated__gt=since, **query_dict)
     if until:
         proposals_changed = proposals_changed.filter(updated__lte=until)
 
@@ -73,7 +74,12 @@ def summarize_query_updates(query, since, until=None):
         if image.proposal_id in summary:
             summary[image.proposal_id]["images"].append(image.to_dict())
 
-    return summary
+    return {"changes": summary,
+            "new": len(new_ids),
+            "updated": len(proposals_changed),
+            "total": len(new_ids) + len(proposals_changed),
+            "start": since.timestamp(),
+            "end": until.timestamp if until else None}
 
 
 def summarize_subscription_updates(subscription, since, until=None):
@@ -85,8 +91,10 @@ def summarize_subscription_updates(subscription, since, until=None):
     :since: a datetime
     :until: datetime
 
-    :returns: a dictionary with proposal ids as keys and dictionaries as
-    values. The dictionaries
+    :returns: a dictionary with the keys "changes", containing a dictionary
+    mapping proposal ids to changes; "new", a count of the new proposals; and
+    "updated", a count of the updated proposals.
+
     """
     query_dict = subscription.query_dict
     if query_dict is None:
@@ -135,3 +143,16 @@ def find_updates(subscriptions, since, until=None):
         summary = summarize_subscription_updates(subscription, since, until)
 
     return summary
+
+
+def summary_line(updates):
+    total_count = updates["total"]
+    if not total_count:
+        return "No updates"
+
+    new_count = updates["new"]
+    updated_count = updates["updated"]
+    return "".join([
+        "{} new {}".format(new_count, "and " if updated_count else ""),
+        "{} updated ".format(updated_count),
+        "proposal{}".format("s" if total_count > 1 else "")])
