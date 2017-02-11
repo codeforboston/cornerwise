@@ -3,8 +3,13 @@ from itertools import takewhile
 import logging
 import pytz
 import re
-from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
+
+try:
+    from urllib.request import urlopen
+    from urllib.error import HTTPError, URLError
+except ImportError:
+    from urllib import urlopen, HTTPError, URLError
+
 
 from . import helpers
 
@@ -47,28 +52,13 @@ def detect_last_page(doc):
     return 0
 
 
-# Field helpers:
-
-def get_links(elt):
-    "Return information about the <a> element descendants of elt."
-    return [helpers.link_info(a) for a in elt.find_all("a") if a["href"]]
-
-
-def default_field(td):
-    return td.get_text().strip()
-
 field_processors = {
     "reports": helpers.links_field,
     "decisions": helpers.links_field,
     "other": helpers.links_field,
-    "first_hearing_date": helpers.optional(helpers.dates_field),
+    "first_hearing_date": helpers.optional(helpers.date_field_tz("US/Eastern")),
     "updated_date": helpers.datetime_field_tz("US/Eastern")
 }
-
-
-def get_td_val(td, attr=None):
-    processor = field_processors.get(attr, default_field)
-    return processor(td)
 
 
 def add_geocode(geocoder, proposals):

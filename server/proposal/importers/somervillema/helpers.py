@@ -15,19 +15,16 @@ def to_under(s):
 
 
 def link_info(a):
-    return {
-        "title": a.get_text().strip(),
-        "url": a["href"]
-    }
+    return {"title": a.get_text().strip(), "url": a["href"]}
 
 
-def get_date(d):
-    return datetime.strptime(d, '%b %d, %Y')
+def get_date(d, tzinfo=None):
+    dt = datetime.strptime(d, "%b %d, %Y")
+    return tzinfo.localize(dt) if tzinfo else dt
 
 
 def get_datetime(datestring, tzinfo=None):
-    dt = datetime.strptime(datestring,
-                           "%m/%d/%Y - %I:%M%p")
+    dt = datetime.strptime(datestring, "%m/%d/%Y - %I:%M%p")
     if tzinfo:
         return tzinfo.localize(dt)
 
@@ -40,8 +37,14 @@ def get_links(elt):
 
 
 # Field processors:
-def dates_field(td):
-    return get_date(default_field(td))
+def date_field(td, tzinfo=None):
+    return get_date(default_field(td), tzinfo)
+
+
+def date_field_tz(tz):
+    if isinstance(tz, str):
+        tz = pytz.timezone(tz)
+    return partial(date_field, tzinfo=tz)
 
 
 def datetime_field(td, tzinfo=None):
@@ -68,12 +71,12 @@ def optional(fn, default=None):
     def helper(td):
         try:
             val = fn(td)
+            return default if val is None else val
         except:
             return default
 
-        return val if val is not None else default
-
     return helper
+
 
 def get_td_value(td, attr=None, processors={}):
     processor = processors.get(attr, default_field)
@@ -81,8 +84,11 @@ def get_td_value(td, attr=None, processors={}):
 
 
 def get_row_vals(attrs, tr, processors={}):
-    return {attr: get_td_value(td, attr, processors=processors)
-            for attr, td in zip(attrs, tr.find_all("td"))}
+    return {
+        attr: get_td_value(
+            td, attr, processors=processors)
+        for attr, td in zip(attrs, tr.find_all("td"))
+    }
 
 
 def col_names(table):
