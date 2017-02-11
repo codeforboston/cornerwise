@@ -44,7 +44,7 @@ def proposal_json(proposal,
         pdict["attributes"] = [a.to_dict() for a in attributes]
 
     if include_events:
-        pdict["events"] = [e.to_dict() for e in proposal.events.all()]
+        pdict["events"] = [e.to_json_dict() for e in proposal.events.all()]
 
     if include_projects and proposal.project:
         pdict["project"] = proposal.project.to_dict()
@@ -117,7 +117,8 @@ def view_proposal(req, pk=None):
     return proposal_json(
         proposal,
         include_attributes=True,
-        include_images=True)
+        include_images=True,
+        include_events=True)
 
 
 # Document views

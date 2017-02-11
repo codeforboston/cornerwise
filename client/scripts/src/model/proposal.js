@@ -49,6 +49,13 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
             if (!attrs.documents)
                 attrs.documents = [];
 
+            attrs.events = _.map(attrs.events, function(event, _i) {
+                event.date = new Date(event.date);
+                return event;
+            }).sort(function(event1, event2) {
+                return event2.date.getTime() - event1.date.getTime();
+            });
+
             attrs.attributes = _.indexBy(attrs.attributes || [], "handle");
 
             return attrs;

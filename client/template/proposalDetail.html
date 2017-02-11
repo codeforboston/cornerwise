@@ -19,6 +19,7 @@
 
     if (others.length) { %>
     <h5>
+        Additional addresses:
         <%- others.join(", ") %>
     </h5>
     <%
@@ -82,6 +83,26 @@
         </div>
         <!-- end documents -->
         <% } %>
+
+        <%
+        var events = proposal.get("events");
+
+        if (events.length) {
+        %>
+        <h5>Public Hearings</h5>
+        <div class="events">
+            <% _.each(events, function(event) { %>
+            <div>
+                <a class="event" href="/proposal/event/<%- event.id %>" target="_blank">
+                    <%- prettyDate(event.date) %> &mdash;
+                    <%- event.title %>
+                </a>
+            </div>
+            <% }); %>
+        </div>
+        <%
+        }
+        %>
     </div>
 
     <%

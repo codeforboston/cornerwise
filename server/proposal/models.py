@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 
 import pickle
+import pytz
 import utils
 
 
@@ -226,6 +227,11 @@ class Attribute(models.Model):
             self.date_value
 
 
+class EventManager(models.Manager):
+    def upcoming(self):
+        today = pytz.UTC.localize(datetime.today())
+        return self.filter(date__gte=today).order_by("date")
+
 class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
@@ -240,14 +246,17 @@ class Event(models.Model):
     description = models.TextField()
     proposals = models.ManyToManyField(
         Proposal, related_name="events", related_query_name="event")
+    minutes = models.URLField(blank=True)
+
+    objects = EventManager()
 
     class Meta:
         unique_together = (("date", "title", "region_name"))
 
-    def to_dict(self):
+    def to_json_dict(self):
         d = model_to_dict(self, exclude=["created", "proposals"])
-        d["date"] = d["date"].isoformat()
         return d
+
 
 
 def upload_document_to(doc, filename):
