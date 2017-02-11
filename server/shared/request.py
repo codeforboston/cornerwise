@@ -90,7 +90,8 @@ def make_response(template=None, error_template="error.djhtml",
 
 def json_view(view):
     def json_handler(req, *args, **kwargs):
-        resp = HttpResponse(json.dumps(view(req, *args, **kwargs)))
+        resp = HttpResponse(json.dumps(view(req, *args, **kwargs),
+                                       cls=DjangoJSONEncoder))
         resp["Content-type"] = "application/json"
         return resp
 
@@ -113,7 +114,7 @@ def make_redirect_response(redirect_to_url=None, redirect_to=None):
                 elif isinstance(data, dict):
                     level = data.get("level", "success")
                     level = getattr(messages, level.upper())
-                    message = json.dumps(data)
+                    message = json.dumps(data, cls=DjangoJSONEncoder)
                     extra_tags = "json"
                 elif isinstance(data, tuple):
                     (message, level) = data
