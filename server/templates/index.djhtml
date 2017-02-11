@@ -21,6 +21,8 @@
          {% templatetag closebrace %}
      );
      {% endfor %}
+
+     var _CornerwisePreload = {{ preload_data|escapejs }};
     </script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
     {% if production %}
@@ -166,14 +168,12 @@
             <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
 
             <label for="filter-status" class="select">
-                Application
+                Application Status
             </label>
             <select id="filter-status" class="filter-selector">
-                <option value="" class="selector-name">
-                    (all)
-                </option>
-                <option value="closed">Complete</option>
                 <option value="active">Pending</option>
+                <option value="closed">Complete</option>
+                <option value="all">All</option>
             </select>
 
 
@@ -185,9 +185,7 @@
                 Lot Size
             </label>
             <select id="filter-lotsize" name="property_size" class="filter-selector">
-                <option value="" class="selector-name">
-                    (all)
-                </option>
+                <option value="">(all)</option>
                 <option value="small">
                     &lt; {{ lot_sizes.small }} ft&#xb2;
                 </option>
@@ -276,9 +274,9 @@
         <a href="#view=contact">Contact</a>
     </div>
 
-    <!-- <script src="https://use.typekit.net/wpe7mmw.js"></script> -->
-    <!-- <script type="text/javascript"> -->
-    <!-- try{Typekit.load({ async: true });}catch(e){} -->
-    <!-- </script> -->
+    <script src="https://use.typekit.net/wpe7mmw.js"></script>
+    <script type="text/javascript">
+     try{Typekit.load({ async: true });}catch(e){}
+     /* <!-- </script> -->*/
   </body>
 </html>
