@@ -98,7 +98,18 @@ define(
                 });
 
                 appViews.imageView = new ImageView({
-                    el: "#image-view"
+                    el: "#image-view",
+                    step: function(id, dir) {
+                        var sel = proposals.getSelection(),
+                            next;
+
+                        for (var i = 0, l = sel.length; i < l; i++) {
+                            if ((next = sel[i].stepImage(id, dir)))
+                                break;
+                        }
+
+                        return next && next.id;
+                    }
                 });
 
                 appState.init();

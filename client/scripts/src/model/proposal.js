@@ -150,6 +150,24 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
             return config.defaultProposalThumb;
         },
 
+        /**
+         *
+         * Used to calculate next/previous when stepping through images.
+         *
+         * @param {number} id an image id
+         * @param {number} step How much to advance (if the step is positive) or
+         * retreat the index
+         *
+         * @returns {?object} An image or null
+         */
+        stepImage: function(id, step) {
+            var images = this.get("images"),
+                idx = _.findIndex(images,
+                                  function(image) { return image.id == id; });
+
+            return idx === undefined ? undefined : images[idx+step];
+        },
+
         getAttribute: function(handle) {
             return this.get("attributes")[handle];
         },
