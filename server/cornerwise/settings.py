@@ -125,12 +125,11 @@ SERVER_DOMAIN = "cornerwise.org"
 STATIC_URL = "static/"
 MEDIA_URL = "media/"
 
-if not IS_PRODUCTION:
-    STATIC_ROOT = '/client/'
-    MEDIA_ROOT = '/media/'
-else:
-    STATIC_ROOT = os.environ.get("APP_STATIC_ROOT", "/client/")
-    MEDIA_ROOT = os.environ.get("APP_MEDIA_ROOT", "/media/")
+STATIC_ROOT = "/client/"
+MEDIA_ROOT = "/media/"
+
+SERVE_STATIC = os.environ.get("DJANGO_SERVE_STATIC", "1") == "1"
+SERVE_MEDIA = os.environ.get("DJANGO_SERVE_MEDIA", "1") == "1"
 
 #######################
 # Celery configuration
