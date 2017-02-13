@@ -5,6 +5,16 @@ services:
     image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
+    volumes:
+      - ./server:/app
+      - ./client:/client
+      - ./data:/data
+      - ./docker-support:/support
+    environment:
+      APP_PORT: "4000"
+      APP_MODE: "development"
+    ports:
+      - "4000:4000"
     links:
       - postgres
       - redis
@@ -12,7 +22,6 @@ services:
     command: bash /app/start.sh
     volumes:
       - media:/media
-    working_dir: /app
   postgres:
     image: mdillon/postgis:9.4
     volumes:
