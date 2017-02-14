@@ -152,20 +152,32 @@ def make_sections(lines, matchers):
     return OrderedDict(generate_sections(lines, matchers))
 
 
-def get_lines(doc):
+strip_lines = [
+    r"CITY HALL\s+93 HIGHLAND AVENUE\s+SOMERVILLE, MASSACHUSETTS 02143",
+    r"(617) 625-6600 EXT. 2500  TTY: (617) 666-0001  FAX: (617) 625-0722",
+    r"^\s*www.somervillema.gov\s*$",
+    r"^\s*Page (\d+) of (\d+)\s*$",
+]
+
+
+def matches_any(s, regexes):
+    return any(re.search(regex, s) for regex in regexes)
+
+
+def get_lines(doc, strip_lines=strip_lines):
     """Returns a generator that successively produces lines from the
     document."""
     enc = doc.encoding
-    lines = (line.decode(enc) for line in doc.fulltext)
+    lines = (line.decode(enc) for line in doc.fulltext
+             if not matches_any(line, strip_lines))
 
     return lines
 
 
 staff_report_section_matchers = [
-    skip_match(r"CITY HALL", 2),
-    skip_match(r"Page \d+ of \d+"),
-    make_matcher(r"PLANNING STAFF REPORT", fn=str.lower),
-    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1, fn=str.lower)
+    make_matcher(
+        r"PLANNING STAFF REPORT", fn=str.lower), make_matcher(
+            r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1, fn=str.lower)
 ]
 
 
@@ -206,10 +218,7 @@ def find_vote(decision):
     patt = re.compile(r"voted (\d+-\d+) to (approve|deny)", re.I)
     m = re.search(patt, decision)
 
-    if m:
-        return m.group(1).split("-")
-
-    return None, None
+    return (m.group(1), m.group(2)) if m else (None, None)
 
 
 decision_section_matchers = [
@@ -235,9 +244,10 @@ def decision_properties(doc_json):
     if "properties" in sections:
         props.update(properties(sections["properties"]))
 
-    vote = find_vote(" ".join(sections["decision"]))
+    vote, decision = find_vote(" ".join(sections["decision"]))
     if vote:
         props["Vote"] = vote
+        props["Decision"] = decision
 
     return props
 
@@ -267,26 +277,3 @@ def get_properties(doc_json):
         return decision_properties(doc_json)
     else:
         return {}
-
-
-def split_event(desc):
-    """
-    Splits a string description of an event into
-    """
-    now = datetime.now()
-    dt, tokens = date_parse(desc, fuzzy_with_tokens=True, default=now)
-
-    if dt == now:
-        return None
-
-    dt = pytz.timezone("US/Eastern").localize(dt)
-
-    if len(tokens) > 0:
-        event_desc = tokens[0].strip()
-
-        if event_desc and not desc.index(event_desc.lstrip()) == 0:
-            event_desc = ""
-    else:
-        event_desc = ""
-
-    return {"date": dt, "title": event_desc}
