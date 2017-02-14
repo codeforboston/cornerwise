@@ -226,8 +226,9 @@ for envvar in ["GOOGLE_API_KEY",
     globals()[envvar] = os.environ.get(envvar, "")
 
 
-try:
-    # Allow user's local settings to shadow shared settings:
-    from .local_settings import *
-except ImportError as err:
-    print("Could not find local_settings.py -- ", err)
+if not IS_PRODUCTION:
+    try:
+        # Allow user's local settings to shadow shared settings:
+        from .local_settings import *
+    except ImportError as err:
+        print("Could not find local_settings.py -- ", err)

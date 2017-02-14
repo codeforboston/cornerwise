@@ -8,6 +8,7 @@ services:
       APP_PORT: 3000
     env_file:
       - ./docker-support/common.env
+      - ./docker-support/prod.env
     links:
       - postgres
       - redis
