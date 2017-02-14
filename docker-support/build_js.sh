@@ -20,6 +20,6 @@ mv ../client/dist/main.js ../client/app.js
 rm -r ../client/dist/
 
 echo "Minifying CSS"
-cssnano ../client/app.css ../client/app.build.css
+cssnano ../client/css/app.css ../client/css/app.build.css
 
 cd -
