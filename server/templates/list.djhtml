@@ -13,6 +13,7 @@
             </div>
             <div class="col-md-8" >
                 <h3>{{ proposal.address }}</h3>
+                <h4>{{ proposal.region_name }}</h4>
                 Last updated {{ proposal.updated|naturalday }}
 
                 {% if proposal.project %}
