@@ -84,7 +84,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                            return loc;
                        }, function(err) {
-                           alerts.show(err.reason);
+                           alerts.show(err.reason, "error");
                        })
                        .always(function() {
                            self.set("geolocating", false);
