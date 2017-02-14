@@ -6,8 +6,10 @@
     ],
     "plugins": {
         "requirejs": {
-            "baseURL": "./",
-            "paths": {}
+            "baseURL": "./src",
+            "paths": {
+                "backbone": "lib/backbone-min.js"
+            }
         }
     }
 }
