@@ -2,9 +2,9 @@ from django.conf import settings
 
 from django.contrib import messages
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from django.contrib.auth import login, logout
 
@@ -21,6 +21,8 @@ from user.models import Subscription, UserProfile
 from user.utils import not_logged_in, with_user
 
 logger = logging.getLogger(__file__)
+
+User = get_user_model()
 
 
 def user_dict(user):

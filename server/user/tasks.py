@@ -4,7 +4,7 @@ import pytz
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
@@ -16,6 +16,8 @@ from .models import Subscription, UserProfile
 from . import changes, mail
 
 logger = get_task_logger(__name__)
+
+User = get_user_model()
 
 
 @celery_app.task(name="user.send_user_updates")
