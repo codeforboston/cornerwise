@@ -187,9 +187,15 @@ def change_log(request):
 
     until = request.GET.get("until")
 
-    query = Subscription.validate_query(params)
+    if "sub_id" in request.GET:
+        sub = get_object_or_404(Subscription, pk=request.GET["sub_id"])
+        query = sub.query_dict
+    else:
+        query = Subscription.validate_query(params)
+
     summary = changes.summarize_query_updates(query, since)
     return {"since": since, "until": until, "changes": summary}
+
 
 
 @with_user
