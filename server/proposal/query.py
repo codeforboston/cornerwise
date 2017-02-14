@@ -17,10 +17,18 @@ def get_lot_size_groups():
         "large": {"lot_size__gt": quantiles.medium_lot}
     }
 
-LOT_SIZES = get_lot_size_groups()
+LOT_SIZES = None
+
+def get_lot_sizes():
+    global LOT_SIZES
+    if not LOT_SIZES:
+        LOT_SIZES = get_lot_size_groups()
+
+    return LOT_SIZES
+
 
 def make_size_query(param):
-    size_query = LOT_SIZES.get(param.lower())
+    size_query = get_lot_sizes().get(param.lower())
     if size_query:
         return size_query
 
