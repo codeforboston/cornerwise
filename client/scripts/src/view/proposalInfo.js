@@ -1,5 +1,5 @@
 /**
- * Defines the 'info view' shown at the bottom of the map.
+ * Defines the 'info view' overlay for a proposal.
  */
 define(["jquery", "backbone", "appState", "underscore", "config", "utils",
         "view/budget"],

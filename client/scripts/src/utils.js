@@ -436,12 +436,12 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                            },
                            function() {
                                promise.reject(
-                                   {reason: "Could not set location without " +
-                                    "user permission."});
+                                   {reason: ("Could not set location without " +
+                                             "user permission.")});
                            });
                    } else {
-                       promise.reject({reason: "Geolocation unavailable " +
-                                       "in this browser."});
+                       promise.reject({reason: ("Geolocation unavailable " +
+                                                "in this browser.")});
                    }
 
                    return promise;

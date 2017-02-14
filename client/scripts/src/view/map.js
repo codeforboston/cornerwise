@@ -30,17 +30,17 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    var map = L.map(this.el, mapOptions),
                        layer = L.tileLayer(config.tilesURL),
-                       zoningLayer = L.featureGroup(),
+                       markersLayer = L.featureGroup(),
                        parcelLayer = L.geoJson();
 
                    this.map = map;
 
                    map.addLayer(layer);
                    map.addLayer(parcelLayer);
-                   map.addLayer(zoningLayer);
+                   map.addLayer(markersLayer);
 
                    this.parcelLayer = parcelLayer;
-                   this.zoningLayer = zoningLayer;
+                   this.markersLayer = markersLayer;
 
                    map.on("zoomend", _.bind(this.updateControls, this))
                        .on("moveend", _.bind(this.updateMarkers, this))
@@ -177,9 +177,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                // Layer ordering (bottom -> top):
                // tiles, base layers, parcel layer, permits layer
 
-               // The Layer Group containing permit markers, set during
+               // The Layer Group containing proposal markers, set during
                // initialization.
-               zoningLayer: null,
+               markersLayer: null,
 
                // GeoJSON layer group containing parcel shapes
                parcelLayer: null,
@@ -194,7 +194,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        marker = new ProposalMarker(proposal),
                        proposals = this.collection;
 
-                   marker.addTo(this.zoningLayer);
+                   marker.addTo(this.markersLayer);
 
                    this.caseMarker[proposal.get("caseNumber")] = marker;
 
@@ -220,12 +220,13 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.listenTo(proposal, "change", this.changed);
                },
 
-               proposalRemoved: function(permit) {
-                   var caseNumber = permit.get("caseNumber"),
+               proposalRemoved: function(proposal) {
+                   // debugger;
+                   var caseNumber = proposal.get("caseNumber"),
                        marker = this.caseMarker[caseNumber],
                        parcel = this.parcelLayers[caseNumber];
                    if (marker) {
-                       this.zoningLayer.removeLayer(marker);
+                       this.markersLayer.removeLayer(marker);
                        delete this.caseMarker[caseNumber];
                    }
                    if (parcel)
@@ -235,7 +236,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                // Map of case # -> ILayer objects
                parcelLayers: {},
 
-               // Triggered when a child permit changes
+               // Triggered when a child proposal changes
                changed: function(change) {
                    var self = this,
                        excluded = change.get("_excluded"),
@@ -244,9 +245,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    if (marker) {
                        if (excluded) {
-                           self.zoningLayer.removeLayer(marker);
+                           self.markersLayer.removeLayer(marker);
                        } else {
-                           marker.addTo(self.zoningLayer);
+                           marker.addTo(self.markersLayer);
                        }
                    }
 
@@ -329,7 +330,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                /* Getting information about the markers. */
                updateMarkers: function() {
                    var map = this.map,
-                       pLayer = this.zoningLayer,
+                       pLayer = this.markersLayer,
                        bounds = map.getBounds(),
                        zoom = map.getZoom();
 
@@ -365,7 +366,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        if (!this._refMarker) {
                            this._refMarker =
                                (new RefMarker(refLocation))
-                               .addTo(this.zoningLayer);
+                               .addTo(this.markersLayer);
                        }
 
                        // Recenter
@@ -373,7 +374,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                                         {animate: false});
                        this._refMarker.bringToBack();
                    } else if (this._refMarker) {
-                       this.zoningLayer.removeLayer(this._refMarker);
+                       this.markersLayer.removeLayer(this._refMarker);
                        this._refMarker = null;
                    }
                },
