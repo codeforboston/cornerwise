@@ -2,7 +2,7 @@ version: "2"
 
 services:
   cornerwise:
-    image: cornerwise:latest
+    image: bdsand/cornerwise:latest
     environment:
       APP_MODE: production
       APP_PORT: 3000
