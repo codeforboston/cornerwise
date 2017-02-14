@@ -27,12 +27,16 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
     {% if production %}
         <link rel="stylesheet" href="/static/css/app.build.css" type="text/css" media="screen" />
-        <script type="text/javascript"  href="/static/app.js"/>
+        <script src="/static/scripts/require.js"></script>
+        <script>
+         require.config({paths: {"main": "/static/app"}});
+         require(["main"]);
+        </script>
     {% else %}
         <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
         <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
     {% endif %}
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -277,6 +281,6 @@
     <script src="https://use.typekit.net/wpe7mmw.js"></script>
     <script type="text/javascript">
      try{Typekit.load({ async: true });}catch(e){}
-     /* <!-- </script> -->*/
+    </script>
   </body>
 </html>
