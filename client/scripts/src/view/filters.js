@@ -2,10 +2,12 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "ref-location", "regions", "utils", "arcgis",
-     "app-state", "config"],
+    ["backbone", "underscore", "jquery", "refLocation", "collection/regions",
+     "utils", "api/arcgis", "api/places", "appState", "config"],
 
-    function(B, _, $, refLocation, regions, $u, arcgis, appState, config) {
+    function(B, _, $, refLocation, regions, $u, arcgis, places, appState, config) {
+        "use strict";
+
         return B.View.extend({
             el: document.body,
 
@@ -19,8 +21,9 @@ define(
                 this.buildRegionSelection();
 
                 // Show the filter controls?
-                appState.onStateKeyChange("fc", function(fc) {
-                    this.toggle(fc === "1");
+                appState.onStateKeyChange("showmenu", function(show, oldValue) {
+                    if (_.isString(show))
+                        this.toggleSideMenu(show == "1");
                 }, this, true);
 
                 appState.onStateKeyChange(
@@ -32,16 +35,63 @@ define(
                 appState.onStateKeyChange("f", function(filters) {
                     this.onFiltersChange(filters);
                 }, this);
+
+                // Google Places Autocomplete setup:
+                var self = this,
+                    placesOptions = {types: ["geocode"]},
+                    input = $("#ref-address-form input")[0];
+                places.setup(input, placesOptions)
+                    .done(function(ac) {
+                        self.placesSetup(ac, input);
+                        $(input).keypress(function(e) {
+                            if (e.which == 13) {
+                                e.preventDefault();
+                                input.blur();
+                            }
+                        });
+                    });
             },
 
-            toggle: function(shouldShow) {
-                $("#filter-controls")
-                    .toggleClass("expanded", shouldShow)
-                    .toggleClass("collapsed", !shouldShow);
+            placesSetup: function(ac, input) {
+                var self = this;
+
+                google.maps.event.addListener(ac, "place_changed", function() {
+                    self.onPlaceChanged(ac, input);
+                });
+
+                this.listenTo(
+                    regions, "regionBounds",
+                    function(bounds) {
+                        var gbounds = $u.gBounds(bounds);
+                        ac.setBounds(gbounds);
+                    });
+            },
+
+            toggleSideMenu: function(show) {
+                $("#show-filters-button").toggle(!show);
+                $("#hide-filters-button").toggle(show);
+                $("#side-menu")
+                    .toggleClass("expanded", show)
+                    .toggleClass("collapsed", !show);
+
+                if (show) {
+                    var self = this;
+                    if (!this._hideHandler) {
+                        var handler = _.bind(function(e) {
+                            if (!$(e.target).closest("#map-container,#side-menu").length) {
+                                appState.setHashKey("showmenu", "0");
+                                $(document.body).unbind("click", handler);
+                                delete self._hideHandler;
+                            }
+                        }, this);
+                        $(document.body).click(handler);
+                        this._hideHandler = null;
+                    }
+                }
             },
 
             events: {
-                "submit #ref-address-form": "submitAddress",
+                //"submit #ref-address-form": "submitAddress",
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
                 "click #reset": "clearInputs",
@@ -50,10 +100,11 @@ define(
                 // "change #filter-text": "filterText",
                 "keyup #filter-text": "filterText",
                 "search #filter-text": "filterText",
-                "click #filter-bounds": "filterBounds",
                 "change #filter-private": "updateProjectTypeFilter",
                 "change #filter-public": "updateProjectTypeFilter",
                 "change #filter-region": "updateRegion",
+                "change #filter-lotsize": "updateLotSize",
+                "change #filter-status": "updateApplicationStatus",
                 "click a.ref-loc": "selectAddress"
             },
 
@@ -63,6 +114,10 @@ define(
                 $("#filter-private").prop("checked", filters.projects != "all");
                 $("#filter-public").prop("checked", filters.projects != "null");
                 $("#filter-region").val(filters.region);
+                if (filters.lotsize)
+                    $("#filter-lotsize").val(filters.lotsize);
+                if (filters.status)
+                    $("#filter-status").val(filters.status);
             },
 
             submitAddress: function(e) {
@@ -86,6 +141,26 @@ define(
             selectAddress: function(e) {
                 $("#ref-address-form input").focus();
                 e.preventDefault();
+            },
+
+            onPlaceChanged: function(ac, input) {
+                var place = ac.getPlace(),
+                    geo = place.geometry;
+
+                if (geo) {
+                    $(input).removeClass("error");
+                    var loc = geo.location,
+                        addr = places.shortAddress(place);
+                    refLocation.setFromLatLng(loc.lat(),
+                                              loc.lng(),
+                                              addr);
+                } else {
+                    $(input)
+                        .addClass("error")
+                        .find(".error-reason").text("Could not locate that address!");
+
+                }
+                return false;
             },
 
             /**
@@ -166,11 +241,19 @@ define(
             buildRegionSelection: function() {
                 var html = regions.map(function(region) {
                     return ("<option value='" + region.id +
-                        "'>" + _.escape(region.get("regionName")) +
+                        "'>" + _.escape(region.get("name")) +
                             "</option>");
                 });
 
                 $("#filter-region").html(html.join(""));
+            },
+
+            updateLotSize: function(e) {
+                this.collection.filterByLotSize(e.target.value);
+            },
+
+            updateApplicationStatus: function(e) {
+                this.collection.filterByApplicationStatus(e.target.value);
             },
 
             updateRegion: function(e) {
@@ -179,19 +262,10 @@ define(
 
             // Filter the collection to only include models that lie within the
             // visible bounds.
-            filterBounds: function() {
-                this.collection.filterByViewBox(
-                    this.mapView.getMap().getBounds()); 
-            },
-
             updateProjectTypeFilter: function() {
                 this.collection.filterByProjectType(
                     $("#filter-private").prop("checked"),
                     $("#filter-public").prop("checked"));
-            },
-
-            clearFilterBounds: function() {
-                this.collection.filterByViewBox(null);
             }
         });
     });

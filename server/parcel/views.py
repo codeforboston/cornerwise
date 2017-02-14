@@ -1,18 +1,21 @@
 from django.contrib.gis.geos import Point
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from functools import reduce
 import json, operator, re
 
 from shared.address import normalize_number, normalize_street, split_address
-from shared.geo import geojson_data
 from shared.request import make_response, ErrorResponse
 
 from .models import Parcel, Attribute
 
+
 def make_query(d, reducer=operator.and_):
     subqueries = []
+
+    if "id" in d:
+        return Q(pk=d["id"])
 
     if "lng" in d and "lat" in d:
         try:
@@ -54,6 +57,13 @@ def make_query(d, reducer=operator.and_):
     elif "include_row" not in d:
         return q & ~Q(poly_type="ROW")
 
+
+def geojson_data(geom):
+    return {
+        "type": geom.__class__.__name__,
+        "coordinates": geom.coords
+    }
+
 def parcels_for_request(req):
     """
     Helper function for retrieving the parcel(s) at a given latitude and
@@ -62,7 +72,7 @@ def parcels_for_request(req):
     query = make_query(req.GET)
     queryset = Parcel.objects.filter(query).transform()
 
-        # Include attributes
+    # Include attributes
     if req.GET.get("attributes"):
         queryset = queryset.prefetch_related("attributes")
 
@@ -71,22 +81,24 @@ def parcels_for_request(req):
 
     return queryset
 
+
 def parcels_for_multi_request(req):
-    #
-    # [{ "lat": <lat>,
-    #    "lng": <lng>,
-    #    "id": <id> }]
+    """
+    Find parcels using the "points" parameter of a GET request. The value
+    should be a JSON-encoded array of dictionaries with "lat", "lng", and "id"
+    values. UNUSED.
+    """
     try:
         print(req.GET["points"])
         points = json.loads(req.GET["points"])
     except KeyError as kerr:
         raise ErrorResponse(
-            "",
-            {"error": "Missing required key: {}".format(kerr)})
+            "", {"error": "Missing required key: {}".format(kerr)})
     except ValueError:
-        raise ErrorResponse(
-            "",
-            {"error": "Malformed 'points' value; must be valid JSON array: {}".format(e)})
+        raise ErrorResponse("", {
+            "error":
+            "Malformed 'points' value; must be valid JSON array: {}".format(e)
+        })
 
     query = None
     for point in points:
@@ -98,18 +110,19 @@ def parcels_for_multi_request(req):
 
     return Parcel.objects.filter(query)
 
+
 def make_parcel_data(parcel, include_attributes=False):
     d = geojson_data(parcel.shape)
-    d["properties"] = {
-        "type": parcel.poly_type,
-        "loc_id": parcel.loc_id
-    }
+    d["properties"] = {"type": parcel.poly_type, "loc_id": parcel.loc_id}
 
     if include_attributes:
-        d["properties"].update(
-            {a.name: a.value for a in parcel.attributes.all()})
+        d["properties"].update({
+            a.name: a.value
+            for a in parcel.attributes.all()
+        })
 
     return d
+
 
 @make_response()
 def find_parcels(req):
@@ -118,10 +131,14 @@ def find_parcels(req):
 
         include_attributes = req.GET.get("attributes", False)
     except IndexError:
-        raise ErrorResponse(
-            "No matching parcels found",
-            status=404)
+        raise ErrorResponse("No matching parcels found", status=404)
     return make_parcel_data(parcel, include_attributes=include_attributes)
+
+
+@make_response()
+def view_parcel(req, pk):
+    parcel = get_object_or_404(Parcel, pk=pk)
+
 
 @make_response()
 def parcel_with_loc_id(req, loc_id=None):

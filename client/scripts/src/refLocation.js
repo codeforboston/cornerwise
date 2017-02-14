@@ -1,8 +1,8 @@
 /*
  * The reference location is used to determine the distance to
  */
-define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
-        "app-state"],
+define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
+        "collection/regions", "utils", "appState"],
        function(B, L, alerts, config, arcgis, regions, $u, appState) {
            var bounds;
 
@@ -68,7 +68,7 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
                    return $u.promiseLocation()
                        .then(function(loc) {
                            if (bounds && !bounds.contains(loc)) {
-                               alerts.show("You are outside " + config.regionName,
+                               alerts.show("You are outside " + config.name,
                                            "error");
                                return loc;
                            }
@@ -84,19 +84,25 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
 
                            return loc;
                        }, function(err) {
-                           alerts.show(err.reason);
+                           alerts.show(err.reason, "error");
                        })
                        .always(function() {
                            self.set("geolocating", false);
                        });
                },
 
-               setFromLatLng: function(lat, long) {
-                   this.set({setMethod: "map"});
+               setFromLatLng: function(lat, long, address) {
+                   if (address) {
+                       this.set({
+                           setMethod: "address",
+                           address: address
+                       });
+                   } else {
+                       this.set("setMethod", "map");
+                   }
                    appState.setHashKey("ref", {
                        lat: lat,
-                       lng: long,
-                       address: null
+                       lng: long
                    });
                },
 
@@ -105,7 +111,7 @@ define(["backbone", "leaflet", "alerts", "config", "arcgis", "regions", "utils",
                    this.set("geolocating", true);
                    return arcgis.geocode(addr).then(arcgis.getLatLngForFirstAddress).done(function(loc) {
                        if (bounds && !bounds.contains(loc)) {
-                           alerts.show("That address is outside " + config.regionName,
+                           alerts.show("That address is outside " + config.name,
                                        "error");
                            return loc;
                        }

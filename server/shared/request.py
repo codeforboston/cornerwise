@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render_to_response
@@ -57,7 +58,7 @@ def make_response(template=None, error_template="error.djhtml",
                                                    json=content)
 
                 response = HttpResponse(body, status=status)
-                response["Content-Type"] = "application/javascript"
+                response["Content-type"] = "application/javascript"
                 return response
 
             accepts = req.META["HTTP_ACCEPT"]
@@ -81,6 +82,56 @@ def make_response(template=None, error_template="error.djhtml",
                     return redirect(back_url or "/")
 
             return render_to_response(use_template, data, status=status)
+
+        return wrapped_view
+
+    return constructor_fn
+
+
+def json_view(view):
+    def json_handler(req, *args, **kwargs):
+        resp = HttpResponse(json.dumps(view(req, *args, **kwargs),
+                                       cls=DjangoJSONEncoder))
+        resp["Content-type"] = "application/json"
+        return resp
+
+    return json_handler
+
+def make_redirect_response(redirect_to_url=None, redirect_to=None):
+    """
+    Decorator function that converts the return value of the decorated view
+    function into a message (django.contrib.messsages) then redirects to a
+    specified URL or named url.
+    """
+    def constructor_fn(view):
+        def wrapped_view(req, *args, **kwargs):
+            try:
+                data = view(req, *args, **kwargs)
+                extra_tags = None
+                if isinstance(data, str):
+                    message = data
+                    level = messages.SUCCESS
+                elif isinstance(data, dict):
+                    level = data.get("level", "success")
+                    level = getattr(messages, level.upper())
+                    message = json.dumps(data, cls=DjangoJSONEncoder)
+                    extra_tags = "json"
+                elif isinstance(data, tuple):
+                    (message, level) = data
+
+                if isinstance(level, str):
+                    level = getattr(messages, level.upper())
+
+                messages.add_message(req, level, message, extra_tags=extra_tags)
+            except ErrorResponse as err:
+                data = err.data
+                messages.error(req, error.data["error"])
+
+            url = redirect_to_url or \
+                  (redirect_to and reverse(redirect_to)) or \
+                  "/#view=main"
+
+            return redirect(url)
 
         return wrapped_view
 

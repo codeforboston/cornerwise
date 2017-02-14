@@ -4,11 +4,11 @@
  * Application configuration options
  */
 
-define(["optional!local-config", "underscore"], function(localConfig, _) {
+define(["optional!localConfig", "underscore"], function(localConfig, _) {
     var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
-        tilesURL: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+        tilesURL: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png",
         tilesCredit: "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL",
 
         backendURL: "",
@@ -58,12 +58,12 @@ define(["optional!local-config", "underscore"], function(localConfig, _) {
         regions: [
             {
                 id: "somerville",
-                regionName: "Somerville, MA",
+                name: "Somerville, MA",
                 source: "/static/scripts/src/layerdata/somerville.geojson"
             },
             {
                 id: "cambridge",
-                regionName: "Cambridge, MA",
+                name: "Cambridge, MA",
                 source: "/static/scripts/src/layerdata/cambridge.geojson"
             }
         ],

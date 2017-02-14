@@ -14,7 +14,7 @@ def xobjects(pdf):
             yield x_id, xobject[x_id]
 
 
-def default_name(i, ext, xobject):
+def default_name(i, ext, img):
     return "image-{i:0>3}.{ext}".format(i=i, ext=ext)
 
 
@@ -25,14 +25,10 @@ def default_guard(xobject):
     return w >= 100 and h >= 100
 
 
-def extract_images(path, guard_fn=default_guard, name_fn=default_name,
-                   limit=10, dirname=None):
-    image_paths = []
-    if not dirname:
-        dirname = os.path.dirname(path)
+def get_images(path, guard_fn=default_guard):
     with open(path, "rb") as infile:
         pdf = PdfFileReader(infile)
-        for i, (xid, xobject) in enumerate(xobjects(pdf)):
+        for (xid, xobject) in xobjects(pdf):
             if xobject["/Subtype"] != "/Image":
                 continue
 
@@ -44,22 +40,21 @@ def extract_images(path, guard_fn=default_guard, name_fn=default_name,
             if filter == "/FlateDecode":
                 data = xobject.getData()
                 mode = "RGB" if xobject["/ColorSpace"] == "/DeviceRGB" else "P"
-                width = xobject["/Width"]
-                height = xobject["/Height"]
-                img = Image.frombytes(mode, (width, height), data)
-                filename = os.path.join(dirname, name_fn(i, "png", xobject))
-                img.save(filename)
-                image_paths.append(filename)
+                yield (Image.frombytes(mode, (xobject["/Width"], xobject["/Height"]), data), "png")
             elif filter == "/DCTDecode":
-                filename = os.path.join(dirname, name_fn(i, "jpg", xobject))
                 data = xobject._data
-                img = Image.open(BytesIO(data))
-                img.save(filename)
-                image_paths.append(filename)
+                yield (Image.open(BytesIO(data)), "jpeg")
             else:
                 continue
 
-            if len(image_paths) == limit:
-                break
 
-    return image_paths
+def extract_images(path, filter_fn=default_guard, limit=10):
+    limit -= 1
+    for i, (image, ext) in enumerate(get_images(path, filter_fn)):
+        image_out = BytesIO()
+        image.save(image_out, ext)
+        yield (image_out, ext)
+
+        if i == limit:
+            break
+

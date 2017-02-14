@@ -7,3 +7,5 @@ class ProposalConfig(AppConfig):
     def ready(self):
         # Register tasks with Celery:
         from . import tasks
+        from . import event_tasks
+

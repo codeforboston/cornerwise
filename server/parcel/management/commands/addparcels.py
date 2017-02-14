@@ -3,27 +3,17 @@ import logging
 import imp
 import os
 
+from shared import importers
+from parcel.models import LotSize
+
 logger = logging.getLogger(__name__)
 
-IMPORTER_DIR = "/app/parcel/importers"
+IMPORTER_DIR = "/app/parcel/importers" 
 
 
-def get_importer_module(file_name, path=IMPORTER_DIR):
-    try:
-        assert file_name.endswith(".py")
-        mod_name = file_name[0:-3]
-        file_path = os.path.join(path, file_name)
-        mod = imp.load_source(mod_name, file_path)
-        assert hasattr(mod, "run")
-        return mod
-    except:
-        return None
-
-
-def find_importers(path=IMPORTER_DIR):
-    for file_name in os.listdir(path):
-        mod = get_importer_module(file_name, path)
-        if mod: yield mod
+def find_importers():
+    return filter(lambda mod: hasattr(mod, "run"),
+                  importers.find_modules(IMPORTER_DIR))
 
 
 class Command(BaseCommand):
@@ -45,11 +35,12 @@ class Command(BaseCommand):
             self.run_all()
 
         if not options["name"]:
-            raise CommandError("You did not tell me what to import!")
+            raise CommandError("You did not tell me what to import!\n"
+                               "Run again with --help argument for usage.")
 
         modules = []
         for mod_name in options["name"]:
-            mod = get_importer_module(mod_name + ".py")
+            mod = importers.get_module(mod_name + ".py", IMPORTER_DIR)
             if not mod:
                 raise CommandError("Unknown importer '%s'\n" % mod_name)
             modules.append(mod)
@@ -72,5 +63,8 @@ class Command(BaseCommand):
             run_fn = getattr(module, "run")
             mod_name = getattr(module, "name", module.__name__)
             self.stdout.write("Running importer for '%s'\n" % mod_name)
+            self.stdout.write("This will take a while!")
             run_fn(logger)
         self.stdout.write("Import complete")
+
+        LotSize.refresh()

@@ -3,11 +3,13 @@ from datetime import datetime
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.core.urlresolvers import reverse
+from django.dispatch import receiver
 from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
 import pickle
+import pytz
 import utils
 
 
@@ -32,10 +34,6 @@ class ProposalManager(models.GeoManager):
 
         return self.filter(q)
 
-    def build_query(self, params):
-        "Construct a query from parameters"
-        pass
-
     def for_parcel(self, parcel):
         return self.filter(location__within=parcel.shape)
 
@@ -47,30 +45,34 @@ def make_property_map():
     def _G(p):
         return lambda d: d[p]
 
+    def get_other_addresses(d):
+        return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
+
     return [("address", _G("address")),
+            ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["long"], d["lat"])),
             ("summary", lambda d: d.get("summary", "")[0:1024]),
-            ("description", _g("description")),
-            ("source", _g("source")),
+            ("description", _g("description")), ("source", _g("source")),
             ("region_name", _g("region_name")),
-            ("updated", _G("updated_date")),
-            ("complete", _G("complete"))]
+            ("updated", _G("updated_date")), ("complete", _G("complete"))]
+
 
 property_map = make_property_map()
 
 
 class Proposal(models.Model):
-    case_number = models.CharField(max_length=64,
-                                   unique=True,
-                                   help_text=("The unique case number "
-                                              "assigned by the city"))
-    address = models.CharField(max_length=128,
-                               help_text="Street address")
+    case_number = models.CharField(
+        max_length=64,
+        unique=True,
+        help_text=("The unique case number "
+                   "assigned by the city"))
+    address = models.CharField(max_length=128, help_text="Street address")
+    other_addresses = models.CharField(max_length=250,
+                                       blank=True,
+                                       help_text="Other addresses covered by this proposal")
     location = models.PointField(help_text="The latitude and longitude")
-    region_name = models.CharField(max_length=128,
-                                   default="Somerville, MA",
-                                   null=True,
-                                   help_text="")
+    region_name = models.CharField(
+        max_length=128, default="Somerville, MA", null=True, help_text="")
     # The time when the proposal was last saved:
     modified = models.DateTimeField(auto_now=True)
     # The last time that the source was changed:
@@ -78,8 +80,8 @@ class Proposal(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     summary = models.CharField(max_length=1024, default="")
     description = models.TextField(default="")
-    source = models.URLField(null=True,
-                             help_text="The data source for the proposal.")
+    source = models.URLField(
+        null=True, help_text="The data source for the proposal.")
     status = models.CharField(max_length=64)
 
     # A proposal can be associated with a Project:
@@ -87,7 +89,8 @@ class Proposal(models.Model):
     # A misnomer; if True, indicates that the proposal has been approved:
     complete = models.BooleanField(default=False)
 
-    # To enable geo queries
+    parcel = models.ForeignKey("parcel.Parcel", null=True)
+
     objects = ProposalManager()
 
     def get_absolute_url(self):
@@ -117,10 +120,12 @@ class Proposal(models.Model):
             try:
                 val = fn(p_dict)
                 if changed and val != old_val:
-                    prop_changes.append({"name": p,
-                                         "new": val,
-                                         "old": old_val})
-                setattr(proposal, p, fn(p_dict))
+                    prop_changes.append({
+                        "name": p,
+                        "new": val,
+                        "old": old_val
+                    })
+                setattr(proposal, p, val)
             except Exception as exc:
                 if old_val:
                     continue
@@ -155,20 +160,24 @@ class Proposal(models.Model):
                 attr = proposal.attributes.get(handle=handle)
                 old_val = attr.text_value
             except Attribute.DoesNotExist:
-                proposal.attributes.create(name=attr_name,
-                                           handle=handle,
-                                           text_value=attr_val,
-                                           published=p_dict["updated_date"])
+                proposal.attributes.create(
+                    name=attr_name,
+                    handle=handle,
+                    text_value=attr_val,
+                    published=p_dict["updated_date"])
                 old_val = None
             if changed:
-                attr_changes.append({"name": attr_name,
-                                     "old": old_val,
-                                     "new": attr_val})
+                attr_changes.append({
+                    "name": attr_name,
+                    "old": old_val,
+                    "new": attr_val
+                })
 
         if changed:
-            changeset = Changeset.from_changes(proposal,
-                                               {"properties": prop_changes,
-                                                "attributes": attr_changes})
+            changeset = Changeset.from_changes(proposal, {
+                "properties": prop_changes,
+                "attributes": attr_changes
+            })
             changeset.save()
 
         return (created, proposal)
@@ -192,9 +201,15 @@ class Attribute(models.Model):
     #     unique_together = ("proposal", "handle")
 
     def to_dict(self):
-        return {"name": self.name,
-                "handle": self.handle,
-                "value": self.text_value or self.date_value}
+        d = {"name": self.name, "handle": self.handle}
+        if self.text_value:
+            d["value"] = self.text_value
+            d["value_type"] = "text"
+        elif self.date_value:
+            d["value"] = self.date_value.isoformat()
+            d["value_type"] = "date"
+
+        return d
 
     def set_value(self, v):
         if isinstance(v, str):
@@ -212,18 +227,40 @@ class Attribute(models.Model):
             self.date_value
 
 
+class EventManager(models.Manager):
+    def upcoming(self):
+        today = pytz.UTC.localize(datetime.today())
+        return self.filter(date__gte=today).order_by("date")
+
 class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
     """
     title = models.CharField(max_length=256, db_index=True)
+    created = models.DateTimeField(auto_now_add=True)
     date = models.DateTimeField(db_index=True)
     duration = models.DurationField(null=True)
+    location = models.CharField(
+        max_length=256, default="Somerville City Hall, 93 Highland Ave")
+    region_name = models.CharField(max_length=128, default="Somerville, MA")
     description = models.TextField()
-    proposals = models.ManyToManyField(Proposal, related_name="proposals")
+    proposals = models.ManyToManyField(
+        Proposal, related_name="events", related_query_name="event")
+    minutes = models.URLField(blank=True)
 
-    def to_dict(self):
-        return model_to_dict(self, exclude=["proposals"])
+    objects = EventManager()
+
+    class Meta:
+        unique_together = (("date", "title", "region_name"))
+
+    def to_json_dict(self):
+        d = model_to_dict(self, exclude=["created", "proposals"])
+        return d
+
+
+
+def upload_document_to(doc, filename):
+    return "doc/%s/%s" % (doc.pk, filename)
 
 
 class Document(models.Model):
@@ -231,14 +268,14 @@ class Document(models.Model):
     A document associated with a proposal.
     """
     proposal = models.ForeignKey(Proposal)
-    event = models.ForeignKey(Event, null=True,
-                              help_text="Event associated with this document")
+    event = models.ForeignKey(
+        Event, null=True, help_text="Event associated with this document")
     url = models.URLField()
-    title = models.CharField(max_length=256,
-                             help_text="The name of the document")
-    field = models.CharField(max_length=256,
-                             help_text=("The field in which the document"
-                                        " was found"))
+    title = models.CharField(
+        max_length=256, help_text="The name of the document")
+    field = models.CharField(
+        max_length=256,
+        help_text=("The field in which the document was found"))
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
 
@@ -246,13 +283,13 @@ class Document(models.Model):
     published = models.DateTimeField(null=True)
 
     # If the document has been copied to the local filesystem:
-    document = models.FileField(null=True)
+    document = models.FileField(null=True, upload_to=upload_document_to)
 
     # File containing extracted text of the document:
     fulltext = models.FileField(null=True)
     encoding = models.CharField(max_length=20, default="")
     # File containing a thumbnail of the document:
-    thumbnail = models.FileField(null=True)
+    thumbnail = models.FileField(null=True, upload_to=upload_document_to)
 
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
@@ -262,8 +299,8 @@ class Document(models.Model):
         return reverse("view-document", kwargs={"pk": self.pk})
 
     def to_dict(self):
-        d = model_to_dict(self, exclude=["event", "document",
-                                         "fulltext", "thumbnail"])
+        d = model_to_dict(
+            self, exclude=["event", "document", "fulltext", "thumbnail"])
         if self.thumbnail:
             d["thumb"] = self.thumbnail.url
 
@@ -283,13 +320,29 @@ class Document(models.Model):
     move_file = utils.make_file_mover("document")
 
 
+@receiver(models.signals.post_delete, sender=Document)
+def auto_delete_document(**kwargs):
+    document = kwargs["instance"]
+    if document.document:
+        document.document.delete(save=False)
+    if document.thumbnail:
+        document.thumbnail.delete(save=False)
+    if document.fulltext:
+        document.fulltext.delete(save=False)
+
+
+def upload_image_to(doc, filename):
+    fmt = "doc/%s/images/%s" if doc.document else "prop/%s/%s"
+    return fmt % (doc.document_id, filename)
+
+
 class Image(models.Model):
     """An image associated with a document.
     """
     proposal = models.ForeignKey(Proposal, related_name="images")
-    document = models.ForeignKey(Document, null=True,
-                                 help_text="Source document for image")
-    image = models.FileField(null=True)
+    document = models.ForeignKey(
+        Document, null=True, help_text="Source document for image")
+    image = models.FileField(null=True, upload_to=upload_image_to)
     thumbnail = models.FileField(null=True)
     url = models.URLField(null=True, unique=True, max_length=512)
     # Crude way to specify that an image should not be copied to the
@@ -306,9 +359,20 @@ class Image(models.Model):
         return self.image and self.image.url or self.url
 
     def to_dict(self):
-        return {"id": self.pk,
-                "src": self.get_url(),
-                "thumb": self.thumbnail.url if self.thumbnail else None}
+        return {
+            "id": self.pk,
+            "src": self.get_url(),
+            "thumb": self.thumbnail.url if self.thumbnail else None
+        }
+
+
+@receiver(models.signals.post_delete, sender=Image)
+def auto_delete_image(**kwargs):
+    image = kwargs["instance"]
+    if image.image:
+        image.image.delete(save=False)
+    if image.thumbnail:
+        image.thumbnail.delete(save=False)
 
 
 class Changeset(models.Model):

@@ -1,6 +1,6 @@
-define(["backbone", "config", "leaflet", "jquery", "underscore",
-        "ref-location", "ref-marker", "proposal-marker", "layers",
-        "regions", "info-layer-helper", "app-state", "utils"],
+define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocation",
+        "leaflet/refMarker", "leaflet/proposalMarker", "collection/layers",
+        "collection/regions", "leaflet/infoLayer", "appState", "utils"],
        function(B, config, L, $, _, refLocation, RefMarker,
                 ProposalMarker, infoLayers, regions, info, appState, $u) {
 
@@ -25,33 +25,34 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                    if (_.isFinite(zoom))
                        mapOptions.zoom = zoom;
-                   else 
+                   else
                        mapOptions.zoom = 14;
 
                    var map = L.map(this.el, mapOptions),
                        layer = L.tileLayer(config.tilesURL),
-                       zoningLayer = L.featureGroup(),
+                       markersLayer = L.featureGroup(),
                        parcelLayer = L.geoJson();
 
                    this.map = map;
 
                    map.addLayer(layer);
                    map.addLayer(parcelLayer);
-                   map.addLayer(zoningLayer);
+                   map.addLayer(markersLayer);
 
                    this.parcelLayer = parcelLayer;
-                   this.zoningLayer = zoningLayer;
+                   this.markersLayer = markersLayer;
 
-                   map.on("zoomend", _.bind(this.updateControls, this));
-                   map.on("moveend", _.bind(this.updateMarkers, this));
-                   map.on("moveend", function() {
-                       var center = map.getCenter();
-                       appState.extendHash({
-                           lat: center.lat,
-                           lng: center.lng,
-                           zoom: map.getZoom()
+                   map.on("zoomend", _.bind(this.updateControls, this))
+                       .on("moveend", _.bind(this.updateMarkers, this))
+                       .on("popupopen", _.bind(this.onPopupOpened, this))
+                       .on("moveend", function() {
+                           var center = map.getCenter();
+                           appState.extendHash({
+                               lat: center.lat,
+                               lng: center.lng,
+                               zoom: map.getZoom()
+                           });
                        });
-                   });
 
                    // Map from case numbers to L.Markers
                    this.caseMarker = {};
@@ -111,34 +112,51 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    var self = this,
                        bounds = L.latLngBounds([]),
                        deferredBounds = $.Deferred(),
-                       completeCount = 0,
-                       deferreds = _.map(ids, function(id) {
-                           var regionInfo = regions.get(id);
+                       completeCount = 0;
 
-                           if (self.regionLayers[id]) return null;
+                   _.each(ids, function(id) {
+                       if (self.regionLayers[id]) {
+                           var layer = self.regionLayers[id];
+                           bounds.extend(layer.getBounds());
 
-                           return regionInfo.loadShape()
-                               .done(function(shape) {
-                                   var layer = L.geoJson(shape,
-                                                         {style: config.regionStyle});
+                           if (++completeCount == ids.length)
+                               deferredBounds.resolve(bounds);
+
+                           return;
+                       }
+
+                       var regionInfo = regions.get(id);
+                       regionInfo.loadShape()
+                           .done(function(shape) {
+                               var layer = L.geoJson(shape,
+                                                     {style: config.regionStyle});
 
 
-                                   layer.on("dblclick", function(e) {
-                                       self.onDblClick(e);
-                                   });
-                                   bounds.extend(layer.getBounds());
-                                   self.regionLayers[id] = layer;
-                                   self.map.addLayer(layer);
-
-                                   if (++completeCount == ids.length)
-                                       deferredBounds.resolve(bounds);
+                               layer.on("dblclick", function(e) {
+                                   self.onDblClick(e);
                                });
+                               bounds.extend(layer.getBounds());
+                               self.regionLayers[id] = layer;
+                               self.map.addLayer(layer);
+
+                               if (++completeCount == ids.length)
+                                   deferredBounds.resolve(bounds);
+                           });
                        });
 
                    // Fit to visible regions?
                    deferredBounds.done(function(bounds) {
-                       // Need to add padding to the bounds
                        self.map.setMaxBounds(bounds.pad(1));
+
+                       if (!bounds.contains(self.map.getBounds()))
+                           self.map.fitBounds(bounds.pad(-1));
+
+                       // HACK Do this here rather than inside the bounds
+                       // collection because this is where we actually load the
+                       // region geometries and therefore have access to the
+                       // layers and their bounds methods.
+                       regions._bounds = bounds;
+                       regions.trigger("regionBounds", bounds);
                    });
                },
 
@@ -159,9 +177,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                // Layer ordering (bottom -> top):
                // tiles, base layers, parcel layer, permits layer
 
-               // The Layer Group containing permit markers, set during
+               // The Layer Group containing proposal markers, set during
                // initialization.
-               zoningLayer: null,
+               markersLayer: null,
 
                // GeoJSON layer group containing parcel shapes
                parcelLayer: null,
@@ -173,10 +191,10 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                    if (!loc) return;
 
                    var z = this.map.getZoom() - zoomThreshold,
-                       marker = new ProposalMarker(proposal, z >= 0 ? z : null),
+                       marker = new ProposalMarker(proposal),
                        proposals = this.collection;
 
-                   marker.addTo(this.zoningLayer);
+                   marker.addTo(this.markersLayer);
 
                    this.caseMarker[proposal.get("caseNumber")] = marker;
 
@@ -190,19 +208,25 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        .on("click", function(e) {
                            proposals.setSelection(proposal.id);
                        })
-                       .on("dblclick", function(e) {
-                           appState.focusModels([proposal], true);
+                       .on("popupclose", function(e) {
+                           proposals.removeFromSelection(proposal.id);
                        });
+
+
+                   if (z >= 0 && this.map.getBounds().contains(marker.getLatLng())) {
+                       marker.setZoomed(z);
+                   }
 
                    this.listenTo(proposal, "change", this.changed);
                },
 
-               proposalRemoved: function(permit) {
-                   var caseNumber = permit.get("caseNumber"),
+               proposalRemoved: function(proposal) {
+                   // debugger;
+                   var caseNumber = proposal.get("caseNumber"),
                        marker = this.caseMarker[caseNumber],
                        parcel = this.parcelLayers[caseNumber];
                    if (marker) {
-                       this.zoningLayer.removeLayer(marker);
+                       this.markersLayer.removeLayer(marker);
                        delete this.caseMarker[caseNumber];
                    }
                    if (parcel)
@@ -212,7 +236,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                // Map of case # -> ILayer objects
                parcelLayers: {},
 
-               // Triggered when a child permit changes
+               // Triggered when a child proposal changes
                changed: function(change) {
                    var self = this,
                        excluded = change.get("_excluded"),
@@ -221,9 +245,9 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
 
                    if (marker) {
                        if (excluded) {
-                           self.zoningLayer.removeLayer(marker);
+                           self.markersLayer.removeLayer(marker);
                        } else {
-                           marker.addTo(self.zoningLayer);
+                           marker.addTo(self.markersLayer);
                        }
                    }
 
@@ -254,6 +278,15 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        e.latlng.lng);
                },
 
+               /**
+                * Triggered on the appState when the map should focus on a group
+                * of models. It's a hack, but the pattern could be generalized.
+                * Right now, appState is only designed to cope with state that
+                * is persisted to the location hash.
+                *
+                * @param {Backbone.Model[]} models
+                * @param {boolean} zoom
+                */
                onFocused: function(models, zoom) {
                    var self = this,
                        ll = _.map(models, function(model) {
@@ -268,7 +301,13 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        var bounds = L.latLngBounds(ll);
                        this.map.fitBounds(bounds);
                    }
+               },
 
+               onPopupOpened: function(e) {
+                   // Recenter the map view on the popup when it opens.
+                   var pos = this.map.project(e.popup._latlng);
+                   pos.y -= e.popup._container.clientHeight/2;
+                   this.map.panTo(this.map.unproject(pos), {animate: true});
                },
 
                onBoxFilterChanged: function(box) {
@@ -289,19 +328,14 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                },
 
                /* Getting information about the markers. */
-               getMarkerForPermit: function(permit) {
-                   return this.caseMarker[permit.get("caseNumber")];
-               },
-
                updateMarkers: function() {
                    var map = this.map,
-                       pLayer = this.zoningLayer,
+                       pLayer = this.markersLayer,
                        bounds = map.getBounds(),
                        zoom = map.getZoom();
 
                    _.each(this.caseMarker, function(marker) {
                        var inBounds = bounds.contains(marker.getLatLng());
-                       marker.getModel().set("_visible", inBounds);
 
                        if (zoom >= zoomThreshold) {
                            if (!inBounds)
@@ -332,7 +366,7 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                        if (!this._refMarker) {
                            this._refMarker =
                                (new RefMarker(refLocation))
-                               .addTo(this.zoningLayer);
+                               .addTo(this.markersLayer);
                        }
 
                        // Recenter
@@ -340,27 +374,17 @@ define(["backbone", "config", "leaflet", "jquery", "underscore",
                                         {animate: false});
                        this._refMarker.bringToBack();
                    } else if (this._refMarker) {
-                       this.zoningLayer.removeLayer(this._refMarker);
+                       this.markersLayer.removeLayer(this._refMarker);
                        this._refMarker = null;
                    }
                },
 
+               getBounds: function() {
+                   return this.map.getBounds();
+               },
+
                resetBounds: function() {
                    this.map.fitBounds(config.bounds);
-               },
-
-               fitToModels: function(models) {
-                   var bounds = L.latLngBounds(_.map(models,
-                                                     function(model) {
-                                                         return model.get("location");
-                                                     }));
-                   this.map.fitBounds(bounds, {paddingTopLeft: [5, 20],
-                                               paddingBottomRight: [5, 40]});
-               },
-
-               // Fit the map view to the proposals matching the active filters.
-               fitToCollection: function() {
-                   this.fitToModels(this.collection);
                },
 
                zoomToRefLocation: function() {

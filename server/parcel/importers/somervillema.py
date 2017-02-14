@@ -16,44 +16,57 @@ srs_wkt = 'PROJCS["NAD_1983_StatePlane_Massachusetts_Mainland_FIPS_2001",GEOGCS[
 
 def import_shapes(logger):
     srs = SpatialReference(srs_wkt)
-    lm = LayerMapping(Parcel, "/data/shapefiles/M274TaxPar.shp",
-                      {"shape_leng": "SHAPE_Leng",
-                       "shape_area": "SHAPE_Area",
-                       "map_par_id": "MAP_PAR_ID",
-                       "loc_id": "LOC_ID",
-                       "poly_type": "POLY_TYPE",
-                       "map_no": "MAP_NO",
-                       "source": "SOURCE",
-                       "plan_id": "PLAN_ID",
-                       "last_edit": "LAST_EDIT",
-                       "town_id": "TOWN_ID",
-                       "shape": "POLYGON"},
-                      source_srs=srs)
+    lm = LayerMapping(
+        Parcel,
+        "/data/shapefiles/M274TaxPar.shp", {
+            "shape_leng": "SHAPE_Leng",
+            "shape_area": "SHAPE_Area",
+            "map_par_id": "MAP_PAR_ID",
+            "loc_id": "LOC_ID",
+            "poly_type": "POLY_TYPE",
+            "map_no": "MAP_NO",
+            "source": "SOURCE",
+            "plan_id": "PLAN_ID",
+            "last_edit": "LAST_EDIT",
+            "town_id": "TOWN_ID",
+            "shape": "POLYGON"
+        },
+        source_srs=srs)
     lm.save(strict=True)
 
 
 def add_assessor_data(logger, file_name="M274Assess.dbf"):
-    logger.info("Adding assessor data...")
+    if logger:
+        logger.info("Adding assessor data...")
     # This could be done more efficiently, but it only needs to run once.
     path = os.path.join("/data/shapefiles", file_name)
     dbf = dbfread.DBF(path)
-    copy_attributes = ["LOT_SIZE", "USE_CODE", "YEAR_BUILT", "BLD_AREA",
-                       "UNITS", "STYLE", "STORIES", "NUM_ROOMS", "ZONING"]
+    copy_attributes = [
+        "LOT_SIZE", "USE_CODE", "YEAR_BUILT", "BLD_AREA", "UNITS", "STYLE",
+        "STORIES", "NUM_ROOMS", "ZONING"
+    ]
+    processed_ids = set()
     for entry in dbf:
+        loc_id = entry["LOC_ID"]
+        if loc_id in processed_ids:
+            continue
+        processed_ids.add(loc_id)
+
         try:
-            parcel = Parcel.objects.get(loc_id=entry["LOC_ID"])
+            parcel = Parcel.objects.get(loc_id=loc_id)
             parcel.address_num = entry["ADDR_NUM"]
             parcel.full_street = entry["FULL_STR"]
             parcel.save()
             for attr in copy_attributes:
                 if attr in entry:
                     try:
-                        parcel.attributes.create(name=attr,
-                                                 value=str(entry[attr]))
+                        parcel.attributes.create(
+                            name=attr, value=str(entry[attr]))
                     except IntegrityError:
                         continue
         except Parcel.DoesNotExist:
             continue
+
 
 def run(logger=None):
     import_shapes(logger)

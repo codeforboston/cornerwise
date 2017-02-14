@@ -2,11 +2,10 @@
  * ProposalsCollection
  */
 define(
-    ["backbone", "jquery", "underscore", "leaflet", "proposal", "ref-location",
-     "selectable", "config", "utils", "app-state"],
-    function(B, $, _, L, Proposal, refLocation, Selectable, config, $u,
+    ["backbone", "jquery", "underscore", "lib/leaflet", "model/proposal",
+     "refLocation", "collection/regions", "collection/selectable", "config", "utils", "appState"],
+    function(B, $, _, L, Proposal, refLocation, Regions, Selectable, config, $u,
              appState) {
-        window.$u = $u;
         return Selectable.extend({
             model: Proposal,
 
@@ -28,8 +27,6 @@ define(
 
                 appState.onStateKeyChange(
                     "f", this.onFiltersChange, this);
-
-                //refLocation.on("change")
             },
 
             url: function() {
@@ -75,7 +72,9 @@ define(
                 projects: "typeFilter",
                 text: "textFilter",
                 box: "boxFilter",
-                region: "regionFilter"
+                region: "regionFilter",
+                lotsize: "lotSizeFilter",
+                status: "statusFilter"
             },
 
             /**
@@ -94,6 +93,9 @@ define(
              */
             isNarrowingQuery: function(newQuery, oldQuery) {
                 if (!oldQuery) return false;
+
+                if (newQuery.lotsize || oldQuery.lotsize)
+                    return false;
 
                 if (!newQuery.projects && oldQuery.projects ||
                     (oldQuery.projects && newQuery.projects !== oldQuery.projects))
@@ -162,9 +164,6 @@ define(
                     });
                 }
 
-                if (query.range) {
-                }
-
                 if (query.box) {
                     var bounds = $u.boxStringToBounds(query.box);
                     preds.push(function(proposal) {
@@ -174,9 +173,15 @@ define(
                 }
 
                 if (query.region) {
-                    preds.push(function(proposal) {
-                        return proposal.region_name == query.region;
-                    });
+                    var regions = (query.region||"").split(";");
+                    if (regions.length == 1) 
+                        preds.push(function(proposal) {
+                            return proposal.region_name == query.region;
+                        });
+                    else
+                        preds.push(function(proposal) {
+                            return regions.indexOf(proposal.region_name) > -1;
+                        });
                 }
 
                 return function(proposal) {
@@ -185,31 +190,28 @@ define(
             },
 
             runQuery: function(query) {
-                var lastQuery = this.lastQuery;
+                this.fetch();
 
-                if (this.isNarrowingQuery(query, this.lastQuery)) {
-                    // Find the results in the local cache.
-                    var pred = this.makePredicate(query),
-                        found = _.filter(this.resultCache, pred);
-                    this.set(found);
-                } else {
-                    this.fetch();
-                }
+                // var lastQuery = this.lastQuery;
+
+                // if (this.isNarrowingQuery(query, this.lastQuery)) {
+                //     // Find the results in the local cache.
+                //     var pred = this.makePredicate(query),
+                //         found = _.filter(this.resultCache, pred);
+                //     this.set(found);
+                // } else {
+                //     this.fetch();
+                // }
             },
 
             updateQuery: function(filters) {
-                var query;
-
-                _.each(filters, function(val, key) {
+                return _.reduce(filters, function(query, val, key) {
                     if (this.queryFilters[key]) {
-                        if (!query) query = {};
-
                         var filter = this[this.queryFilters[key]];
                         filter.call(this, query, val, key, filters);
                     }
-                }, this);
-
-                return query;
+                    return query;
+                }, {}, this);
             },
 
             onFiltersChange: function(newFilters, oldFilters) {
@@ -219,26 +221,13 @@ define(
                 this.runQuery(query);
             },
 
+            ///- Convenience methods for setting filters:
             clearFilters: function() {
                 appState.clearHashKey("f");
             },
 
             filterByText: function(text) {
                 appState.setHashKey("f.text", text);
-            },
-
-            textFilter: function(query, s) {
-                if (!s)
-                    delete query.text;
-                else
-                    query.text = s;
-            },
-
-            typeFilter: function(query, val) {
-                if (/^(all|null)$/.exec(val))
-                    query.projects = val.toLowerCase();
-                else
-                    delete query.projects;
             },
 
             /**
@@ -265,12 +254,53 @@ define(
                     appState.clearHashKey("f.projects");
             },
 
+            filterByLotSize: function(lotSize) {
+                if (lotSize)
+                    appState.setHashKey("f.lotsize", lotSize);
+                else
+                    appState.clearHashKey("f.lotsize");
+            },
+
+            filterByApplicationStatus: function(status) {
+                if (status)
+                    appState.setHashKey("f.status", status);
+                else
+                    appState.clearHashKey("f.status");
+            },
+
+            // Filter implementations. Called when the filters change to
+            // construct a new query.
+            textFilter: function(query, s) {
+                if (!s)
+                    delete query.text;
+                else
+                    query.text = s;
+            },
+
+            typeFilter: function(query, val) {
+                if (/^(all|null)$/.exec(val))
+                    query.projects = val.toLowerCase();
+                else
+                    delete query.projects;
+            },
+
             boxFilter: function(query, val) {
                 query.box = val;
             },
 
-            regionFilter: function(query, val) {
-                query.region = val;
+            regionFilter: function(query, regions) {
+                query.region = $u.keep(regions.split(/\s*,\s*/), function(id) {
+                    var r = Regions.get(id);
+                    return r ? r.get("name") : undefined;
+                }).join(";");
+            },
+
+            lotSizeFilter: function(query, lotsize) {
+                query.lotsize = lotsize;
+            },
+
+            statusFilter: function(query, status) {
+                query.status = status;
             },
 
             // Returns a LatLngBounds object for the proposals that are

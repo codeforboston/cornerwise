@@ -1,4 +1,4 @@
-define(["leaflet", "underscore"], function(L, _) {
+define(["lib/leaflet", "underscore"], function(L, _) {
     function popupOpened(infoLayer, feature, e) {
         var tstring = infoLayer.get("template"),
             template = tstring && _.template(tstring);

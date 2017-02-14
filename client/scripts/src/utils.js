@@ -1,5 +1,5 @@
-define(["underscore", "jquery", "locale", "leaflet"],
-       function(_, $, locale, L) {
+define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templates"],
+       function(_, $, locale, L, templates) {
            /**
             * Takes a numeric string s and adds thousands separators.
             * For example: commas("12345678.3") -> "12,345,678.3"
@@ -72,24 +72,33 @@ define(["underscore", "jquery", "locale", "leaflet"],
                return currency + commas(amount);
            }
 
-           function prettyDistance(ft) {
-               var miles = ft/5280;
+           function acresToSqFt(acres) {
+               return Math.round(acres * 43560);
+           }
 
-               if (miles >= 1) {
+           function prettyFraction(dec) {
+               var whole = Math.floor(dec),
+                   frac = dec - whole,
+                   denom, num;
+
+               if (frac > 0.5) {
+                   denom = Math.round(1/(1-frac));
+                   num = Math.round(frac*denom);
+               } else {
+                   denom = Math.min(Math.round(1/frac), 10);
+                   num = Math.round(frac*denom);
+               }
+
+               return [whole, num, denom];
+           }
+
+           function prettyDistance(meters) {
+               var ft = meters * 3.2808,
+                   miles = ft/5280;
+
+               if (miles >= 0.2) {
                    var m = miles.toFixed(1).replace(/\.0$/, "");
-                   return m + " mile" + (miles - 1 < 0.1 ? "" : "s");
-               } else if (miles >= 0.2) {
-                   var denom, num;
-                   if (miles > 0.5) {
-                       denom = Math.round(1/(1-miles));
-                       num = Math.round(miles*denom);
-
-                   } else {
-                       denom = Math.round(1/miles);
-                       num = 1;
-                   }
-
-                   return "about <sup>" + num + "</sup>&frasl;<sub>" + denom + "</sub> mile";
+                   return m + " mile" + (Math.abs(miles - 1) < 0.1 ? "" : "s");
                }
 
                return commas(ft) + " feet";
@@ -97,6 +106,8 @@ define(["underscore", "jquery", "locale", "leaflet"],
 
 
            function prettyDate(d, format) {
+               // TODO: Use the Internationalization API when available
+               // https://marcoscaceres.github.io/jsi18n/
                if (!(d instanceof Date)) {
                    d = new Date(d);
                }
@@ -196,7 +207,7 @@ define(["underscore", "jquery", "locale", "leaflet"],
            }
 
            function isSimpleObject(o) {
-               return o.constructor && o.constructor === Object;
+               return o && o.constructor && o.constructor === Object;
            }
 
            function setIn(obj, ks, v) {
@@ -265,7 +276,7 @@ define(["underscore", "jquery", "locale", "leaflet"],
                var result = [];
                for (var i = 0, l = coll.length; i < l; i++) {
                    var val = fn.call(ctx, coll[i]);
-                   if (val && val !== undefined && val !== null)
+                   if (val || val !== undefined && val !== null)
                        result.push(val);
                }
                return result;
@@ -288,7 +299,9 @@ define(["underscore", "jquery", "locale", "leaflet"],
 
                prettyDistance: prettyDistance,
 
-               prettyDate: prettyDate
+               prettyDate: prettyDate,
+
+               acresToSqFt: acresToSqFt
            };
 
            var $u = {
@@ -423,15 +436,32 @@ define(["underscore", "jquery", "locale", "leaflet"],
                            },
                            function() {
                                promise.reject(
-                                   {reason: "Could not set location without " +
-                                    "user permission."});
+                                   {reason: ("Could not set location without " +
+                                             "user permission.")});
                            });
                    } else {
-                       promise.reject({reason: "Geolocation unavailable " +
-                                       "in this browser."});
+                       promise.reject({reason: ("Geolocation unavailable " +
+                                                "in this browser.")});
                    }
 
                    return promise;
+               },
+
+               /**
+                * Convert a Leaflet LatLng object to a Google Maps LatLng.
+                *
+                * @param coords A Leaflet coordinate
+                *
+                * @returns A Google Maps coordinate
+                */
+               gLatLng: function(coords) {
+                   return new google.maps.LatLng(coords.lat, coords.lng);
+               },
+
+               gBounds: function(bounds) {
+                   return new google.maps.LatLngBounds(
+                       $u.gLatLng(bounds.getSouthWest()),
+                       $u.gLatLng(bounds.getNorthEast()));
                },
 
                // Unit conversions:
@@ -459,9 +489,10 @@ define(["underscore", "jquery", "locale", "leaflet"],
                prettyAmount: prettyAmount,
 
                /**
-                * Convert a number to a human-friendly distance string.
+                * Convert a number (in meters) to a human-friendly distance
+                * string.
                 *
-                * @param {number} feet Distance in feet
+                * @param {number} meters Distance in meters
                 */
                prettyDistance: prettyDistance,
 
@@ -583,6 +614,20 @@ define(["underscore", "jquery", "locale", "leaflet"],
                },
 
                /**
+                * Converts a latLngBounds to a string.
+                *
+                * @param {L.LatLngBounds} bounds
+                *
+                * @returns {string}
+                */
+               boundsToBoxString: function(bounds) {
+                   var sw = bounds.getSouthWest(),
+                       ne = bounds.getNorthEast();
+
+                   return [sw.lat, sw.lng, ne.lat, ne.lng].join(",");
+               },
+
+               /**
                 * Like _.template, except that it adds helper functions to the
                 * data passed to the resulting template function.
                 *
@@ -613,24 +658,6 @@ define(["underscore", "jquery", "locale", "leaflet"],
                },
 
                /**
-                * @param {string} id Element ID of the template element in the
-                * DOM.
-                * @param {object} options
-                * @param o
-                *
-                * @return {Function}
-                */
-               templateWithId: function(id, options) {
-                   var templateString = $("#" + id).text();
-
-                   if (!templateString) {
-                       throw new Error("Unknown template: " + id);
-                   }
-                   options = options || {};
-                   return $u.template(templateString, options, options.helpers);
-               },
-
-               /**
                 * Store a map of URLs to jQuery xhr objects, so that overlapping
                 * requests to the same URL will not create multiple requests.
                 */
@@ -639,13 +666,16 @@ define(["underscore", "jquery", "locale", "leaflet"],
                    if (this._getting[url])
                        return this._getting[url];
 
+                   if (templates[url])
+                       return $.Deferred().resolve(templates[url]);
+
                    return (this._getting[url] = $.get(url));
                },
 
                /**
                 * @param {string} url
                 * @param {object} options
-                * @param options.helpers 
+                * @param options.helpers
                 */
                templateWithUrl: function(url, options) {
                    var template = null, self = this;

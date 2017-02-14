@@ -20,3 +20,12 @@ local/
 .tern-port
 google_credentials.json
 /logs/
+/docker-support/prod.env
+client/css/font
+.DS_Store
+/client/scripts/build/templates.js
+/client/dist/
+/client/scripts/src/build
+/client/app.js
+/server/celerybeat-schedule
+/client/css/app.build.css

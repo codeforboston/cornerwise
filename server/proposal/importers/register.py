@@ -9,6 +9,10 @@ Importers = [
     somervillema.SomervilleImporter()
 ]
 
+EventImporters = [
+    somervillema.EventsImporter()
+]
+
 if socrata_token:
     from . import cambridgema
     Importers.append(cambridgema.CambridgeImporter(socrata_token))

@@ -1,0 +1,1 @@
+((nil . ((pyvenv-workon . "cornerwise"))))

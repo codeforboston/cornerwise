@@ -1,28 +1,31 @@
 from collections import defaultdict, OrderedDict
 
-from proposal.models import Changeset, Document, Image, Proposal
+from django.forms.models import model_to_dict
+
+from proposal.models import Changeset, Document, Image, Proposal, Event
 from proposal.views import proposal_json
-from proposal.query import build_proposal_query
+from proposal.query import build_proposal_query_dict
 
 
 def summarize_query_updates(query, since, until=None):
+    query_dict = build_proposal_query_dict(query)
     # Find proposals that are NEW since the given date:
-    proposals = Proposal.objects.filter(query, created__gt=since)
+    proposals = Proposal.objects.filter(created__gt=since, **query_dict)
     new_ids = {proposal.pk for proposal in proposals}
 
     # Find proposals that have *changed*, but which are not new:
     proposals_changed = Proposal.objects\
                                 .exclude(pk__in=new_ids)\
-                                .filter(query,
-                                        updated__gt=since)
+                                .filter(updated__gt=since, **query_dict)
     if until:
         proposals_changed = proposals_changed.filter(updated__lte=until)
 
         # Start with the new proposals:
-    summary = OrderedDict((p.id, { "proposal": proposal_json(p,
-                                                             include_images=1,
-                                                             include_documents=False),
-                                   "new": True }) for p in proposals)
+    summary = OrderedDict((p.id, {
+        "proposal": proposal_json(
+            p, include_images=1, include_documents=False),
+        "new": True
+    }) for p in proposals)
 
     if proposals_changed:
         # Only include changesets for proposals we're interested in:
@@ -41,17 +44,19 @@ def summarize_query_updates(query, since, until=None):
             achange_list.extend(change_dict["attributes"])
 
         for p in proposals_changed:
-            summary[p.id] = { "proposal": proposal_json(p, include_images=1,
-                                                       include_documents=False),
-                              "new": False,
-                              "properties": prop_changes[p.id],
-                              "attributes": attr_changes[p.id],
-                              "documents": [],
-                              "images": []}
+            summary[p.id] = {
+                "proposal": proposal_json(
+                    p, include_images=1, include_documents=False),
+                "new": False,
+                "properties": prop_changes[p.id],
+                "attributes": attr_changes[p.id],
+                "documents": [],
+                "images": []
+            }
 
     # Find new Documents:
-    documents = Document.objects.filter(proposal__in=proposals_changed,
-                                        created__gt=since)
+    documents = Document.objects.filter(
+        proposal__in=proposals_changed, created__gt=since)
     if until:
         documents = documents.filter(updated__lte=until)
 
@@ -60,8 +65,8 @@ def summarize_query_updates(query, since, until=None):
             summary[doc.proposal_id]["documents"].append(doc.to_dict())
 
     # Find new Images:
-    images = Image.objects.filter(proposal__in=proposals_changed,
-                                  created__gt=since)
+    images = Image.objects.filter(
+        proposal__in=proposals_changed, created__gt=since)
     if until:
         images = images.filter(updated__lte=until)
 
@@ -69,7 +74,12 @@ def summarize_query_updates(query, since, until=None):
         if image.proposal_id in summary:
             summary[image.proposal_id]["images"].append(image.to_dict())
 
-    return summary
+    return {"changes": summary,
+            "new": len(new_ids),
+            "updated": len(proposals_changed),
+            "total": len(new_ids) + len(proposals_changed),
+            "start": since.timestamp(),
+            "end": until.timestamp if until else None}
 
 
 def summarize_subscription_updates(subscription, since, until=None):
@@ -81,15 +91,40 @@ def summarize_subscription_updates(subscription, since, until=None):
     :since: a datetime
     :until: datetime
 
-    :returns: a dictionary with proposal ids as keys and dictionaries as
-    values. The dictionaries 
+    :returns: a dictionary with the keys "changes", containing a dictionary
+    mapping proposal ids to changes; "new", a count of the new proposals; and
+    "updated", a count of the updated proposals.
+
     """
     query_dict = subscription.query_dict
     if query_dict is None:
         return None
 
-    query = build_proposal_query(query_dict)
+    query = build_proposal_query_dict(query_dict)
+    # Don't include changes that predate the Subscription:
+    since = max(subscription.created, since)
     return summarize_query_updates(query, since, until)
+
+
+def summarize_event(event):
+    d = model_to_dict(event, exclude=["created", "proposals"])
+    d["proposals"] = [{"case_number": p.case_number,
+                       "address": p.address} for p in event.proposals]
+    return d
+
+
+def summarize_event_updates(since, until=None, region=None):
+    query = {"created__gte": since}
+    if until:
+        query["created_lt"] = until
+    if region:
+        query["region_name"] = region
+
+    events = Event.objects.filter(**query)
+
+    if events:
+        return {"events": [{"title": event.title,
+                            "date": event.date} for event in events]}
 
 
 def find_updates(subscriptions, since, until=None):
@@ -99,18 +134,25 @@ def find_updates(subscriptions, since, until=None):
     be. There are operations-level strategies for scaling that wouldn't require
     too much to be changed here.
 
-    :subscriptions: A collection of Subscription objects
+    :subscription: A collection of Subscription objects
     :since: datetime
     :until: datetime
 
     """
     for subscription in subscriptions:
-        summary = summarize_subscription_updates(subscription,
-                                                 since,
-                                                 until)
-
-        if summary:
-            pass
-
+        summary = summarize_subscription_updates(subscription, since, until)
 
     return summary
+
+
+def summary_line(updates):
+    total_count = updates["total"]
+    if not total_count:
+        return "No updates"
+
+    new_count = updates["new"]
+    updated_count = updates["updated"]
+    return "".join([
+        "{} new {}".format(new_count, "and " if updated_count else ""),
+        "{} updated ".format(updated_count),
+        "proposal{}".format("s" if total_count > 1 else "")])

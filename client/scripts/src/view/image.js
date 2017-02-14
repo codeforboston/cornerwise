@@ -1,18 +1,21 @@
-define(["backbone", "app-state", "jquery", "utils"],
+define(["backbone", "appState", "jquery", "utils"],
        function(B, appState, $, $u) {
            var ImageView = B.View.extend({
-               template: $u.templateWithUrl(
-                   "/static/template/imageBox.html",
-                   {variable: "image"}),
-
                events: {
                    "click": "onClick"
                },
 
-               initialize: function() {
-                   appState.onStateKeyChange("image",
-                                             this.onImageChange,
-                                             this);
+               initialize: function(options) {
+                   this.options = options;
+                   appState.onStateKeyChange("image", this.onImageChange, this);
+                   this._selectedId = null;
+
+                   var self = this;
+                   $(document).keyup(function(e) {
+                       if (self.showing) {
+                           self.onKeyUp(e);
+                       }
+                   });
                },
 
                onClick: function(e) {
@@ -22,13 +25,15 @@ define(["backbone", "app-state", "jquery", "utils"],
                },
 
                onImageChange: function(id) {
+                   this._selectedId = parseInt(id);
+
                    if (id) {
                        var self = this;
                        $.getJSON("/proposal/image", {pk: id})
                            .done(function(image) {
                                self.render(image);
                            })
-                           .error(function() {
+                           .fail(function() {
                                appState.clearHashKey("image");
                            });
                    } else {
@@ -36,16 +41,37 @@ define(["backbone", "app-state", "jquery", "utils"],
                    }
                },
 
+               step: function(dir) {
+                   if (this.options.step) {
+                       var id = this.options.step(this._selectedId, dir);
+                       if (id) {
+                           appState.setHashKey("image", id);
+                       }
+                   }
+               },
+
+               next: function() { this.step(1); },
+               prev: function() { this.step(-1); },
+
+               onKeyUp: function(e) {
+                   switch (e.keyCode) {
+                   case 37: this.prev(); break;
+                   case 39: this.next(); break;
+                   default: return;
+                   }
+                   e.preventDefault();
+               },
+
                hide: function() {
-                   this.$el.hide();
+                   this.showing = false;
+                   this.$el.removeClass("displayed");
                },
 
                render: function(image) {
-                   var $el = this.$el;
-                   this.template(image,
-                                 function(html) {
-                                     $el.html(html).show();
-                                 });
+                   this.showing = true;
+                   this.$el.html(
+                       "<img class='image-zoom' src='" + image.src + "'/>")
+                       .addClass("displayed");
 
                    return this;
                }

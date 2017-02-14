@@ -5,9 +5,42 @@ from functools import reduce
 import re
 
 from .models import Attribute
+from parcel.models import LotSize, LotQuantiles
 
 
-def build_attributes_query(d):
+def get_lot_size_groups():
+    quantiles = LotQuantiles.objects.all()[0]
+    return {
+        "small": {"lot_size__lte": quantiles.small_lot},
+        "medium": {"lot_size__lte": quantiles.medium_lot,
+                   "lot_size__gt": quantiles.small_lot},
+        "large": {"lot_size__gt": quantiles.medium_lot}
+    }
+
+LOT_SIZES = None
+
+def get_lot_sizes():
+    global LOT_SIZES
+    if not LOT_SIZES:
+        LOT_SIZES = get_lot_size_groups()
+
+    return LOT_SIZES
+
+
+def make_size_query(param):
+    size_query = get_lot_sizes().get(param.lower())
+    if size_query:
+        return size_query
+
+    m = re.match(r"([<>])(=?)(\d+(\.\d+)?)", param)
+    if m:
+        size_op = "lot_size__{op}{eq}".format(
+            op="lt" if m.group(1) == "<" else "gt",
+            eq="e" if m.group(2) else "")
+        return {size_op: float(m.group(3))}
+
+
+def run_attributes_query(d):
     """Construct a Proposal query from query parameters.
 
     :param d: A dictionary-like object, typically something like
@@ -15,7 +48,6 @@ def build_attributes_query(d):
 
     :returns: A
     """
-    # Query attributes:
     subqueries = []
 
     for k, val in d.items():
@@ -42,16 +74,10 @@ query_params = {
     "source": "source"
 }
 
-# TODO: Don't hardcode this
-region_names = {
-    "somerville": "Somerville, MA",
-    "cambridge": "Cambridge, MA"
-}
-
 
 def build_proposal_query_dict(d):
     subqueries = {}
-    ids = build_attributes_query(d) or []
+    ids = run_attributes_query(d) or []
 
     if "id" in d:
         ids = re.split(r"\s*,\s*", d["id"])
@@ -60,12 +86,8 @@ def build_proposal_query_dict(d):
         subqueries["address__icontains"] = d["text"]
 
     if d.get("region"):
-        regions = re.split(r"\s*,\s*", d["region"])
-        regions = [region_names[r] for r in regions if r in region_names]
-        if len(regions) == 1:
-            subqueries["region_name"] = regions[0]
-        else:
-            subqueries["region_name__in"] = regions
+        regions = re.split(r"\s*;\s*", d["region"])
+        subqueries["region_name__in"] = regions
 
     if ids:
         subqueries["pk__in"] = ids
@@ -75,8 +97,12 @@ def build_proposal_query_dict(d):
             subqueries["project__isnull"] = True
         elif d["projects"] == "all":
             subqueries["project__isnull"] = False
-        # else:
-        #     subqueries["projects"] = d["project"]
+
+    if "lotsize" in d:
+        parcel_query = make_size_query(d["lotsize"])
+        if parcel_query:
+            parcel_ids = LotSize.objects.filter(**parcel_query).values("parcel_id")
+            subqueries["parcel_id__in"] = parcel_ids
 
     bounds = d.get("box")
     if bounds:
@@ -84,8 +110,7 @@ def build_proposal_query_dict(d):
         # Coordinates are submitted to the server as
         # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
         # different order:
-        bbox = Polygon.from_bbox((coords[1], coords[0],
-                                  coords[3], coords[2]))
+        bbox = Polygon.from_bbox((coords[1], coords[0], coords[3], coords[2]))
         subqueries["location__within"] = bbox
 
     # If status is anything other than 'active' or 'closed', find all

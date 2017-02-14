@@ -4,6 +4,7 @@ from django.utils.feedgenerator import Atom1Feed
 
 from .models import Proposal
 
+
 class ReportsAndDecisionsFeed(Feed):
     title = "Somerville Reports and Decisions"
     link = "/proposals/"
@@ -43,6 +44,7 @@ class ReportsAndDecisionsFeed(Feed):
     item_enclosure_mime_type = "application/pdf"
 
     item_copyright = ""
+
 
 class ReportsAndDecisionsAtom(ReportsAndDecisionsFeed):
     feed_type = Atom1Feed

@@ -1,4 +1,4 @@
-define(["backbone", "app-state"],
+define(["backbone", "appState"],
        function(B, appState) {
            var ToggleButtonView = B.View.extend({
                tagName: "a",

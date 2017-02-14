@@ -1,11 +1,18 @@
 define(
-    ["jquery", "proposals", "collection-manager", "map-view", "proposal-view", "glossary", "config", "app-state", "view-manager", "ref-location", "legal-notice"],
-    function($, Proposals, CollectionManager, MapView, ProposalItemView,
-             glossary, config, appState, ViewManager, refLocation) {
+    ["jquery", "collection/proposals", "collection/manager", "view/map",
+     "view/proposalInfo", "view/proposal", "glossary", "config", "appState",
+     "viewManager", "refLocation", "view/layers", "view/alerts",
+     "view/filters", "view/image", "view/subscribe", "legalNotice",
+     "view/modal", "view/list", "view/info"],
+    function($, Proposals, CollectionManager, MapView, ProposalInfoView,
+             ProposalItemView, glossary, config, appState, ViewManager,
+             refLocation, LayersView, alerts, FiltersView, ImageView,
+             SubscribeView) {
         return {
             start: function() {
                 var proposals = new Proposals(),
                     appViews = {
+                        alerts: alerts,
                         proposals: proposals,
                         glossary: glossary
                     };
@@ -45,42 +52,33 @@ define(
                     }
                 });
 
+                if (window.ResponseMessages && ResponseMessages.length) {
+                    alerts.showResponses(ResponseMessages);
+                }
+
                 // Configure modal views here!
                 // See viewManager.js for documentation and examples.
                 new ViewManager({
                     // Simple view that will load the about page from a
                     // static URL into a modal overlay when the 'view'
                     // parameter in the hash.
-                    "about": ["modal-view", {url: "/static/template/about.html",
+                    "about": ["view/modal", {url: "/static/template/about.html",
                                              context: {config: config}}],
-                    "events": ["modal-view",
+                    "events": ["view/modal",
                                {url: "/static/template/eventBrowser.html"}],
-                    "list": ["list-view",
+                    "contact": ["view/modal",
+                                {url: "/static/template/contact.html",
+                                 context: {config: config}}],
+                    "list": ["view/list",
                              {collection: proposals,
-                              subview: ProposalItemView}]
+                              subview: ProposalItemView}],
+                    "info": ["view/info", {collection: proposals,
+                                           subview: new ProposalInfoView()}]
                 });
 
-                require(["info-view", "proposal-info-view", "layers-view"],
-                        function(InfoView, ProposalInfoView, LayersView) {
-                            var infoView = new InfoView({
-                                el: "#info",
-                                startExpanded: appState.getKey("x") === "1",
-                                subview: new ProposalInfoView(),
-                                collection: proposals
-                            });
-                            appViews.info = infoView;
-
-                            appState.onStateKeyChange(
-                                "view",
-                                function(newKey) {
-                                    infoView.toggle(newKey == "main");
-                                });
-                            infoView.render();
-
-                            var layersView = new LayersView({
-                                el: "#map-options"
-                            }).render();
-                        });
+                appViews.layers = new LayersView({
+                    el: "#layers"
+                }).render();
 
 
                 appViews.mapView = new MapView({
@@ -88,25 +86,31 @@ define(
                     el: "#map"
                 });
 
-                require(["filters-view", "subscribe-view"],
-                        function(FiltersView, SubscribeView) {
-                            appViews.filtersView = new FiltersView({
-                                collection: proposals,
-                                mapView: appViews.mapView
-                            });
+                appViews.filtersView = new FiltersView({
+                    collection: proposals,
+                    mapView: appViews.mapView
+                });
 
-                            appViews.subscribeView = new SubscribeView({
-                                collection: proposals,
-                                el: "#user-controls"
-                            });
-                        });
+                appViews.subscribeView = new SubscribeView({
+                    collection: proposals,
+                    el: "#subscribe",
+                    mapView: appViews.mapView
+                });
 
-                require(["image-view"],
-                        function(ImageView) {
-                            appViews.imageView = new ImageView({
-                                el: "#image-view"
-                            });
-                        });
+                appViews.imageView = new ImageView({
+                    el: "#image-view",
+                    step: function(id, dir) {
+                        var sel = proposals.getSelection(),
+                            next;
+
+                        for (var i = 0, l = sel.length; i < l; i++) {
+                            if ((next = sel[i].stepImage(id, dir)))
+                                break;
+                        }
+
+                        return next && next.id;
+                    }
+                });
 
                 appState.init();
                 glossary.init();

@@ -1,4 +1,3 @@
 from .scrape import SomervilleImporter
 
-# TODO: EventImporter class
-
+from .events import EventsImporter

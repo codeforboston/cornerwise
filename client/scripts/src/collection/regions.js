@@ -1,4 +1,4 @@
-define(["backbone", "jquery", "underscore", "selectable", "config"],
+define(["backbone", "jquery", "underscore", "collection/selectable", "config"],
        function(B, $, _, SelectableCollection, config) {
            var RegionModel = B.Model.extend({
                loadShape: function() {
@@ -7,13 +7,18 @@ define(["backbone", "jquery", "underscore", "selectable", "config"],
                    if (shape)
                        return $.Deferred().resolve(shape);
 
-                   var self = this;
-                   return $.getJSON(this.get("source"))
-                       .done(function(shape) {
-                           self.set("shape", shape);
-                           self.trigger("regionLoaded", shape);
-                       });
+                   if (!this._fetchingShape) {
 
+                   var self = this;
+                   this._fetchingShape =
+                           $.getJSON(this.get("source"))
+                           .done(function(shape) {
+                               self.set("shape", shape);
+                               self.trigger("regionLoaded", shape);
+                               self._fetchingShape = null;
+                           });
+                   }
+                   return this._fetchingShape;
                }
            });
 
@@ -22,11 +27,12 @@ define(["backbone", "jquery", "underscore", "selectable", "config"],
            });
 
            var RegionCollection = SelectableCollection.extend({
-               selection: ["somerville"],
+               selection: [config.regions[0].id],
 
                model: RegionModel,
 
                hashParam: "f.region"
+
            });
 
            return new RegionCollection(regions);

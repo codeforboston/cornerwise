@@ -3,14 +3,19 @@ from itertools import takewhile
 import logging
 import pytz
 import re
-from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
+
+try:
+    from urllib.request import urlopen
+    from urllib.error import HTTPError, URLError
+except ImportError:
+    from urllib import urlopen, HTTPError, URLError
+
 
 from . import helpers
 
 logger = logging.getLogger(__name__)
 
-URL_BASE = ("http://www.somervillema.gov/departments/planning-board/"
+URL_BASE = ("http://archive.somervillema.gov/departments/planning-board/"
             "reports-and-decisions/robots")
 URL_FORMAT = URL_BASE + "?page={:1}"
 
@@ -47,28 +52,13 @@ def detect_last_page(doc):
     return 0
 
 
-# Field helpers:
-
-def get_links(elt):
-    "Return information about the <a> element descendants of elt."
-    return [helpers.link_info(a) for a in elt.find_all("a") if a["href"]]
-
-
-def default_field(td):
-    return td.get_text().strip()
-
 field_processors = {
     "reports": helpers.links_field,
     "decisions": helpers.links_field,
     "other": helpers.links_field,
-    "first_hearing_date": helpers.optional(helpers.dates_field),
+    "first_hearing_date": helpers.optional(helpers.date_field_tz("US/Eastern")),
     "updated_date": helpers.datetime_field_tz("US/Eastern")
 }
-
-
-def get_td_val(td, attr=None):
-    processor = field_processors.get(attr, default_field)
-    return processor(td)
 
 
 def add_geocode(geocoder, proposals):
@@ -76,8 +66,7 @@ def add_geocode(geocoder, proposals):
     Modifies each proposal in the list (in place), adding 'lat' and 'long'
     matching the proposal address.
     """
-    addrs = ["{0[number]} {0[street]}".format(proposal) for proposal in
-             proposals]
+    addrs = [proposal["address"] for proposal in proposals]
     locations = geocoder.geocode(addrs)
 
     # Assumes the locations are returned in the same order
@@ -85,12 +74,32 @@ def add_geocode(geocoder, proposals):
         loc = location and location.get("location", None)
         if not loc:
             logger.error("Skipping proposal {id}; geolocation failed."
-                         .format(id=proposal["caseNumber"]))
+                         .format(id=proposal["case_number"]))
             continue
 
         proposal["lat"] = loc["lat"]
         proposal["long"] = loc["lng"]
         proposal["score"] = location["properties"].get("score")
+
+
+def parse_addresses(number, street):
+    number_sublists = re.split(r"\s*/\s*", number)
+    street_sublists = re.split(r"\s*/\s*", street)
+
+    for number, street in zip(number_sublists, street_sublists):
+        number_range_match = re.match(r"(\d+)-(\d+)", number)
+
+        if number_range_match:
+            yield (number_range_match.group(1), street)
+            yield (number_range_match.group(2), street)
+        else:
+            number_sublist = re.split(r",? and |,? & |, ", number)
+            for number in number_sublist:
+                yield (number, street)
+
+
+def get_address_list(number, street):
+    return ["{} {}".format(n, s) for (n, s) in parse_addresses(number, street)]
 
 
 def find_cases(doc):
@@ -103,13 +112,13 @@ def find_cases(doc):
 
     cases = []
 
-    # This is ugly, but there's some baaad data out there:
     for i, tr in enumerate(trs):
         try:
             proposal = helpers.get_row_vals(attributes, tr,
                                             processors=field_processors)
-            proposal["address"] = "{} {}".format(proposal["number"],
-                                                 proposal["street"])
+            addresses = get_address_list(proposal["number"], proposal["street"])
+            proposal["address"] = addresses[0]
+            proposal["all_addresses"] = addresses
             proposal["source"] = URL_BASE
             proposal["region_name"] = "Somerville, MA"
 
@@ -209,7 +218,7 @@ def get_proposals_since(dt=None,
 
     def guard(case):
         return (not dt or case[date_column] > dt) and \
-            (not stop_at_case or case["caseNumber"] != stop_at_case)
+            (not stop_at_case or case["case_number"] != stop_at_case)
 
     all_cases = list(takewhile(guard, get_cases()))
 

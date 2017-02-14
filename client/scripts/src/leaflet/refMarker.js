@@ -1,5 +1,5 @@
 // This file is probably no longer necessary
-define(["leaflet", "config", "underscore"],
+define(["lib/leaflet", "config", "underscore"],
        function(L, config, _) {
            return L.FeatureGroup.extend({
                initialize: function(refLoc) {

@@ -29,13 +29,16 @@ urlpatterns = [
     url(r"^doc/", include("proposal.doc_urls")),
     url(r"^task/", include("task.urls")),
     url(r"^user/", include("user.urls")),
-    url(r"^$", index),
-
-    url(r"^" + settings.MEDIA_URL + "(?P<path>.*)$",
-        static_serve, {"document_root": settings.MEDIA_ROOT}),
+    url(r"^$", index, name="front-page"),
 ]
 
-if settings.DEBUG:
+if settings.SERVE_MEDIA:
+    urlpatterns += [
+        url(r"^" + settings.MEDIA_URL + "(?P<path>.*)$",
+            static_serve, {"document_root": settings.MEDIA_ROOT}),
+    ]
+
+if settings.SERVE_STATIC:
     urlpatterns += [
         url(r"^" + settings.STATIC_URL + "(?P<path>.*)$",
             static_serve, {"document_root": settings.STATIC_ROOT}),

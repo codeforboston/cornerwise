@@ -1,0 +1,63 @@
+{% extends "base.djhtml" %}
+
+{% load humanize %}
+
+{% block body %}
+    <h2>{{ event.title }}</h2>
+    <h4>
+        {{ event.location }}
+        <br/>
+        {{ event.date|naturalday }} at {{ event.date|time }}
+    </h4>
+
+    {% if event.description %}
+        <p>
+            {{ event.description }}
+        </p>
+    {% endif %}
+
+    {% if event.minutes %}
+        <a href="{{ event.minutes }}">Minutes</a>
+    {% endif %}
+
+    {% for proposal in event.proposals %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <strong>{{ proposal.address }}</strong>
+                ({{ proposal.case_number }})
+            </div>
+        </div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th class="col-xs-3 col-sm-3">
+                        Status
+                    </th>
+                    <td>
+                    </td>
+                </tr>
+                {% for attribute in proposal.attributes %}
+                    <tr>
+                        <th class="col-xs-3 col-sm-3">
+                            {{ attribute.name }}
+                        </th>
+                        <td>
+                            {{ attribute.value }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">
+                        <a href="/#view=main&ps={{ proposal.id }}&zoom=17">
+                            Show in Cornerwise
+                        </a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% endfor %}
+{% endblock %}

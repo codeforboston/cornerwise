@@ -7,18 +7,18 @@ define(["backbone", "underscore", "config", "utils"],
 
                        getDefaults: function() {
                            return {
-                           // Filters:
-                           "f": {
-                               "projects": "",
-                               "range": "<60",
-                               // Region:
-                               "region": "somerville"
-                           },
-                           "ref": {
-                               "lat": config.refPointDefault.lat,
-                               "lng": config.refPointDefault.lng
-                           },
-                           sort: "-updated"
+                               // Filters:
+                               "f": {
+                                   "projects": "",
+                                   "range": "<60",
+                                   // Region:
+                                   "region": "somerville"
+                               },
+                               "ref": {
+                                   "lat": config.refPointDefault.lat,
+                                   "lng": config.refPointDefault.lng
+                               },
+                               sort: "-updated"
                            };
                        },
 
@@ -58,13 +58,13 @@ define(["backbone", "underscore", "config", "utils"],
                            return $u.decodeQuery(B.history.getHash());
                        },
 
-                       getState: function() {
+                       getState: function(o) {
                            if (this._cachedState)
                                return this._cachedState;
 
                            return $u.deepMerge(
                                this.getDefaults(),
-                               this.getHashState());
+                               o || this.getHashState());
                        },
 
                        getKey: function(k) {
@@ -114,18 +114,31 @@ define(["backbone", "underscore", "config", "utils"],
                            return this.setHashState(hashObject, replace, quiet);
                        },
 
+                       goBack: function() {
+                           if (this.lastView)
+                               this.setHashKey("view", this.lastView);
+                           return !!this.lastView;
+                       },
+
                        triggerHashState: function(o) {
-                           o = o || $u.decodeQuery(B.history.getHash());
-                           this.trigger("hashState", o);
+                           this.trigger("hashState", this.getState(o));
                        },
 
                        watchers: [],
 
+                       lastView: null,
+
                        startWatch: function() {
                            var lastState = null,
                                watchers = this.watchers,
-                               defaults = this.getDefaults();
+                               defaults = this.getDefaults(),
+                               self = this;
+
                            this.on("hashState", function(state) {
+                               if (lastState && state.view !== lastState.view) {
+                                   self.lastView = lastState.view;
+                               }
+
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
                                        key = watcher[1],
@@ -133,13 +146,15 @@ define(["backbone", "underscore", "config", "utils"],
 
                                    if (key) {
                                        var defval = $u.getIn(defaults, key),
-                                    oldVal = $u.getIn(lastState, key) || (lastState && defval),
+                                           oldVal = ($u.getIn(lastState, key) ||
+                                                     (lastState && defval)),
                                            newVal = $u.getIn(state, key) || defval;
                                        if (lastState && _.isEqual(newVal, oldVal))
                                            return;
                                        callback.call(context, newVal, oldVal);
                                    } else {
-                                       callback.call(context, state, lastState || {});
+                                       callback.call(context, state, lastState ||
+                                                     {});
                                    }
                                });
                                lastState = state;
@@ -194,9 +209,17 @@ define(["backbone", "underscore", "config", "utils"],
                                // if (e.currentTarget != e.target)
                                //     return true;
 
+                               if ($(this).hasClass("_back") && appState.goBack()) {
+                                   e.preventDefault();
+                                   return false;
+                               }
+
                                var goto = $(this).data("goto");
 
                                if (goto) {
+                                   if (e.target !== e.currentTarget)
+                                       return true;
+
                                    appState.setHashKey("view", goto);
 
                                    e.preventDefault();

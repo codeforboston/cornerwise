@@ -1,11 +1,19 @@
-define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLocation, config) {
+define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function($, B, L, refLocation, config) {
     return B.Model.extend({
         urlRoot: "/proposal/view",
 
+        /**
+           When sorting attributes, display these attributes first, in this
+           order:
+        */
+        promoteAttributes: ["applicant_name", "date", "alderman",
+                            "applicant_address", "owner_address",
+                            "recommendation"],
+
         initialize: function() {
-                 this.listenTo(refLocation, "change", this.recalculateDistance)
-                .listenTo(this, "change:_hovered", this.loadParcel)
-                .listenTo(this, "change:_selected", this.loadParcel);
+            this.listenTo(refLocation, "change", this.recalculateDistance)
+                .listenTo(this, "change:_hovered", this.onHovered)
+                .listenTo(this, "change:_selected", this.onHovered);
         },
 
         defaults: function() {
@@ -17,9 +25,6 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
                 // the currently applied filter(s).
                 _excluded: false,
 
-                // Cached calculation; true if the proposal marker lies within
-                // the bounds of the visible map area.
-                _visible: true,
                 // GeoJSON representing the shape of the corresponding
                 // tax parcel, if one is found.
                 parcel: null
@@ -27,6 +32,9 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
         },
 
         parse: function(attrs) {
+            attrs.parcelId = attrs.parcel;
+            delete attrs.parcel;
+
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
@@ -40,6 +48,13 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
 
             if (!attrs.documents)
                 attrs.documents = [];
+
+            attrs.events = _.map(attrs.events, function(event, _i) {
+                event.date = new Date(event.date);
+                return event;
+            }).sort(function(event1, event2) {
+                return event2.date.getTime() - event1.date.getTime();
+            });
 
             attrs.attributes = _.indexBy(attrs.attributes || [], "handle");
 
@@ -81,21 +96,23 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return promise;
         },
 
-        loadParcel: function(proposal) {
+        onHovered: function(proposal) {
             if (this._parcelLoadAttempted)
                 return;
 
             var loc = this.get("location"),
+                pk = this.get("parcelId"),
                 self = this;
 
             this._parcelLoadAttempted = true;
 
-            $.getJSON(config.backendURL + "/parcel/find",
-                      {lat: loc.lat,
-                       lng: loc.lng,
-                       attributes: true,
-                       mode: "or",
-                       address: this.get("address")})
+            var query = pk ? {id: pk} : {lat: loc.lat,
+                                         lng: loc.lng,
+                                         mode: "or",
+                                         address: this.get("address")};
+            query.attributes = true;
+
+            $.getJSON(config.backendURL + "/parcel/find", query)
                 .done(function(parcel) {
                     self.set("parcel", parcel);
                 })
@@ -110,6 +127,11 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return this.get("address");
         },
 
+        getOtherAddresses: function() {
+            var others = this.get("other_addresses");
+            return others ? others.split(";") : [];
+        },
+
         getThumb: function() {
             var images = this.get("images");
 
@@ -119,21 +141,95 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return config.defaultProposalThumb;
         },
 
+        getImage: function() {
+            var images = this.get("images");
+
+            if (images.length)
+                return images[0].src;
+
+            return config.defaultProposalThumb;
+        },
+
+        /**
+         *
+         * Used to calculate next/previous when stepping through images.
+         *
+         * @param {number} id an image id
+         * @param {number} step How much to advance (if the step is positive) or
+         * retreat the index
+         *
+         * @returns {?object} An image or null
+         */
+        stepImage: function(id, step) {
+            var images = this.get("images"),
+                idx = _.findIndex(images,
+                                  function(image) { return image.id == id; });
+
+            return idx === undefined ? undefined : images[idx+step];
+        },
+
         getAttribute: function(handle) {
             return this.get("attributes")[handle];
         },
 
+        /**
+         * @param {string} handle
+         *
+         * @returns {?string}
+         */
         getAttributeValue: function(handle) {
             var attr = this.getAttribute(handle);
 
             return attr && attr.value;
         },
 
+        /**
+         * Retrieve attribute values for the specified keys in the specified
+         * order.
+         *
+         * @param {string[]} handles
+         *
+         * @returns {string[]}
+         */
         getAttributeValues: function(handles) {
             return _.map(handles, this.getAttributeValue, this);
         },
 
+        _makeHandlerComparator: function(promoted) {
+            var m = _.reduce(promoted, function(o, handle, i) {
+                o[handle] = i;
+                return o;
+            }, {});
+
+            return function(a, b) {
+                var aIdx = m[a], bIdx = m[b];
+
+                if (aIdx !== undefined && bIdx !== undefined) {
+                    return aIdx - bIdx;
+                }
+
+                if (aIdx === undefined) {
+                    if (bIdx === undefined)
+                        return a < b ? -1 : a == b ? 0 : -1;
+                    return 1;
+                }
+
+                return -1;
+            };
+        },
+
+        getHandlerCmp: function() {
+            if (!this._handlerCmp) {
+                this._handlerCmp = this._makeHandlerComparator(this.promoteAttributes);
+            }
+            return this._handlerCmp;
+        },
+
         getAttributes: function(handles) {
+            if (!handles) {
+                handles = _.keys(this.get("attributes")).sort(this.getHandlerCmp());
+            }
+
             return _.map(handles, this.getAttribute, this);
         },
 
@@ -200,8 +296,24 @@ define(["backbone", "leaflet", "ref-location", "config"], function(B, L, refLoca
             return this.get("project");
         },
 
+        projectYearRange: function() {
+            var project = this.getProject();
+
+            if (!project) return null;
+
+            var years = _.map(_.keys(project.budget),
+                              function(s) { return parseInt(s); }).sort(),
+                start = years[0],
+                end = years.slice(-1)[0];
+
+            if (start === end)
+                return "FY " + start;
+
+            return ["FY ", start, "– ", end].join("");
+        },
+
         recalculateDistance: function() {
-            var dist = this.set("refDistance", this.getDistanceToRef());
+            this.set("refDistance", this.getDistanceToRef());
         }
     }, {
         // Class properties:

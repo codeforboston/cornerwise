@@ -8,7 +8,7 @@ doc_urlpatterns = [
 ]
 
 urlpatterns = [
-    url(r"^list$", views.active_proposals, name="list-proposals"),
+    url(r"^list$", views.list_proposals, name="list-proposals"),
     url(r"^closed$", views.closed_proposals),
     url(r"^view$", views.view_proposal),
     url(r"^view/(?P<pk>[0-9]+)$", views.view_proposal, name="view-proposal"),

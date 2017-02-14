@@ -23,27 +23,27 @@
     <% } %>
 &bull;
 <div class="distance">
-    <%= prettyDistance(proposal.get('refDistance')) %> away
-    from
-    <%= refLocationButton() %>
+    <%= prettyDistance(proposal.get("refDistance")) %> away from <%= refLocationButton() %>
 </div>
-&bull;
-<a class="source-link"  href="<%- proposal.get('source') %>" target="_blank ">Source</a>
+<!-- &bull; -->
+<!-- <a class="source-link"  href="<%- proposal.get('source') %>" target="_blank ">Source</a> -->
 
 <% if (project) { %>
 <table class="attributes table" >
     <tr class="attribute" >
-        <th scope="row" >DESCRIPTION</th>
+        <th scope="row" >Description</th>
         <td><%- project.description %></td>
     </tr>
     <tr class="attribute" >
-        <th scope="row" >JUSTIFICATION</th>
+        <th scope="row" >Justification</th>
         <td><%- project.justification %></td>
     </tr>
 </table>
 <% } else { %>
 <%
 var notice = proposal.getAttributeValue("legal_notice");
+var applicant = proposal.getAttributeValue("applicant_name");
+var hearing = proposal.getAttributeValue("dates_of_public_hearing");
 
 if (notice) {
 %>
@@ -53,17 +53,23 @@ if (notice) {
 <% } %>
 
 <table class="attributes table">
+    <% if (applicant) { %>
     <tr class="attribute">
-        <th scope="row">APPLICANT</th>
+        <th scope="row">Applicant</th>
         <td><%- proposal.getAttributeValue("applicant_name") %></td>
     </tr>
+    <% } %>
 
+    <% if (hearing) { %>
     <tr class="attribute">
-        <th scope="row">PUBLIC HEARINGS</th>
+        <th scope="row">Public Hearings</th>
         <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
     </tr>
+    <% } %>
 </table>
 <% } %>
+
+<a class=" more" href="#view=info&ps=<%- proposal.id %>">More&hellip;</a>
 
 <%
 var documents = proposal.get("documents");
