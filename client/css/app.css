@@ -313,6 +313,13 @@ button.big {
     font-size: x-large;
 }
 
+button.big-submit {
+    background-color: #3c7c3d;
+    color: white;
+    margin: 0.5em;
+    text-transform: uppercase;
+}
+
 .overlay ::-webkit-input-placeholder {
     color: white;
     font-style: italic;
@@ -572,7 +579,7 @@ body.main .map-mode-button, body.list .list-mode-button {
 }
 
 .action {
-    background-color: #4EAF48;
+    background-color: #3c7c3d;
 }
 
 .action:hover {
@@ -1151,11 +1158,11 @@ a.brief-model:hover {
     display: none;
 }
 
-#info .document {
+#info .document, #info .event {
     color: #4EAF48;
     display: block;
     line-height: 1.5em;
-    padding-left: 1em;
+    padding-left: 0.5em;
 }
 
 #info .attribute {
@@ -1518,7 +1525,10 @@ ul.model-list li {
     font-weight: normal;
     text-align: left;
     font-size: smaller;
+    padding-right: 5px;
+    padding-top: 3px;
     text-transform:uppercase;
+    vertical-align: top;
 }
 
 .button {
@@ -1645,9 +1655,17 @@ ul.model-list li {
 
 a.document:before {
     content: "\f105";
+}
+
+a.document:before, a.event:before {
     font-family: Flaticon;
     font-style: normal;
     padding-left: 0.2em;
+    padding-right: 0.3em;
+}
+
+a.event:before {
+    /* content: "\1f4c5"; */
 }
 
 #side-menu {
@@ -1663,9 +1681,6 @@ a.document:before {
     display: none;
 }
 
-body.nointro #side-menu {
-    display: none;
-}
 
 body.nointro #side-menu.expanded {
     display: block;
@@ -1676,7 +1691,7 @@ body.nointro #side-menu.expanded {
     position: absolute;
     top: 0em;
     left: 0.5em;
-    color: #4EAF48;
+    color: #3c7c3d;
 }
 
 .menu-group {
@@ -1692,7 +1707,7 @@ select {
     background: url(/static/images/down-arrow.png) right / contain no-repeat;
     border-color: gray;
     border-radius: 0;
-    color: #4EAF48;
+    color: #3c7c3d;
     display: block;
     font-size: 1em;
     margin-bottom: 1em;
@@ -1752,7 +1767,7 @@ body.choosing-bounds .leaflet-marker-icon
 }
 
 #subscribe {
-    background-color: #4aaf42;
+    background-color: #3c7c3d;
 }
 
 #subscribe .screen {
@@ -1848,14 +1863,14 @@ body.choosing-bounds .leaflet-marker-icon
 
     #info .main-thumb {
         max-height: 300px;
-        max-width: 100%;
+        max-width: 95%;
     }
 
     #info .images {
         margin-top: 1em;
     }
 
-    #info .document {
+    #info .document, #info .event {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -2049,7 +2064,7 @@ body.choosing-bounds .leaflet-marker-icon
         bottom: 0;
     }
 
-    #side-menu.expanded {
+    body.nointro #side-menu.expanded {
         display: block;
         right: 0;
     }
@@ -2060,8 +2075,8 @@ body.choosing-bounds .leaflet-marker-icon
     }
 
     #modal-contents {
-        margin-left: 5%;
-        margin-right: 5%;
+        margin-left: 1%;
+        margin-right: 1%;
     }
 
     h3 {
