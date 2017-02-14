@@ -1,5 +1,5 @@
-define(["backbone", "jquery", "utils", "underscore"],
-       function(B, $, $u, _) {
+define(["backbone", "jquery", "utils", "underscore", "appState"],
+       function(B, $, $u, _, appState) {
            return B.View.extend({
                initialize: function(options) {
                    if (options.url)
@@ -27,7 +27,8 @@ define(["backbone", "jquery", "utils", "underscore"],
                getContext: function() {
                    return _.extend({model: this.model,
                                     collection: this.collection},
-                                   this.context);
+                                   this.context,
+                                   appState.getState());
                },
 
                _update: function() {
