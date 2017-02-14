@@ -1,6 +1,6 @@
 from django.contrib.gis.geos import Point
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from functools import reduce
 import json, operator, re
@@ -133,6 +133,11 @@ def find_parcels(req):
     except IndexError:
         raise ErrorResponse("No matching parcels found", status=404)
     return make_parcel_data(parcel, include_attributes=include_attributes)
+
+
+@make_response()
+def view_parcel(req, pk):
+    parcel = get_object_or_404(Parcel, pk=pk)
 
 
 @make_response()
