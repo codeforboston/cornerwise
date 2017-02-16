@@ -125,7 +125,7 @@ SERVER_DOMAIN = "cornerwise.org"
 STATIC_URL = "static/"
 MEDIA_URL = "media/"
 
-STATIC_ROOT = "/client/"
+STATIC_ROOT = "/static/"
 MEDIA_ROOT = "/media/"
 
 SERVE_STATIC = os.environ.get("DJANGO_SERVE_STATIC", "1") == "1"

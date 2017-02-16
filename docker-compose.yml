@@ -5,14 +5,12 @@ services:
     image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
-    volumes:
-      - ./server:/app
-      - ./client:/client
-      - ./data:/data
-      - ./docker-support:/support
     environment:
       APP_PORT: "4000"
       APP_MODE: "development"
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/cornerwise/google_credentials.json"
+      DJANGO_SERVE_STATIC: "1"
+      DJANGO_SERVE_MEDIA: "1"
     ports:
       - "4000:4000"
     links:
@@ -22,6 +20,10 @@ services:
     command: bash /app/start.sh
     volumes:
       - media:/media
+      - ./server:/app
+      - ./client:/static
+      - ./data:/data
+      - ./docker-support:/support
   postgres:
     image: mdillon/postgis:9.4
     volumes:

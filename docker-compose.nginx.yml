@@ -15,10 +15,12 @@ services:
     image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
+      - ./docker-support/nginx.env
     environment:
       APP_MODE: "production"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
+      GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
     links:
       - postgres
       - redis
@@ -28,6 +30,7 @@ services:
       - media:/media
       - ./data:/data
       - ./server:/app
+      - ./server/cornerwise/google_credentials.json:/google_credentials.json
   postgres:
     image: mdillon/postgis:9.4
     volumes:

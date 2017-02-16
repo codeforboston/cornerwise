@@ -14,11 +14,6 @@ if [ -z "$APP_ROOT" ]; then
     export APP_ROOT=$(pwd)
 fi
 
-# The APP_PORT global is set
-if [ -z "$APP_PORT" ]; then
-    export APP_PORT=3000
-fi
-
 # Wait until Postgres is accepting connections:
 trial_count=0
 while ! timeout 1 bash -c "echo > /dev/tcp/$POSTGRES_HOST/5432" 2>/dev/null; do
@@ -58,7 +53,8 @@ if ! getent hosts celery; then
 fi
 
 if [ "$APP_MODE" = "production" ]; then
-    gunicorn -b "0.0.0.0:$APP_PORT" cornerwise.wsgi
+    gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
+             cornerwise.wsgi:application
 else
     $PYTHON_BIN manage.py runserver 0.0.0.0:$APP_PORT
 fi
