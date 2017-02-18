@@ -6,6 +6,9 @@ services:
     environment:
       APP_MODE: production
       APP_PORT: 3000
+      ALLOWED_HOSTS: ".cornerwise.org,.cornerwise.org."
+      CSRF_COOKIE_SECURE: "1"
+      SESSION_COOKIE_SECURE: "1"
     env_file:
       - ./docker-support/common.env
       - ./docker-support/prod.env
@@ -14,6 +17,7 @@ services:
       - redis
     volumes:
       - /datadrive/media:/media
+      - /datadrive/secrets:/secrets
     ports:
       - "3000:3000"
     working_dir: /app

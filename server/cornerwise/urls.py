@@ -1,8 +1,7 @@
 from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib import admin
-from django.views import static
-
 
 from cornerwise.views import index, contact_us
 
@@ -19,13 +18,10 @@ urlpatterns = [
 ]
 
 if settings.SERVE_MEDIA:
-    urlpatterns += [
-        url(r"^" + settings.MEDIA_URL + "(?P<path>.*)$",
-            static.serve, {"document_root": settings.MEDIA_ROOT}),
-    ]
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+print(settings.STATIC_ROOT)
 if settings.SERVE_STATIC:
-    urlpatterns += [
-        url(r"^" + settings.STATIC_URL + "(?P<path>.*)$",
-            static.serve, {"document_root": settings.STATIC_ROOT}),
-    ]
+    urlpatterns += static(
+        settings.STATIC_URL, document_root=settings.STATIC_ROOT)

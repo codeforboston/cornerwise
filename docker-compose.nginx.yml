@@ -18,6 +18,7 @@ services:
       - ./docker-support/nginx.env
     environment:
       APP_MODE: "production"
+      ALLOWED_HOSTS: "*"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
@@ -30,7 +31,7 @@ services:
       - media:/media
       - ./data:/data
       - ./server:/app
-      - ./server/cornerwise/google_credentials.json:/google_credentials.json
+      - ./server/cornerwise/google_credentials.json:/secrets/google_credentials.json
   postgres:
     image: mdillon/postgis:9.4
     volumes:

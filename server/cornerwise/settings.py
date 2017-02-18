@@ -16,16 +16,15 @@ IS_CELERY = os.environ.get("IS_CELERY") == "1"
 
 REDIS_HOST = "redis://" + os.environ.get("REDIS_HOST", "")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
-SECRET_KEY = os.environ.get("DJANGO_SECRET",
-                            "98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs")
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET", "98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not IS_PRODUCTION and not IS_CELERY
+DEBUG = not IS_PRODUCTION
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "0") == "1"
+SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
 
 # Application definition
 INSTALLED_APPS = (
@@ -44,8 +43,7 @@ INSTALLED_APPS = (
     'project.ProjectConfig',
     'user.UserAppConfig',
     "task",
-    "shared",
-)
+    "shared", )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,29 +53,38 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+    'django.middleware.security.SecurityMiddleware', )
 
 ROOT_URLCONF = 'cornerwise.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["templates"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+def templates_config():
+    context_processors = [
+        "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth",
+        "django.contrib.messages.context_processors.messages",
+    ]
+    if IS_PRODUCTION:
+        loaders = [("django.template.loaders.cached.Loader", [
+            "django.template.loaders.filesystem.Loader",
+            "django.template.loaders.app_directories.Loader",
+        ])]
+    else:
+        context_processors = ["django.template.context_processors.debug",
+                              ] + context_processors
+        loaders = ["django.template.loaders.filesystem.Loader"]
+
+    return [{
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": ["templates"],
+        "OPTIONS": {
+            "context_processors": context_processors,
+            "loaders": loaders,
         },
-    },
-]
+    }]
+
+TEMPLATES = templates_config()
 
 WSGI_APPLICATION = 'cornerwise.wsgi.application'
-
 
 #####################
 # Database and Cache
@@ -122,11 +129,11 @@ USE_TZ = True
 
 SERVER_DOMAIN = "cornerwise.org"
 
-STATIC_URL = "static/"
-MEDIA_URL = "media/"
+STATIC_URL = "/static/"
+MEDIA_URL = "/media/"
 
-STATIC_ROOT = "/static/"
 MEDIA_ROOT = "/media/"
+STATICFILES_DIRS = ("/static", "/media")
 
 SERVE_STATIC = os.environ.get("DJANGO_SERVE_STATIC", "1") == "1"
 SERVE_MEDIA = os.environ.get("DJANGO_SERVE_MEDIA", "1") == "1"
@@ -145,23 +152,24 @@ CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
         "task": "proposal.fetch_proposals",
         # Run daily at midnight:
-        "schedule": crontab(minute=0, hour=0)
+        "schedule": crontab(
+            minute=0, hour=0)
     },
-
     "scrape-events": {
         "task": "proposal.pull_events",
-        "schedule": crontab(minute=0, hour=1)
+        "schedule": crontab(
+            minute=0, hour=1)
     },
-
     "update-projects": {
         "task": "project.pull_updates",
         # Run on Mondays at midnight:
-        "schedule": crontab(minute=0, hour=0, day_of_week="monday")
+        "schedule": crontab(
+            minute=0, hour=0, day_of_week="monday")
     },
-
     "send-notifications": {
         "task": "user.send_notifications",
-        "schedule": crontab(minute=0, hour=1)
+        "schedule": crontab(
+            minute=0, hour=1)
     }
 }
 
@@ -170,15 +178,17 @@ CELERYD_TASK_SOFT_TIME_LIMIT = 60
 ###########
 # Messages
 from django.contrib.messages import constants as messages
-MESSAGE_TAGS = {
-    messages.ERROR: "danger"
-}
+MESSAGE_TAGS = {messages.ERROR: "danger"}
 
 ###############################
 # Cornerwise-specific settings
 
-GEO_BOUNDS = [42.371861543730496, -71.13338470458984,  # northwest
-              42.40393908425197, -71.0679817199707]    # southeast
+GEO_BOUNDS = [
+    42.371861543730496,
+    -71.13338470458984,  # northwest
+    42.40393908425197,
+    -71.0679817199707
+]  # southeast
 
 # The 'fit-width' of image thumbnails:
 THUMBNAIL_DIM = (300, 300)
@@ -206,23 +216,16 @@ MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
                "sw-lat={swlat}&sw-lng={swlon}&"
                "ne-lat={nelat}&ne-lng={nelon}&clip=1")
 
-
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
 # Load select environment variables into settings:
-for envvar in ["GOOGLE_API_KEY",
-               "GOOGLE_BROWSER_API_KEY",
-               "GOOGLE_STREET_VIEW_SECRET",
-               "GEOCODER",
-               "ARCGIS_CLIENT_ID",
-               "ARCGIS_CLIENT_SECRET",
-               "SOCRATA_APP_TOKEN",
-               "SOCRATA_APP_SECRET",
-               "SENDGRID_API_KEY",
-               "FOURSQUARE_CLIENT",
-               "FOURSQUARE_SECRET"]:
+for envvar in [
+        "GOOGLE_API_KEY", "GOOGLE_BROWSER_API_KEY",
+        "GOOGLE_STREET_VIEW_SECRET", "GEOCODER", "ARCGIS_CLIENT_ID",
+        "ARCGIS_CLIENT_SECRET", "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET",
+        "SENDGRID_API_KEY", "FOURSQUARE_CLIENT", "FOURSQUARE_SECRET"
+]:
     globals()[envvar] = os.environ.get(envvar, "")
-
 
 if not IS_PRODUCTION:
     try:
