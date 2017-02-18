@@ -5,12 +5,13 @@
 
 * Running the Server
 
-  We're using Docker (and eventually docker-compose), because it ensures
-  that we're all working with the same environment. In essence, Docker
-  is a tool for managing lightweight Linux machines.
+  We're using Docker, because it ensures that we're all working with the same
+  environment and provides near parity between development and production. You
+  can think of Docker as a tool for managing lightweight machines and wiring
+  them together.
 
   If you follow the instructions below, you will have the necessary
-  dependencies, including Postgres w/GIS extensions and Django 1.8.
+  dependencies, including Postgres w/GIS extensions and Django 1.10.
 
 ** Docker Installation
 
@@ -18,7 +19,7 @@
     You have two options:
     - [[https://docs.docker.com/engine/installation/windows/][Docker for Windows]] / [[https://docs.docker.com/engine/installation/mac/][Docker for Mac]] 
       
-      Newer Macs running 10.10.3 or higher and Windows PCs running Windows 10
+      Macs (>=2012) running 10.10.3 or higher and Windows PCs running Windows 10
       Pro, Enterprise, or Education edition can choose to run Docker Native.
 
     - [[https://www.docker.com/toolbox][Install Docker Toolbox]]
@@ -31,26 +32,22 @@
       Quickstart Terminal* whenever you want to interact with Docker.
 
 *** Linux
-    - [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Intall Docker Engine]]
-    
-      You can try ~apt-get install docker.io~, but make sure you get a recent
-      version (>1.10)
+    - [[https://docs.docker.com/engine/installation/linux/ubuntulinux/][Install Docker Engine]]
     
     - [[https://docs.docker.com/compose/install/][Install Docker Compose]]
 
       Compose is a tool built on top of Docker that allows us to organize the
-      application into component services and to wire them together
-      appropriately. It reads the contents of `docker-compose.yml` (possibly
-      merging in other files like `docker-compose.override.yml`) and constructs
-      containers as needed.
+      application into component services and to wire them together. It reads
+      the contents of `docker-compose.yml` (possibly merging in other files like
+      `docker-compose.override.yml`) and constructs containers as needed.
 
 ** Startup
 
    Note: On Linux, you'll typically have to run all ~docker~ commands, including
    ~docker-compose~, with ~sudo~. This is due to the fact that the Docker daemon
    must run as root, and the client communicates with it over a socket owned by
-   root. (You can add your user to the ~docker~ group to avoid having to type
-   ~sudo~.)
+   root. You can add your user to the ~docker~ group to avoid having to type
+   ~sudo~.
 
    1. (Docker Toolbox) Launch the *Docker Quickstart Terminal*. This will
       provision a new ~default~ Docker Machine if one does not already exist and
@@ -58,12 +55,11 @@
       instructions below if you prefer to do this step manually or in another
       terminal.
 
-   2. ~cd path/to/cornerwise~
+   2. ~cd path/to/cornerwise~ in your terminal
 
    3. ~docker-compose up~
-      - When you first run ~up~, Compose will retrieve some pre-built images from
-        Docker Hub and then build the ~cornerwise~ image. It is normal for these steps
-        to take a few minutes.
+      - When you first run ~up~, Compose will retrieve some images from Docker
+        Hub. It is normal for this process to take a few minutes.
 
    4. Once the images have been built and the containers have started, you
       should see something like:
@@ -81,31 +77,36 @@
 
       - (Linux or Docker Native) Open a browser to http://localhost:4000/.
 
-   7. In the original window, press Ctrl-C to shut down the application.
+   7. In the original window, press Ctrl-C to shut down the application when
+      you're done.
 
-*** Without Quickstart Terminal (/optional/)
-    To create a Machine manually:
+*** Docker Toolbox Without Quickstart Terminal (/optional/)
+    If you're using Docker Toolbox and prefer to use a terminal other than the
+    included Docker Quickstart Terminal, you will need to run a couple extra
+    commands.
 
-    - ~docker-machine create -d virtualbox dev~
-      Where ~dev~ is the name of the container
+    - ~docker-machine create -d virtualbox default~
+      Run this the *first time*. It creates a new VM with the name ~default~ using
+      your specified driver (VirtualBox in this example, but there are many
+      other [[https://docs.docker.com/machine/drivers/][supported drivers]])
 
-    - ~eval $(docker-machine env dev)~
+    - ~eval $(docker-machine env default)~
       Sets up some environment variables for communicating with a running machine
-      named ~dev~.
+      named ~default~. You must run this *each time you open a new terminal
+      session*.
 
-*** Port Forwarding (OS X) (/optional/)
-    If you'd like to be able to access the site at http://localhost:4000:
+*** Port Forwarding (OS X + Docker Toolbox) (/optional/)
+    If you're using Docker Toolbox + VirtualBox and would like to be able to
+    access the site at http://localhost:4000:
 
     - ~VBoxManage controlvm default natpf1 cornerwise,tcp,127.0.0.1,4000,,4000~
       - ~default~ :: name of the Docker Machine
       - 4000 (first occurrence) :: host port
       - 4000 (second occurrence) :: VM port
 
-*** Production
-    - ~docker-compose up -f docker-compose.yml -f docker-compose.prod.yml~
-
 ** Interacting with Containers
-   - (OS X/Windows) Launch *Docker Quickstart Terminal*
+   - (Docker Toolbox) ~eval $(docker-machine env default)~ or run Quickstart
+     Terminal
    - ~cd path/to/cornerwise~
    - ~docker-machine exec cornerwise bash~
 
@@ -115,6 +116,12 @@
   third-party APIs. To get them working, you'll need to set up accounts with the
   appropriate vendors. All of them offer services that are free at the volume we
   deal with (certainly, more than needed for the purposes of local development.)
+
+  At the moment, the only settings that are /absolutely required/ are
+  ~GOOGLE_BROWSER_API_KEY~ and either ~GOOGLE_API_KEY~ or the ArcGIS id and
+  secret. If you use ~GOOGLE_API_KEY~ and omit ArcGIS, change ~GEOCODER~ to
+  "google". Things will run more or less normally without the other credentials,
+  with certain features disabled.
 
 ** Setup
 
@@ -137,10 +144,11 @@
     #+BEGIN_SRC bash
     docker-compose exec cornerwise ./manage.py shell
     >>> import datetime, proposal
-    >>> proposal.tasks.pull_updates(datetime.datetime(2016, 10, 10))
+    >>> proposal.tasks.pull_updates(datetime.datetime(2016, 10, 10).timestamp())
     # Or, with celery running, dispatch an asychronous job:
     >>> proposal.tasks.pull_updates_dt(datetime)
     #+END_SRC
+
 *** Parcels
     Parcels, for our purposes, are shapes representing an area of real property
     (real estate) with some metadata attached. They are stored in shapefiles.
@@ -180,20 +188,37 @@
       from port 3000 instead of 4000.
    4. Configuration that in development uses ~local_settings.py~ uses
       environment variables in production . When deploying, ensure that there is
-      a ~production.env~ file in ~docker-support~. It should not be in git.
-** Running
-   1. ~docker-compose -f docker-compose.yml -f docker-compose.prod.yml up~
+      a ~prod.env~ file in ~docker-support~. It should not be in git.
+
+** Running Production Mode Locally
+   The ~docker-compose.nginx.yml~ file contains the necessary configuration to
+   run Cornerwise in production mode behind a reverse proxy, mirroring the
+   production setup. To run it:
+   1. Copy ~docker-support/nginx.env.example~ to ~docker-support/nginx.env~,
+      replacing the variables with appropriate values. (The application will
+      fail gracefully if you omit most settings, but you will need to have a
+      GOOGLE_BROWSER_API_KEY and a geocoder at minimum.)
+   2. Run ~docker-compose -f docker-compose.nginx.yml up~ to start running the
+      application.
+   3. The application will be running at http://localhost:4000.
+
 * Starting Fresh
   To start over with a clean database, cd to the the project directory and run
   ~docker-compose down -v~. This will shut down the running containers and delete
   them. It will also delete all of the named volumes and any data they may
   contain.
+
 * Uninstalling
 ** Stop and Remove Containers
-   - In the ~cornerwise~ directory, run ~docker-compose down~
-   - 
+   - In the ~cornerwise~ directory, run ~docker-compose down -v~
 ** Remove the image:
 
    #+BEGIN_SRC bash
-docker rmi bdsand/cornerwise
+   docker rmi bdsand/cornerwise
+   #+END_SRC
+
+   Or, if you'd like to remove all the images we use:
+
+   #+BEGIN_SRC bash
+   docker rmi bdsand/cornerwise redis mdillion/postgis nginx
    #+END_SRC
