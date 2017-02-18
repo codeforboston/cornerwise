@@ -67,7 +67,7 @@ def add_geocode(geocoder, proposals):
     matching the proposal address.
     """
     addrs = [proposal["address"] for proposal in proposals]
-    locations = geocoder.geocode(addrs)
+    locations = geocoder.geocode(addrs, region="Somerville, MA")
 
     # Assumes the locations are returned in the same order
     for proposal, location in zip(proposals, locations):

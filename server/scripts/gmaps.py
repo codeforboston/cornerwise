@@ -76,7 +76,6 @@ class GoogleGeocoder(object):
     def __init__(self, api_key):
         self.api_key = api_key
         self._bounds = None
-        self.region = None
 
     @property
     def bounds(self):
@@ -110,10 +109,10 @@ class GoogleGeocoder(object):
         # addresses:
         return [results[a] for a in addrs]
 
-    def geocode(self, addrs, bounds=None):
+    def geocode(self, addrs, bounds=None, region=None):
         results = []
         for addr in addrs:
-            if self.region:
-                addr += " " + self.region
+            if region:
+                addr += " " + region
             results.append(simplify(geocode(self.api_key, addr, self.bounds)))
         return results

@@ -183,8 +183,6 @@ GEO_BOUNDS = [42.371861543730496, -71.13338470458984,  # northwest
 # The 'fit-width' of image thumbnails:
 THUMBNAIL_DIM = (300, 300)
 
-# String appended to addresses to assist geocoder:
-GEO_REGION = "Somerville, MA"
 GEOCODER = "arcgis"
 
 # Email address and name for emails:

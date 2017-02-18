@@ -20,7 +20,7 @@ from . import extract
 from . import documents as doc_utils
 from .importers.register import Importers
 from cornerwise import celery_app
-from scripts import arcgis, foursquare, gmaps, images, street_view
+from scripts import arcgis, foursquare, gmaps, street_view
 
 logger = logging.getLogger(__name__)
 task_logger = get_task_logger(__name__)
@@ -195,25 +195,6 @@ def generate_doc_thumbnail(doc_id):
     return doc_utils.generate_thumbnail(doc)
 
 
-@celery_app.task(name="proposal.fetch_image")
-def fetch_image(image_id):
-    image = Image.objects.get(pk=image_id)
-    url = image.url
-
-    if url:
-        components = parse.urlsplit(url)
-        ext = extension(os.path.basename(components.path))
-        filename = "image_%s.%s" % (image.pk, ext)
-        path = os.path.join(settings.MEDIA_ROOT, "image", filename)
-        with request.urlopen(url) as resp, open(path, "wb") as out:
-            shutil.copyfileobj(resp, out)
-            image.document = path
-
-            image.save()
-
-    return image
-
-
 @celery_app.task(name="proposal.generate_thumbnail")
 def generate_thumbnail(image_id, replace=False):
     """Generate an image thumbnail.
@@ -300,7 +281,7 @@ def process_proposal(proposal):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
     add_street_view.delay(proposal.id)
-    add_venue_info.delay(proposal.id)
+    #add_venue_info.delay(proposal.id)
 
     add_parcel.delay(proposal.id)
 
@@ -317,7 +298,6 @@ def fetch_proposals(since=None,
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
         geocoder.bounds = settings.GEO_BOUNDS
-        geocoder.region = settings.GEO_REGION
     else:
         geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
                                       settings.ARCGIS_CLIENT_SECRET)
