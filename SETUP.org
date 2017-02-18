@@ -146,7 +146,7 @@
     >>> import datetime, proposal
     >>> proposal.tasks.pull_updates(datetime.datetime(2016, 10, 10).timestamp())
     # Or, with celery running, dispatch an asychronous job:
-    >>> proposal.tasks.pull_updates_dt(datetime)
+    >>> proposal.tasks.pull_updates.delay(datetime.datetime(2016, 10, 10).timestamp())
     #+END_SRC
 
 *** Parcels
@@ -164,7 +164,7 @@
     docker-compose exec cornerwise ./manage.py addparcels somervillema
     #+END_SRC
 
-    (You can also run ~./manage.py help addparcels~ to view additional options.)
+    (You can run ~./manage.py help addparcels~ to view additional options.)
 
     The script will import all the Somerville parcel shapes into the Cornerwise
     database running in your postgis container. There are over 30,000 parcels in
@@ -200,7 +200,7 @@
       GOOGLE_BROWSER_API_KEY and a geocoder at minimum.)
    2. Run ~docker-compose -f docker-compose.nginx.yml up~ to start running the
       application.
-   3. The application will be running at http://localhost:4000.
+   3. The application will be running at http://localhost:3000.
 
 * Starting Fresh
   To start over with a clean database, cd to the the project directory and run
