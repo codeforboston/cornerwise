@@ -175,3 +175,7 @@ def view_image(req, pk=None):
 
     image = get_object_or_404(Image, pk=pk)
     return image.to_dict()
+
+@make_response("images.djhtml")
+def list_images(req):
+    return {"images": Image.objects.exclude(image="")}

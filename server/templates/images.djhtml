@@ -1,0 +1,13 @@
+{% extends "base.djhtml" %}
+
+{% block body %}
+<table>
+    {% for image in images %}
+        <tr>
+            <td class="thumbnail">
+                <img src="{{ image.get_url }}"/>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

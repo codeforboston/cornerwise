@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import url
 
 from . import views
@@ -21,3 +22,8 @@ urlpatterns = [
     url(r"^rss", feed.ReportsAndDecisionsFeed()),
     url(r"^atom", feed.ReportsAndDecisionsAtom()),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        url(r"^images$", views.list_images),
+    ]
