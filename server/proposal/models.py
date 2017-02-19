@@ -337,17 +337,22 @@ def upload_image_to(doc, filename):
 
 
 class Image(models.Model):
-    """An image associated with a document.
+    """
+    An image associated with a proposal and (optionally) with a document.
     """
     proposal = models.ForeignKey(Proposal, related_name="images")
     document = models.ForeignKey(
         Document, null=True, help_text="Source document for image")
     image = models.FileField(null=True, upload_to=upload_image_to)
+    width = models.IntegerField()
+    height = models.IntegerField()
     thumbnail = models.FileField(null=True)
     url = models.URLField(null=True, unique=True, max_length=512)
     # Crude way to specify that an image should not be copied to the
     # local filesystem:
     skip_cache = models.BooleanField(default=False)
+    # Crude form of ranking. Images with lower priority values are shown first
+    # in the UI.
     priority = models.IntegerField(default=0, db_index=True)
     source = models.CharField(max_length=64, default="document")
     created = models.DateTimeField(auto_now_add=True)

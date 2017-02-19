@@ -68,8 +68,10 @@ def save_images(doc):
 
     images = []
     # Do stuff with the images in the directory
-    for i, (image_data, ext) in enumerate(image_gen):
+    for i, (image_data, ext, w, h) in enumerate(image_gen):
         image = Image(proposal=doc.proposal, document=doc)
+        image.width = w
+        image.height = h
         image.image.save("image-{:0>3}.{}".format(i, ext), image_data)
         images.append(image)
 
