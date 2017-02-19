@@ -70,6 +70,7 @@ define(["backbone", "appState", "jquery", "utils"],
                render: function(image) {
                    this.showing = true;
                    this.$el.html(
+                       "<a class='close _back'>&times</a>" +
                        "<img class='image-zoom' src='" + image.src + "'/>")
                        .addClass("displayed");
 

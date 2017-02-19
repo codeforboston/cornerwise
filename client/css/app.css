@@ -1087,7 +1087,8 @@ a.brief-model:hover {
     text-decoration: none;
 }
 
-#info .close {
+#info .close, #image-view .close {
+    color: white;
     font-size: 30pt;
     position: absolute;
     right: 0.5em;
@@ -1096,7 +1097,7 @@ a.brief-model:hover {
     z-index: 5;
 }
 
-#info .close:hover {
+#info .close:hover, #image-view .close:hover {
     color: #4EAF48;
     text-decoration: none;
 }
@@ -1895,7 +1896,7 @@ body.choosing-bounds .leaflet-marker-icon
     }
 
     .nointro #alert-container {
-        top: 120px; 
+        top: 120px;
     }
 
     body.nointro .filters-button {
@@ -2151,7 +2152,8 @@ body.choosing-bounds .leaflet-marker-icon
 
     #subscribe .screen1 {
         display: block;
-       font-size: x-large;
+        font-size: x-large;
+        font-size: 4.5vw;
     }
 
     /* List view tweaks for mobile */
