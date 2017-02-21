@@ -1,5 +1,5 @@
-define(["backbone", "jquery", "utils", "underscore", "appState"],
-       function(B, $, $u, _, appState) {
+define(["backbone", "view/alerts", "jquery", "utils", "underscore", "appState"],
+       function(B, alerts, $, $u, _, appState) {
            return B.View.extend({
                initialize: function(options) {
                    if (options.url)
@@ -19,6 +19,10 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
                },
 
                el: "#modal-contents",
+
+               events: {
+                   "submit form": "onSubmit"
+               },
 
                getContainer: function() {
                    return this.$el.closest(this.container);
@@ -64,6 +68,49 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
                hide: function() {
                    this.shouldShow = false;
                    this._update();
+               },
+
+               clearFormErrors: function() {
+                   this.$("label").removeClass("error");
+                   this.$(".form-error").remove();
+               },
+
+               showFormErrors: function(errors) {
+                   var $el = this.$el;
+                   this.clearFormErrors();
+                   this.$(".input-group").each(function(i, el) {
+                       var name = $(el).find("[name]").attr("name");
+                       if (errors[name]) {
+                           $(el).addClass("error");
+                           $("<div class='form-error'></div>")
+                               .text(errors[name].join(", "))
+                               .prependTo(el);
+                       }
+                   });
+               },
+
+               onSubmit: function(e) {
+                   var form = e.target,
+                       data = $(form).serialize(),
+                       self = this;
+
+                   data += "&csrfmiddlewaretoken=" + $u.getCsrfToken();
+
+                   $.ajax({
+                       url: form.action,
+                       method: form.method,
+                       data: data
+                   }).done(function(xhr) {
+                       var result = xhr.responseJSON;
+                       appState.goBack("main");
+                       alerts.show({title: result.title,
+                                    message: result.message});
+                   }).fail(function(xhr) {
+                       self.showFormErrors(xhr.responseJSON.errors);
+                   });
+
+                   e.preventDefault();
+                   return false;
                }
            });
        });

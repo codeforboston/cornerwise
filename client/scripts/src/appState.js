@@ -114,9 +114,9 @@ define(["backbone", "underscore", "config", "utils"],
                            return this.setHashState(hashObject, replace, quiet);
                        },
 
-                       goBack: function() {
-                           if (this.lastView)
-                               this.setHashKey("view", this.lastView);
+                       goBack: function(defaultView) {
+                           if (this.lastView || defaultView)
+                               this.setHashKey("view", this.lastView || defaultView);
                            return !!this.lastView;
                        },
 
