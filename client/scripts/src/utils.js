@@ -535,6 +535,10 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                    return m && decodeURIComponent(m[2]);
                },
 
+               getCsrfToken: function() {
+                   return $u.getCookie("csrftoken");
+               },
+
                /**
                 * Traverse a map using a sequence of keys and return the nested
                 * value.

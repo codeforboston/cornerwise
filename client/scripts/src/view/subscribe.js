@@ -64,7 +64,7 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                    $.ajax("/user/subscribe",
                           {method: "POST",
                            data: {query: JSON.stringify(query),
-                                  csrfmiddlewaretoken: $u.getCookie("csrftoken"),
+                                  csrfmiddlewaretoken: $u.getCsrfToken(),
                                   email: form.email.value,
                                   language: navigator.language},
                            dataType: "json"})
