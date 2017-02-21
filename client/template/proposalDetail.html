@@ -1,4 +1,6 @@
-<% var project = proposal.getProject(); %>
+<%
+var project = proposal.getProject();
+var address = proposal.get("address"); %>
 
 <div class="details">
     <% if (project) { %>
@@ -7,12 +9,12 @@
         <%- project.name %>
     </h4>
     <h5>
-        <%- proposal.get("address") %>
+        <%- address %>
     </h5>
 
     <% } else { %>
     <h4>
-        <%- proposal.get("address") %>
+        <%- address %>
     </h4>
 
     <% var others = proposal.getOtherAddresses();
@@ -103,6 +105,11 @@
         <%
         }
         %>
+
+        <a class="big big-submit"
+           href="#view=contact&modal.subject=<%- encodeURIComponent(address) %>">
+            Contact Us
+        </a>
     </div>
 
     <%
