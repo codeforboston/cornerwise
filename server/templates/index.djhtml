@@ -266,7 +266,7 @@
                         <input name="email"
                                class="input"
                                type="email"/>
-                        <button type="submit">Subscribe</button>
+                        <button class="inline" type="submit">Subscribe</button>
                     </div>
                 </form>
             </div>

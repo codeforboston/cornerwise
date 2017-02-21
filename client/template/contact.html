@@ -2,23 +2,43 @@
 
 <h2>Contact Us</h2>
 
-<form>
-    <label for="contact-send-to" class="select">
-        Contact
-    </label>
-    <br/>
-    <select id="contact-send-to" name="send_to">
-        <option value="planning-board">About a project</option>
-        <option value="cornerwise">About the website</option>
-        <option value="webmaster">Other</option>
-    </select>
-    <br/>
+<form action="/contact" method="post">
+    <div class="input-group">
+        <label for="contact-send-to" class="select">
+            Topic
+        </label>
+        <br/>
+        <select id="contact-send-to" name="send_to" required>
+            <option value="" disabled hidden selected>Choose topic</option>
+            <option value="planning-board">About a project</option>
+            <option value="cornerwise">
+                About the website/technical issue
+            </option>
+            <option value="webmaster">Other</option>
+        </select>
+    </div>
 
-    <label for="contact-text" class="select">
-        Comments
-    </label>
-    <br/>
-    <textarea id="contact-text" name="comment" rows="10">
-    </textarea>
+    <div class="input-group">
+        <label for="contact-subject" class="select" >
+            Subject (optional)
+        </label>
+        <br/>
+        <input name="subject"
+               type="text"
+               class="big"
+               value="<%- modal.subject %>"/>
+    </div>
+
+    <div class="input-group">
+        <label for="contact-text" class="select">
+            Comments
+        </label>
+        <br/>
+        <textarea id="contact-text" name="comment" rows="10"></textarea>
+    </div>
+
+    <button  type="submit" class="big big-submit">
+        Send
+    </button>
 </form>
 

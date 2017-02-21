@@ -143,8 +143,8 @@ body.main #info-menu {
     text-decoration: none;
 }
 
-button {
-    background-color:  white;
+button.inline {
+    background-color: white;
     border-radius: 0;
     color: #2A749B;
     font-size: 10pt;
@@ -281,6 +281,18 @@ h3 {
     top: 0.2em;
 }
 
+.form-error {
+    color: crimson;
+    float: right;
+    font-size: small;
+}
+
+.input-group.error input, 
+.input-group.error textarea,
+.input-group.error select {
+    border-color: crimson;
+}
+
 body.geolocating #ref-address-form .status {
     display: block;
 }
@@ -309,15 +321,22 @@ body.geolocating #ref-address-form .status {
     font-size: x-large;
 }
 
-button.big {
-    font-size: x-large;
+button.big, a.big {
+    font-size: large;
+    font-weight: 100;
+    letter-spacing: 0.5px;
 }
 
-button.big-submit {
+button.big-submit, a.big-submit {
     background-color: #3c7c3d;
+    border: none;
     color: white;
-    margin: 0.5em;
+    display: inline-block;
+    margin-top: 1.5em;
+    padding: 0.75em;
+    text-align: center;
     text-transform: uppercase;
+    width: 100%;
 }
 
 .overlay ::-webkit-input-placeholder {
@@ -1703,20 +1722,33 @@ body.nointro #side-menu.expanded {
     font-weight: bold;
 }
 
-select {
-    background-color: transparent;
-    background: url(/static/images/down-arrow.png) right / contain no-repeat;
-    border-color: gray;
-    border-radius: 0;
-    color: #3c7c3d;
-    display: block;
+
+input.big, select {
     font-size: 1em;
     margin-bottom: 1em;
     padding: 0.5em;
-    width: 100%;
+}
+
+input.big {
+    width: 97%;
+}
+
+select {
+    background-color: transparent;
+    background: url(/static/images/down-arrow.png) right / contain no-repeat;
+    border-radius: 0;
+    color: #3c7c3d;
+    display: block;
     appearance: none;
+    width: 100%;
     -moz-appearance: none;
     -webkit-appearance: none;
+}
+
+select:invalid {
+    color: #bbb;
+    font-style: italic;
+    font-weight: lighter;
 }
 
 label.select {
