@@ -3,7 +3,7 @@ from . import views
 from .mail_parse_views import mail_inbound
 
 urlpatterns = [
-    url(r"^confirm$",views.confirm, name="confirm"),
+    url(r"^confirm$", views.confirm, name="confirm"),
     url(r"^(?P<token>[a-zA-Z0-9\-/+=]+)/(?P<pk>\d+)/", views.user_login,
         name="user-login"),
     url(r"^logout$", views.user_logout, name="logout"),

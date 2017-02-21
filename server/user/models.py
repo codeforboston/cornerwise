@@ -112,7 +112,7 @@ class Subscription(models.Model):
     def confirm_url(self):
         return "{base}?token={token}&uid={uid}&sub={sub_id}".format(
             base=reverse("confirm"),
-            token=self.user.token,
+            token=self.user.profile.token,
             uid=self.user.pk,
             sub_id=self.pk)
 
