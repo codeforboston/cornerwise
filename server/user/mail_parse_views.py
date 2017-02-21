@@ -1,5 +1,31 @@
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+import logging
+
+from shared import mail
 from . import tasks
+
+logger = logging.getLogger(__name__)
+
+User = get_user_model()
+
+
+def send_fowarded_message(users, from_email, text):
+    emails = [user.email for user in users]
+    mail.send(emails, "Cornerwise: Received Message",
+              "forwarded", {"text": text, "from": from_email})
+
+
+def forward_mail(username, from_email, text):
+    try:
+        if username == "admin":
+            users = User.objects.filter(is_staff=True)
+        else:
+            users = [User.objects.get(username=username, is_staff=True)]
+        send_fowarded_message(users, from_email, text)
+    except User.DoesNotExist:
+        logger.warn(f"Received email for unknown user '{username}' from {from_email}")
 
 
 # When email is sent to @cornerwise.org, SendGrid parses it and posts the
@@ -11,16 +37,25 @@ def mail_inbound(request):
     """
     try:
         email = request.POST["from"]
-        User = get_user_model()
+        body = request.POST["text"]
         user = User.objects.get(email=email)
+
+        (username, _) = request.POST["to"].split("@", 1)
+        if username.lower() not in {"cornerwise", "noreply"}:
+            forward_mail(to, )
         lines = request.POST["text"].split("\n")
         for line in lines:
             command = line.strip().split(" ")[0]
             if command in email_commands:
                 email_commands(request, user)
-                return
-    except (KeyError, User.DoesNotExist):
-        return
+                return HttpResponse("OK", status=200)
+    except KeyError:
+        pass
+    except User.DoesNotExist:
+        logger.warning("Received an email from unknown user %s", request.POST["from"])
+
+    # SendGrid will retry if there's a status code other than 200.
+    return HttpResponse("NOK", status=200)
 
 
 def deactivate_account(request, user):
@@ -33,7 +68,4 @@ def reset_account(request, user):
     tasks.send_reset_email.delay(user)
 
 
-email_commands = {
-    "deactivate": deactivate_account,
-    "reset": reset_account
-}
+email_commands = {"deactivate": deactivate_account, "reset": reset_account}
