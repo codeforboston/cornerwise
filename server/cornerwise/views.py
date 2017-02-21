@@ -1,12 +1,17 @@
 import json
+import re
 
 from django.conf import settings
-from django.shortcuts import render
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import redirect, render
+from django.template import RequestContext
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from shared import mail
-
 from parcel.models import LotQuantiles
+from shared import request
+
+from .contact import ContactForm
 
 
 def get_lot_sizes():
@@ -30,25 +35,21 @@ def lot_sizes():
     return LOT_SIZES
 
 
-RECIPIENTS = {
-    "planning-board": "someone",
-    "cornerwise": "admin@cornerwise.org",
-    "webmaster": "dan@cornerwise.org"
-}
-
-
 def contact_us(request):
-    if request.method == "GET":
-        return render(request, "contact.djhtml")
-
-    message = request.POST["comment"]
-    recipient = request.POST["send_to"]
-
-    if recipient in RECIPIENTS:
-        email = RECIPIENTS[recipient]
-        mail.send(email, "Cornerwise: Feedback", "feedback",
-                  {"comment": message})
-        return
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.send_email()
+            return JsonResponse({
+                "title": "Email Sent",
+                "text": "Thanks for your feedback!"
+            })
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    else:
+        return HttpResponse({
+            "bad request method"
+        }, status=405)
 
 
 @ensure_csrf_cookie
