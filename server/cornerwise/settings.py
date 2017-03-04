@@ -211,10 +211,14 @@ SENDGRID_TEMPLATES = {
 LIMIT_SUBSCRIPTIONS = True
 
 # URL to use for generating minimap raster images for emails, etc.
+# MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
+#                "tile-provider=cartodb-light&"
+#                "sw-lat={swlat}&sw-lng={swlon}&"
+#                "ne-lat={nelat}&ne-lng={nelon}&clip=1")
 MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
                "tile-provider=cartodb-light&"
                "sw-lat={swlat}&sw-lng={swlon}&"
-               "ne-lat={nelat}&ne-lng={nelon}&clip=1")
+               "ne-lat={nelat}&ne-lng={nelon}")
 
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
 
