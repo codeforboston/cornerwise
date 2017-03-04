@@ -10,5 +10,4 @@ RUN apt-get update && \
     apt-get install -y libgdal-dev binutils gdal-bin xpdf-utils && \
     pip3 install -r /support/requirements.txt
 
-ADD ./data /data
 ADD ./server /app
