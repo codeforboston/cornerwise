@@ -1,0 +1,3 @@
+Forwarded message from {{ from }}:
+
+{{ text }}
