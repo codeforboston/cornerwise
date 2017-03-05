@@ -20,7 +20,6 @@ define(
 
                 this.buildRegionSelection();
 
-                // Show the filter controls?
                 appState.onStateKeyChange("showmenu", function(show, oldValue) {
                     if (_.isString(show))
                         this.toggleSideMenu(show == "1");
@@ -79,7 +78,7 @@ define(
                     if (!this._hideHandler) {
                         var handler = _.bind(function(e) {
                             if (!$(e.target).closest("#map-container,#side-menu").length) {
-                                appState.setHashKey("showmenu", "0");
+                                appState.setHashKey("showmenu", "0", true);
                                 $(document.body).unbind("click", handler);
                                 delete self._hideHandler;
                             }

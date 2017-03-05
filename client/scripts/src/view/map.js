@@ -51,7 +51,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                                lat: center.lat,
                                lng: center.lng,
                                zoom: map.getZoom()
-                           });
+                           }, true);
                        });
 
                    // Map from case numbers to L.Markers

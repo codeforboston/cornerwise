@@ -229,7 +229,8 @@ define(["backbone", "underscore", "config", "utils"],
                                        hash = href && href[0] == "#" && href.slice(1);
 
                                    if (hash) {
-                                       appState.extendHash($u.decodeQuery(hash));
+                                       var replace = !!$(this).data("replace-history");
+                                       appState.extendHash($u.decodeQuery(hash), replace);
 
                                        e.preventDefault();
                                        return false;

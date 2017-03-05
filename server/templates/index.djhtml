@@ -66,7 +66,7 @@
 
     <div id="search-banner" class="overlay">
         <a href="#view=about" id="logo" class="_setview"></a>
-        <a href="#showmenu=1" id="hamburger"></a>
+        <a href="#showmenu=1" id="hamburger" data-replace-history="1"></a>
         <div class="overlay-contents">
             <h3>What&rsquo;s Being Built Near&hellip;</h3>
             <div class="input-group big-input">
@@ -78,7 +78,10 @@
                            autocomplete="off" />
                     <img src="/static/images/geolocating.gif" class="status" alt="searching" />
 
-                    <a id="show-filters-button" class="filters-button" href="#showmenu=1">
+                    <a id="show-filters-button"
+                       class="filters-button"
+                       data-replace-history="1"
+                       href="#showmenu=1">
                         Filter
                     </a>
                     <a id="hide-filters-button" style="display: none" class="filters-button" href="#showmenu=0">
