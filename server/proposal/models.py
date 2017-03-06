@@ -67,9 +67,10 @@ class Proposal(models.Model):
         help_text=("The unique case number "
                    "assigned by the city"))
     address = models.CharField(max_length=128, help_text="Street address")
-    other_addresses = models.CharField(max_length=250,
-                                       blank=True,
-                                       help_text="Other addresses covered by this proposal")
+    other_addresses = models.CharField(
+        max_length=250,
+        blank=True,
+        help_text="Other addresses covered by this proposal")
     location = models.PointField(help_text="The latitude and longitude")
     region_name = models.CharField(
         max_length=128, default="Somerville, MA", null=True, help_text="")
@@ -86,10 +87,12 @@ class Proposal(models.Model):
 
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True)
-    # A misnomer; if True, indicates that the proposal has been approved:
+    # A misnomer; if True, indicates that the planning board has issued a
+    # ruling (approval or disapproval):
     complete = models.BooleanField(default=False)
 
-    parcel = models.ForeignKey("parcel.Parcel", null=True)
+    parcel = models.ForeignKey(
+        "parcel.Parcel", related_name="proposals", null=True)
 
     objects = ProposalManager()
 
@@ -134,23 +137,12 @@ class Proposal(models.Model):
 
         proposal.save()
 
+        proposal.create_events(p_dict.get("events"))
+
         # Create associated documents:
-        for field, val in p_dict.items():
-            if not isinstance(val, dict) or not val.get("links"):
-                continue
-
-            for link in val["links"]:
-                try:
-                    doc = proposal.document_set.get(url=link["url"])
-                except Document.DoesNotExist:
-                    doc = Document(proposal=proposal)
-
-                    doc.url = link["url"]
-                    doc.title = link["title"]
-                    doc.field = field
-                    doc.published = p_dict["updated_date"]
-
-                    doc.save()
+        proposal.create_documents((field, val["links"])
+                                  for field, val in p_dict.items()
+                                  if isinstance(val, dict) and val.get("links"))
 
         if changed:
             attr_changes = []
@@ -181,6 +173,27 @@ class Proposal(models.Model):
             changeset.save()
 
         return (created, proposal)
+
+    def create_documents(self, docs):
+        for field, links in docs:
+            for link in links:
+                try:
+                    doc = proposal.document_set.get(url=link["url"])
+                except Document.DoesNotExist:
+                    doc = Document(proposal=proposal)
+
+                    doc.url = link["url"]
+                    doc.title = link["title"]
+                    doc.field = field
+                    doc.published = p_dict["updated_date"]
+
+                    doc.save()
+
+    def create_events(self, events_json):
+        if events_json:
+            for event_json in events_json:
+                event_json["cases"] = [self.case_number]
+                Event.make_event(event_json)
 
 
 class Attribute(models.Model):
@@ -232,6 +245,7 @@ class EventManager(models.Manager):
         today = pytz.UTC.localize(datetime.today())
         return self.filter(date__gte=today).order_by("date")
 
+
 class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
@@ -257,6 +271,41 @@ class Event(models.Model):
         d = model_to_dict(self, exclude=["created", "proposals"])
         return d
 
+    @classmethod
+    def make_event(cls, event_json):
+        """
+        event_json should have the following fields:
+        - title (str) - Name of the event
+        - description (str)
+        - date (datetime with local timezone) - When will the event occur?
+        - cases - A list of case numbers
+        - region_name
+        - duration (timedelta, optional) - how long will the event last?
+        - agenda_url (string, optional)
+        """
+        keys = ("title", "description", "date", "region_name", "duration")
+        try:
+            event = cls.objects.get(title=event_json["title"],
+                                    date=event_json["date"],
+                                    region_name=event_json["region_name"])
+            for k in keys:
+                setattr(event, k, event_json.get(k))
+            event.minutes = event_json.get("agenda_url")
+        except cls.DoesNotExist:
+            kwargs = {k: event_json.get(k) for k in keys}
+            kwargs["minutes"] = event_json.get("agenda_url", "")
+            event = cls(**kwargs)
+
+        event.save()
+
+        for case_number in event_json["cases"]:
+            try:
+                proposal = Proposal.objects.get(case_number=case_number)
+                event.proposals.add(proposal)
+            except Proposal.DoesNotExist:
+                continue
+
+        return event
 
 
 def upload_document_to(doc, filename):
