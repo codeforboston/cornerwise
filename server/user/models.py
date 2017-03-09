@@ -79,19 +79,25 @@ class UserProfile(models.Model):
         return self.url(reverse("confirm"))
 
 
+class SubscriptionQuerySet(models.QuerySet):
+    def mark_sent(self):
+        self.update(last_notified=datetime.utcnow())
+
 class Subscription(models.Model):
     # The subscription belong to a registered user:
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name="subscriptions")
     active = models.BooleanField(default=False,
                                  help_text="Users only receive updates for active subscriptions")
-    created = models.DateTimeField(default=datetime.now)
-    updated = models.DateTimeField(default=datetime.now)
+    created = models.DateTimeField(default=datetime.utcnow)
+    updated = models.DateTimeField(default=datetime.utcnow)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
     include_events = models.CharField(max_length=256, default="", blank=True,
                                       help_text="Include events for a specified region")
     last_notified = models.DateTimeField(default=datetime.now)
+
+    objects = SubscriptionQuerySet.as_manager()
 
     def save(self, *args, **kwargs):
         self.updated = datetime.now()
