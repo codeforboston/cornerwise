@@ -39,9 +39,12 @@ def send_user_updates(user_id, updates):
 
 
 def send_subscription_updates(subscription, since):
+    if not since:
+        since = subscription.last_notified
     updates = changes.summarize_subscription_updates(subscription, since)
     if updates["total"]:
         send_user_updates.delay(subscription.user_id, updates)
+        return True
 
 
 def send_user_welcome(user, subscription):
@@ -113,16 +116,22 @@ def send_notifications(subscription_ids=None, since=None):
     Check the Subscriptions and find those that have new updates since the last
     update was run.
     """
-    if subscription_ids is None:
-        subscriptions = Subscription.objects.filter(active=True)
-    else:
+    if subscription_ids:
         subscriptions = Subscription.objects.filter(pk__in=subscription_ids)
+    else:
+        dt = datetime.utcnow() - timedelta(days=7)
+        subscriptions = Subscription.objects.filter(active=True,
+                                                    last_notified__lte=dt)
 
-    if since is None:
-        since = pytz.utc.localize(datetime.utcnow() - timedelta(days=7))
-
+    sent = []
     for subscription in subscriptions:
-        send_subscription_updates(subscription, since)
+        if send_subscription_updates(subscription, since):
+            sent.append(subscription.pk)
+
+    if sent:
+        logger.info("Sent updates for %s subscription(s)",
+                    len(sent))
+        Subscription.objects.filter(pk__in=sent).mark_sent()
 
 
 # Database hook:
