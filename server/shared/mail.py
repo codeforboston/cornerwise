@@ -4,12 +4,10 @@ from urllib import request
 import sendgrid
 from sendgrid.helpers import mail
 
-
 from django.conf import settings
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-
 
 if getattr(settings, "SENDGRID_API_KEY", None):
     SG = sendgrid.SendGridAPIClient(
@@ -39,11 +37,16 @@ def send(email, subject, template_name, context={}, content=None):
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items()}
 
+    if not isinstance(email, list):
+        email = [email]
+
+    recipients = [{
+        "email": addr
+    } if isinstance(addr, str) else addr for addr in email]
+
     data = {
         "personalizations": [{
-            "to": [{
-                "email": email
-            }],
+            "to": recipients,
             "substitutions": substitutions,
             "subject": subject,
         }],
@@ -72,10 +75,9 @@ def send_template(email, subject, template_name, context={}):
         text = strip_tags(html)
 
     if SG:
-        message = mail.Mail(mail.Email(settings.EMAIL_ADDRESS),
-                            subject,
-                            mail.Email(email, addressal),
-                            mail.Content("text/html", html))
+        message = mail.Mail(
+            mail.Email(settings.EMAIL_ADDRESS), subject,
+            mail.Email(email, addressal), mail.Content("text/html", html))
         response = SG.client.mail.send.post(request_body=message.get())
         logger.info("Sent '%s' email to %s (response %s)", template_name,
                     email, response)
