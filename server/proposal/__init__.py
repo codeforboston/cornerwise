@@ -8,4 +8,5 @@ class ProposalConfig(AppConfig):
         # Register tasks with Celery:
         from . import tasks
         from . import event_tasks
+        from . import image_tasks
 
