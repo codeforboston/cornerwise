@@ -27,6 +27,14 @@ POSTING_FORMAT = "%m/%d/%Y - %I:%M%p"
 TZ = pytz.timezone("US/Eastern")
 
 
+def title_for_case_number(case_number):
+    if case_number.startswith("PB"):
+        return "Planning Board"
+
+    if case_number.startswith("ZBA"):
+        return "Zoning Board of Appeals"
+
+
 def get_page(url):
     with urlopen(url) as u:
         return BeautifulSoup(u.read(), "html.parser")

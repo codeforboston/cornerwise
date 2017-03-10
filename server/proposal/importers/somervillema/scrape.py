@@ -11,13 +11,14 @@ except ImportError:
     from urllib import urlopen, HTTPError, URLError
 
 
-from . import helpers
+from . import events, helpers
 
 logger = logging.getLogger(__name__)
 
 URL_BASE = ("http://archive.somervillema.gov/departments/planning-board/"
             "reports-and-decisions/robots")
 URL_FORMAT = URL_BASE + "?page={:1}"
+TZ = pytz.timezone("US/Eastern")
 
 # Give the attributes a custom name:
 TITLES = {}
@@ -121,6 +122,18 @@ def find_cases(doc):
             proposal["all_addresses"] = addresses
             proposal["source"] = URL_BASE
             proposal["region_name"] = "Somerville, MA"
+
+            # Event:
+            events = []
+            event_title = events.title_for_case_number(proposal["case_number"]),
+            first_hearing = proposal.get("first_hearing_date")
+            if first_hearing and event_title:
+                first_hearing = TZ.localize(first_hearing.replace(hour=18, minute=0))
+                events.append(
+                    {"title": event_title,
+                     "description": events.DEFAULT_DESCRIPTIONS.get(event_title),
+                     "date": first_hearing,
+                     "region_name": "Somerville, MA"})
 
             # For now, we assume that if there are one or more documents
             # linked in the 'decision' page, the proposal is 'complete'.
