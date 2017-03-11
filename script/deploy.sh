@@ -15,9 +15,9 @@ docker login
 docker push $DOCKER_HUB_REPO/cornerwise:latest
 
 eval $(docker-machine env cornerwise)
-docker-compose -f ../docker-compose.prod.yml restart -d
+docker-compose -f ../docker-compose.prod.yml restart cornerwise
 
 bash ../docker-support/build_js.sh
-rsync -azP -e 'docker-machine ssh cornerwise' ../client :cornerwise/client
+rsync -azP -e 'docker-machine ssh cornerwise' ../client/ :cornerwise/www/static/
 
 cd -

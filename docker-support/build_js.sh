@@ -17,6 +17,7 @@ echo "Minifying JS."
 r.js -o ../client/app.build.js || exit 1
 
 mv ../client/dist/main.js ../client/app.js
+echo -e "\n/* Revision: $(git rev-parse HEAD) */" >> ../client/app.js
 rm -r ../client/dist/
 
 echo "Minifying CSS"
