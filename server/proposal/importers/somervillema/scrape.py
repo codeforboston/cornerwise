@@ -11,7 +11,8 @@ except ImportError:
     from urllib import urlopen, HTTPError, URLError
 
 
-from . import events, helpers
+from . import helpers
+from .events import title_for_case_number
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,7 @@ def find_cases(doc):
 
             # Event:
             events = []
-            event_title = events.title_for_case_number(proposal["case_number"]),
+            event_title = title_for_case_number(proposal["case_number"]),
             first_hearing = proposal.get("first_hearing_date")
             if first_hearing and event_title:
                 first_hearing = TZ.localize(first_hearing.replace(hour=18, minute=0))
