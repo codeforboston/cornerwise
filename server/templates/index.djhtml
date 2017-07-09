@@ -1,289 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <link rel="icon" type="image/png" href="/static/images/favicon.png" />
+    <head>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" href="/static/images/favicon.png" />
 
-    <title>Cornerwise</title>
+        <title>Cornerwise</title>
 
-    <script type="text/javascript">
-     function _placesInit() {
-         if (window._onPlacesReady) onPlacesReady();
-     }
+        <script type="text/javascript">
+         function _placesInit() {
+             if (window._onPlacesReady) onPlacesReady();
+         }
 
-     var ResponseMessages = [];
-     {% for message in messages %}
-     ResponseMessages.push(
-         {% templatetag openbrace %}
-         "message": "{{ message.message|escapejs }}",
-         "level": "{{ message.level_tag }}",
-         "tags": "{{ message.tags }}"
-         {% templatetag closebrace %}
-     );
-     {% endfor %}
+         var ResponseMessages = [];
+         {% for message in messages %}
+         ResponseMessages.push(
+             {% templatetag openbrace %}
+             "message": "{{ message.message|escapejs }}",
+             "level": "{{ message.level_tag }}",
+             "tags": "{{ message.tags }}"
+             {% templatetag closebrace %}
+         );
+         {% endfor %}
 
-     var _CornerwisePreload = {{ preload_data|escapejs }};
-    </script>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
-    {% if production %}
-        <link rel="stylesheet" href="/static/css/app.build.css" type="text/css" media="screen" />
-        <script src="/static/scripts/require.js"></script>
-        <script>
-         require.config({paths: {"main": "/static/app"}});
-         require(["main"]);
+         var _CornerwisePreload = {{ preload_data|escapejs }};
         </script>
-    {% else %}
-        <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
-        <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
-    {% endif %}
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
+        {% if production %}
+            <link rel="stylesheet" href="/static/css/app.build.css" type="text/css" media="screen" />
+            <script src="/static/scripts/require.js"></script>
+            <script>
+             require.config({paths: {"main": "/static/app"}});
+             require(["main"]);
+            </script>
+        {% else %}
+            <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
+            <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+        {% endif %}
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="description" content="Find and explore current and future zoning projects near you - City of Somerville."/>
-    <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning board,urban planning,zoning,zoning board" />
-    <!-- OpenGraph -->
-    <meta name="og:type" content="website" />
-    <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
+        <meta name="description" content="Find and explore current and future zoning projects near you - City of Somerville."/>
+        <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning board,urban planning,zoning,zoning board" />
+        <!-- OpenGraph -->
+        <meta name="og:type" content="website" />
+        <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
 
-  <body>
-    <div id="loading-indicator" class="control">
-        <img src="/static/images/loading.gif">
-    </div>
-    <div id="map-container">
-      <div id="map"></div>
-
-      <!-- container for preview of selected proposal/project -->
-      <div id="preview"></div>
-
-      <!-- container for detail view -->
-      <div id="overlay"></div>
-    </div>
-
-    <!-- This element prevents interactions with the map and other
-         controls while the user is viewing, e.g., the intro screen. -->
-    <div id="event-eater" class="_setview" data-goto="main"></div>
-
-    <div id="search-banner" class="overlay">
-        <a href="#view=about" id="logo" class="_setview"></a>
-        <a href="#showmenu=1" id="hamburger" data-replace-history="1"></a>
-        <div class="overlay-contents">
-            <h3>What&rsquo;s Being Built Near&hellip;</h3>
-            <div class="input-group big-input">
-                <form id="ref-address-form">
-                    <input class="input"
-                           type="text"
-                           name="address"
-                           placeholder="Enter address, landmark, intersection"
-                           autocomplete="off" />
-                    <img src="/static/images/geolocating.gif" class="status" alt="searching" />
-
-                    <a id="show-filters-button"
-                       class="filters-button"
-                       data-replace-history="1"
-                       href="#showmenu=1">
-                        Filter
-                    </a>
-                    <a id="hide-filters-button" style="display: none" class="filters-button" href="#showmenu=0">
-                        Filter
-                    </a>
-
-                    <a id="geolocate" href="#"
-                       title="Search near me"
-                       aria-label="Search near me">
-                        <span>Current Location</span>
-                    </a>
-                    <a class="cancel"
-                       href="#"
-                       title="Cancel Search"
-                       aria-label="Cancel search" >
-                        &times;
-                    </a>
-                </form>
-            </div>
-        </div>
-
-        <a id="explore" href="#view=main">Explore the Map</a>
-
-        <div id="mode-controls">
-            <a class="mode action list-mode-button" href="#view=list">
-                <img src="static/images/list-icon.png" alt="List" width="23" height="23">
-                <br/>
-                LIST
-            </a>
-            <a class="mode action map-mode-button" href="#view=main">
-                <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
-                <br/>
-                MAP
-            </a>
-        </div>
-        <div id="alert-container">
-            <div id="alert">
-                <a href="#" class="close">&times;</a>
-                <div>
-                    <h2 class="title"></h2>
-                    <span class="content"></span>
+        <body>
+            <div id="wrapper">
+                <div id="loading-indicator" class="control">
+                    <img src="/static/images/loading.gif">
                 </div>
-            </div>
-        </div>
-    </div>
+                <div id="map-container">
+                    <div id="map"></div>
 
+                    <!-- container for preview of selected proposal/project -->
+                    <div id="preview"></div>
 
-    <div id="intro" class="overlay">
-      <div class="section">
-        <div class="logos">
-          <a href="https://github.com/cityofsomerville/cornerwise">
-            <img src="/static/images/logo/github-light.png">
-          </a>
-          <a href="http://codeforboston.org" title="Code for Boston">
-            <img src="/static/images/code_for_boston_logo.png" alt="Code for Boston" />
-          </a>
-        </div>
-      </div>
-    </div>
+                    <!-- container for detail view -->
+                    <div id="overlay"></div>
+                </div>
 
-      <div id="map-controls" class="control">
-          <a href="#" class="map-zoom-in" >&#43;</a>
-          <a href="#" class="map-zoom-out" >&minus;</a>
-      </div>
+                <!-- This element prevents interactions with the map and other
+                     controls while the user is viewing, e.g., the intro screen. -->
+                <div id="event-eater" class="_setview" data-goto="main"></div>
 
-    <div id="info" class="overlay default">
-      <div class="loading-message" >Loading...</div>
-      <div class="when-empty">
-          No proposals selected.
-      </div>
-      <div class="content"></div>
-      <a href="#view=main" class="close _back">&times;</a>
-    </div>
+                <div id="search-banner" class="overlay">
+                    <a href="#view=about" id="logo" class="_setview"></a>
+                    <a href="#showmenu=1" id="hamburger" data-replace-history="1"></a>
+                    <div class="overlay-contents">
+                        <h3>What&rsquo;s Being Built Near&hellip;</h3>
+                        <div class="input-group big-input">
+                            <form id="ref-address-form">
+                                <input class="input"
+                                       type="text"
+                                       name="address"
+                                       placeholder="Enter address, landmark, intersection"
+                                       autocomplete="off" />
+                                <img src="/static/images/geolocating.gif" class="status" alt="searching" />
 
-    <div id="modal" class="_setview" data-goto="main">
-      <div id="modal-contents"></div>
-    </div>
+                                <a id="show-filters-button"
+                                   class="filters-button"
+                                   data-replace-history="1"
+                                   href="#showmenu=1">
+                                    Filter
+                                </a>
+                                <a id="hide-filters-button" style="display: none" class="filters-button" href="#showmenu=0">
+                                    Filter
+                                </a>
 
-    <div id="list-view"></div>
-
-    <div id="image-view"></div>
-
-    <div id="side-menu" class="collapsed">
-        <a href="#showmenu=0" class="close _mobile-only">&times;</a>
-
-        <div class="menu-group" >
-            <div class="group-header _mobile-only">
-                Filter Results
-            </div>
-
-            <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
-
-            <label for="filter-status" class="select">
-                Application Status
-            </label>
-            <select id="filter-status" class="filter-selector">
-                <option value="active">Pending</option>
-                <option value="closed">Complete</option>
-                <option value="all">All</option>
-            </select>
-
-
-            <!-- <input id="filter-private" type="checkbox" checked/> Private -->
-            <!-- &mdash; -->
-            <!-- <input id="filter-public" type="checkbox" checked/> Public -->
-
-            <label for="filter-lotsize" class="select">
-                Lot Size
-            </label>
-            <select id="filter-lotsize" name="property_size" class="filter-selector">
-                <option value="">(all)</option>
-                <option value="small">
-                    &lt; {{ lot_sizes.small }} ft&#xb2;
-                </option>
-                <option value="medium">
-                    {{ lot_sizes.small }}&ndash;{{ lot_sizes.medium }} ft&#xb2;
-                </option>
-                <option value="large">
-                    &gt; {{ lot_sizes.medium }} ft&#xb2;
-                </option>
-            </select>
-
-            <label for="filter-region" class="select">
-                Region
-            </label>
-            <select id="filter-region" name="region" class="filter-selector">
-                <option value="cambridge" selected>Somerville, MA</option>
-                <option value="somerville">Cambridge, MA</option>
-            </select>
-        </div>
-
-        <hr class="group-separator _mobile-only" />
-
-        <div class="menu-group _mobile-only" >
-            <div class="group-header" >
-                View by
-            </div>
-
-            <a class="mode action list-mode-button" href="#view=list&showmenu=0" >
-                <img src="static/images/list-icon.png" alt="List" width="23" height="23">
-                <br/>
-                LIST
-            </a>
-
-            <a class="mode action map-mode-button" href="#view=main&showmenu=0">
-                <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
-                <br/>
-                MAP
-            </a>
-        </div>
-
-        <!-- <hr class="group-separator" /> -->
-
-        <!-- Layers: -->
-        <!-- <div class="menu-group" > -->
-        <!-- <div class="group-header" > -->
-        <!-- Show on Map -->
-        <!-- </div> -->
-        <!-- <div id="map-options"  class="group-contents"> -->
-        <!-- <div id="layers"></div> -->
-        <!-- </div> -->
-        <!-- </div> -->
-
-        <hr class="group-separator _mobile-only" />
-
-        <div class="menu-group _mobile-only" >
-            <div class="group-contents">
-                <a href="#view=about&showmenu=0" class="_setview">About Cornerwise</a>
-                <br/>
-                <a href="#" >Contact</a>
-            </div>
-        </div>
-    </div>
-
-    <div id="subscribe">
-        <a href="#" class="screen screen1 subscribe-link">
-            Subscribe to Project Updates
-        </a>
-        <div class="screen screen2">
-            <div class="signup-screen" >
-                <a href="#" class="cancel">&times;</a>
-                <form class="form">
-                    <span>&nbsp;Email address</span>
-                    <div class="input-group">
-                        <input name="email"
-                               class="input"
-                               type="email"/>
-                        <button class="inline" type="submit">Subscribe</button>
+                                <a id="geolocate" href="#"
+                                   title="Search near me"
+                                   aria-label="Search near me">
+                                    <span>Current Location</span>
+                                </a>
+                                <a class="cancel"
+                                   href="#"
+                                   title="Cancel Search"
+                                   aria-label="Cancel search" >
+                                    &times;
+                                </a>
+                            </form>
+                        </div>
                     </div>
-                </form>
+
+                    <a id="explore" href="#view=main">Explore the Map</a>
+
+                    <div id="mode-controls">
+                        <a class="mode action list-mode-button" href="#view=list">
+                            <img src="static/images/list-icon.png" alt="List" width="23" height="23">
+                            <br/>
+                            LIST
+                        </a>
+                        <a class="mode action map-mode-button" href="#view=main">
+                            <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
+                            <br/>
+                            MAP
+                        </a>
+                    </div>
+                    <div id="alert-container">
+                        <div id="alert">
+                            <a href="#" class="close">&times;</a>
+                            <div>
+                                <h2 class="title"></h2>
+                                <span class="content"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div id="intro" class="overlay">
+                    <div class="section">
+                        <div class="logos">
+                            <a href="https://github.com/cityofsomerville/cornerwise">
+                                <img src="/static/images/logo/github-light.png">
+                            </a>
+                            <a href="http://codeforboston.org" title="Code for Boston">
+                                <img src="/static/images/code_for_boston_logo.png" alt="Code for Boston" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="map-controls" class="control">
+                    <a href="#" class="map-zoom-in" >&#43;</a>
+                    <a href="#" class="map-zoom-out" >&minus;</a>
+                </div>
+
+                <div id="info" class="overlay default">
+                    <div class="loading-message" >Loading...</div>
+                    <div class="when-empty">
+                        No proposals selected.
+                    </div>
+                    <div class="content"></div>
+                    <a href="#view=main" class="close _back">&times;</a>
+                </div>
+
+                <div id="modal" class="_setview" data-goto="main">
+                    <div id="modal-contents"></div>
+                </div>
+
+                <div id="list-view"></div>
+
+                <div id="image-view"></div>
+
+                <div id="side-menu" class="collapsed">
+                    <a href="#showmenu=0" class="close _mobile-only">&times;</a>
+
+                    <div class="menu-group" >
+                        <div class="group-header _mobile-only">
+                            Filter Results
+                        </div>
+
+                        <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
+
+                        <label for="filter-status" class="select">
+                            Application Status
+                        </label>
+                        <select id="filter-status" class="filter-selector">
+                            <option value="active">Pending</option>
+                            <option value="closed">Complete</option>
+                            <option value="all">All</option>
+                        </select>
+
+
+                        <!-- <input id="filter-private" type="checkbox" checked/> Private -->
+                        <!-- &mdash; -->
+                        <!-- <input id="filter-public" type="checkbox" checked/> Public -->
+
+                        <label for="filter-lotsize" class="select">
+                            Lot Size
+                        </label>
+                        <select id="filter-lotsize" name="property_size" class="filter-selector">
+                            <option value="">(all)</option>
+                            <option value="small">
+                                &lt; {{ lot_sizes.small }} ft&#xb2;
+                            </option>
+                            <option value="medium">
+                                {{ lot_sizes.small }}&ndash;{{ lot_sizes.medium }} ft&#xb2;
+                            </option>
+                            <option value="large">
+                                &gt; {{ lot_sizes.medium }} ft&#xb2;
+                            </option>
+                        </select>
+
+                        <label for="filter-region" class="select">
+                            Region
+                        </label>
+                        <select id="filter-region" name="region" class="filter-selector">
+                            <option value="cambridge" selected>Somerville, MA</option>
+                            <option value="somerville">Cambridge, MA</option>
+                        </select>
+                    </div>
+
+                    <hr class="group-separator _mobile-only" />
+
+                    <div class="menu-group _mobile-only" >
+                        <div class="group-header" >
+                            View by
+                        </div>
+
+                        <a class="mode action list-mode-button" href="#view=list&showmenu=0" >
+                            <img src="static/images/list-icon.png" alt="List" width="23" height="23">
+                            <br/>
+                            LIST
+                        </a>
+
+                        <a class="mode action map-mode-button" href="#view=main&showmenu=0">
+                            <img src="static/images/map-icon.png" alt="Map" width="23" height="23">
+                            <br/>
+                            MAP
+                        </a>
+                    </div>
+
+                    <!-- <hr class="group-separator" /> -->
+
+                    <!-- Layers: -->
+                    <!-- <div class="menu-group" > -->
+                    <!-- <div class="group-header" > -->
+                    <!-- Show on Map -->
+                    <!-- </div> -->
+                    <!-- <div id="map-options"  class="group-contents"> -->
+                    <!-- <div id="layers"></div> -->
+                    <!-- </div> -->
+                    <!-- </div> -->
+
+                    <hr class="group-separator _mobile-only" />
+
+                    <div class="menu-group _mobile-only" >
+                        <div class="group-contents">
+                            <a href="#view=about&showmenu=0" class="_setview">About Cornerwise</a>
+                            <br/>
+                            <a href="#" >Contact</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="subscribe">
+                    <a href="#" class="screen screen1 subscribe-link">
+                        Subscribe to Project Updates
+                    </a>
+                    <div class="screen screen2">
+                        <div class="signup-screen" >
+                            <a href="#" class="cancel">&times;</a>
+                            <form class="form">
+                                <span>&nbsp;Email address</span>
+                                <div class="input-group">
+                                    <input name="email"
+                                           class="input"
+                                           type="email"/>
+                                    <button class="inline" type="submit">Subscribe</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="info-menu" class="_desktop-only">
+                    <a href="#view=about">About Cornerwise</a>
+                    <a href="#view=contact">Contact</a>
+                </div>
+
             </div>
-        </div>
-    </div>
-
-    <div id="info-menu" class="_desktop-only">
-        <a href="#view=about">About Cornerwise</a>
-        <a href="#view=contact">Contact</a>
-    </div>
-
-    <script src="https://use.typekit.net/wpe7mmw.js"></script>
-    <script type="text/javascript">
-     try{Typekit.load({ async: true });}catch(e){}
-    </script>
-  </body>
+            <script src="https://use.typekit.net/wpe7mmw.js"></script>
+            <script type="text/javascript">
+             try{Typekit.load({ async: true });}catch(e){}
+            </script>
+        </body>
 </html>
