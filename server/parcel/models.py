@@ -16,7 +16,7 @@ class Parcel(models.Model):
     map_par_id = models.CharField(max_length=26, blank=True, null=True)
     loc_id = models.CharField(max_length=18, blank=True, null=True, unique=True)
     poly_type = models.CharField(max_length=15, blank=True, null=True)
-    map_no = models.CharField(max_length=4, blank=True, null=True)
+    map_no = models.CharField(max_length=10, blank=True, null=True)
     source = models.CharField(max_length=15, blank=True, null=True)
     plan_id = models.CharField(max_length=40, blank=True, null=True)
     last_edit = models.IntegerField(blank=True, null=True)
