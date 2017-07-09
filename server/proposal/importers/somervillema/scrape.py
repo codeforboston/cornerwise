@@ -2,11 +2,15 @@
 Importer for Somerville Reports and Decisions.
 """
 
-from bs4 import BeautifulSoup
-from itertools import takewhile
 import logging
-import pytz
 import re
+from itertools import takewhile
+
+import pytz
+from bs4 import BeautifulSoup
+
+from . import helpers
+from .events import DEFAULT_DESCRIPTIONS, title_for_case_number
 
 try:
     from urllib.request import urlopen
@@ -15,10 +19,8 @@ except ImportError:
     from urllib import urlopen, HTTPError, URLError
 
 
-from . import helpers
-from .events import title_for_case_number, DEFAULT_DESCRIPTIONS
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 URL_BASE = ("http://www.somervillema.gov/departments/planning-board/"
             "reports-and-decisions/robots")
@@ -43,12 +45,12 @@ def get_page(page=1, url_format=URL_FORMAT):
     "Returns the HTML content of the given Reports and Decisions page."
     url = url_format.format(page)
     with urlopen(url) as html_page:
-        logger.info("Fetching page %i", page)
+        LOGGER.info("Fetching page %i", page)
         return html_page.read()
 
 
 def detect_last_page(doc):
-    """
+    """Given a BeautifulSoup document, returns the index of the last page.
     """
     anchor = doc.select_one("li.pager-last a")
     match = re.search(r"[?&]page=(\d+)", anchor["href"])
@@ -56,7 +58,7 @@ def detect_last_page(doc):
     return int(match.group(1)) if match else 0
 
 
-field_processors = {
+FIELD_PROCESSORS = {
     "reports": helpers.links_field,
     "decisions": helpers.links_field,
     "other": helpers.links_field,
@@ -77,7 +79,7 @@ def add_geocode(geocoder, proposals):
     for proposal, location in zip(proposals, locations):
         loc = location and location.get("location", None)
         if not loc:
-            logger.error("Skipping proposal {id}; geolocation failed."
+            LOGGER.error("Skipping proposal {id}; geolocation failed."
                          .format(id=proposal["case_number"]))
             continue
 
@@ -87,6 +89,8 @@ def add_geocode(geocoder, proposals):
 
 
 def parse_addresses(number, street):
+    """Translates an address or range of addresses into a generator.
+    """
     number_sublists = re.split(r"\s*/\s*", number)
     street_sublists = re.split(r"\s*/\s*", street)
 
@@ -103,13 +107,17 @@ def parse_addresses(number, street):
 
 
 def get_address_list(number, street):
+    """Translates an address or range of addresses into a list of addresses.
+    """
     return ["{} {}".format(n, s) for (n, s) in parse_addresses(number, street)]
 
 
 def find_cases(doc):
+    """Takes a BeautifulSoup document, returns a list of maps representing the
+    proposals found in the document.
+    """
     table = helpers.find_table(doc)
-    titles = helpers.col_names(table)
-    attributes = [attribute_for_title(t) for t in titles]
+    attributes = [attribute_for_title(t) for t in helpers.col_names(table)]
 
     tbody = table.find("tbody")
     trs = tbody.find_all("tr")
@@ -119,7 +127,7 @@ def find_cases(doc):
     for i, tr in enumerate(trs):
         try:
             proposal = helpers.get_row_vals(attributes, tr,
-                                            processors=field_processors)
+                                            processors=FIELD_PROCESSORS)
             addresses = get_address_list(proposal["number"], proposal["street"])
             proposal["address"] = addresses[0]
             proposal["all_addresses"] = addresses
@@ -146,8 +154,8 @@ def find_cases(doc):
             cases.append(proposal)
         except Exception as err:
             tr_string = " | ".join(tr.stripped_strings)
-            logger.error("Failed to scrape row %i: %s", i, tr_string)
-            logger.error(err)
+            LOGGER.error("Failed to scrape row %i: %s", i, tr_string)
+            LOGGER.error(err)
             continue
     return cases
 
@@ -155,7 +163,7 @@ def find_cases(doc):
 def get_proposals_for_page(page, geocoder=None):
     html = get_page(page)
     doc = BeautifulSoup(html, "html.parser")
-    logger.info("Scraping page {num}".format(num=page))
+    LOGGER.info("Scraping page {num}".format(num=page))
     cases = find_cases(doc)
 
     if geocoder:
@@ -182,8 +190,7 @@ def get_pages():
             break
 
         except URLError as err:
-            logger.warn("Failed to retrieve URL for page %d.", i,
-                        err)
+            LOGGER.warning("Failed to retrieve URL for page %d.", i, err)
             break
 
         doc = BeautifulSoup(html, "html.parser")
@@ -246,10 +253,12 @@ def get_proposals_since(dt=None,
 
 class SomervilleImporter(object):
     region_name = "Somerville, MA"
-    tz = pytz.timezone("US/Eastern")
+    zone = pytz.timezone("US/Eastern")
 
-    def updated_since(self, dt, geocoder=None):
-        if not dt.tzinfo:
-            dt = self.tz.localize(dt)
+    def updated_since(self, since, geocoder=None):
+        """Returns the proposals added or changed since the given datetime.
+        """
+        if not since.tzinfo:
+            since = self.zone.localize(since)
 
-        return get_proposals_since(dt, geocoder=geocoder)
+        return get_proposals_since(since, geocoder=geocoder)
