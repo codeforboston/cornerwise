@@ -92,7 +92,7 @@ class Proposal(models.Model):
     complete = models.BooleanField(default=False)
 
     parcel = models.ForeignKey(
-        "parcel.Parcel", related_name="proposals", null=True)
+        "parcel.Parcel", related_name="proposals", null=True, on_delete=models.SET_NULL)
 
     objects = ProposalManager()
 
