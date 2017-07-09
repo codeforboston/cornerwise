@@ -1,3 +1,7 @@
+"""
+Importer for Somerville Reports and Decisions.
+"""
+
 from bs4 import BeautifulSoup
 from itertools import takewhile
 import logging
@@ -12,14 +16,15 @@ except ImportError:
 
 
 from . import helpers
-from .events import title_for_case_number
+from .events import title_for_case_number, DEFAULT_DESCRIPTIONS
 
 logger = logging.getLogger(__name__)
 
-URL_BASE = ("http://archive.somervillema.gov/departments/planning-board/"
+URL_BASE = ("http://www.somervillema.gov/departments/planning-board/"
             "reports-and-decisions/robots")
 URL_FORMAT = URL_BASE + "?page={:1}"
-TZ = pytz.timezone("US/Eastern")
+HEARING_HOUR = 18
+HEARING_MIN = 0
 
 # Give the attributes a custom name:
 TITLES = {}
@@ -37,21 +42,18 @@ def attribute_for_title(title):
 def get_page(page=1, url_format=URL_FORMAT):
     "Returns the HTML content of the given Reports and Decisions page."
     url = url_format.format(page)
-    f = urlopen(url)
-    logger.info("Fetching page %i", page)
-    html = f.read()
-    f.close()
-    return html
+    with urlopen(url) as html_page:
+        logger.info("Fetching page %i", page)
+        return html_page.read()
 
 
 def detect_last_page(doc):
+    """
+    """
     anchor = doc.select_one("li.pager-last a")
-    m = re.search(r"[?&]page=(\d+)", anchor["href"])
+    match = re.search(r"[?&]page=(\d+)", anchor["href"])
 
-    if m:
-        return int(m.group(1))
-
-    return 0
+    return int(match.group(1)) if match else 0
 
 
 field_processors = {
@@ -129,10 +131,10 @@ def find_cases(doc):
             event_title = title_for_case_number(proposal["case_number"]),
             first_hearing = proposal.get("first_hearing_date")
             if first_hearing and event_title:
-                first_hearing = TZ.localize(first_hearing.replace(hour=18, minute=0))
+                first_hearing = first_hearing.replace(hour=HEARING_HOUR, minute=HEARING_MIN)
                 events.append(
                     {"title": event_title,
-                     "description": events.DEFAULT_DESCRIPTIONS.get(event_title),
+                     "description": DEFAULT_DESCRIPTIONS.get(event_title),
                      "date": first_hearing,
                      "region_name": "Somerville, MA"})
 
