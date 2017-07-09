@@ -198,8 +198,8 @@ def change_log(request):
 
 
 @with_user
-def deactivate_account(request, user):
-    user.deactivate()
+def deactivate_account(_request, user):
+    user.profile.deactivate()
 
     return redirect("/")
 

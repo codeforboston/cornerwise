@@ -47,11 +47,18 @@ class UserProfile(models.Model):
             self.save()
 
     def deactivate(self):
-        if self.user.is_active:
-            self.user.is_active = False
-            self.token = make_token()
-            self.user.save()
-            self.save()
+        if not self.user.is_active:
+            return
+
+        self.user.is_active = False
+        self.token = make_token()
+        self.user.save()
+        self.save()
+
+        self.deactivate_subscriptions()
+
+    def deactivate_subscriptions(self):
+        self.user.subscriptions.update(active=False)
 
     def generate_token(self):
         "Creates a new verification token for the user and saves it."
@@ -82,6 +89,7 @@ class UserProfile(models.Model):
 class SubscriptionQuerySet(models.QuerySet):
     def mark_sent(self):
         self.update(last_notified=datetime.utcnow())
+
 
 class Subscription(models.Model):
     # The subscription belong to a registered user:
