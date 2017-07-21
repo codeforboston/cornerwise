@@ -7,13 +7,16 @@ from utils import prettify_lat, prettify_long
 
 from base64 import b64encode
 from datetime import datetime
+import os
 import pickle
-import random
 import re
 
 
 def make_token():
-    return b64encode(random.getrandbits(256).to_bytes(32, "big"))
+    """
+    :returns: (str) an authentication token
+    """
+    return b64encode(os.urandom(32))
 
 
 class UserProfile(models.Model):
