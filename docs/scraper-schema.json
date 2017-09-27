@@ -1,0 +1,113 @@
+ {
+    "id": "https://github.com/codeforboston/cornerwise/docs/scraper-schema",
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "schema for Cornerwise scrapers",
+    "type": "object",
+    "properties": {
+        "cases": {
+            "type": "array",
+            "description": "",
+            "items": {"$ref": "#/definitions/case" }
+        },
+        "events": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/event" }
+        }
+    },
+    "definitions": {
+        "case": {
+            "required": ["address", "complete", "case_number", "updated_date"],
+            "properties": {
+                "address": "The primary address",
+                "all_addresses": {
+                    "type": "array",
+                    "items": { "type": "string"}
+                },
+                "location": {
+                    "description": "The coordinates of the ",
+                    "type": "object",
+                    "properties": {
+                        "lat": { "type": "number" },
+                        "long": { "type": "number" }
+                    },
+                    "required": ["lat", "long"]
+                },
+                "updated_date": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "region_name": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "status": {
+                    "type": { "type": "string" }
+                },
+                "complete": {
+                    "description": "Indicates whether the case is still pending review (false), or if it has been reviewed or withdrawn (true)",
+                    "type": "boolean"
+                },
+                "decision": {
+                    "type": "object",
+                    "description": "Provides additional details about the decision from the reviewing body",
+                    "properties": {
+                        "approved": { "type": "boolean" },
+                        "votes_for": { "type": "number" },
+                        "votes_against": { "type": "number" },
+                        "comments": { "type": "array",
+                                      "items": { "type": "string" }}
+                    },
+                    "dependencies": {
+                        "votes_for": ["votes_against"]
+                    }
+                },
+                "case_number": {
+                    "type": "string",
+                    "description": "A unique case number for this case"
+                },
+                "first_hearing_date": {},
+                "documents": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/link"}
+                },
+                "images": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/link"}
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": { "type": "object" }
+                }
+            }
+        },
+
+        "event": {
+            "required": [],
+            "properties": {
+            }
+        },
+
+        "link": {
+            "required": ["title", "url"],
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "content-type": {
+                    "description": "MIME type of the document",
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": { "type": "string"
+                             }}
+            }
+        }
+}
