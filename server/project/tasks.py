@@ -1,15 +1,16 @@
+from celery import shared_task
 from django.db.utils import IntegrityError
 from datetime import datetime
-from cornerwise import celery_app
 from project.models import Project
 from project.importers.register import Importers
 
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 
-@celery_app.task(name="project.pull_updates")
+@shared_task
 def pull_updates(since=None):
     if since:
         since = datetime.fromtimestamp(since)

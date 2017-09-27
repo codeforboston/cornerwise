@@ -67,8 +67,6 @@ def make_response(template=None, error_template="error.djhtml",
                or re.search(r"application/json", accepts) \
                or req.GET.get("format", "").lower() == "json":
                 response = JsonResponse(data, status=status)
-                # TODO: We may (or may not!) want to be more restrictive
-                # in the future:
                 response["Access-Control-Allow-Origin"] = "*"
                 return response
 

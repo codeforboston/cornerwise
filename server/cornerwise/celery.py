@@ -3,6 +3,8 @@ import os
 from celery import Celery
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cornerwise.settings")
+import django
+django.setup()
 from django.conf import settings
 
 app = Celery("cornerwise")

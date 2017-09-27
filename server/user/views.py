@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from django.contrib.auth import login, logout
@@ -15,6 +16,7 @@ import re
 
 from cornerwise.utils import today
 from shared.request import make_response, make_redirect_response, ErrorResponse
+from shared.mail import render_email_body
 from user import changes, tasks
 from user.models import Subscription, UserProfile
 from user.utils import not_logged_in, with_user
@@ -170,18 +172,18 @@ def user_login(request, token, pk):
     return redirect(reverse(manage))
 
 
-@make_response("changes.djhtml")
 def change_log(request):
     """
-    Show a summary of changes based on criteria in the query string.
+    Show a summary of changes based on criteria in the query string. Intended
+    mostly for debugging purposes at the moment.
     """
     params = request.GET.copy()
     try:
         since = datetime.strptime(params["since"], "%Y%m%d")
         del params["since"]
-    except KeyError as kerr:
+    except KeyError as _kerr:
         raise ErrorResponse("Missing required param: since")
-    except ValueError as err:
+    except ValueError as _err:
         raise ErrorResponse("'since' should have the format YYYYmmdd")
 
     until = request.GET.get("until")
@@ -193,8 +195,7 @@ def change_log(request):
         query = Subscription.validate_query(params)
 
     summary = changes.summarize_query_updates(query, since)
-    return {"since": since, "until": until, "changes": summary}
-
+    context = {"since": since, "until": until, "changes": summary}
 
 
 @with_user

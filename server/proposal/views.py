@@ -1,3 +1,5 @@
+from celery import shared_task
+
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.forms.models import model_to_dict

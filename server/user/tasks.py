@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from urllib import request
 import pytz
 
+from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -9,8 +10,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 
-from cornerwise import celery_app
 from cornerwise.utils import make_absolute_url
+from shared.mail import send as send_mail
 
 from .models import Subscription, UserProfile
 from . import changes, mail
@@ -20,57 +21,47 @@ logger = get_task_logger(__name__)
 User = get_user_model()
 
 
-@celery_app.task(name="user.send_user_updates")
+@shared_task
 def send_user_updates(user_id, updates):
+    """Sends an email to a user containing a summary of recent updates to a
+    Subscription.
+
+    """
     user = User.objects.get(pk=user_id)
-    updates_html = render_to_string("changes.djhtml",
-                                    {"changes": updates["changes"]})
-
-    datefmt = lambda dt: datetime.fromtimestamp(dt).strftime("%A, %B %-d") if dt else ""
-    fmt = "from {start} to {end}" if updates["end"] else "since {start}"
-    date_range = fmt.format(
-        start=datefmt(updates["start"]), end=datefmt(updates["end"]))
-
-    mail.send(user, "Cornerwise: New Updates", "updates", {
-        "updates": updates_html,
-        "update_summary": changes.summary_line(updates),
-        "date_range": date_range
-    })
+    send_mail(user.email, "Cornerwise: New Updates", "updates",
+              mail.updates_context(user, updates))
 
 
 def send_subscription_updates(subscription, since):
+    """If there are any recent changes relevant to the given Subscription,
+    create a task to send email to the subscription owner.
+    """
     if not since:
         since = subscription.last_notified
-    updates = changes.summarize_subscription_updates(subscription, since)
+    updates = subscription.summarize_updates(since)
     if updates["total"]:
         send_user_updates.delay(subscription.user_id, updates)
         return True
 
 
 def send_user_welcome(user, subscription):
-    profile = user.profile
-    if not profile.token:
-        profile.generate_token()
-
-    # Render HTML and text templates:
-    context = {
-        "confirm_url": make_absolute_url(profile.confirm_url),
-        "minimap_src": subscription.minimap_src,
-        "subscription-preview": subscription.minimap_src
-    }
-    mail.send(profile.user, "Cornerwise: Welcome", "welcome", context)
+    """Send an email requesting confirmation of a subscription.
+    """
+    send_mail(user.email, "Cornerwise: Welcome", "welcome",
+              mail.welcome_context(subscription))
 
 
-@celery_app.task()
+@shared_task
 def send_deactivation_email(user_id):
+    """Sends the email when a user is unsubscribed.
+    """
     user = User.objects.get(pk=user_id)
-    mail.send(user, "Cornerwise: Unsubscribed", "account_deactivated")
+    send_mail(user.email, "Cornerwise: Unsubscribed", "account_deactivated")
 
 
-@celery_app.task()
+@shared_task
 def send_subscription_confirmation_email(sub_id):
-    """"
-    When a new Subscription is created, check if the User has existing
+    """" When a new Subscription is created, check if the User has existing
     Subscription(s). If s/he does and if LIMIT_SUBSCRIPTIONS is set to True,
     send an email asking the user to confirm the new subscription and replace
     the old one.
@@ -90,7 +81,7 @@ def send_subscription_confirmation_email(sub_id):
 
     try:
         existing = user.subscriptions.filter(active=True)[0]
-    except:
+    except IndexError:
         # The user doesn't have any active Subscriptions
         return
 
@@ -99,29 +90,22 @@ def send_subscription_confirmation_email(sub_id):
     request.urlopen(subscription.minimap_src).close()
     request.urlopen(existing.minimap_src).close()
 
-    context = {
-        "subscription": subscription.readable_description,
-        "minimap_src": subscription.minimap_src,
-        "subscription-preview": subscription.minimap_src,
-        "old_minimap_src": existing.minimap_src,
-        "confirmation_link": make_absolute_url(subscription.confirm_url)
-    }
-    mail.send(user, "Cornerwise: Confirm New Subscription",
-              "replace_subscription", context)
+    send_mail(user.email, "Cornerwise: Confirm New Subscription",
+              "replace_subscription", mail.confirmation_context(subscription))
 
 
-@celery_app.task(name="user.send_notifications")
+@shared_task
 def send_notifications(subscription_ids=None, since=None):
-    """
-    Check the Subscriptions and find those that have new updates since the last
+    """Check the Subscriptions and find those that have new updates since the last
     update was run.
+
     """
     if subscription_ids:
         subscriptions = Subscription.objects.filter(pk__in=subscription_ids)
     else:
-        dt = datetime.utcnow() - timedelta(days=7)
+        before = datetime.utcnow() - timedelta(days=7)
         subscriptions = Subscription.objects.filter(active=True,
-                                                    last_notified__lte=dt)
+                                                    last_notified__lte=before)
 
     sent = []
     for subscription in subscriptions:

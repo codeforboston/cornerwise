@@ -4,6 +4,7 @@ from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 
 from utils import prettify_lat, prettify_long
+from .changes import summarize_subscription_updates
 
 from base64 import b64encode
 from datetime import datetime
@@ -43,6 +44,8 @@ class UserProfile(models.Model):
         return self.user.email
 
     def activate(self):
+        """Activates a user account.
+        """
         if not self.user.is_active:
             self.user.is_active = True
             self.token = make_token()
@@ -124,6 +127,15 @@ class Subscription(models.Model):
         self.user.profile.activate()
         self.active = True
         self.save()
+
+    def summarize_updates(self, since):
+        """
+        since: a datetime
+
+        :returns: a dictionary describing the changes to the query since the
+        given datetime
+        """
+        return summarize_subscription_updates(self, since or self.last_notified)
 
     @property
     def confirm_url(self):

@@ -2,20 +2,25 @@
 
 {% for change in changes.values %}
     {% with proposal=change.proposal props=changes.properties attrs=changes.attributes %}
-        <div class="change row">
-            <div class="change-thumb col-md-3 col-xs-6 thumbnail">
+        <div class="change">
+            <div class="address">{{ proposal.address }}</div>
+            <div class="thumb">
                 {% with image=proposal.images.0 %}
                     {% if image and image.thumb %}
                         <img src="{{ image.thumb|absolutize }}"/>
                     {% endif %}
                 {% endwith %}
             </div>
-            <div class="col-md-9 col-xs 6">
-                <h2>{{ proposal.address }}</h2>
-
+            <div class="details">
                 {% if change.new %}
-                    <div class="new" >Added {{ proposal.updated|date:"l, F jS" }}</div>
-                    <table class="table table-striped" >
+                    <div>
+                        <span class="change-type">New Project</span>
+                        &mdash;
+                        <span class="timestamp">
+                            Added {{ proposal.updated|date:"l, F jS" }}
+                        </span>
+                    </div>
+                    <table>
                         <tbody>
                             {% for attribute in proposal.attributes %}
                                 <tr>
@@ -32,28 +37,27 @@
                     {% for change in attrs %}
                         {% include "partial/change_item.djhtml" %}
                     {% endfor %}
-                    {% if change.images %}
-                        <div class="image-list">
-                            New Images:
-                            {% for image in change.images %}
-                                <div class="image" >
-                                    <!-- Absolutize!! -->
-                                    <img src="{% firstof image.thumbnail image.url %}"/>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% if change.documents %}
-                        <div class="document-list" >
-                            New Documents:
-                            {% for doc in change.documents %}
-                                <div class="doc" >
-                                    <img src="{{ doc.thumbnail }}"/>
-                                    {{ doc.title }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    {#% if change.images %#}
+                    <!-- <div class="image-list"> -->
+                    <!-- New Images: -->
+                            {#% for image in change.images %#}
+                    <!-- <div class="image" > -->
+                    <!-- <img src="{% firstof image.thumbnail image.url %}"/> -->
+                    <!-- </div> -->
+                            {#% endfor %#}
+                    <!-- </div> -->
+                    {#% endif %#}
+                    {#% if change.documents %#}
+                    <!-- <div class="document-list" > -->
+                    <!-- New Documents: -->
+                            {#% for doc in change.documents %#}
+                    <!-- <div class="doc" > -->
+                    <!-- <img src="{{ doc.thumbnail }}"/> -->
+                                    {#{ doc.title }#}
+                    <!-- </div> -->
+                            {#% endfor %#}
+                    <!-- </div> -->
+                    {#% endif %#}
                 {% endif %}
             </div>
         </div>

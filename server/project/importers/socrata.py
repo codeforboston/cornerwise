@@ -17,11 +17,7 @@ def make_request(domain, resource_id, token, fmt="json",
         params["$$exclude_system_fields"] = "false"
 
     qs = ("?" + parse.urlencode(params)) if params else ""
-    url = "https://{domain}/resource/{resource_id}.{fmt}{qs}"\
-          .format(domain=domain,
-                  resource_id=resource_id,
-                  fmt=fmt,
-                  qs=qs)
+    url = f"https://{domain}/resource/{resource_id}.{fmt}{qs}"
     data = None
 
     return Request(url, data, {"Accept": "application/json",

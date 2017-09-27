@@ -33,5 +33,6 @@ sendgrid==3.6.3
 simplejson==3.8.2
 six==1.10.0
 smtpapi==0.3.1
+toronado==0.0.11
 uritemplate==3.0.0
 vine==1.1.3

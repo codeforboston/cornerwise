@@ -3,6 +3,8 @@ import re
 import pytz
 from functools import partial
 
+from urllib.parse import urljoin
+
 
 def to_camel(s):
     "Converts a string s to camelCase."
@@ -14,8 +16,9 @@ def to_under(s):
     return re.sub(r"\s+", "_", s.lower())
 
 
-def link_info(a):
-    return {"title": a.get_text().strip(), "url": a["href"]}
+def link_info(a, base_url=None):
+    return {"title": a.get_text().strip(),
+            "url": urljoin(base_url, a["href"]) if base_url else a["href"]}
 
 
 def get_date(d, tzinfo=None):
@@ -31,9 +34,9 @@ def get_datetime(datestring, tzinfo=None):
     return dt
 
 
-def get_links(elt):
+def get_links(elt, base=None):
     "Return information about the <a> element descendants of elt."
-    return [link_info(a) for a in elt.find_all("a") if a["href"]]
+    return [link_info(a, base) for a in elt.find_all("a") if a["href"]]
 
 
 # Field processors:
@@ -55,12 +58,6 @@ def datetime_field_tz(tz):
     if isinstance(tz, str):
         tz = pytz.timezone(tz)
     return partial(datetime_field, tzinfo=tz)
-
-
-def links_field(td):
-    links = get_links(td)
-    if links:
-        return {"links": get_links(td)}
 
 
 def default_field(td):

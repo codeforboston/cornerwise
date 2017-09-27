@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import url
 from . import views
 from .mail_parse_views import mail_inbound

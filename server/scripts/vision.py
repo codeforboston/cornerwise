@@ -1,5 +1,8 @@
 import base64
+from collections import OrderedDict
+from httplib2 import ServerNotFoundError
 import itertools
+import logging
 from math import sqrt
 
 from googleapiclient import discovery
@@ -18,8 +21,24 @@ def get_client():
 
 try:
     CLIENT = get_client()
-except ApplicationDefaultCredentialsError:
+except (ApplicationDefaultCredentialsError, ServerNotFoundError) as exc:
+    logging.warning("Unable to initialize Google Vision client: %s", exc)
     CLIENT = None
+
+
+def image_similarity(image_path_a, image_path_b):
+    image_a = Image.open(image_path_a)
+    image_b = Image.open(image_path_b)
+    (wA, hA) = image_a.width, image_a.height
+    (wB, hB) = image_b.width, image_b.height
+
+    if abs(wA/hA - wB/hB) > 0.1:
+        return 0
+
+    scaleA = min()
+
+    a_gray = image_a.convert("LA")
+    b_gray = image_b.convert("LA")
 
 
 def encode_image(image_file):
@@ -126,8 +145,8 @@ def colorfulness(response):
 
 
 def simplify_labels(response):
-    return ((l["description"], l["score"])
-            for l in response["labelAnnotations"])
+    return OrderedDict((l["description"], l["score"])
+                       for l in response["labelAnnotations"])
 
 
 def process_image(image_file):
@@ -136,6 +155,7 @@ def process_image(image_file):
     image = Image.open(image_file)
     try:
         response = annotate_image(CLIENT, image_file)["responses"][0]
-        return {"logo": find_logo(response)}
+        return {"logo": find_logo(response),
+                "colorfulness": colorfulness(response)}
     except KeyError:
         return None

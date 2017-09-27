@@ -13,6 +13,7 @@ from . import helpers
 from .events import DEFAULT_DESCRIPTIONS, title_for_case_number
 
 try:
+    from urllib.parse import urljoin
     from urllib.request import urlopen
     from urllib.error import HTTPError, URLError
 except ImportError:
@@ -22,8 +23,9 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 
-URL_BASE = ("http://www.somervillema.gov/departments/planning-board/"
-            "reports-and-decisions/robots")
+URL_HOST = "https://www.somervillema.gov"
+URL_BASE = (f"{URL_HOST}/departments/ospcd/"
+            "planning-and-zoning/reports-and-decisions/robots")
 URL_FORMAT = URL_BASE + "?page={:1}"
 HEARING_HOUR = 18
 HEARING_MIN = 0
@@ -58,10 +60,21 @@ def detect_last_page(doc):
     return int(match.group(1)) if match else 0
 
 
+def links_field(td, base=URL_BASE):
+    links = helpers.get_links(td, base)
+    return links and {"links": links}
+
+
+def staff_report_field(td, base=URL_BASE):
+    links = sum((a.find_all("a") for a in td.find_all("a")), [])
+    return links and {"links": [helpers.link_info(a, base) for a in links]}
+
+
+
 FIELD_PROCESSORS = {
-    "reports": helpers.links_field,
-    "decisions": helpers.links_field,
-    "other": helpers.links_field,
+    "reports": links_field,
+    "decisions": links_field,
+    "other": links_field,
     "first_hearing_date": helpers.optional(helpers.date_field_tz("US/Eastern")),
     "updated_date": helpers.datetime_field_tz("US/Eastern")
 }

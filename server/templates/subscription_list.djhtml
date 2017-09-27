@@ -1,0 +1,9 @@
+<table>
+    {% for subscription in subscriptions %}
+        <tr>
+            <td>
+                <img src="{{ subscription.minimap_src }}"/>
+            </td>
+        </tr>
+    {% endfor %}
+</table>

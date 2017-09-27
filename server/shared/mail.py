@@ -1,13 +1,14 @@
+"""Utilities for rendering emails.
+"""
 import logging
-from urllib import request
 
 import sendgrid
-from sendgrid.helpers import mail
-
+import toronado
 from django.conf import settings
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from sendgrid.helpers import mail
 
 if getattr(settings, "SENDGRID_API_KEY", None):
     SG = sendgrid.SendGridAPIClient(
@@ -15,10 +16,10 @@ if getattr(settings, "SENDGRID_API_KEY", None):
 else:
     SG = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
-def send(email, subject, template_name, context={}, content=None):
+def send(email, subject, template_name, context=None, content=None):
     """
     Send an email to an email address. If there is a SendGrid template id
     configured for the given template name, create substitutions from `context`
@@ -29,9 +30,10 @@ def send(email, subject, template_name, context={}, content=None):
     template in <templates>/email.
 
     """
+    context = {} if context is None else context
     try:
         template_id = settings.SENDGRID_TEMPLATES[template_name]
-    except:
+    except KeyError:
         # Fall back to Django templates
         return send_template(email, subject, template_name, context)
 
@@ -40,9 +42,8 @@ def send(email, subject, template_name, context={}, content=None):
     if not isinstance(email, list):
         email = [email]
 
-    recipients = [{
-        "email": addr
-    } if isinstance(addr, str) else addr for addr in email]
+    recipients = [{"email": addr} if isinstance(addr, str) else addr
+                  for addr in email]
 
     data = {
         "personalizations": [{
@@ -61,25 +62,42 @@ def send(email, subject, template_name, context={}, content=None):
         data["content"] = [{"type": "text/html", "value": content}]
 
     SG.client.mail.send.post(request_body=data)
-    logger.info("Email sent to {}".format(email))
+    LOGGER.info("Email sent to {}".format(email))
     return True
 
 
-def send_template(email, subject, template_name, context={}):
-    context = context.copy()
+def render_email_body(template_name, context=None):
+    """Generate text and HTML for an email body using the named email template,
+    with substitutions provided by `context`.
+    """
+    context = {} if context is None else context
     html = render_to_string("email/" + template_name + ".djhtml", context)
-    addressal = context.get("user")
     try:
         text = render_to_string("email/" + template_name + ".djtxt", context)
     except TemplateDoesNotExist:
         text = strip_tags(html)
+
+    html = toronado.from_string(html)
+
+    return (html, text)
+
+
+def send_template(email, subject, template_name, context=None):
+    """Construct and send an email with subject `subject` to `email`, using the
+    named email template.
+    """
+    context = context or {}
+    html, _text = render_email_body(template_name, context)
+    LOGGER.info("Generated email: %s", html)
+    addressal = context.get("user")
 
     if SG:
         message = mail.Mail(
             mail.Email(settings.EMAIL_ADDRESS), subject,
             mail.Email(email, addressal), mail.Content("text/html", html))
         response = SG.client.mail.send.post(request_body=message.get())
-        logger.info("Sent '%s' email to %s (response %s)", template_name,
+        LOGGER.info("Sent '%s' email to %s (response %s)", template_name,
                     email, response)
     else:
-        logger.info("SendGrid not available. Generated email: %s", html)
+        LOGGER.info("SendGrid not available. Generated email: %s", html)
+

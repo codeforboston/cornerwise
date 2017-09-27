@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import logging
 import os
-import shutil
 import subprocess
 from urllib import parse, request
 
@@ -14,19 +13,22 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
-from .models import Proposal, Attribute, Document, Image
+import pytz
+
+from .models import Proposal, Attribute, Document, Event, Image
 from utils import extension, normalize
 from . import extract
 from . import documents as doc_utils
-from .importers.register import Importers
-from cornerwise import celery_app
+from .importers.register import Importers, EventImporters
 from scripts import arcgis, foursquare, gmaps, street_view
+
 
 logger = logging.getLogger(__name__)
 task_logger = get_task_logger(__name__)
+shared_task = celery.shared_task
 
 
-@celery_app.task(name="proposal.fetch_document")
+@shared_task
 def fetch_document(doc_id):
     """Copy the given document (proposal.models.Document) to a local
     directory.
@@ -50,7 +52,7 @@ def fetch_document(doc_id):
     return doc.pk
 
 
-@celery_app.task(name="proposal.extract_text")
+@shared_task
 def extract_text(doc_id, encoding="ISO-8859-9"):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
@@ -84,7 +86,7 @@ def extract_text(doc_id, encoding="ISO-8859-9"):
         return doc.pk
 
 
-@celery_app.task(name="proposal.extract_images")
+@shared_task
 def extract_images(doc_id):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
@@ -110,7 +112,7 @@ def extract_images(doc_id):
         return []
 
 
-@celery_app.task(name="proposal.add_street_view")
+@shared_task
 def add_street_view(proposal_id):
     api_key = getattr(settings, "GOOGLE_API_KEY")
     secret = getattr(settings, "GOOGLE_STREET_VIEW_SECRET")
@@ -143,7 +145,7 @@ def add_street_view(proposal_id):
                          + "to add Street View images.")
 
 
-@celery_app.task(name="proposal.add_venue_info")
+@shared_task
 def add_venue_info(proposal_id):
     client_id = getattr(settings, "FOURSQUARE_CLIENT", None)
     client_secret = getattr(settings, "FOURSQUARE_SECRET")
@@ -170,7 +172,7 @@ def add_venue_info(proposal_id):
     return proposal_id
 
 
-@celery_app.task(name="proposal.add_parcel")
+@shared_task
 def add_parcel(proposal_id):
     from parcel.models import Parcel
 
@@ -183,7 +185,7 @@ def add_parcel(proposal_id):
         return proposal.id
 
 
-@celery_app.task(name="proposal.generate_doc_thumbnail")
+@shared_task
 def generate_doc_thumbnail(doc_id):
     "Generate a Document thumbnail."
     doc = Document.objects.get(pk=doc_id)
@@ -195,7 +197,7 @@ def generate_doc_thumbnail(doc_id):
     return doc_utils.generate_thumbnail(doc)
 
 
-@celery_app.task(name="proposal.generate_thumbnail")
+@shared_task
 def generate_thumbnail(image_id, replace=False):
     """Generate an image thumbnail.
 
@@ -228,7 +230,7 @@ def generate_thumbnail(image_id, replace=False):
     return thumbnail_path
 
 
-@celery_app.task(name="proposal.add_doc_attributes")
+@shared_task
 def add_doc_attributes(doc_id):
     doc = Document.objects.get(pk=doc_id)
     doc_json = doc_utils.doc_info(doc)
@@ -260,7 +262,7 @@ def add_doc_attributes(doc_id):
     return doc
 
 
-@celery_app.task(name="proposal.generate_thumbnails")
+@shared_task
 def generate_thumbnails(image_ids):
     return generate_thumbnail.map(image_ids)()
 
@@ -288,7 +290,7 @@ def process_proposal(proposal):
     return proposal.id
 
 
-@celery_app.task(name="proposal.fetch_proposals")
+@shared_task
 def fetch_proposals(since=None,
                     coder_type=settings.GEOCODER,
                     importers=Importers):
@@ -347,7 +349,7 @@ def fetch_proposals(since=None,
     return [p.id for p in proposals]
 
 
-@celery_app.task(name="proposal.pull_updates")
+@shared_task
 def pull_updates(since=None, importers_filter=None):
     "Run all registered proposal importers."
     importers = Importers
@@ -360,6 +362,75 @@ def pull_updates(since=None, importers_filter=None):
     return fetch_proposals(since, importers=importers)
 
 
+# Event tasks
+@shared_task
+def pull_events(since=None):
+    """
+    Runs all registered event importers.
+    """
+    if since:
+        since = datetime.fromtimestamp(since)
+
+    events = []
+    for importer in EventImporters:
+        if not since:
+            all_events = Event.objects.filter(
+                region_name=importer.region_name).order_by("-created")
+            try:
+                last_event = all_events[0]
+                if not last_event.created.tzinfo:
+                    since = pytz.utc.localize(last_event.created)
+            except IndexError:
+                pass
+
+        importer_events = [
+            Event.make_event(ejson) for ejson in importer.updated_since(since)
+        ]
+        events += importer_events
+
+        logger.info("Fetched %i events from %s",
+                    len(importer_events), type(importer).__name__)
+
+    return [event.pk for event in events]
+
+
+# Image tasks
+@shared_task
+def cloud_vision_process(image_id):
+    """
+    Send the image to the Cloud Vision API. If the image is recognized as a
+    logo, delete it.
+    """
+    processed_key = f"image:{image_id}:logo_checked"
+    image = Image.objects.annotate(region_name=F("proposal__region_name"))\
+                         .get(pk=image_id)
+    if not image.image or cache.get(processed_key):
+        return
+
+    city_name = re.split(r"\s*,\s*", image.region_name, 1)[0]
+    processed = vision.process_image(image.image.path, )
+    logo = processed.get("logo")
+    if logo:
+        if city_name in logo["description"]:
+            image.delete()
+            task_logger.info("Logo detected: image #%i deleted", image.pk)
+        else:
+            cache.set(f"image:{image_id}:logo", logo)
+    cache.set(processed_key, True)
+
+
+def process_image(image):
+    if vision.CLIENT:
+        cloud_vision_process.delay(image.pk)
+
+
+@receiver(post_save, sender=Image, dispatch_uid="process_image")
+def image_hook(**kwargs):
+    image = kwargs["instance"]
+    if image.image:
+        process_image(image)
+
+
 @receiver(post_save, sender=Proposal, dispatch_uid="process_new_proposal")
 def proposal_hook(**kwargs):
     if kwargs["created"]:
@@ -370,3 +441,4 @@ def proposal_hook(**kwargs):
 def document_hook(**kwargs):
     if kwargs["created"]:
         process_document(kwargs["instance"])
+

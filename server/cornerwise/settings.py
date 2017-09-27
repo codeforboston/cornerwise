@@ -168,8 +168,7 @@ CELERYBEAT_SCHEDULE = {
     },
     "send-notifications": {
         "task": "user.send_notifications",
-        "schedule": crontab(
-            minute=0, hour=1)
+        "schedule": crontab(minute=0, hour=1)
     }
 }
 

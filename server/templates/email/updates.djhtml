@@ -432,7 +432,7 @@
          }
 
          .main-content
-         {
+        {
              margin-top: 20px;
              padding: 40px;
          }
@@ -455,6 +455,23 @@
              margin-bottom: 10px;
              margin-top: 10px;
              max-width: 300px;
+         }
+
+         .change-type {
+             font-style: italic;
+             font-weight: lighter;
+             text-transform: uppercase;
+         }
+
+         .timestamp {
+             
+         }
+
+         .details table th {
+             text-transform: uppercase;
+             color: #a39ba6;
+             font-size: smaller;
+             font-weight: 700;
          }
         </style>
     </head>
@@ -494,7 +511,7 @@
                                         <td>
                                             <p>Here are the updates you requested:</p>
 
-                                            <p>{{ updates_summary }}</p>
+                                            <p>{{ update_summary }}</p>
                                             {{ updates }}
                                         </td>
                                     </tr>

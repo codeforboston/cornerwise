@@ -106,7 +106,7 @@ class CambridgeImporter(object):
             location = pjson["location"]
             try:
                 human_address = json.loads(location["human_address"])
-                proposal["address"] = human_address["address"]
+                proposal["address"] = human_address["address"].title()
                 proposal["long"] = float(location["longitude"])
                 proposal["lat"] = float(location["latitude"])
             except:

@@ -1,5 +1,9 @@
-from shared import mail
+from datetime import datetime
+
 from cornerwise.utils import make_absolute_url
+from django.template.loader import render_to_string
+
+from . import changes
 
 
 def _make_user_context(user, context):
@@ -9,15 +13,50 @@ def _make_user_context(user, context):
     return context
 
 
-def send(user, subject, template_name, context=None, content=None):
+def updates_context(user, updates):
+    """Constructs the context for the subscription updates email.
     """
-    Send an email to a user. If there is a SendGrid template id configured for
-    the given template name, create substitutions from `context` so that `-key`
-    in the template is replaced by the value of `key` in `context`.
+    updates_html = render_to_string("changes.djhtml",
+                                    {"changes": updates["changes"]})
 
-    If there is no such SendGrid template, falls back to using a Django
-    template in <templates>/email.
+    datefmt = lambda dt: datetime.fromtimestamp(dt).strftime("%A, %B %-d") if dt else ""
+    fmt = "from {start} to {end}" if updates["end"] else "since {start}"
+    date_range = fmt.format(
+        start=datefmt(updates["start"]), end=datefmt(updates["end"]))
+
+    return _make_user_context(user, {
+        "updates": updates_html,
+        "update_summary": changes.summary_line(updates),
+        "date_range": date_range
+    })
+
+
+def welcome_context(subscription):
+    """Constructs the context for rendering the welcome email.
     """
+    user = subscription.user
+    profile = user.profile
+    if not profile.token:
+        profile.generate_token()
 
-    return mail.send(user.email, subject, template_name,
-                     _make_user_context(user, context))
+    return {
+        "confirm_url": make_absolute_url(profile.confirm_url),
+        "minimap_src": subscription.minimap_src,
+        "subscription-preview": subscription.minimap_src
+    }
+
+
+def confirmation_context(subscription):
+    try:
+        user = subscription.user
+        existing = user.subscriptions.filter(active=True).exists()
+    except IndexError:
+        # The user doesn't have any active Subscriptions
+        return
+    return {
+        "subscription": subscription.readable_description,
+        "minimap_src": subscription.minimap_src,
+        "subscription-preview": subscription.minimap_src,
+        "old_minimap_src": existing.minimap_src,
+        "confirmation_link": make_absolute_url(subscription.confirm_url)
+    }

@@ -20,7 +20,7 @@ def summarize_query_updates(query, since, until=None):
     if until:
         proposals_changed = proposals_changed.filter(updated__lte=until)
 
-        # Start with the new proposals:
+    # Start with the new proposals:
     summary = OrderedDict((p.id, {
         "proposal": proposal_json(
             p, include_images=1, include_documents=False),
