@@ -1,4 +1,4 @@
- {
+{
     "id": "https://github.com/codeforboston/cornerwise/docs/scraper-schema",
     "$schema": "http://json-schema.org/draft-06/schema#",
     "description": "schema for Cornerwise scrapers",
@@ -7,44 +7,80 @@
         "cases": {
             "type": "array",
             "description": "",
-            "items": {"$ref": "#/definitions/case" }
+            "items": {
+                "$ref": "#/definitions/case"
+            }
         },
         "events": {
             "type": "array",
-            "items": { "$ref": "#/definitions/event" }
+            "items": {
+                "$ref": "#/definitions/event"
+            }
         }
     },
     "definitions": {
         "case": {
-            "required": ["address", "complete", "case_number", "updated_date"],
+            "required": [
+                "all_addresses",
+                "complete",
+                "case_number",
+                "updated_date"
+            ],
             "properties": {
-                "address": "The primary address",
+                "case_number": {
+                    "type": "string",
+                    "description": "A case number for this case, unique within the scope of this region."
+                },
+                "first_hearing_date": {
+                    "description": "The date and time of the first public hearing",
+                    "type": "string",
+                    "format": "date-time"
+                },
                 "all_addresses": {
+                    "description": "An array of all the addresses associated with this proposal. The first address is used as the primary address.",
                     "type": "array",
-                    "items": { "type": "string"}
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "location": {
-                    "description": "The coordinates of the ",
+                    "description": "The coordinates of the proposal. If omitted, Cornerwise will geocode the primary address.",
                     "type": "object",
                     "properties": {
-                        "lat": { "type": "number" },
-                        "long": { "type": "number" }
+                        "lat": {
+                            "type": "number"
+                        },
+                        "long": {
+                            "type": "number"
+                        }
                     },
-                    "required": ["lat", "long"]
+                    "required": [
+                        "lat",
+                        "long"
+                    ]
+                },
+                "parcel_id": {
+                    "description": "An identifier for the corresponding parcel, unique within the scope of the region.",
+                    "type": "string"
                 },
                 "updated_date": {
+                    "description": "The last modification date and time",
                     "type": "string",
                     "format": "date-time"
                 },
                 "region_name": {
+                    "description": "If omitted, Cornerwise will use the region name configured for the importer.",
                     "type": "string"
                 },
                 "source": {
+                    "description": "A site where users can find additional information",
                     "type": "string",
                     "format": "uri"
                 },
                 "status": {
-                    "type": { "type": "string" }
+                    "type": {
+                        "type": "string"
+                    }
                 },
                 "complete": {
                     "description": "Indicates whether the case is still pending review (false), or if it has been reviewed or withdrawn (true)",
@@ -54,44 +90,72 @@
                     "type": "object",
                     "description": "Provides additional details about the decision from the reviewing body",
                     "properties": {
-                        "approved": { "type": "boolean" },
-                        "votes_for": { "type": "number" },
-                        "votes_against": { "type": "number" },
-                        "comments": { "type": "array",
-                                      "items": { "type": "string" }}
+                        "approved": {
+                            "type": "boolean"
+                        },
+                        "votes_for": {
+                            "type": "number"
+                        },
+                        "votes_against": {
+                            "type": "number"
+                        },
+                        "comments": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "dependencies": {
-                        "votes_for": ["votes_against"]
+                        "votes_for": [
+                            "votes_against"
+                        ]
                     }
                 },
-                "case_number": {
-                    "type": "string",
-                    "description": "A unique case number for this case"
+                "events": {
+                    "type": "object",
+                    "$ref": "#/definitions/event"
                 },
-                "first_hearing_date": {},
                 "documents": {
                     "type": "array",
-                    "items": { "$ref": "#/definitions/link"}
+                    "items": {
+                        "$ref": "#/definitions/link"
+                    }
                 },
                 "images": {
                     "type": "array",
-                    "items": { "$ref": "#/definitions/link"}
+                    "items": {
+                        "$ref": "#/definitions/link"
+                    }
                 },
                 "attributes": {
                     "type": "array",
-                    "items": { "type": "object" }
+                    "items": {
+                        "type": "object"
+                    }
                 }
             }
         },
-
         "event": {
-            "required": [],
+            "required": [
+                "title",
+                "date"
+            ],
             "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string",
+                    "format": "date-time"
+                }
             }
         },
-
         "link": {
-            "required": ["title", "url"],
+            "required": [
+                "title",
+                "url"
+            ],
             "properties": {
                 "title": {
                     "type": "string"
@@ -106,8 +170,11 @@
                 },
                 "tags": {
                     "type": "array",
-                    "items": { "type": "string"
-                             }}
+                    "items": {
+                        "type": "string"
+                    }
+                }
             }
         }
+    }
 }
