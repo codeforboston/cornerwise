@@ -63,45 +63,39 @@ def templates_config():
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
     ]
-    if IS_PRODUCTION:
-        loaders = [("django.template.loaders.cached.Loader", [
-            "django.template.loaders.filesystem.Loader",
-            "django.template.loaders.app_directories.Loader",
-        ])]
-    else:
-        context_processors = ["django.template.context_processors.debug",
-                              ] + context_processors
-        loaders = ["django.template.loaders.filesystem.Loader"]
+    if not IS_PRODUCTION:
+        context_processors.insert(0, "django.template.context_processors.debug")
 
     return [{
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": ["templates"],
+        "APP_DIRS": True,
         "OPTIONS": {
+            "debug": not IS_PRODUCTION,
             "context_processors": context_processors,
-            "loaders": loaders,
         },
     }]
 
 TEMPLATES = templates_config()
 
-WSGI_APPLICATION = 'cornerwise.wsgi.application'
+WSGI_APPLICATION = "cornerwise.wsgi.application"
 
 #####################
 # Database and Cache
 
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "")
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': POSTGRES_HOST,
-        'NAME': 'postgres',
-        'USER': 'postgres'
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "HOST": POSTGRES_HOST,
+        "NAME": "postgres",
+        "USER": "postgres"
     },
-    'migrate': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': POSTGRES_HOST,
-        'NAME': 'postgres',
-        'USER': 'postgres'
+    "migrate": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "HOST": POSTGRES_HOST,
+        "NAME": "postgres",
+        "USER": "postgres"
     }
 }
 
