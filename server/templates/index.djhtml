@@ -47,6 +47,14 @@
         <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
 
         <body>
+            <noscript>
+                <div>
+                    The main site requires JavaScript to run.
+
+                    We also have a <a href="/proposal/list">list of recent
+                proposals</a> that works without JavaScript.
+                </div>
+            </noscript>
             <div id="wrapper">
                 <div id="loading-indicator" class="control">
                     <img src="/static/images/loading.gif">
@@ -286,6 +294,7 @@
             <script src="https://use.typekit.net/wpe7mmw.js"></script>
             <script type="text/javascript">
              try{Typekit.load({ async: true });}catch(e){}
+             document.getElementById("wrapper").className += " js-enabled";
             </script>
         </body>
 </html>
