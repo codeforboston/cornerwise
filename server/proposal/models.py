@@ -8,8 +8,12 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
+from utils import add_params, bounds_from_box, geometry_from_url
+
+import json
 import pickle
 import pytz
+from urllib import request
 import utils
 
 
@@ -90,6 +94,8 @@ class Proposal(models.Model):
     # A misnomer; if True, indicates that the planning board has issued a
     # ruling (approval or disapproval):
     complete = models.BooleanField(default=False)
+    importer = models.ForeignKey("proposal.Importer", blank=True,
+                                 null=True, on_delete=models.SET_NULL)
 
     parcel = models.ForeignKey(
         "parcel.Parcel", related_name="proposals", null=True, on_delete=models.SET_NULL)
@@ -457,3 +463,46 @@ class Changeset(models.Model):
     def changes(self, d):
         self._change_dict = d
         self.change_blob = pickle.dumps(d)
+
+
+class Importer(models.Model):
+    """Importers are created through the administrator interface. Cornerwise
+    will place a GET request to the importer's URL once a day with a `when`
+    query parameter. The endpoint should return a result conforming to the
+    format documented in `docs/scraper-schema.json`.
+    """
+    name = models.CharField(max_length=128,
+                            unique=True,
+                            help_text="""Readable name that will be used
+                            to identify the origin of the proposals. """)
+    region_name = models.CharField(max_length=128,
+                                   help_text="""Default region name, used when
+                                   a proposal in the response JSON does not
+                                   have one set.""")
+    timezone = models.CharField(default="US/Eastern", max_length=25,
+                                help_text="""Ambiguous date fields will be
+                                interpreted as having this timezone""")
+    url = models.URLField(help_text="""A URL endpoint that should accept a
+    `when` parameter of the format YYYYmmdd and should respond with a JSON
+    document conforming to the scraper-schema spec.""")
+    last_run = models.DateTimeField(help_text="Last time the scraper ran")
+
+    def __str__(self):
+        return f"<Importer: {self.name}>"
+
+    @property
+    def timezone(self):
+        return pytz.timezone(self.timezone)
+
+    def url_for(self, when=None):
+        params = when and {"when": when.strftime("%Y%m%d")}
+        return add_params(self.url, params)
+
+    def updated_since(self, when):
+        with request.urlopen(self.url_for(when)) as u:
+            return json.load(u)
+
+    def cases_since(self, when):
+        return self.updated_since(when).get("cases")
+
+

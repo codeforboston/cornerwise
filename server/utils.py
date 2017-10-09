@@ -1,6 +1,11 @@
+import json
 import os
 import re
 from collections import deque
+from urllib import parse, request
+
+from django.contrib.gis.geos import GeometryCollection, GEOSGeometry
+from django.contrib.gis.geos.polygon import Polygon
 
 
 def normalize(s):
@@ -119,3 +124,50 @@ def prettify_long(lng):
 
     return prettify_format.\
         format(d=d, m=m, s=s, h="E" if lng > 0 else "W")
+
+
+def add_params(url, extra_params):
+    """Given a URL, add new query parameters by merging in the contents of the
+    `extra_params` dictionary.
+
+    :param url: (str)
+    :param extra_params: (dict)
+
+    :returns: (str) URL including new parameters
+    """
+    parsed = parse.urlparse(url)._asdict()
+    params = parse.parse_qs(parsed["query"])
+    params.update(extra_params)
+    parsed["query"] = parse.urlencode(params, doseq=True)
+
+    return parse.urlunparse(parse.ParseResult(**parsed))
+
+
+def bounds_from_box(box):
+    """Converts a `box` string parameter to a Polygon object.
+
+    :param box: (str) with the format latMin,longMin,latMax,longMax
+    """
+    coords = [float(coord) for coord in box.split(",")]
+    assert len(coords) == 4
+    # Coordinates are submitted to the server as
+    # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
+    # different order:
+    return Polygon.from_bbox((coords[1], coords[0], coords[3], coords[2]))
+
+
+def _geometry(feat):
+    if feat["type"] == "FeatureCollection":
+        return sum([_geometry(f) for f in feat["features"]], [])
+
+    return [GEOSGeometry(json.dumps(feat["geometry"]))]
+
+
+def geometry(feat):
+    return GeometryCollection(_geometry(feat), srid=4326)
+
+
+def geometry_from_url(url):
+    with request.urlopen(url) as resp:
+        raw = resp.read().decode("utf-8")
+        return geometry(json.loads(raw))
