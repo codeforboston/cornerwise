@@ -476,6 +476,7 @@ class Importer(models.Model):
                             help_text="""Readable name that will be used
                             to identify the origin of the proposals. """)
     region_name = models.CharField(max_length=128,
+                                   blank=True,
                                    help_text="""Default region name, used when
                                    a proposal in the response JSON does not
                                    have one set.""")
