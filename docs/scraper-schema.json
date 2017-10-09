@@ -59,6 +59,14 @@
                         "long"
                     ]
                 },
+                "summary": {
+                    "type": "string",
+                    "description": "A brief description of the case"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A detailed description of the case."
+                },
                 "parcel_id": {
                     "description": "An identifier for the corresponding parcel, unique within the scope of the region.",
                     "type": "string"
@@ -139,15 +147,49 @@
         "event": {
             "required": [
                 "title",
-                "date"
+                "start"
             ],
             "properties": {
                 "title": {
                     "type": "string"
                 },
-                "date": {
+                "description": {
+                    "type": "string"
+                },
+                "start": {
                     "type": "string",
                     "format": "date-time"
+                },
+                "duration": {
+                    "type": "string",
+                    "description": "Estimated duration of the event.",
+                    "pattern": "^\\d\\d:\\d\\d"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "name":           { "type": "string" },
+                        "street_address": { "type": "string" },
+                        "city":           { "type": "string" },
+                        "state":          { "type": "string" }
+                    },
+                    "required": ["street_address", "city", "state"]
+                },
+                "region_name": {
+                    "type": "string"
+                },
+                "cases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": ""
+                    }
+                },
+                "documents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/link"
+                    }
                 }
             }
         },
