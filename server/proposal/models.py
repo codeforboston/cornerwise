@@ -506,3 +506,36 @@ class Importer(models.Model):
         return self.updated_since(when).get("cases")
 
 
+class Layer(models.Model):
+    name = models.CharField(max_length=100,
+                            help_text="Name shown to users")
+    short_name = models.CharField(max_length=30, blank=True)
+    description = models.TextField(help_text="""A detailed description of the layer""")
+    icon_text = models.CharField(max_length=10,
+                                 help_text="""Emoji or short string shown as
+                                 shorthand for the layer if there is no icon set.""")
+    icon = models.FileField(default=None, null=True,)
+    icon_credit = models.CharField(max_length=100,
+                                   blank=True,
+                                   help_text="""Many popular icons require that
+                                   proper attribution be given to the original
+                                   author(s). Use this field to provide it.""")
+    region_name = models.CharField(max_length=128,
+                                   blank="True",
+                                   help_text="""Used when filtering layers by
+                                   region name""")
+    url = models.URLField(
+        help_text="""URL of the GeoJSON representing the
+                  layer geometry.
+        """)
+    envelope = models.PolygonField(srid=4326,
+                                   null=True,
+                                   help_text="""Polygon for the bounding envelope
+                                   of the layer geometry. Used to determine
+                                   which layers should be loaded when looking
+                                   at the map. Calculated automatically from
+                                   the geometry in the layer""")
+
+    def calculate_envelope(self):
+        gc = geometry_from_url(self.url)
+        self.envelope = gc.envelope
