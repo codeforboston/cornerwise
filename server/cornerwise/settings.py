@@ -215,7 +215,8 @@ MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
                "sw-lat={swlat}&sw-lng={swlon}&"
                "ne-lat={nelat}&ne-lng={nelon}")
 
-AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend"]
+AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
+                           "django.contrib.auth.backends.ModelBackend"]
 
 # Load select environment variables into settings:
 for envvar in [
