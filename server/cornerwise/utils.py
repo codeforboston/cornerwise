@@ -4,8 +4,10 @@
 from datetime import datetime
 import inspect
 import re
+from urllib.parse import urljoin
 
 from django.conf import settings
+
 
 protocol = "https" if settings.IS_PRODUCTION else "http"
 
@@ -13,9 +15,7 @@ def make_absolute_url(path):
     if re.match(r"^https?://", path):
         return path
 
-    return "{protocol}://{domain}{path}".format(protocol=protocol,
-                                                domain=settings.SERVER_DOMAIN,
-                                                path=path)
+    return urljoin(f"{protocol}://{settings.SERVER_DOMAIN}", path)
 
 
 def today():

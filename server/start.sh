@@ -27,12 +27,13 @@ done
 
 # Prefer Python 3:
 PYTHON_BIN=$(which python3 || which python)
+manage="$PYTHON_BIN $APP_ROOT/manage.py"
 
 echo "Applying any outstanding migrations"
-$PYTHON_BIN $APP_ROOT/manage.py migrate
+$manage migrate
 
 echo "Creating views"
-$PYTHON_BIN $APP_ROOT/manage.py sync_pgviews
+$manage sync_pgviews
 
 rm /tmp/*.pid
 
@@ -56,5 +57,5 @@ if [ "$APP_MODE" = "production" ]; then
     gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
              cornerwise.wsgi:application
 else
-    $PYTHON_BIN manage.py runserver 0.0.0.0:$APP_PORT
+    $manage runserver 0.0.0.0:$APP_PORT
 fi

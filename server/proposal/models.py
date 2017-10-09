@@ -43,8 +43,8 @@ class ProposalManager(models.GeoManager):
 
 
 def make_property_map():
-    def _g(p):
-        return lambda d: d.get(p, "")
+    def _g(p, default=""):
+        return lambda d: d.get(p, default)
 
     def _G(p):
         return lambda d: d[p]
@@ -52,13 +52,15 @@ def make_property_map():
     def get_other_addresses(d):
         return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
 
-    return [("address", _G("address")),
+    return [("address", lambda d: d["all_addresses"][0]),
             ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["long"], d["lat"])),
             ("summary", lambda d: d.get("summary", "")[0:1024]),
-            ("description", _g("description")), ("source", _g("source")),
+            ("description", _g("description")),
+            ("source", _g("source")),
             ("region_name", _g("region_name")),
-            ("updated", _G("updated_date")), ("complete", _G("complete"))]
+            ("updated", _G("updated_date")),
+            ("complete", _G("complete"))]
 
 
 property_map = make_property_map()
@@ -486,7 +488,8 @@ class Importer(models.Model):
     url = models.URLField(help_text="""A URL endpoint that should accept a
     `when` parameter of the format YYYYmmdd and should respond with a JSON
     document conforming to the scraper-schema spec.""")
-    last_run = models.DateTimeField(help_text="Last time the scraper ran")
+    last_run = models.DateTimeField(help_text="Last time the scraper ran",
+                                    null=True)
 
     def __str__(self):
         return f"<Importer: {self.name}>"
