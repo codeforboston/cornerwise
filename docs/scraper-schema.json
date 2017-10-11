@@ -16,10 +16,17 @@
             "items": {
                 "$ref": "#/definitions/event"
             }
+        },
+        "projects": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/project"
+            }
         }
     },
     "definitions": {
         "case": {
+            "type": "object",
             "required": [
                 "all_addresses",
                 "complete",
@@ -45,19 +52,7 @@
                 },
                 "location": {
                     "description": "The coordinates of the proposal. If omitted, Cornerwise will geocode the primary address.",
-                    "type": "object",
-                    "properties": {
-                        "lat": {
-                            "type": "number"
-                        },
-                        "long": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "lat",
-                        "long"
-                    ]
+                    "$ref": "#/definitions/location"
                 },
                 "summary": {
                     "type": "string",
@@ -145,6 +140,7 @@
             }
         },
         "event": {
+            "type": "object",
             "required": [
                 "title",
                 "start"
@@ -166,14 +162,7 @@
                     "pattern": "^\\d\\d:\\d\\d"
                 },
                 "address": {
-                    "type": "object",
-                    "properties": {
-                        "name":           { "type": "string" },
-                        "street_address": { "type": "string" },
-                        "city":           { "type": "string" },
-                        "state":          { "type": "string" }
-                    },
-                    "required": ["street_address", "city", "state"]
+                    "$ref": "#/definitions/address"
                 },
                 "region_name": {
                     "type": "string"
@@ -193,7 +182,34 @@
                 }
             }
         },
+        "project": {
+            "type": "object",
+            "properties": {
+                "region_name":    { "type": "string" },
+                "name":           { "type": "string" },
+                "description":    { "type": "string" },
+                "approved":       { "type": "boolean" },
+                "justification":  { "type": "string" },
+                "department":     { "type": "string" },
+                "category":       { "type": "string" },
+                "funding_source": { "type": "string" },
+                "location":       { "$ref": "#/definitions/location" },
+                "address":        { "$ref": "#/definitions/address" },
+                "related_cases":  { "type": "array", "items": { "type": "string" }},
+                "budget":         {
+                    "type": "object",
+                    "description": "A dictionary mapping years to budgeted cost (USD)",
+                    "patternProperties": {
+                        "^\\d{4}$": { "type": "integer" }
+                    },
+                    "additionalProperties": false
+                },
+                "updated":        { "type": "string", "format": "date-time" }
+            },
+            "required": ["name", "description", "region_name"]
+        },
         "link": {
+            "type": "object",
             "required": [
                 "title",
                 "url"
@@ -217,6 +233,27 @@
                     }
                 }
             }
+        },
+
+        "address": {
+            "type": "object",
+            "properties": {
+                "name":           { "type": "string" },
+                "street_address": { "type": "string" },
+                "city":           { "type": "string" },
+                "state":          { "type": "string" },
+                "zip":            { "type": "string" }
+            },
+            "required": ["street_address", "city", "state"]
+        },
+
+        "location": {
+            "type":"object",
+            "properties": {
+                "lat":  {"type": "number"},
+                "long": {"type": "number"}
+            },
+            "required": ["lat", "long"]
         }
     }
 }
