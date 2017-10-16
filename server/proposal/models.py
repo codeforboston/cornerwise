@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
+from django.core.validators import MinValueValidator
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 from django.db import IntegrityError
@@ -488,6 +489,12 @@ class Importer(models.Model):
     url = models.URLField(help_text="""A URL endpoint that should accept a
     `when` parameter of the format YYYYmmdd and should respond with a JSON
     document conforming to the scraper-schema spec.""")
+    run_frequency = models.DurationField(
+        help_text="""Specifies how often the scraper should run. Effectively
+    rounds up to the next day, so values of '3 days' and '2 days, 3 hours' are
+    the same.""",
+        default=timedelta(days=1),
+        validators=[MinValueValidator(timedelta(days=1))])
     last_run = models.DateTimeField(help_text="Last time the scraper ran",
                                     null=True)
 
