@@ -218,6 +218,8 @@ MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
                            "django.contrib.auth.backends.ModelBackend"]
 
+IMPORTER_SCHEMA = "https://raw.githubusercontent.com/codeforboston/cornerwise/config/docs/scraper-schema.json"
+
 # Load select environment variables into settings:
 for envvar in [
         "GOOGLE_API_KEY", "GOOGLE_BROWSER_API_KEY",

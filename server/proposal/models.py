@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
@@ -9,13 +10,15 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
-from utils import add_params, bounds_from_box, geometry_from_url
+from utils import (add_params, bounds_from_box, geometry_from_url, lazy)
 
 import json
 import pickle
-import pytz
 from urllib import request
 import utils
+
+import jsonschema
+import pytz
 
 
 class ProposalManager(models.GeoManager):
@@ -468,6 +471,12 @@ class Changeset(models.Model):
         self.change_blob = pickle.dumps(d)
 
 
+@lazy
+def get_importer_schema():
+    with request.urlopen(settings.IMPORTER_SCHEMA) as u_in:
+        return json.loads(u_in.read())
+
+
 class Importer(models.Model):
     """Importers are created through the administrator interface. Cornerwise
     will place a GET request to the importer's URL once a day with a `when`
@@ -512,6 +521,10 @@ class Importer(models.Model):
     def updated_since(self, when):
         with request.urlopen(self.url_for(when)) as u:
             return json.load(u)
+
+    def validate(self, when, schema=None):
+        return jsonschema.validate(self.updated_since(when),
+                                   schema or get_importer_schema())
 
     def cases_since(self, when):
         return self.updated_since(when).get("cases")

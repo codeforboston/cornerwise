@@ -1,6 +1,8 @@
+from datetime import datetime
 import json
 import os
 import re
+import pytz
 from collections import deque
 from urllib import parse, request
 
@@ -171,3 +173,17 @@ def geometry_from_url(url):
     with request.urlopen(url) as resp:
         raw = resp.read().decode("utf-8")
         return geometry(json.loads(raw))
+
+
+def utc_now():
+    return pytz.utc.localize(datetime.utcnow())
+
+
+def lazy(fn):
+    memo = [None, False]
+
+    def wrapped():
+        if not memo[1]:
+            memo[0:2] = fn(), True
+        return memo[0]
+    return wrapped
