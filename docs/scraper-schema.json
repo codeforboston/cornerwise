@@ -132,7 +132,13 @@
                 "attributes": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "type": "array",
+                        "items": [
+                            {"type": "string",
+                             "description": "attribute name"},
+                            {"type": "string",
+                             "description": "attribute value"}
+                        ]
                     }
                 }
             }
