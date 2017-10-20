@@ -1,12 +1,16 @@
 from django import forms
-from django.contrib import admin
+from django.conf.urls import url
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.contrib.gis.admin import GeoModelAdmin
 
 from proposal.models import Importer, Layer
 
+from datetime import datetime, timedelta
 from utils import geometry_from_url
+
+import jsonschema
 
 
 class CornerwiseAdmin(admin.AdminSite):
@@ -23,9 +27,33 @@ class ImporterForm(forms.ModelForm):
         exclude = ["last_run"]
 
 
+def run_importers(_modeladmin, request, importers):
+    from proposal import tasks
+
+    for importer in importers:
+        found = len(tasks.fetch_proposals(importer))
+        messages.info(
+            request, f"Found {found} new proposal(s) using {importer}")
+
+
+def validate_importers(_, request, importers):
+    when = datetime.now() - timedelta(days=30)
+    for importer in importers:
+        try:
+            importer.validate(when)
+        except jsonschema.exceptions.ValidationError as err:
+            messages.warning(
+                request,
+                f"Validation error for {importer}"
+                f"at {err.absolute_schema_path}: {err.message}")
+        else:
+            messages.info(request, f"{importer} successfully validated!")
+
+
 class ImporterAdmin(admin.ModelAdmin):
     model = Importer
     form = ImporterForm
+    actions = [run_importers, validate_importers]
 
 
 class LayerForm(forms.ModelForm):
