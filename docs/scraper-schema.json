@@ -114,8 +114,10 @@
                     }
                 },
                 "events": {
-                    "type": "object",
-                    "$ref": "#/definitions/event"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/event"
+                    }
                 },
                 "documents": {
                     "type": "array",
