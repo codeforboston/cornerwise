@@ -9,8 +9,7 @@ from django.dispatch import receiver
 from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
-
-from utils import (add_params, bounds_from_box, geometry_from_url, lazy)
+from django.utils import dateparse
 
 import json
 import pickle
@@ -58,12 +57,12 @@ def make_property_map():
 
     return [("address", lambda d: d["all_addresses"][0]),
             ("other_addresses", get_other_addresses),
-            ("location", lambda d: Point(d["long"], d["lat"])),
+            ("location", lambda d: Point(d["location"]["long"], d["location"]["lat"])),
             ("summary", lambda d: d.get("summary", "")[0:1024]),
             ("description", _g("description")),
             ("source", _g("source")),
             ("region_name", _g("region_name")),
-            ("updated", _G("updated_date")),
+            ("updated", utils.make_fn_chain(_G("updated_date"), dateparse.parse_datetime)),
             ("complete", _G("complete"))]
 
 
@@ -115,7 +114,7 @@ class Proposal(models.Model):
         return self.document_set.filter(field=field)
 
     @classmethod
-    def create_or_update_proposal_from_dict(kls, p_dict):
+    def create_or_update_from_dict(kls, p_dict):
         """
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict."""
@@ -134,14 +133,16 @@ class Proposal(models.Model):
             old_val = changed and getattr(proposal, p)
             try:
                 val = fn(p_dict)
-                if changed and val != old_val:
+                if changed:
                     prop_changes.append({
                         "name": p,
                         "new": val,
                         "old": old_val
                     })
                 setattr(proposal, p, val)
-            except Exception as exc:
+            except KeyError as exc:
+                # The getters should throw a KeyError whenever a required
+                # property is missing
                 if old_val:
                     continue
                 raise Exception("Missing required property: %s\n Reason: %s" %
@@ -149,12 +150,15 @@ class Proposal(models.Model):
 
         proposal.save()
 
-        proposal.create_events(p_dict.get("events"))
+        for event in proposal.create_events(p_dict.get("events", [])):
+            event.proposals.add(proposal)
 
         # Create associated documents:
+        document_fields = ["decisions", "reports", "other"]
+        doc_dicts = zip(document_fields, map(p_dict.get, document_fields))
         proposal.create_documents((field, val["links"])
-                                  for field, val in p_dict.items()
-                                  if isinstance(val, dict) and val.get("links"))
+                                  for field, val in doc_dicts
+                                  if val and val.get("links"))
 
         if changed:
             attr_changes = []
@@ -179,8 +183,8 @@ class Proposal(models.Model):
 
         if changed:
             changeset = Changeset.from_changes(proposal, {
-                "properties": prop_changes,
-                "attributes": attr_changes
+                "properties": [ch for ch in prop_changes if ch["old"] != ch["new"]],
+                "attributes": [ch for ch in attr_changes if ch["old"] != ch["new"]]
             })
             changeset.save()
 
@@ -190,22 +194,15 @@ class Proposal(models.Model):
         for field, links in docs:
             for link in links:
                 try:
-                    doc = proposal.document_set.get(url=link["url"])
+                    doc = self.document_set.get(url=link["url"])
                 except Document.DoesNotExist:
-                    doc = Document(proposal=proposal)
+                    self.document_set.create(url=link["url"],
+                                             title=link["title"],
+                                             field=field,
+                                             published=self.updated)
 
-                    doc.url = link["url"]
-                    doc.title = link["title"]
-                    doc.field = field
-                    doc.published = p_dict["updated_date"]
-
-                    doc.save()
-
-    def create_events(self, events_json):
-        if events_json:
-            for event_json in events_json:
-                event_json["cases"] = [self.case_number]
-                Event.make_event(event_json)
+    def create_events(self, event_dicts):
+        return list(map(Event.make_event, event_dicts)) if event_dicts else []
 
 
 class Attribute(models.Model):
@@ -284,9 +281,9 @@ class Event(models.Model):
         return d
 
     @classmethod
-    def make_event(cls, event_json):
+    def make_event(cls, event_dict):
         """
-        event_json should have the following fields:
+        event_dict should have the following fields:
         - title (str) - Name of the event
         - description (str)
         - date (datetime with local timezone) - When will the event occur?
@@ -295,22 +292,23 @@ class Event(models.Model):
         - duration (timedelta, optional) - how long will the event last?
         - agenda_url (string, optional)
         """
-        keys = ("title", "description", "date", "region_name", "duration")
+        start = dateparse.parse_datetime(event_dict["start"])
+        kwargs = {"title": event_dict["title"],
+                  "date": start,
+                  "region_name": event_dict["region_name"]}
         try:
-            event = cls.objects.get(title=event_json["title"],
-                                    date=event_json["date"],
-                                    region_name=event_json["region_name"])
-            for k in keys:
-                setattr(event, k, event_json.get(k))
-            event.minutes = event_json.get("agenda_url")
+            event = cls.objects.get(**kwargs)
         except cls.DoesNotExist:
-            kwargs = {k: event_json.get(k) for k in keys}
-            kwargs["minutes"] = event_json.get("agenda_url", "")
+            kwargs["minutes"] = event_dict.get("agenda_url", "")
             event = cls(**kwargs)
+
+        event.date = start
+        event.minutes = event_dict.get("agenda_url", "")
+        event.duration = utils.fn_chain(event_dict, "duration", dateparse.parse_duration)
 
         event.save()
 
-        for case_number in event_json["cases"]:
+        for case_number in event_dict.get("cases", []):
             try:
                 proposal = Proposal.objects.get(case_number=case_number)
                 event.proposals.add(proposal)
@@ -445,12 +443,22 @@ class Changeset(models.Model):
     """
     Model used to record the changes to a Proposal over time.
     """
-    proposal = models.ForeignKey(Proposal, related_name="changes")
+    proposal = models.ForeignKey(Proposal, related_name="changesets")
     created = models.DateTimeField(auto_now_add=True)
     change_blob = models.BinaryField()
 
     @classmethod
     def from_changes(kls, proposal, changes):
+        """Create a new Changeset for a proposal.
+
+        :param proposal: a Proposal object
+
+        :param changes: a dictionary with "properties" and "attributes" keys.
+        Each should be a list of dicts containing "name", the name of the
+        change property or attribute; "new", the new value or None; and "old",
+        the old value or None.
+
+        """
         instance = kls(proposal=proposal)
         instance.changes = changes
         return instance
@@ -471,7 +479,7 @@ class Changeset(models.Model):
         self.change_blob = pickle.dumps(d)
 
 
-@lazy
+@utils.lazy
 def get_importer_schema():
     with request.urlopen(settings.IMPORTER_SCHEMA) as u_in:
         return json.loads(u_in.read())
@@ -508,7 +516,7 @@ class Importer(models.Model):
                                     null=True)
 
     def __str__(self):
-        return f"<Importer: {self.name}>"
+        return self.name
 
     @property
     def timezone(self):
@@ -516,15 +524,14 @@ class Importer(models.Model):
 
     def url_for(self, when=None):
         params = when and {"when": when.strftime("%Y%m%d")}
-        return add_params(self.url, params)
+        return utils.add_params(self.url, params)
 
     def updated_since(self, when):
         with request.urlopen(self.url_for(when)) as u:
             return json.load(u)
 
-    def validate(self, when, schema=None):
-        return jsonschema.validate(self.updated_since(when),
-                                   schema or get_importer_schema())
+    def validate(self, data, schema=None):
+        return jsonschema.validate(data, schema or get_importer_schema())
 
     def cases_since(self, when):
         return self.updated_since(when).get("cases")
@@ -561,5 +568,5 @@ class Layer(models.Model):
                                    the geometry in the layer""")
 
     def calculate_envelope(self):
-        gc = geometry_from_url(self.url)
+        gc = utils.geometry_from_url(self.url)
         self.envelope = gc.envelope

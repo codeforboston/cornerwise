@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 import re
@@ -166,10 +166,15 @@ def _geometry(feat):
 
 
 def geometry(feat):
+    """Constructs a GEOSGeometryCollection from a GeoJSON dict.
+    """
     return GeometryCollection(_geometry(feat), srid=4326)
 
 
 def geometry_from_url(url):
+    """Constructs a GEOSGeometryCollection from a URL that points to a GeoJSON
+    resource.
+    """
     with request.urlopen(url) as resp:
         raw = resp.read().decode("utf-8")
         return geometry(json.loads(raw))
@@ -187,3 +192,32 @@ def lazy(fn):
             memo[0:2] = fn(), True
         return memo[0]
     return wrapped
+
+
+def add_locations(dicts, geocoder, get_address=lambda d: d["all_addresses"][0],
+                  region=lambda d: d.get("region_name", "")):
+    """Alters an iterable of dictionaries in place, adding a "location" field
+                  that contains the geocoded latitude and longitude of each
+                  dictionary's address field.
+
+    :param geocoder: an instance of a geocoder object that takes a 
+    """
+    get_region = region if callable(region) else (lambda _: region)
+    locations = geocoder.geocode(map(lambda d: f"{get_address(d)}, {get_region(d)}", dicts))
+    for d, location in zip(dicts, locations):
+        d["location"] = {"lat": location["location"]["lat"],
+                         "long": location["location"]["lng"],
+                         "score": location["properties"].get("score"),
+                         "google_place_id": location["properties"].get("place_id")}
+
+def fn_chain(val, *fns):
+    for fn in fns:
+        val = fn(val) if callable(fn) else val.get(fn)
+        if val is None:
+            return val
+    return val
+
+
+def make_fn_chain(*fns):
+    return lambda x: fn_chain(x, *fns)
+
