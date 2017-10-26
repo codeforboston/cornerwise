@@ -30,7 +30,7 @@ def proposal_json(proposal,
     }
 
     if include_documents:
-        pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
+        pdict["documents"] = [d.to_dict() for d in proposal.documents.all()]
 
     if include_images:
         images = proposal.images.order_by("-priority")

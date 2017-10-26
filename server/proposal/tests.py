@@ -64,7 +64,7 @@ class TestImport(TestCase):
         (created, proposal) = Proposal.create_or_update_from_dict(pdict)
 
         self.assertTrue(created)
-        self.assertEqual(proposal.document_set.count(),
+        self.assertEqual(proposal.documents.count(),
                          len(pdict["decisions"]) +
                          len(pdict["other"]) +
                          len(pdict["reports"]))

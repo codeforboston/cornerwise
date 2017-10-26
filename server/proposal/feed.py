@@ -35,7 +35,7 @@ class ReportsAndDecisionsFeed(Feed):
     # the first 'decision' document if present, else something like
     # 'plans'.
     def item_enclosure_url(self, item):
-        document = item.document_set.all()[0]
+        document = item.documents.all()[0]
 
         if document:
             return document.url

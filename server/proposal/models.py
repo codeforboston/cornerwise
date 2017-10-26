@@ -111,7 +111,7 @@ class Proposal(models.Model):
         return reverse("view-proposal", kwargs={"pk": self.pk})
 
     def document_for_field(self, field):
-        return self.document_set.filter(field=field)
+        return self.documents.filter(field=field)
 
     @classmethod
     def create_or_update_from_dict(kls, p_dict):
@@ -194,12 +194,12 @@ class Proposal(models.Model):
         for field, links in docs:
             for link in links:
                 try:
-                    doc = self.document_set.get(url=link["url"])
+                    doc = self.documents.get(url=link["url"])
                 except Document.DoesNotExist:
-                    self.document_set.create(url=link["url"],
-                                             title=link["title"],
-                                             field=field,
-                                             published=self.updated)
+                    self.documents.create(url=link["url"],
+                                          title=link["title"],
+                                          field=field,
+                                          published=self.updated)
 
     def create_events(self, event_dicts):
         return list(map(Event.make_event, event_dicts)) if event_dicts else []
@@ -326,7 +326,7 @@ class Document(models.Model):
     """
     A document associated with a proposal.
     """
-    proposal = models.ForeignKey(Proposal)
+    proposal = models.ForeignKey(Proposal, related_name="documents")
     event = models.ForeignKey(
         Event, null=True, help_text="Event associated with this document")
     url = models.URLField()
