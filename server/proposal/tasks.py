@@ -16,7 +16,7 @@ from django.db.utils import DataError, IntegrityError
 import pytz
 
 from .models import Proposal, Attribute, Document, Event, Image
-from utils import extension, normalize
+from utils import extension, normalize, add_locations
 from . import extract
 from . import documents as doc_utils
 from .importers.register import Importers, EventImporters
@@ -290,12 +290,33 @@ def process_proposal(proposal):
     return proposal.id
 
 
+def stringify_address_dict(address):
+    return f"{address.street_address}, {address.city}, {address.state}"
+
+
+def create_proposals(dicts):
+    for case_dict in dicts:
+        try:
+            (_, p) = Proposal.create_or_update_from_dict(case_dict)
+            p.save() # Needed?
+            yield p
+        except Exception as exc:
+            task_logger.error("Could not create proposal from dictionary: %s",
+                              case_dict)
+            task_logger.error("%s", exc)
+
+
+def create_events(dicts):
+    for event_dict in dicts:
+        yield Event.objects.make_event(event_dict)
+
+
 @shared_task
 def fetch_proposals(since=None,
                     coder_type=settings.GEOCODER,
                     importers=Importers):
-    """
-    Task that scrapes the reports and decisions page
+    """Task runs each of the importers given.
+
     """
     if coder_type == "google":
         geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
@@ -320,33 +341,31 @@ def fetch_proposals(since=None,
                 hour=0, minute=0, second=0, microsecond=0)
             since = now - timedelta(days=7 + now.weekday())
 
-    proposals_json = []
+    all_found = {"cases": [], "events": [], "projects": []}
     for importer in importers:
         importer_name = type(importer).__name__
         try:
-            found = list(importer.updated_since(since, geocoder))
+            found = importer.updated_since(since)
+            importer.validate(found)
         except Exception as err:
             task_logger.warning("Error in importer: %s - %s", importer_name,
                                 err)
             continue
 
+        found_description = ", ".join(f"{len(v)} {k}" for k, v in found.items())
         task_logger.info("Fetched %i proposals from %s",
-                         len(found), type(importer).__name__)
-        proposals_json += found
+                         len(found["cases"]), importer)
+        for k in found:
+            all_found[k].extend(found[k])
 
-    proposals = []
+    add_locations(all_found["cases"], geocoder)
 
-    for p_dict in proposals_json:
-        try:
-            (is_new, p) = Proposal.create_or_update_proposal_from_dict(p_dict)
-            p.save()
-            proposals.append(p)
-        except Exception as exc:
-            task_logger.error("Could not create proposal from dictionary: %s",
-                              p_dict)
-            task_logger.error("%s", exc)
+    if False:
+        add_locations(all_found["projects"],
+                      lambda prj: stringify_address_dict(prj["address"]))
 
-    return [p.id for p in proposals]
+    proposal_ids = [p.id for p in create_proposals(all_found["cases"])]
+    return proposal_ids
 
 
 @shared_task
