@@ -19,7 +19,6 @@ from .models import Proposal, Attribute, Document, Event, Image
 from utils import extension, normalize, add_locations
 from . import extract
 from . import documents as doc_utils
-from .importers.register import Importers, EventImporters
 from scripts import arcgis, foursquare, gmaps, street_view
 
 
@@ -313,8 +312,8 @@ def create_events(dicts):
 
 @shared_task
 def fetch_proposals(since=None,
-                    coder_type=settings.GEOCODER,
-                    importers=Importers):
+                    importers=[],
+                    coder_type=settings.GEOCODER):
     """Task runs each of the importers given.
 
     """
@@ -379,38 +378,6 @@ def pull_updates(since=None, importers_filter=None):
         ]
 
     return fetch_proposals(since, importers=importers)
-
-
-# Event tasks
-@shared_task
-def pull_events(since=None):
-    """
-    Runs all registered event importers.
-    """
-    if since:
-        since = datetime.fromtimestamp(since)
-
-    events = []
-    for importer in EventImporters:
-        if not since:
-            all_events = Event.objects.filter(
-                region_name=importer.region_name).order_by("-created")
-            try:
-                last_event = all_events[0]
-                if not last_event.created.tzinfo:
-                    since = pytz.utc.localize(last_event.created)
-            except IndexError:
-                pass
-
-        importer_events = [
-            Event.make_event(ejson) for ejson in importer.updated_since(since)
-        ]
-        events += importer_events
-
-        logger.info("Fetched %i events from %s",
-                    len(importer_events), type(importer).__name__)
-
-    return [event.pk for event in events]
 
 
 # Image tasks

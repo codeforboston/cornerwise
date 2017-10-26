@@ -156,12 +156,6 @@ CELERYBEAT_SCHEDULE = {
         "schedule": crontab(
             minute=0, hour=1)
     },
-    "update-projects": {
-        "task": "project.pull_updates",
-        # Run on Mondays at midnight:
-        "schedule": crontab(
-            minute=0, hour=0, day_of_week="monday")
-    },
     "send-notifications": {
         "task": "user.send_notifications",
         "schedule": crontab(minute=0, hour=1)

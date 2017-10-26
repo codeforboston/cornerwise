@@ -31,7 +31,7 @@ def run_importers(_modeladmin, request, importers):
     from proposal import tasks
 
     for importer in importers:
-        found = len(tasks.fetch_proposals(importer))
+        found = len(tasks.fetch_proposals(None, importers=[importer]))
         messages.info(
             request, f"Found {found} new proposal(s) using {importer}")
 
