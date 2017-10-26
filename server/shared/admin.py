@@ -40,7 +40,7 @@ def validate_importers(_, request, importers):
     when = datetime.now() - timedelta(days=30)
     for importer in importers:
         try:
-            importer.validate(when)
+            importer.validate(importer.updated_since(when))
         except jsonschema.exceptions.ValidationError as err:
             messages.warning(
                 request,
