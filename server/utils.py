@@ -221,3 +221,7 @@ def fn_chain(val, *fns):
 def make_fn_chain(*fns):
     return lambda x: fn_chain(x, *fns)
 
+
+def parse_duration(s):
+    h, m = s.split(":")
+    return timedelta(hours=int(h), minutes=int(m))

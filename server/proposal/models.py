@@ -304,7 +304,7 @@ class Event(models.Model):
 
         event.date = start
         event.minutes = event_dict.get("agenda_url", "")
-        event.duration = utils.fn_chain(event_dict, "duration", dateparse.parse_duration)
+        event.duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
 
         event.save()
 

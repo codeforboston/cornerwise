@@ -143,7 +143,8 @@
                         ]
                     }
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "event": {
             "type": "object",
@@ -164,8 +165,8 @@
                 },
                 "duration": {
                     "type": "string",
-                    "description": "Estimated duration of the event.",
-                    "pattern": "^\\d\\d:\\d\\d"
+                    "description": "Estimated duration of the event, in hours and minutes (h:mm)",
+                    "pattern": "^(\\d+:)?\\d\\d"
                 },
                 "address": {
                     "$ref": "#/definitions/address"
