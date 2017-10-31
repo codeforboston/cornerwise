@@ -1,10 +1,12 @@
 from django.conf import settings
-from django.test import TestCase
+from django.test import tag, TestCase
 
 from datetime import datetime, timedelta
 from pprint import pprint
+import os
 
-from proposal.models import Event, Importer, Proposal
+from proposal.models import Event, Importer, Proposal, Document
+from . import tasks
 from scripts import gmaps
 from utils import add_locations
 
@@ -34,7 +36,10 @@ proposal_dict = {'all_addresses': ['21 Cherry Street'],
                      ("Applicant Name", "Sally Bobson")
                  ]}
 
+proposal_dict_with_location = proposal_dict.copy()
+proposal_dict_with_location["location"] = {"lat": 42.370737, "long": -71.08638}
 
+@tag("proposal", "import")
 class TestImport(TestCase):
     def setUp(self):
         self.region = "Somerville, MA"
@@ -79,8 +84,7 @@ class TestImport(TestCase):
         self.assertIsInstance(proposal, Proposal)
 
     def test_changes(self):
-        pdict = proposal_dict.copy()
-        add_locations([pdict], self.geocoder)
+        pdict = proposal_dict_with_location.copy()
 
         # Ensure that the proposal is already created:
         Proposal.create_or_update_from_dict(pdict)
@@ -111,10 +115,38 @@ class TestImport(TestCase):
         self.assertIn("Applicant Name", changed_attribute_names)
         self.assertIn("description", changed_property_names)
 
+    @classmethod
+    def tearDownClass(kls):
+        Proposal.objects.all().delete()
 
-    def test_something(self):
-        pass
 
-    def tearDown(self):
-        pass
-        # Proposal.objects.all().delete()
+class TestTasks(TestCase):
+    @classmethod
+    def setUpClass(kls):
+        pdict = proposal_dict_with_location.copy()
+        (_, proposal) = Proposal.objects.create_or_update_from_dict(pdict)
+        self.proposal = proposal
+
+    def test_document_processing(self):
+        doc = self.proposal.documents.all()[0]
+        self.assertFalse(bool(doc.document), "Document already downloaded")
+        tasks.fetch_document(doc.pk)
+        self.assertTrue(bool(doc.document), "Document did not download")
+
+        self.assertFalse(bool(doc.fulltext), "Document contents already extracted")
+        tasks.extract_text(doc.pk)
+        self.assertTrue(bool(doc.fulltext), "Document text not extracted")
+
+        images = tasks.extract_images(doc.pk)
+        for image in images:
+            self.assertTrue(image.image and os.path.exists(image.image.path),
+                            "Images extracted from a document should all "
+                            "produce files.")
+
+    def test_street_view(self):
+        before_count = self.proposal.images.count()
+        tasks.add_street_view(self.proposal.id)
+        self.assertEqual(before_count+1, self.proposal.images.count())
+
+        new_image = self.proposal.images.order_by("-created")[0]
+        self.assertEqual(new_image.source, "document")
