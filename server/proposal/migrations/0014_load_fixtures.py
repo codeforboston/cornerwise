@@ -9,23 +9,23 @@ from os import path
 
 fixture_path = path.abspath(path.join(path.dirname(__file__), "../fixtures/importers.json"))
 
-def with_importers(fn):
-    def wrapped_fn(*args):
-        with open(fixture_path) as fix:
-            return fn(deserialize("json", fix, ignorenonexistent=True))
-    return wrapped_fn
+def load_fixture(apps, schema_editor):
+    with open(fixture_path) as fixt:
+        importers_json = json.load(fixt)
+    Importer = apps.get_model("proposal", "Importer")
 
-
-@with_importers
-def load_fixture(importers):
-    for importer in importers:
+    for importer_dict in importers_json:
+        importer = Importer(pk=importer_dict["pk"],
+                            **{f: importer_dict["fields"][f]
+                               for f in ("name", "region_name", "url")})
         importer.save()
 
 
-@with_importers
-def unload_fixture(importers):
-    for importer in importers:
-        importer.delete()
+def unload_fixture():
+    Importer = apps.get_model("proposal", "Importer")
+    with open(fixture_path) as fixt:
+        importers_json = json.load(fixt)
+    Importer.objects.filter(pk__in=[ij["pk"] for ij in importers_json])
 
 
 class Migration(migrations.Migration):
