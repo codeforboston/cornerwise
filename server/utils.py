@@ -194,7 +194,8 @@ def lazy(fn):
     return wrapped
 
 
-def add_locations(dicts, geocoder, get_address=lambda d: d["all_addresses"][0],
+def add_locations(dicts, geocoder,
+                  get_address=lambda d: d["all_addresses"][0],
                   region=lambda d: d.get("region_name", "")):
     """Alters an iterable of dictionaries in place, adding a "location" field
                   that contains the geocoded latitude and longitude of each
@@ -203,8 +204,11 @@ def add_locations(dicts, geocoder, get_address=lambda d: d["all_addresses"][0],
     :param geocoder: an instance of a geocoder object that takes a 
     """
     get_region = region if callable(region) else (lambda _: region)
-    locations = geocoder.geocode(map(lambda d: f"{get_address(d)}, {get_region(d)}", dicts))
+    locations = geocoder.geocode(
+        f"{get_address(d)}, {get_region(d)}" for d in dicts)
     for d, location in zip(dicts, locations):
+        if not location:
+            continue
         d["location"] = {"lat": location["location"]["lat"],
                          "long": location["location"]["lng"],
                          "score": location["properties"].get("score"),

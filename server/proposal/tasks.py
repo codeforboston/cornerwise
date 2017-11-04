@@ -387,21 +387,26 @@ def cloud_vision_process(image_id):
     Send the image to the Cloud Vision API. If the image is recognized as a
     logo, delete it.
     """
-    processed_key = f"image:{image_id}:logo_checked"
+    processed_key = f"image:{image_id}:checked"
     image = Image.objects.annotate(region_name=F("proposal__region_name"))\
                          .get(pk=image_id)
-    if not image.image or cache.get(processed_key):
+    if cache.get(processed_key):
         return
 
     city_name = re.split(r"\s*,\s*", image.region_name, 1)[0]
-    processed = vision.process_image(image.image.path, )
-    logo = processed.get("logo")
+    processed = vision.process_image(image.image and image.image.path, image.url)
+    logo = processed["logo"]
     if logo:
         if city_name in logo["description"]:
             image.delete()
             task_logger.info("Logo detected: image #%i deleted", image.pk)
         else:
             cache.set(f"image:{image_id}:logo", logo)
+
+    if processed["empty_streetview"]:
+        image.delete()
+        task_logger.info("Empty streetview: image #%i deleted", image.pk)
+
     cache.set(processed_key, True)
 
 
