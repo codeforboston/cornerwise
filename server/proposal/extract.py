@@ -3,14 +3,12 @@ contents.
 """
 
 from collections import OrderedDict
-from datetime import datetime
 from dateutil.parser import parse as date_parse
-import pytz
 from utils import pushback_iter
 import re
 
 empty_line = re.compile(r"\s*\n$")
-property_pattern = re.compile(r"^([a-z]+(\s+[a-z]+)*): (.*)(\n|$)", re.I)
+property_pattern = re.compile(r"^([a-z]+(\s+[a-z&]+)*): (.*)(\n|$)", re.I)
 
 
 def properties(lines):
@@ -84,14 +82,21 @@ def subsection_matcher(line):
     if re.match(r"^[0-9]+\.$", line):
         subsection_patt = re.compile(r"^([a-z]+(\s+[a-z]+)*):", re.I)
 
-        def get_subsection_name(inlines):
-            for line in inlines:
+        def get_subsection_name(in_lines):
+            for line in in_lines:
                 m = subsection_patt.match(line)
                 if m:
-                    if isinstance(inlines, pushback_iter):
-                        inlines.pushback(line[m.end():])
+                    if isinstance(in_lines, pushback_iter):
+                        in_lines.pushback(line[m.end():])
                     return m.group(1)
 
+        return get_subsection_name
+
+    m = re.match(r"^[0-9]+\. ([a-z]+(\s+[a-z]+)*):", line, re.I)
+    if m:
+        def get_subsection_name(in_lines):
+            in_lines.pushback(line[m.end():])
+            return m.group(1)
         return get_subsection_name
 
 
@@ -152,66 +157,32 @@ def make_sections(lines, matchers):
     return OrderedDict(generate_sections(lines, matchers))
 
 
-strip_lines = [
+STRIP_LINES = "|".join([
     r"CITY HALL\s+93 HIGHLAND AVENUE\s+SOMERVILLE, MASSACHUSETTS 02143",
-    r"(617) 625-6600 EXT. 2500  TTY: (617) 666-0001  FAX: (617) 625-0722",
+    r"\(617\) 625-6600 EXT\. 2500  TTY: \(617\) 666-0001  FAX: \(617\) 625-0722",
     r"^\s*www.somervillema.gov\s*$",
-    r"^\s*Page (\d+) of (\d+)\s*$",
+    r"^\s*Page \d+ of \d+\s*$",
+])
+
+STRIP_ADDITIONAL = "|".join([r"^Date: .* \d{4}$", r"^Case #:", r"^Site:"])
+
+
+def filter_lines(lines, strip_lines=STRIP_LINES):
+    """Returns a generator that filters out lines from the iterable that match
+    any of the patterns in `strip_lines`."""
+    patt = re.compile(strip_lines)
+    return filter(lambda l: not patt.search(l), lines)
+
+
+STAFF_REPORT_SECTION_MATCHERS = [
+    make_matcher(r"PLANNING STAFF REPORT", fn=str.lower),
+    make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1, fn=str.lower)
 ]
 
 
-def matches_any(s, regexes):
-    return any(re.search(regex, s) for regex in regexes)
+def staff_report_sections(lines):
+    return make_sections(lines, STAFF_REPORT_SECTION_MATCHERS)
 
-
-def get_lines(doc, strip_lines=strip_lines):
-    """Returns a generator that successively produces lines from the
-    document."""
-    enc = doc.encoding
-    lines = (line.decode(enc) for line in doc.fulltext
-             if not matches_any(line, strip_lines))
-
-    return lines
-
-
-staff_report_section_matchers = [
-    make_matcher(
-        r"PLANNING STAFF REPORT", fn=str.lower), make_matcher(
-            r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1, fn=str.lower)
-]
-
-
-def staff_report_sections(doc_json):
-    lines = doc_json["lines"]
-    return make_sections(lines, staff_report_section_matchers)
-
-
-def staff_report_properties(doc_json):
-SomervilleMA = region_matches(r"^Somerville, MA$")
-CambridgeMA = region_matches(r"^Cambridge, MA$")
-@extractor(SomervilleMA, field_matches(r"^reports$"),
-           title_matches(r"(?i)staff report"))
-    """Extract a dictionary of properties from the plaintext contents of a
-    Planning Staff Report.
-    """
-    sections = staff_report_sections(doc_json)
-    props = {}
-
-    props.update(properties(sections["header"]))
-    props.update(properties(sections["planning staff report"]))
-
-    pd = sections.get("project description")
-    if pd:
-        subsections = make_sections(pushback_iter(pd), [subsection_matcher])
-
-        for pname in [
-                "Proposal", "Subject Property", "Green Building Practices"
-        ]:
-            v = subsections.get(pname)
-            if v:
-                props[pname] = "\n".join(paragraphize(v))
-
-    return props
 
 
 # Decision Documents
@@ -225,26 +196,97 @@ def find_vote(decision):
     return (m.group(1), m.group(2)) if m else (None, None)
 
 
-decision_section_matchers = [
-    skip_match(r"CITY HALL", 2), make_matcher(
-        r"(ZBA DECISION|DESCRIPTION|PLANNING BOARD DECISION):?",
-        value="properties"), make_matcher(
-            r"DECISION:", value="decision"), top_section_matcher
+DECISION_SECTION_MATCHERS = [
+    skip_match(r"CITY HALL", 2),
+    make_matcher(r"(ZBA DECISION|DESCRIPTION|PLANNING BOARD DECISION):?",
+        value="properties"),
+    make_matcher(r"DECISION:", value="decision"), top_section_matcher
 ]
 
 
-def decision_sections(doc_json):
-    lines = doc_json["lines"]
-    return make_sections(lines, decision_section_matchers)
+def decision_sections(doc):
+    return make_sections(filter_lines(doc.line_iterator),
+                         DECISION_SECTION_MATCHERS)
 
 
-def decision_properties(doc_json):
+def remove_match(s, m):
+    return s[0:m.start()].rstrip() + s[m.end():]
+
+
+ALL_EXTRACTORS = []
+
+def extractor(*preds):
+    def decorator_fn(process):
+        def wrapped_fn(document):
+            if all(pred(document) for pred in preds):
+                return process(document)
+            return {}
+
+        wrapped_fn.__name__ = process.__name__
+        wrapped_fn.__module__ = process.__module__
+        ALL_EXTRACTORS.append(wrapped_fn)
+
+        return wrapped_fn
+
+    return decorator_fn
+
+
+def region_matches(pattern):
+    "Extractor predicate for matching the document's region name."
+    return lambda doc: re.search(pattern, doc.proposal.region_name)
+
+
+def field_matches(pattern):
+    """Extractor predicate that matches against the field where the document link
+    was found.
+
+    """
+    return lambda doc: re.search(pattern, doc.field)
+
+
+def title_matches(pattern):
+    "Extractor predicate that matches the document title."
+    return lambda doc: re.search(pattern, doc.title)
+
+
+SomervilleMA = region_matches(r"^Somerville, MA$")
+CambridgeMA = region_matches(r"^Cambridge, MA$")
+
+@extractor(SomervilleMA, field_matches(r"^reports$"),
+           title_matches(r"(?i)staff report"))
+def staff_report_properties(doc):
+    """Extract a dictionary of properties from the plaintext contents of a
+    Planning Staff Report.
+    """
+    sections = staff_report_sections(filter_lines(doc.line_iterator, STRIP_LINES))
+    props = {}
+
+    props.update(properties(sections["header"]))
+    props.update(properties(sections["planning staff report"]))
+
+    desc_section = sections.get("project description")
+    if desc_section:
+        subsections = make_sections(
+            pushback_iter(filter_lines(desc_section, STRIP_ADDITIONAL)),
+            [subsection_matcher])
+
+        for pname in [
+                "Proposal", "Subject Property", "Green Building Practices"
+        ]:
+            v = subsections.get(pname)
+            if v:
+                props[pname] = "\n".join(paragraphize(v))
+
+    return props
+
+
 @extractor(SomervilleMA, title_matches("(?i)decision"))
+def decision_properties(doc):
     """
     Extract a dictionary of properties from the contents of a Decision
     Document.
     """
-    sections = decision_sections(doc_json)
+    sections = decision_sections(doc)
     props = {}
     if "properties" in sections:
         props.update(properties(sections["properties"]))
