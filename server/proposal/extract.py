@@ -187,6 +187,10 @@ def staff_report_sections(doc_json):
 
 
 def staff_report_properties(doc_json):
+SomervilleMA = region_matches(r"^Somerville, MA$")
+CambridgeMA = region_matches(r"^Cambridge, MA$")
+@extractor(SomervilleMA, field_matches(r"^reports$"),
+           title_matches(r"(?i)staff report"))
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
     """
@@ -235,6 +239,7 @@ def decision_sections(doc_json):
 
 
 def decision_properties(doc_json):
+@extractor(SomervilleMA, title_matches("(?i)decision"))
     """
     Extract a dictionary of properties from the contents of a Decision
     Document.
@@ -252,28 +257,8 @@ def decision_properties(doc_json):
     return props
 
 
-def remove_match(s, m):
-    return s[0:m.start()].rstrip() + s[m.end():]
-
-
-def doc_type(doc_json):
-    if doc_json["field"] == "reports" and re.match(r"staff report",
-                                                   doc_json["title"], re.I):
-        return "report"
-    elif re.match(r"decision", doc_json["title"], re.I):
-        return "decision"
-
-    return ""
-
-
-def get_properties(doc_json):
-    # Eventually, we'll want to introduce a pluggable property
-    # extraction interface, so that other cities and formats can be
-    # supported.
-    dtype = doc_type(doc_json)
-    if dtype == "report":
-        return staff_report_properties(doc_json)
-    elif dtype == "decision":
-        return decision_properties(doc_json)
-    else:
-        return {}
+def get_properties(doc):
+    all_props = {}
+    for extract in ALL_EXTRACTORS:
+        all_props.update(extract(doc))
+    return all_props
