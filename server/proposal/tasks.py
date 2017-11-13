@@ -131,6 +131,8 @@ def add_street_view(proposal_id):
                     url=url,
                     skip_cache=True,
                     source="google_street_view",
+                    height=640,
+                    width=640,
                     priority=1)
                 return image
         except IntegrityError:
