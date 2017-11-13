@@ -44,8 +44,10 @@ def get_images(path, guard_fn=default_guard):
                 mode = "RGB" if xobject["/ColorSpace"] == "/DeviceRGB" else "P"
                 yield (Image.frombytes(mode, (width, height), data), "png", width, height)
             elif filter == "/DCTDecode":
+                #
+                # pylint: disable=protected-access
                 data = xobject._data
-                width = x
+                # pylint: enable=protected-access
                 yield (Image.open(BytesIO(data)), "jpeg", width, height)
             else:
                 continue
@@ -53,10 +55,10 @@ def get_images(path, guard_fn=default_guard):
 
 def extract_images(path, filter_fn=default_guard, limit=10):
     limit -= 1
-    for i, (image, ext, w, h) in enumerate(get_images(path, filter_fn)):
+    for i, (image, ext, width, height) in enumerate(get_images(path, filter_fn)):
         image_out = BytesIO()
         image.save(image_out, ext)
-        yield (image_out, ext, w, h)
+        yield (image_out, ext, width, height)
 
         if i == limit:
             break
