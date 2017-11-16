@@ -6,7 +6,6 @@ from django.core.files import File
 
 from dateutil.parser import parse as dt_parse
 from os import path
-from dateutil.parser import parse
 import shutil
 import subprocess
 from urllib import parse, request
@@ -22,7 +21,7 @@ def last_modified(url):
     req = request.Request(url=url, method="HEAD")
     with request.urlopen(req) as resp:
         if "Last-Modified" in resp.headers:
-            return parse(resp.headers["Last-Modified"])
+            return dt_parse(resp.headers["Last-Modified"])
 
     return None
 
@@ -84,17 +83,17 @@ def generate_thumbnail(doc):
         task_logger.error("Document has not been copied to the local filesystem")
         return
 
-    path = doc.document.path
+    doc_path = doc.document.path
 
     # TODO: Dispatch on extension. Handle other common file types
-    if extension(path) != "pdf":
+    if extension(doc_path) != "pdf":
         return
 
-    out_prefix = path.join(path.dirname(path), "thumbnail")
+    out_prefix = path.join(path.dirname(doc_path), "thumbnail")
 
     proc = subprocess.Popen(
         [
-            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", path,
+            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", doc_path,
             out_prefix
         ],
         stderr=subprocess.PIPE)
