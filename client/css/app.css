@@ -1197,6 +1197,9 @@ a.brief-model:hover {
     display: block;
     line-height: 1.5em;
     padding-left: 0.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #info .attribute {
