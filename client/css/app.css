@@ -2059,6 +2059,12 @@ body.choosing-bounds .leaflet-marker-icon
     }
 }
 
+@media screen and (min-width: 700px) and (max-width: 850px) {
+    #ref-address-form .input {
+        font-size: 2vw !important;
+    }
+
+}
 
 @media screen and (max-width: 700px) {
     body.nointro #search-banner .overlay-contents {
