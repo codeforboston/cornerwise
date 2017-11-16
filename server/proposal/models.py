@@ -55,6 +55,7 @@ def make_property_map():
     def get_other_addresses(d):
         return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
 
+
     return [("address", lambda d: d["all_addresses"][0]),
             ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["location"]["long"], d["location"]["lat"])),
@@ -63,7 +64,8 @@ def make_property_map():
             ("source", _g("source")),
             ("region_name", _g("region_name")),
             ("updated", utils.make_fn_chain(_G("updated_date"), dateparse.parse_datetime)),
-            ("complete", _G("complete"))]
+            ("complete", _G("complete")),
+            ("status", _g("status"))]
 
 
 property_map = make_property_map()
@@ -97,7 +99,8 @@ class Proposal(models.Model):
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True)
     # A misnomer; if True, indicates that the planning board has issued a
-    # ruling (approval or disapproval):
+    # ruling (approval or disapproval). Does not actually reflect whether the
+    # proposed changes are done.
     complete = models.BooleanField(default=False)
     importer = models.ForeignKey("proposal.Importer", blank=True,
                                  null=True, on_delete=models.SET_NULL)
@@ -107,68 +110,87 @@ class Proposal(models.Model):
 
     objects = ProposalManager()
 
+    @classmethod
+    def create_or_update_from_dict(cls, p_dict: dict):
+        """
+        Constructs a Proposal from a dictionary.  If an existing proposal has a
+        matching case number, update it from p_dict.
+
+        :param cls:
+        :param p_dict: dictionary describing a proposal"""
+
+        proposal: Proposal
+        try:
+            proposal = cls.objects.get(case_number=p_dict["case_number"])
+            created = False
+        except cls.DoesNotExist:
+            proposal = cls(case_number=p_dict["case_number"])
+            created = True
+
+        proposal.update_from_dict(p_dict)
+
+        return (created, proposal)
+
+
+    @property
+    def attribute_dict(self):
+        return dict(self.attributes.values_list("name", "text_value"))
+
     def get_absolute_url(self):
         return reverse("view-proposal", kwargs={"pk": self.pk})
 
     def document_for_field(self, field):
         return self.documents.filter(field=field)
 
-    @classmethod
-    def create_or_update_from_dict(kls, p_dict):
-        """
-        Constructs a Proposal from a dictionary.  If an existing proposal has a
-        matching case number, update it from p_dict."""
-        try:
-            proposal = kls.objects.get(case_number=p_dict["case_number"])
-            created = False
-        except kls.DoesNotExist:
-            proposal = kls(case_number=p_dict["case_number"])
-            created = True
+    def update_from_dict(self, p_dict):
+        changed = bool(self.pk)
 
-        changed = not created
         if changed:
             prop_changes = []
 
-        for p, fn in property_map:
-            old_val = changed and getattr(proposal, p)
+        for prop, fn in property_map:
+            old_val = changed and getattr(self, prop)
             try:
                 val = fn(p_dict)
                 if changed:
                     prop_changes.append({
-                        "name": p,
+                        "name": prop,
                         "new": val,
                         "old": old_val
                     })
-                setattr(proposal, p, val)
+                setattr(self, prop, val)
             except KeyError as exc:
                 # The getters should throw a KeyError whenever a required
-                # property is missing
+                # property is missing.
+
+                # Don't raise an error if the property was already set.
                 if old_val:
                     continue
                 raise Exception("Missing required property: %s\n Reason: %s" %
-                                (p, exc))
+                                (prop, exc))
 
-        proposal.save()
+        self.save()
 
-        for event in proposal.create_events(p_dict.get("events", [])):
-            event.proposals.add(proposal)
+        # Add related events:
+        for event in self.create_events(p_dict.get("events", [])):
+            event.proposals.add(self)
 
         # Create associated documents:
         document_fields = ["decisions", "reports", "other"]
         doc_dicts = zip(document_fields, map(p_dict.get, document_fields))
-        proposal.create_documents((field, val["links"])
-                                  for field, val in doc_dicts
-                                  if val and val.get("links"))
+        self.create_documents((field, val["links"])
+                              for field, val in doc_dicts
+                              if val and val.get("links"))
 
         if changed:
             attr_changes = []
         for attr_name, attr_val in p_dict.get("attributes", []):
             try:
                 handle = utils.normalize(attr_name)
-                attr = proposal.attributes.get(handle=handle)
+                attr = self.attributes.get(handle=handle)
                 old_val = attr.text_value
             except Attribute.DoesNotExist:
-                proposal.attributes.create(
+                self.attributes.create(
                     name=attr_name,
                     handle=handle,
                     text_value=attr_val,
@@ -182,13 +204,11 @@ class Proposal(models.Model):
                 })
 
         if changed:
-            changeset = Changeset.from_changes(proposal, {
+            changeset = Changeset.from_changes(self, {
                 "properties": [ch for ch in prop_changes if ch["old"] != ch["new"]],
                 "attributes": [ch for ch in attr_changes if ch["old"] != ch["new"]]
             })
             changeset.save()
-
-        return (created, proposal)
 
     def create_documents(self, docs):
         for field, links in docs:
@@ -275,6 +295,10 @@ class Event(models.Model):
 
     class Meta:
         unique_together = (("date", "title", "region_name"))
+
+    def __str__(self):
+        datestr = self.date.strftime("%b %d, %Y")
+        return f"{self.title}, {datestr}, {self.region_name}"
 
     def to_json_dict(self):
         d = model_to_dict(self, exclude=["created", "proposals"])
