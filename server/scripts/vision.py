@@ -14,6 +14,10 @@ from PIL import Image
 DISCOVERY_URL = "https://{api}.googleapis.com/$discovery/rest?version={apiVersion}"
 
 
+def is_streetview_url(url):
+    return url.startswith("https://maps.googleapis.com/maps/api/streetview")
+
+
 def get_client():
     creds = GoogleCredentials.get_application_default()
     return discovery.build(
@@ -95,12 +99,25 @@ def find_logo(response, full_width=None, full_height=None):
             return logo
 
 
-def find_textual(response):
+def find_textual(response, full_width=None, full_height=None):
     for label in response["labelAnnotations"]:
-        if label["score"] < 0.9:
-            return False
+        if label["score"] < 0.85:
+            break
         if label["description"] == "text":
             return True
+
+    if "fullTextAnnotation" in response:
+        if full_width and full_height:
+            total_area = remaining_area = full_width * full_height
+            for page in response["fullTextAnnotation"]["pages"]:
+                remaining_area -= page["width"] * page["height"]
+            if remaining_area/total_area <= 0.8:
+                return True
+
+
+def text(response):
+    if "fullTextAnnotation" in response:
+        return response["fullTextAnnotation"]["text"]
 
 
 def rgb_to_xyz(r, g, b):
@@ -165,18 +182,18 @@ def open_image(image_path=None, image_url=None):
 
 def process_image(image_path=None, image_url=None):
     assert image_path or image_url
-    if not CLIENT: return None
+    if not CLIENT:
+        return None
 
     try:
         with open_image(image_path, image_url) as infile:
             response = annotate_image(CLIENT, infile)["responses"][0]
         textual = find_textual(response)
-        is_empty_streetview = \
-            image_url.startswith("https://maps.googleapis.com/maps/api/streetview") \
-            and textual
+        is_empty_streetview = image_url and is_streetview_url(image_url) and textual
         return {"logo": find_logo(response),
                 "colorfulness": colorfulness(response),
                 "textual": textual,
+                "text": text(response),
                 "empty_streetview": is_empty_streetview}
     except KeyError:
         return None
