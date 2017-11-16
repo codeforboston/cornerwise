@@ -397,14 +397,20 @@ class Document(models.Model):
             return f.read()
 
     @property
+    def line_iterator(self):
+        return (line.decode(self.encoding) for line in self.fulltext)
+
+    @property
     def local_path(self):
         return self.document and self.document.path or ""
-
-    move_file = utils.make_file_mover("document")
 
 
 @receiver(models.signals.post_delete, sender=Document)
 def auto_delete_document(**kwargs):
+    """Signal to clean up the files associated with a document when it is deleted
+    from the database.
+
+    """
     document = kwargs["instance"]
     if document.document:
         document.document.delete(save=False)
