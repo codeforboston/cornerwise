@@ -164,7 +164,7 @@ class Proposal(models.Model):
                 # property is missing.
 
                 # Don't raise an error if the property was already set.
-                if old_val:
+                if old_val is not None:
                     continue
                 raise Exception("Missing required property: %s\n Reason: %s" %
                                 (prop, exc))
@@ -184,7 +184,7 @@ class Proposal(models.Model):
 
         if changed:
             attr_changes = []
-        for attr_name, attr_val in p_dict.get("attributes", []):
+        for attr_name, attr_val in p_dict.get("attributes", {}).items():
             try:
                 handle = utils.normalize(attr_name)
                 attr = self.attributes.get(handle=handle)
