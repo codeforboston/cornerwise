@@ -234,13 +234,12 @@ def generate_thumbnail(image_id, replace=False):
 @shared_task
 def add_doc_attributes(doc_id):
     doc = Document.objects.get(pk=doc_id)
-    doc_json = doc_utils.doc_info(doc)
-    properties = extract.get_properties(doc_json)
+    props = extract.get_properties(doc)
 
-    for name, value in properties.items():
-        task_logger.info("Adding %s attribute", name)
-        published = doc.published or datetime.now()
-        handle = normalize(name)
+    doc.proposal.update_from_dict(props)
+
+    return doc.pk
+
 
         try:
             attr = Attribute.objects.get(proposal=doc.proposal, handle=handle)
