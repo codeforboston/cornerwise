@@ -584,7 +584,7 @@ class Layer(models.Model):
                                    proper attribution be given to the original
                                    author(s). Use this field to provide it.""")
     region_name = models.CharField(max_length=128,
-                                   blank="True",
+                                   blank=True,
                                    help_text="""Used when filtering layers by
                                    region name""")
     url = models.URLField(
