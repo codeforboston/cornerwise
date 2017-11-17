@@ -295,9 +295,13 @@ def stringify_address_dict(address):
 
 
 def create_proposals(dicts):
+    """Helper function to create new Proposal objects.
+    """
+
     for case_dict in dicts:
         try:
             (_, p) = Proposal.create_or_update_from_dict(case_dict)
+            p.importer = case_dict.get("importer")
             p.save() # Needed?
             yield p
         except Exception as exc:
@@ -353,10 +357,14 @@ def fetch_proposals(since=None,
             continue
 
         found_description = ", ".join(f"{len(v)} {k}" for k, v in found.items())
-        task_logger.info("Fetched %i proposals from %s",
-                         len(found["cases"]), importer)
+        task_logger.info("Fetched %i proposals from %s", len(found["cases"]), importer)
+
         for k in found:
-            all_found[k].extend(found[k])
+            for item in found[k]:
+                if "region_name" not in item:
+                    item["region_name"] = importer.region_name
+                item["importer"] = importer
+                all_found[k].append(item)
 
     add_locations(all_found["cases"], geocoder)
 
