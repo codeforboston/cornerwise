@@ -47,10 +47,14 @@ if ! getent hosts celery; then
     fi
 
     celery -A $APP_NAME beat --pidfile=/tmp/celerybeat.pid &
-    celery -A $APP_NAME worker --loglevel=INFO \
-           --pidfile=/tmp/celery.pid \
-           --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
-           $celery_opts &
+    # celery -A $APP_NAME worker --loglevel=${CELERY_LOGLEVEL:-info} \
+    #        --pidfile=/tmp/celery.pid \
+    #        --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
+    #        $celery_opts &
+    mkdir -p /var/run/celery /var/log/celery
+    celery multi start 2 -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $celery_opts \
+           --pidfile=/var/run/celery/%n.pid \
+           --logfile=/var/log/celery/%n%I.log
 fi
 
 if [ "$APP_MODE" = "production" ]; then
