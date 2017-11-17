@@ -1225,9 +1225,10 @@ a.thumb-link {
     height: 80px;
     width: 80px;
     text-align: center;
-    vertical-align: middle;
-
     transition: border-color 0.1s linear;
+    display: flex;
+    justify-content: center;
+    align-content: center;
 }
 
 a.thumb-link:hover {
@@ -1235,10 +1236,8 @@ a.thumb-link:hover {
 }
 
 .images .thumb {
-    display: inline-block;
     max-height: 80px;
     max-width: 80px;
-    padding-bottom: 5px;
 }
 
 /* Leaflet info popup */
