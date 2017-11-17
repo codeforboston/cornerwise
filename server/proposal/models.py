@@ -432,7 +432,8 @@ class Image(models.Model):
     """
     proposal = models.ForeignKey(Proposal, related_name="images")
     document = models.ForeignKey(
-        Document, null=True, help_text="Source document for image")
+        Document, null=True, help_text="Source document for image",
+        related_name="images")
     image = models.FileField(null=True, upload_to=upload_image_to)
     width = models.IntegerField()
     height = models.IntegerField()
