@@ -182,6 +182,7 @@ class Proposal(models.Model):
                               for field, val in doc_dicts
                               if val and val.get("links"))
 
+        updated = p_dict.get("updated_date", self.updated)
         if changed:
             attr_changes = []
         for attr_name, attr_val in p_dict.get("attributes", {}).items():
@@ -194,7 +195,7 @@ class Proposal(models.Model):
                     name=attr_name,
                     handle=handle,
                     text_value=attr_val,
-                    published=p_dict["updated_date"])
+                    published=updated)
                 old_val = None
             if changed:
                 attr_changes.append({
