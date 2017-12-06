@@ -146,18 +146,14 @@ CELERY_RESULT_BACKEND = 'django-cache'
 
 CELERYBEAT_SCHEDULE = {
     "scrape-proposals": {
-        "task": "proposal.fetch_proposals",
+        "task": "proposal.tasks.pull_updates",
         # Run daily at midnight:
         "schedule": crontab(
             minute=0, hour=0)
     },
-    "scrape-events": {
-        "task": "proposal.pull_events",
-        "schedule": crontab(
-            minute=0, hour=1)
-    },
+
     "send-notifications": {
-        "task": "user.send_notifications",
+        "task": "user.tasks.send_notifications",
         "schedule": crontab(minute=0, hour=1)
     }
 }
