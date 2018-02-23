@@ -187,7 +187,11 @@ class Proposal(models.Model):
         updated = p_dict.get("updated_date", self.updated)
         if changed:
             attr_changes = []
-        for attr_name, attr_val in p_dict.get("attributes", []):
+
+        attributes = p_dict.get("attributes")
+        if hasattr(attributes, "items"):
+            attributes = attributes.items()
+        for attr_name, attr_val in attributes:
             try:
                 handle = utils.normalize(attr_name)
                 attr = self.attributes.get(handle=handle)
