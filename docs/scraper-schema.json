@@ -44,7 +44,7 @@
                     "format": "date-time"
                 },
                 "all_addresses": {
-                    "description": "An array of all the addresses associated with this proposal. The first address is used as the primary address.",
+                    "description": "An array of all the addresses associated with this proposal. The first address is used as the primary address (e.g., for display purposes).",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -81,6 +81,7 @@
                     "format": "uri"
                 },
                 "status": {
+                    "description": "A descriptive label for the status of the project.",
                     "type": "string"
                 },
                 "complete": {
@@ -122,13 +123,13 @@
                 "documents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/link"
+                        "$ref": "#/definitions/document"
                     }
                 },
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/link"
+                        "$ref": "#/definitions/image"
                     }
                 },
                 "attributes": {
@@ -143,8 +144,7 @@
                         ]
                     }
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "event": {
             "type": "object",
@@ -184,7 +184,7 @@
                 "documents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/link"
+                        "$ref": "#/definitions/document"
                     }
                 }
             }
@@ -214,6 +214,12 @@
                 "updated":        { "type": "string", "format": "date-time" }
             },
             "required": ["name", "description", "region_name"]
+        },
+        "document": {
+            "$ref": "#/definitions/link"
+        },
+        "image": {
+            "$ref": "#/definitions/link"
         },
         "link": {
             "type": "object",
