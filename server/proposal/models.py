@@ -45,8 +45,9 @@ class ProposalManager(models.GeoManager):
         return self.filter(location__within=parcel.shape)
 
 
+UNSET = object()
 def make_property_map():
-    def _g(p, default=""):
+    def _g(p, default=UNSET):
         return lambda d: d.get(p, default)
 
     def _G(p):
@@ -59,7 +60,7 @@ def make_property_map():
     return [("address", lambda d: d["all_addresses"][0]),
             ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["location"]["long"], d["location"]["lat"])),
-            ("summary", lambda d: d.get("summary", "")[0:1024]),
+            ("summary", lambda d: d["summary"][0:1024] if "summary" in d else UNSET),
             ("description", _g("description")),
             ("source", _g("source")),
             ("region_name", _g("region_name")),
@@ -152,13 +153,14 @@ class Proposal(models.Model):
             old_val = changed and getattr(self, prop)
             try:
                 val = fn(p_dict)
-                if changed:
-                    prop_changes.append({
-                        "name": prop,
-                        "new": val,
-                        "old": old_val
-                    })
-                setattr(self, prop, val)
+                if val is not UNSET:
+                    if changed:
+                        prop_changes.append({
+                            "name": prop,
+                            "new": val,
+                            "old": old_val
+                        })
+                    setattr(self, prop, val)
             except KeyError as exc:
                 # The getters should throw a KeyError whenever a required
                 # property is missing.
@@ -185,7 +187,7 @@ class Proposal(models.Model):
         updated = p_dict.get("updated_date", self.updated)
         if changed:
             attr_changes = []
-        for attr_name, attr_val in p_dict.get("attributes", {}).items():
+        for attr_name, attr_val in p_dict.get("attributes", []):
             try:
                 handle = utils.normalize(attr_name)
                 attr = self.attributes.get(handle=handle)
