@@ -3,6 +3,7 @@ Django settings for cornerwise project.
 """
 
 import os
+import re
 # For celery:
 from celery.schedules import crontab
 from django.utils.log import DEFAULT_LOGGING
@@ -236,6 +237,22 @@ for envvar in [
         "SENDGRID_PARSE_KEY"
 ]:
     globals()[envvar] = os.environ.get(envvar, "")
+
+
+def get_admins():
+    admins_from_env = []
+    for admin_str in re.split(r"\s*;\s*", os.environ.get("ADMINS", "")):
+        m = re.search(r"\s*<([^>]+)>", admin_str)
+        username, email = \
+            (admin_str[0:m.start()], m.group(1).strip()) if m \
+            else (admin_str, admin_str)
+
+        admins_from_env.append((username, email))
+    return admins_from_env
+
+
+ADMINS = get_admins()
+
 
 if not IS_PRODUCTION:
     try:
