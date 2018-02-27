@@ -4,6 +4,7 @@ import os
 import re
 import pytz
 from collections import deque
+import typing
 from urllib import parse, request
 
 from django.contrib.gis.geos import GeometryCollection, GEOSGeometry
@@ -191,3 +192,39 @@ def make_fn_chain(*fns):
 def parse_duration(s):
     h, m = s.split(":")
     return timedelta(hours=int(h), minutes=int(m))
+
+
+def read_n_from_end(fp: typing.IO, n,
+                    split_chunk=lambda c: c.split(b"\n"),
+                    chunksize=1000):
+    """
+    Consume a file in reverse, splitting with function `split_chunk`. By
+    default, takes the last `n` lines from the reader.
+
+    :fp: file handle, must be opened in 'rb' mode
+    :n: the number of lines
+    :split_chunk: function to split chunks into lines
+    """
+    start_pos = fp.tell()
+    lines = deque()
+    pos = fp.seek(0, 2)
+    current = b""
+    try:
+        while True:
+            last_pos = pos
+            pos = fp.seek(-chunksize, 1)
+
+            current = fp.read(last_pos - pos) + current
+            current, *found_lines = split_chunk(current)
+            lines.extendleft(reversed(found_lines[0:n-len(lines)]))
+
+            if len(lines) >= n:
+                break
+
+    except OSError as _err:
+        if len(lines) < n:
+            lines.appendleft(current)
+
+    fp.seek(start_pos, 0)
+
+    return lines

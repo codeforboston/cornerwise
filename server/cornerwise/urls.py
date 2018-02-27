@@ -3,11 +3,10 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from cornerwise.views import index, contact_us
-from shared.admin import cornerwise_admin
 
 
 urlpatterns = [
-    url(r"^admin/", cornerwise_admin.urls),
+    url(r"^admin/", include("cornerwise.admin_urls")),
     url(r"^parcel/", include("parcel.urls")),
     url(r"^project/", include("project.urls")),
     url(r"^proposal/", include("proposal.urls")),
