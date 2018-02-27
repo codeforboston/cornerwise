@@ -6,9 +6,10 @@ from django.core.files import File
 
 from dateutil.parser import parse as dt_parse
 from os import path
-import shutil
 import subprocess
-from urllib import parse, request
+from urllib import parse
+
+import requests
 
 from scripts import pdf
 from shared import files_metadata
@@ -18,22 +19,12 @@ from .models import Image
 
 
 def last_modified(url):
-    req = request.Request(url=url, method="HEAD")
-    with request.urlopen(req) as resp:
-        if "Last-Modified" in resp.headers:
-            return dt_parse(resp.headers["Last-Modified"])
+    headers = requests.head(url).headers
+
+    if "Last-Modified" in headers:
+        return dt_parse(headers["Last-Modified"])
 
     return None
-
-
-def doc_info(doc):
-    enc = doc.encoding
-    if doc.fulltext and doc.fulltext.path:
-        lines = (line.decode(enc) for line in doc.fulltext)
-    else:
-        lines = []
-
-    return {"field": doc.field, "title": doc.title, "lines": lines}
 
 
 def save_from_url(doc, url, filename_base=None):
@@ -42,15 +33,15 @@ def save_from_url(doc, url, filename_base=None):
     if filename_base:
         filename = "{}.{}".format(filename_base, extension(filename))
 
-    with request.urlopen(url) as resp:
-        doc.document.save(filename, File(resp), save=False)
+    with requests.get(url, stream=True) as response:
+        doc.document.save(filename, File(response.raw), save=False)
 
         file_published = files_metadata.published_date(path)
 
         if file_published:
             doc.published = file_published
-        elif "Last-Modified" in resp.headers:
-            doc.published = dt_parse(resp.headers["Last-Modified"])
+        elif "Last-Modified" in response.headers:
+            doc.published = dt_parse(response.headers["Last-Modified"])
 
         doc.save()
 
@@ -72,6 +63,7 @@ def save_images(doc):
         image.width = w
         image.height = h
         image.image.save("image-{:0>3}.{}".format(i, ext), image_data)
+        image.save()
         images.append(image)
 
     return images
@@ -80,8 +72,8 @@ def save_images(doc):
 def generate_thumbnail(doc):
     "Generate a Document thumbnail."
     if not doc.document:
-        task_logger.error("Document has not been copied to the local filesystem")
-        return
+        raise FileNotFoundError(
+            "Document has not been copied to the local filesystem")
 
     doc_path = doc.document.path
 
