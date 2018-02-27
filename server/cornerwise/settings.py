@@ -243,3 +243,7 @@ if not IS_PRODUCTION:
         from .local_settings import *
     except ImportError as err:
         print("Could not find local_settings.py -- ", err)
+
+
+if globals().get("SENDGRID_API_KEY"):
+    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
