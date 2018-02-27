@@ -5,6 +5,7 @@ Django settings for cornerwise project.
 import os
 # For celery:
 from celery.schedules import crontab
+from django.utils.log import DEFAULT_LOGGING
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -108,6 +109,22 @@ CACHES = {
         'BACKEND': 'redis_cache.RedisCache',
         "LOCATION": REDIS_HOST
     }
+}
+
+LOGGING = DEFAULT_LOGGING
+
+LOGGING["handlers"]["record"] = {
+    "level":       "INFO",
+    "class":       "logging.handlers.RotatingFileHandler",
+    "filename":    "logs/celery_tasks.log",
+    "formatter":   "django.server",
+    "maxBytes":    1024*1024*10,
+    "backupCount": 5
+}
+
+LOGGING["loggers"]["proposal.tasks"] = {
+    "handlers": ["console", "mail_admins", "record"],
+    "level":    "INFO"
 }
 
 # Internationalization
