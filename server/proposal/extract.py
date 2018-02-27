@@ -6,8 +6,6 @@ from collections import OrderedDict
 from utils import pushback_iter
 import re
 
-from dateutil.parser import parse as date_parse
-
 # from shared.text_utils import 
 
 EMPTY_LINE = re.compile(r"\s*\n$")
@@ -245,6 +243,11 @@ def field_matches(pattern):
 
     """
     return lambda doc: re.search(pattern, doc.field)
+
+
+def has_tags(tags):
+    tagset = set([tags] if isinstance(tags, str) else tags)
+    return lambda doc: tagset < doc.tag_set
 
 
 def title_matches(pattern):
