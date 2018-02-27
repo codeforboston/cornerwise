@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -112,7 +112,7 @@ class Proposal(models.Model):
     objects = ProposalManager()
 
     @classmethod
-    def create_or_update_from_dict(cls, p_dict: dict):
+    def create_or_update_from_dict(cls, p_dict: dict, tz: tzinfo=pytz.utc):
         """
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict.
@@ -120,7 +120,6 @@ class Proposal(models.Model):
         :param cls:
         :param p_dict: dictionary describing a proposal"""
 
-        proposal: Proposal
         try:
             proposal = cls.objects.get(case_number=p_dict["case_number"])
             created = False
@@ -128,7 +127,7 @@ class Proposal(models.Model):
             proposal = cls(case_number=p_dict["case_number"])
             created = True
 
-        proposal.update_from_dict(p_dict)
+        proposal.update_from_dict(p_dict, not created, tz)
 
         return (created, proposal)
 
@@ -143,9 +142,11 @@ class Proposal(models.Model):
     def document_for_field(self, field):
         return self.documents.filter(field=field)
 
-    def update_from_dict(self, p_dict):
-        changed = bool(self.pk)
-
+    def update_from_dict(self, p_dict, changed=True, tz: tzinfo=pytz.utc):
+        """Updates the Proposal from the contents of a dictionary. When changed
+        is True, the update will generate a new Changeset describing the state
+        of the proposal before and after the changes from p_dict were applied.
+        """
         if changed:
             prop_changes = []
 
@@ -153,6 +154,9 @@ class Proposal(models.Model):
             old_val = changed and getattr(self, prop)
             try:
                 val = fn(p_dict)
+                if isinstance(val, datetime):
+                    if val.tzinfo:
+                        val = tz.normalize(val)
                 if val is not UNSET:
                     if changed:
                         prop_changes.append({
@@ -178,11 +182,7 @@ class Proposal(models.Model):
             event.proposals.add(self)
 
         # Create associated documents:
-        document_fields = ["decisions", "reports", "other"]
-        doc_dicts = zip(document_fields, map(p_dict.get, document_fields))
-        self.create_documents((field, val["links"])
-                              for field, val in doc_dicts
-                              if val and val.get("links"))
+        self.create_documents(p_dict.get("documents", []))
 
         updated = p_dict.get("updated_date", self.updated)
         if changed:
@@ -212,17 +212,24 @@ class Proposal(models.Model):
                 "attributes": [ch for ch in attr_changes if ch["old"] != ch["new"]]
             })
             changeset.save()
+            return changeset
 
     def create_documents(self, docs):
-        for field, links in docs:
-            for link in links:
-                try:
-                    doc = self.documents.get(url=link["url"])
-                except Document.DoesNotExist:
-                    self.documents.create(url=link["url"],
-                                          title=link["title"],
-                                          field=field,
-                                          published=self.updated)
+        for doc_link in docs:
+            taglist = ",".join(doc_link.get("tags"))
+            field = doc_link.get("tags", [None])[0]
+            try:
+                doc = self.documents.get(url=doc_link["url"])
+                if taglist:
+                    doc.tags = taglist
+                if doc_link.get("title"):
+                    doc.title = doc_link["title"]
+            except Document.DoesNotExist:
+                self.documents.create(url=doc_link["url"],
+                                      title=doc_link["title"],
+                                      field=field,
+                                      tags=taglist,
+                                      published=self.updated)
 
     def create_events(self, event_dicts):
         return list(map(Event.make_event, event_dicts)) if event_dicts else []
@@ -362,6 +369,9 @@ class Document(models.Model):
     field = models.CharField(
         max_length=256,
         help_text=("The field in which the document was found"))
+    tags = models.CharField(max_length=256,
+                            help_text="comma-separated list of tags",
+                            blank=True)
     # Record when the document was first observed:
     created = models.DateTimeField(auto_now_add=True)
 
@@ -398,6 +408,10 @@ class Document(models.Model):
     def get_text(self):
         with open(self.fulltext.path, "r", encoding=self.encoding) as f:
             return f.read()
+
+    @property
+    def tag_set(self):
+        return set(filter(len, map(str.strip, self.tags.split(","))))
 
     @property
     def line_iterator(self):
@@ -549,11 +563,18 @@ class Importer(models.Model):
     last_run = models.DateTimeField(help_text="Last time the scraper ran",
                                     null=True)
 
+    @staticmethod
+    def validate(data, schema=None):
+        """Validates data against the JSON schema for Cornerwise importers.
+        """
+        return jsonschema.validate(data, schema or get_importer_schema())
+
+
     def __str__(self):
         return self.name
 
     @property
-    def timezone(self):
+    def tz(self):
         return pytz.timezone(self.timezone)
 
     def url_for(self, when=None):
@@ -564,11 +585,8 @@ class Importer(models.Model):
         with request.urlopen(self.url_for(when)) as u:
             return json.load(u)
 
-    def validate(self, data, schema=None):
-        return jsonschema.validate(data, schema or get_importer_schema())
-
     def cases_since(self, when):
-        return self.updated_since(when).get("cases")
+        return self.updated_since(when).get("cases", [])
 
 
 class Layer(models.Model):
