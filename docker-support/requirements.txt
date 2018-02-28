@@ -10,6 +10,7 @@ Django==1.11.5
 django-celery-beat==1.1.0
 django-celery-results==1.0.1
 django-pgviews==0.3.0
+django-redis==4.8.0
 django-redis-cache==1.7.1
 django-sendgrid-v5==0.6.87
 google-api-python-client==1.6.4

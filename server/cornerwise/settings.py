@@ -107,8 +107,17 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 CACHES = {
     "default": {
-        'BACKEND': 'redis_cache.RedisCache',
-        "LOCATION": REDIS_HOST
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_HOST,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_CLASS": "redis.BlockingConnectionPool",
+            "CONNECTION_POOL_CLASS_KWARGS": {
+                "max_connections": 50,
+                "timeout": 20
+            },
+            "TIMEOUT": None
+        }
     }
 }
 
