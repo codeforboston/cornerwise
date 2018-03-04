@@ -37,6 +37,30 @@ $manage sync_pgviews
 
 rm /tmp/*.pid
 
+start_celery() {
+    celery -A $APP_NAME beat --pidfile=/var/run/celery/celerybeat.pid &
+    # celery -A $APP_NAME worker --loglevel=${CELERY_LOGLEVEL:-info} \
+        #        --pidfile=/tmp/celery.pid \
+        #        --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
+        #        $celery_opts &
+    mkdir -p /var/run/celery /var/log/celery
+    celery multi start 2 -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
+           --pidfile=/var/run/celery/%n.pid \
+           --logfile=/var/log/celery/%n.log
+}
+
+autoreload_celery() {
+    while : ; do
+        inotifywait -e modify $APP_ROOT/*/tasks.py
+        pids=$(cat /var/run/celery/*.pid)
+        kill $pids
+        while ps $pids > /dev/null; do
+            sleep 1
+        done
+        start_celery $1
+    done
+}
+
 # Start celery in the background of this container if there is not a linked
 # container running with the name 'celery'.
 if ! getent hosts celery; then
@@ -46,15 +70,11 @@ if ! getent hosts celery; then
         celery_opts="-E"
     fi
 
-    celery -A $APP_NAME beat --pidfile=/tmp/celerybeat.pid &
-    # celery -A $APP_NAME worker --loglevel=${CELERY_LOGLEVEL:-info} \
-    #        --pidfile=/tmp/celery.pid \
-    #        --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
-    #        $celery_opts &
-    mkdir -p /var/run/celery /var/log/celery
-    celery multi start 2 -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $celery_opts \
-           --pidfile=/var/run/celery/%n.pid \
-           --logfile=/var/log/celery/%n%I.log
+    start_celery "$celery_opts"
+
+    if [ "$APP_MODE" != "production" ]; then
+        which inotifywait && autoreload_celery "$celery_opts" &
+    fi
 fi
 
 if [ "$APP_MODE" = "production" ]; then
