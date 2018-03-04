@@ -1,4 +1,5 @@
-from utils import extension
+import utils
+
 
 class multimethod(object):
     def __init__(self, fn):
@@ -31,6 +32,12 @@ class multimethod(object):
         else:
             raise ValueError("Unknown dispatch value:", val)
 
-published_date = multimethod(lambda path: extension(path).lower())
+def extension(path):
+    return utils.extension(path).lower()
 
+
+published_date = multimethod(extension)
 published_date.default(lambda _: None)
+
+encoding = multimethod(extension)
+encoding.default(lambda _: "utf-8")

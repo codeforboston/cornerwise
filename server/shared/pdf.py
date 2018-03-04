@@ -1,6 +1,6 @@
 import datetime, os, re, subprocess
 
-from .files_metadata import published_date
+from .files_metadata import published_date, encoding
 
 @published_date.add("pdf")
 def published_date(path):
@@ -15,3 +15,8 @@ def published_date(path):
         return datetime.strptime(datestr, "%c")
 
     return datetime.fromtimestamp(os.path.getmtime(path))
+
+
+@encoding.add("pdf")
+def encoding(_):
+    return "ISO-8859-9"
