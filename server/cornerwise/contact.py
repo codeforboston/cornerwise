@@ -26,7 +26,7 @@ class ContactForm(forms.Form):
 
     def send_email(self):
         send_to = self.cleaned_data["send_to"]
-        email = RECIPIENTS[form_data["send_to"]]
+        email = RECIPIENTS[self.form_data["send_to"]]
         mail.send(email, "Cornerwise: User Feedback", "user_feedback",
                   {"text": self.comment,
                    "subject": self.subject})

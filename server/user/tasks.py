@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from urllib import request
-import pytz
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -8,13 +7,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.template.loader import render_to_string
 
-from cornerwise.utils import make_absolute_url
 from shared.mail import send as send_mail
 
-from .models import Subscription, UserProfile
-from . import changes, mail
+from .models import Subscription
+from . import mail
 
 logger = get_task_logger(__name__)
 
@@ -61,7 +58,7 @@ def send_deactivation_email(user_id):
 
 @shared_task
 def send_subscription_confirmation_email(sub_id):
-    """" When a new Subscription is created, check if the User has existing
+    """When a new Subscription is created, check if the User has existing
     Subscription(s). If s/he does and if LIMIT_SUBSCRIPTIONS is set to True,
     send an email asking the user to confirm the new subscription and replace
     the old one.

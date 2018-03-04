@@ -1,38 +1,40 @@
+"""Celery tasks for import and processing of Proposals, Events, and Projects
+and their related models (Documents, Images).
+"""
 from datetime import datetime, timedelta
-import logging
 import os
+import pytz
+import re
 import subprocess
-from urllib import parse, request
 
 import celery
 from celery.utils.log import get_task_logger
 
 from django.conf import settings
-from django.core.files import File
+from django.core.cache import cache
 from django.dispatch import receiver
+from django.db.models import F, QuerySet
 from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
-import pytz
+from cornerwise.adapt import adapt
+from utils import add_locations
+from scripts import foursquare, images, street_view, vision
+from shared.geocoder import Geocoder
+from .models import Proposal, Document, Event, Image, Importer
+from . import extract, documents as doc_utils
 
-from .models import Proposal, Attribute, Document, Event, Image
-from utils import extension, normalize, add_locations
-from . import extract
-from . import documents as doc_utils
-from scripts import arcgis, foursquare, gmaps, street_view
 
-
-logger = logging.getLogger(__name__)
 task_logger = get_task_logger(__name__)
 shared_task = celery.shared_task
 
 
 @shared_task
-def fetch_document(doc_id):
+@adapt
+def fetch_document(doc: Document):
     """Copy the given document (proposal.models.Document) to a local
     directory.
     """
-    doc = Document.objects.get(pk=doc_id)
     url = doc.url
 
     if doc.document and os.path.exists(doc.document.path):
@@ -42,8 +44,6 @@ def fetch_document(doc_id):
         if not updated or updated <= doc.published:
             return doc.pk
 
-        # TODO Special handling of updated documents
-
     task_logger.info("Fetching Document #%i", doc.pk)
     doc_utils.save_from_url(doc, url, "download")
     task_logger.info("Copied Document #%i to %s", doc.pk, doc.document.path)
@@ -52,7 +52,8 @@ def fetch_document(doc_id):
 
 
 @shared_task
-def extract_text(doc_id, encoding="ISO-8859-9"):
+@adapt
+def extract_text(doc: Document, encoding="ISO-8859-9"):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
 
@@ -61,7 +62,6 @@ def extract_text(doc_id, encoding="ISO-8859-9"):
     :returns: The same document
 
     """
-    doc = Document.objects.get(pk=doc_id)
     path = doc.local_path
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
@@ -86,23 +86,22 @@ def extract_text(doc_id, encoding="ISO-8859-9"):
 
 
 @shared_task
-def extract_images(doc_id):
+@adapt
+def extract_images(doc: Document):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
     document's directory (docs/<doc id>/images).
 
-    :param doc_id: id of a proposal.models.Document object with a corresponding
+    :param doc: id of a proposal.models.Document object with a corresponding
     PDF file that has been copied to the local filesystem
 
     :returns: A list of proposal.models.Image objects
 
     """
-    doc = Document.objects.get(pk=doc_id)
-
     try:
         task_logger.info("Extracting images from Document #%s", doc.pk)
         images = doc_utils.save_images(doc)
-        task_logger.info("Extracted %i image(s) from %s.", len(images), path)
+        task_logger.info("Extracted %i image(s) from %s.", len(images), doc.title)
 
         return [image.pk for image in images]
     except Exception as exc:
@@ -112,11 +111,10 @@ def extract_images(doc_id):
 
 
 @shared_task
-def add_street_view(proposal_id):
+@adapt
+def add_street_view(proposal: Proposal):
     api_key = getattr(settings, "GOOGLE_API_KEY")
     secret = getattr(settings, "GOOGLE_STREET_VIEW_SECRET")
-
-    proposal = Proposal.objects.get(pk=proposal_id)
 
     if api_key:
         location = "{0.address}, {0.region_name}".format(proposal)
@@ -147,21 +145,21 @@ def add_street_view(proposal_id):
 
 
 @shared_task
-def add_venue_info(proposal_id):
+@adapt
+def add_venue_info(proposal: Proposal):
     client_id = getattr(settings, "FOURSQUARE_CLIENT", None)
     client_secret = getattr(settings, "FOURSQUARE_SECRET")
 
     if not (client_id and client_secret):
         return
 
-    proposal = Proposal.objects.get(pk=proposal_id)
     lng, lat = proposal.location.coords
     params = {"lat": lat, "lng": lng, "address": proposal.address}
     venue = foursquare.find_venue(params, client_id, client_secret)
 
     if venue:
-        logger.info("Found matching venue for proposal #{}: {}"\
-                    .format(proposal.id, venue["id"]))
+        task_logger.info("Found matching venue for proposal #{}: {}"\
+                         .format(proposal.id, venue["id"]))
         proposal.attributes.create(
             name="foursquare_id", text_value=venue["id"])
         proposal.attributes.create(
@@ -170,14 +168,14 @@ def add_venue_info(proposal_id):
             proposal.attributes.create(
                 name="foursquare_url", text_value=venue["url"])
 
-    return proposal_id
+    return proposal.id
 
 
 @shared_task
-def add_parcel(proposal_id):
+@adapt
+def add_parcel(proposal: Proposal):
     from parcel.models import Parcel
 
-    proposal = Proposal.objects.get(pk=proposal_id)
     parcels = Parcel.objects.containing(proposal.location).exclude(poly_type="ROW")
     if parcels:
         proposal.parcel = parcels[0]
@@ -187,9 +185,9 @@ def add_parcel(proposal_id):
 
 
 @shared_task
-def generate_doc_thumbnail(doc_id):
+@adapt
+def generate_doc_thumbnail(doc: Document):
     "Generate a Document thumbnail."
-    doc = Document.objects.get(pk=doc_id)
     if not doc.document:
         task_logger.error(
             "Document has not been copied to the local filesystem")
@@ -217,8 +215,8 @@ def generate_thumbnail(image_id, replace=False):
             return
 
         try:
-            thumbnail_path = iamges.make_thumbnail(
-                image.image.name, fit=settings.THUMBNAIL_DIM)
+            thumbnail_path = images.make_thumbnail(
+                image.image.path, fit=settings.THUMBNAIL_DIM)
         except Exception as err:
             task_logger.error(err)
             return
@@ -232,8 +230,8 @@ def generate_thumbnail(image_id, replace=False):
 
 
 @shared_task
-def add_doc_attributes(doc_id):
-    doc = Document.objects.get(pk=doc_id)
+@adapt
+def add_doc_attributes(doc: Document):
     props = extract.get_properties(doc)
 
     doc.proposal.update_from_dict(props)
@@ -241,42 +239,73 @@ def add_doc_attributes(doc_id):
     return doc.pk
 
 
+@shared_task
+def generate_thumbnails(image_ids):
+    for image_id in image_ids:
         try:
-            attr = Attribute.objects.get(proposal=doc.proposal, handle=handle)
-        except Attribute.DoesNotExist:
-            attr = Attribute(
-                proposal=doc.proposal,
-                name=name,
-                handle=normalize(name),
-                published=published)
-            attr.set_value(value)
-        else:
-            # TODO: Either mark the old attribute as stale and create a
-            # new one or create a record that the value has changed
-            if published > attr.published:
-                attr.clear_value()
-                attr.set_value(value)
-
-        attr.save()
-
-    return doc
+            generate_thumbnail(image_id)
+        except Image.DoesNotExist:
+            task_logger.info(
+                f"Image #{image_id} was deleted before thumbnail generation"
+            )
+            continue
 
 
 @shared_task
-def generate_thumbnails(image_ids):
-    return generate_thumbnail.map(image_ids)()
+@adapt
+def save_image_text(doc: Document, image_ids):
+    if not len(image_ids):
+        return
+
+    all_text = [t for t in [cache.get(f"image:{image_id}:text")
+                            for image_id in image_ids] if t]
+
+    if all_text:
+        text_path = os.path.join(os.path.dirname(doc.local_path), "text.txt")
+        with open(text_path, "a") as fulltext:
+            for text in all_text:
+                fulltext.write(text)
+                fulltext.write("\n")
+        doc.encoding = "utf-8"
+        doc.fulltext = text_path
+        doc.save()
+
+
+@shared_task
+@adapt
+def post_process_images(doc: Document, image_ids):
+    task_logger.info(
+        f"Post processing image ids {image_ids} for doc {doc.pk}")
+    for image_id in image_ids:
+        cloud_vision_process(image_id)
+    generate_thumbnails(image_ids)
+    save_image_text(doc.id, image_ids)
+
+    return image_ids
+
+
+@shared_task
+@adapt
+def process_document_sync(doc: Document):
+    fetch_document(doc)
+
+    extract_text(doc)
+    add_doc_attributes(doc)
+
+    image_ids = extract_images(doc)
+    post_process_images(doc, image_ids)
+
+    generate_doc_thumbnail(doc)
 
 
 def process_document(doc):
     """
     Run all tasks on a Document.
     """
-    # Seems like a new bug in Celery: chain subtasks in a group do not seem to
-    # receive the result from the previous task in the chain.
-    (fetch_document.s() | celery.group(
-        extract_images.s(doc.id) | generate_thumbnails.s(),
-        generate_doc_thumbnail.s(),
-        extract_text.s(doc.id) | add_doc_attributes.s()))(doc.id)
+    (fetch_document.s(doc.id) |
+     celery.group(extract_images.s() | post_process_images.s(),
+                  generate_doc_thumbnail.s(),
+                  extract_text.s() | add_doc_attributes.s()))()
 
 
 def process_proposal(proposal):
@@ -305,6 +334,12 @@ def create_proposals(dicts):
             p.save() # Needed?
             yield p
         except Exception as exc:
+            import pprint
+            from io import StringIO
+            buff = StringIO()
+            pprint.pprint(case_dict, buff)
+            print(f"Could not create create proposal from: {buff.getvalue()}")
+            print(exc)
             task_logger.error("Could not create proposal from dictionary: %s",
                               case_dict)
             task_logger.error("%s", exc)
@@ -315,49 +350,49 @@ def create_events(dicts):
         yield Event.objects.make_event(event_dict)
 
 
-@shared_task
-def fetch_proposals(since=None,
-                    importers=[],
-                    coder_type=settings.GEOCODER):
+@adapt
+def fetch_proposals(since: datetime=None,
+                    importers: QuerySet=None):
     """Task runs each of the importers given.
 
     """
-    if coder_type == "google":
-        geocoder = gmaps.GoogleGeocoder(settings.GOOGLE_API_KEY)
-        geocoder.bounds = settings.GEO_BOUNDS
-    else:
-        geocoder = arcgis.ArcGISCoder(settings.ARCGIS_CLIENT_ID,
-                                      settings.ARCGIS_CLIENT_SECRET)
+    now = pytz.utc.localize(datetime.utcnow().replace(hour=0, minute=8,
+                                                      second=0, microsecond=0))
 
-    # TODO: If `since` is not provided explicitly, we should probably determine
-    # the appropriate date on a per-importer basis.
-    if since:
-        since = datetime.fromtimestamp(since)
+    latest_proposal = Proposal.objects.latest()
+    if latest_proposal:
+        default_since = latest_proposal.updated
     else:
-        latest_proposal = Proposal.objects.latest()
-        if latest_proposal:
-            since = latest_proposal.updated
+        # If there is no record of a previous run, fetch
+        # proposals posted since the previous Monday.
+        default_since = now - timedelta(days=7 + now.weekday())
 
-        if not since:
-            # If there is no record of a previous run, fetch
-            # proposals posted since the previous Monday.
-            now = datetime.now().replace(
-                hour=0, minute=0, second=0, microsecond=0)
-            since = now - timedelta(days=7 + now.weekday())
+    if importers is None:
+        importers = Importer.objects.all()
 
     all_found = {"cases": [], "events": [], "projects": []}
     for importer in importers:
-        importer_name = type(importer).__name__
+        importer_since = since
+        if not since:
+            if importer.last_run:
+                importer_since = importer.last_run
+            else:
+                importer_since = default_since
+
+        importer_since = \
+            importer.tz.normalize(importer_since) if importer_since.tzinfo \
+            else importer_since
+
         try:
-            found = importer.updated_since(since)
+            found = importer.updated_since(importer_since)
             importer.validate(found)
         except Exception as err:
-            task_logger.warning("Error in importer: %s - %s", importer_name,
-                                err)
+            task_logger.warning("Importer %s failed schema validation!\n%s",
+                                importer.name, err)
             continue
 
         found_description = ", ".join(f"{len(v)} {k}" for k, v in found.items())
-        task_logger.info("Fetched %i proposals from %s", len(found["cases"]), importer)
+        task_logger.info(f"Fetched: {found_description} w/{importer}")
 
         for k in found:
             for item in found[k]:
@@ -366,27 +401,27 @@ def fetch_proposals(since=None,
                 item["importer"] = importer
                 all_found[k].append(item)
 
-    add_locations(all_found["cases"], geocoder)
+        importer.last_run = now
+        importer.save()
 
-    if False:
-        add_locations(all_found["projects"],
-                      lambda prj: stringify_address_dict(prj["address"]))
+    add_locations(all_found["cases"], Geocoder)
+
+    #     add_locations(all_found["projects"],
+    #                   lambda prj: stringify_address_dict(prj["address"]))
 
     proposal_ids = [p.id for p in create_proposals(all_found["cases"])]
     return proposal_ids
 
 
 @shared_task
-def pull_updates(since=None, importers_filter=None):
+def pull_updates(since: datetime=None, importers_filter: str=None):
     "Run all registered proposal importers."
-    importers = Importers
+    filters = {}
     if importers_filter:
-        name = importers_filter.lower()
-        importers = [
-            imp for imp in importers if name in imp.region_name.lower()
-        ]
+        filters["region_name__icontains"] = importers_filter
 
-    return fetch_proposals(since, importers=importers)
+    return fetch_proposals(since,
+                           importers=Importer.objects.filter(**filters))
 
 
 # Image tasks
@@ -408,13 +443,19 @@ def cloud_vision_process(image_id):
     if logo:
         if city_name in logo["description"]:
             image.delete()
-            task_logger.info("Logo detected: image #%i deleted", image.pk)
+            task_logger.info("Logo detected: image #%i deleted", image_id)
         else:
             cache.set(f"image:{image_id}:logo", logo)
 
     if processed["empty_streetview"]:
         image.delete()
-        task_logger.info("Empty streetview: image #%i deleted", image.pk)
+        task_logger.info("Empty streetview: image #%i deleted", image_id)
+
+    if processed["textual"]:
+        image.delete()
+
+    if "text" in processed:
+        cache.set(f"image:{image_id}:text", processed["text"])
 
     cache.set(processed_key, True)
 
@@ -422,13 +463,6 @@ def cloud_vision_process(image_id):
 def process_image(image):
     if vision.CLIENT:
         cloud_vision_process.delay(image.pk)
-
-
-@receiver(post_save, sender=Image, dispatch_uid="process_image")
-def image_hook(**kwargs):
-    image = kwargs["instance"]
-    if image.image:
-        process_image(image)
 
 
 @receiver(post_save, sender=Proposal, dispatch_uid="process_new_proposal")
@@ -440,5 +474,5 @@ def proposal_hook(**kwargs):
 @receiver(post_save, sender=Document, dispatch_uid="process_new_document")
 def document_hook(**kwargs):
     if kwargs["created"]:
-        process_document(kwargs["instance"])
+        process_document_sync.delay(kwargs["instance"].pk)
 

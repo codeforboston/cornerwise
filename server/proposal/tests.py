@@ -1,15 +1,15 @@
-from django.conf import settings
-from django.test import tag, TestCase
-
+import os
 from datetime import datetime, timedelta
 from pprint import pprint
-import os
 
-from proposal.models import Event, Importer, Proposal, Document
-from . import tasks
+from django.conf import settings
+from django.test import TestCase, tag
+
+from proposal.models import Importer, Proposal
 from scripts import gmaps
 from utils import add_locations
 
+from . import extract, tasks
 
 proposal_dict = {'all_addresses': ['21 Cherry Street'],
                  'case_number': 'ZBA 2017-123',
@@ -58,8 +58,9 @@ class TestImport(TestCase):
             self.assertIsInstance(addressed["location"]["long"], float)
 
     def test_create_from_dict(self):
-        # TODO: Generate a valid input dict rather than use static dict
+        # TODO: Generate a valid input dict rather than using static dict
         pdict = proposal_dict.copy()
+        pprint(pdict)
         with self.assertRaises(Exception):
             Proposal.create_or_update_from_dict(pdict)
         add_locations([pdict], self.geocoder)
@@ -87,7 +88,8 @@ class TestImport(TestCase):
         pdict = proposal_dict_with_location.copy()
 
         # Ensure that the proposal is already created:
-        Proposal.create_or_update_from_dict(pdict)
+        (created, _) = Proposal.create_or_update_from_dict(pdict)
+        self.assertTrue(created)
 
         # new attribute:
         pdict["attributes"].append(("Owner Name", "Empire Holdings, LLC"))
@@ -100,6 +102,8 @@ class TestImport(TestCase):
         (created, proposal) = Proposal.create_or_update_from_dict(pdict)
         self.assertFalse(created)
         changesets = proposal.changesets.all()
+        for changeset in changesets:
+            pprint(changeset.changes)
 
         self.assertEqual(len(changesets), 1)
         changes = changesets[0].changes
@@ -115,22 +119,28 @@ class TestImport(TestCase):
         self.assertIn("Applicant Name", changed_attribute_names)
         self.assertIn("description", changed_property_names)
 
-    @classmethod
-    def tearDownClass(kls):
+    def tearDown(self):
         Proposal.objects.all().delete()
 
 
+@tag("tasks")
 class TestTasks(TestCase):
     @classmethod
-    def setUpClass(kls):
+    def setUpClass(cls):
         pdict = proposal_dict_with_location.copy()
-        (_, proposal) = Proposal.objects.create_or_update_from_dict(pdict)
-        self.proposal = proposal
+        (_, proposal) = Proposal.create_or_update_from_dict(pdict)
+        cls.proposal = proposal
+
+    @classmethod
+    def tearDownClass(cls):
+        Proposal.objects.all().delete()
 
     def test_document_processing(self):
-        doc = self.proposal.documents.all()[0]
+        print(self.proposal)
+        print(self.proposal.documents.count())
+        doc = self.proposal.documents.filter(title__icontains="staff report")[0]
         self.assertFalse(bool(doc.document), "Document already downloaded")
-        tasks.fetch_document(doc.pk)
+        tasks.fetch_document(doc)
         self.assertTrue(bool(doc.document), "Document did not download")
 
         self.assertFalse(bool(doc.fulltext), "Document contents already extracted")
@@ -143,10 +153,19 @@ class TestTasks(TestCase):
                             "Images extracted from a document should all "
                             "produce files.")
 
-    def test_street_view(self):
-        before_count = self.proposal.images.count()
-        tasks.add_street_view(self.proposal.id)
-        self.assertEqual(before_count+1, self.proposal.images.count())
+        props = extract.get_properties(doc)
+        print(props)
 
-        new_image = self.proposal.images.order_by("-created")[0]
-        self.assertEqual(new_image.source, "document")
+        # Test: when Document is deleted, corresponding files are deleted
+        doc_path = doc.document.path
+        doc.delete()
+        self.assertFalse(os.path.exists(doc_path),
+                         "Document file was not deleted")
+
+    # def test_street_view(self):
+    #     before_count = self.proposal.images.count()
+    #     tasks.add_street_view(self.proposal.id)
+    #     self.assertEqual(before_count+1, self.proposal.images.count())
+
+    #     new_image = self.proposal.images.order_by("-created")[0]
+    #     self.assertEqual(new_image.source, "document")

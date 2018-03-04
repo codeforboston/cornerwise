@@ -179,5 +179,8 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         _.extend(config, localConfig);
     }
 
+    if (window["SITE_CONFIG"])
+        _.extend(config, window["SITE_CONFIG"]);
+
     return config;
 });

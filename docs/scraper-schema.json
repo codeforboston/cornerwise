@@ -216,7 +216,16 @@
             "required": ["name", "description", "region_name"]
         },
         "document": {
-            "$ref": "#/definitions/link"
+            "allOf": [
+                {"$ref": "#/definitions/link"},
+
+                {"properties": {
+                    "content-type": {
+                        "description": "MIME type of the document",
+                        "type": "string"
+                    }}
+                }
+            ]
         },
         "image": {
             "$ref": "#/definitions/link"
@@ -234,10 +243,6 @@
                 "url": {
                     "type": "string",
                     "format": "uri"
-                },
-                "content-type": {
-                    "description": "MIME type of the document",
-                    "type": "string"
                 },
                 "tags": {
                     "type": "array",

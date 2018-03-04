@@ -57,15 +57,18 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "site_config.SiteMiddleware",
 )
 
 ROOT_URLCONF = "cornerwise.urls"
+
 
 def templates_config():
     context_processors = [
         "django.template.context_processors.request",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
+        "site_config.context_processor",
     ]
     if not IS_PRODUCTION:
         context_processors.insert(0, "django.template.context_processors.debug")

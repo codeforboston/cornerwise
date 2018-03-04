@@ -21,8 +21,8 @@
              {% templatetag closebrace %}
          );
          {% endfor %}
-
          var _CornerwisePreload = {{ preload_data|escapejs }};
+         var SITE_CONFIG = {{ site_config|safe }};
         </script>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
         {% if production %}
@@ -217,8 +217,8 @@
                             Region
                         </label>
                         <select id="filter-region" name="region" class="filter-selector">
-                            <option value="cambridge" selected>Somerville, MA</option>
-                            <option value="somerville">Cambridge, MA</option>
+                            <option value="somerville" selected>Somerville, MA</option>
+                            <option value="cambridge">Cambridge, MA</option>
                         </select>
                     </div>
 

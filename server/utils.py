@@ -25,7 +25,9 @@ def normalize(s):
 
 def extension(path):
     "Returns the last piece of the filename after the extension separator."
-    return path.split(os.path.extsep)[-1].lower()
+    filename = os.path.basename(path)
+    pieces = filename.split(os.path.extsep)
+    return pieces[-1] if len(pieces) > 1 else ""
 
 
 class pushback_iter(object):

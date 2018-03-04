@@ -1,0 +1,37 @@
+{% extends "base.djhtml" %}
+
+{% load humanize %}
+
+{% block body %}
+    {% for event in events %}
+        <div class="row" >
+            <h3>{{ event.title }}</h3>
+            <h4>{{ event.date|naturaldate }}</h4>
+
+            {% if event.description %}
+                <p>
+                    {{ event.description }}
+                </p>
+            {% endif %}
+
+            {% if event.minutes %}
+                <a href="{{ event.minutes }}">Minutes of the Meeting</a>
+            {% endif %}
+
+                {% if proposal.project %}
+                    <table class="table table-striped">
+                        <tbody>
+                            {% for attribute in proposal.attributes %}
+                                <tr>
+                                    <th>{{ attribute.name }}</th>
+                                    <td>{{ attribute.value }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+        </div>
+        </div>
+    {% endfor %}
+        </div>
+{% endblock %}

@@ -1,13 +1,19 @@
+"""Cornerwise admin configuration
+
+Allow administrators to configure proposal, case, and project importers.
+
+"""
+from datetime import datetime, timedelta
+from functools import reduce
+
 from django import forms
-from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.contrib.gis.admin import GeoModelAdmin
 
-from proposal.models import Importer, Layer
+from proposal.models import Event, Importer, Layer
 
-from datetime import datetime, timedelta
 from utils import geometry_from_url
 
 import jsonschema
@@ -39,13 +45,19 @@ def run_importers(_modeladmin, request, importers):
 def validate_importers(_, request, importers):
     when = datetime.now() - timedelta(days=30)
     for importer in importers:
+        data = importer.updated_since(when)
         try:
-            importer.validate(importer.updated_since(when))
+            importer.validate(data)
         except jsonschema.exceptions.ValidationError as err:
+            schema_path = "/".join(map(str, err.absolute_schema_path))
             messages.warning(
                 request,
-                f"Validation error for {importer}"
-                f"at {err.absolute_schema_path}: {err.message}")
+                f"Validation error for {importer} "
+                f"at {schema_path}: {err.message}")
+            messages.warning(
+                request,
+                str(reduce(lambda d, k: d[k], err.absolute_path, data)),
+            )
         else:
             messages.info(request, f"{importer} successfully validated!")
 
@@ -92,3 +104,4 @@ cornerwise_admin = CornerwiseAdmin(name="admin")
 cornerwise_admin.register(Importer, ImporterAdmin)
 cornerwise_admin.register(Layer, LayerAdmin)
 cornerwise_admin.register(User, UserAdmin)
+cornerwise_admin.register(Event, admin.ModelAdmin)

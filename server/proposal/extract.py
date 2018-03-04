@@ -300,6 +300,9 @@ def decision_properties(doc):
     if "properties" in sections:
         attrs.update(properties(sections["properties"]))
 
+    del attrs["Date"]
+    del attrs["Site"]
+
     vote, decision = find_vote(" ".join(sections["decision"]))
     if vote:
         concur, dissent, *_ = re.findall(r"\d+", vote)
@@ -315,7 +318,7 @@ def decision_properties(doc):
         props["complete"] = True
         props["status"] = "Approved" if approved else "Denied"
 
-    return attrs
+    return props, attrs
 
 
 def get_properties(doc):

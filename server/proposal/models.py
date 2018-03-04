@@ -222,6 +222,8 @@ class Proposal(models.Model):
         for doc_link in docs:
             taglist = ",".join(doc_link.get("tags"))
             field = doc_link.get("tags", [None])[0]
+            if not utils.extension(doc_link["url"]):
+                continue
             try:
                 doc = self.documents.get(url=doc_link["url"])
                 if taglist:
@@ -613,8 +615,12 @@ class Layer(models.Model):
                                    region name""")
     url = models.URLField(
         help_text="""URL of the GeoJSON representing the
-                  layer geometry.
+        layer geometry.
         """)
+    marker_template = models.TextField(
+        help_text="""The Underscore.js template to render for showing popup
+        information about a marker on the map""",
+        blank=True)
     envelope = models.PolygonField(srid=4326,
                                    null=True,
                                    help_text="""Polygon for the bounding envelope
