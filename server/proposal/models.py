@@ -222,8 +222,6 @@ class Proposal(models.Model):
         for doc_link in docs:
             taglist = ",".join(doc_link.get("tags"))
             field = doc_link.get("tags", [None])[0]
-            if not utils.extension(doc_link["url"]):
-                continue
             try:
                 doc = self.documents.get(url=doc_link["url"])
                 if taglist:

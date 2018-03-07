@@ -29,31 +29,61 @@ task_logger = get_task_logger(__name__)
 shared_task = celery.shared_task
 
 
+class DocumentDownloadFatalException(Exception):
+    pass
+
+
+class DocumentDownloadException(Exception):
+    pass
+
+
+def document_processing_failed(exc, task_id, args, kwargs, einfo):
+    doc = Document.objects.get(pk=args[0])
+    task_logger.warning(
+        "Processing for Document #%i failed repeatedly. Deleting.")
+    doc.delete()
+
+
 @shared_task
 @adapt
 def fetch_document(doc: Document):
     """Copy the given document (proposal.models.Document) to a local
     directory.
+
+    :returns: (new_or_updated, doc_id)
+    :returns: if the document was downloaded successfully and is new or
+    updated, returns the primary key. Otherwise, returns None.
     """
     url = doc.url
 
-    if doc.document and os.path.exists(doc.document.path):
-        # Has the document been updated?
-        updated = doc_utils.last_modified(doc.url)
-        # No?  Then we're good.
-        if not updated or updated <= doc.published:
-            return doc.pk
-
     task_logger.info("Fetching Document #%i", doc.pk)
-    doc_utils.save_from_url(doc, url, "download")
-    task_logger.info("Copied Document #%i to %s", doc.pk, doc.document.path)
-
-    return doc.pk
+    dl, status, updated = doc_utils.save_from_url(doc, url, "download")
+    if dl:
+        if status == 304:
+            task_logger.info("Document #%i is up to date", doc.pk)
+            return (False, doc.pk)
+        else:
+            task_logger.info("Copied %s Document #%i -> %s",
+                             "updated" if updated else "new",
+                             doc.pk, doc.document.path)
+            return (True, doc.pk)
+    else:
+        task_logger.warning(
+            "Attempt to download document #%i (%s) failed with code %i",
+            doc.pk, doc.url, status)
+        if 400 <= status < 500:
+            # Further attempts are not going to succeed, so delete the document
+            task_logger.warning("Document #%i deleted.", doc.pk)
+            doc.delete()
+            raise DocumentDownloadFatalException()
+        else:
+            # This error could eventually go away, so make sure to retry later
+            raise DocumentDownloadException()
 
 
 @shared_task
 @adapt
-def extract_text(doc: Document, encoding="ISO-8859-9"):
+def extract_text(doc: Document):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
 
@@ -62,25 +92,11 @@ def extract_text(doc: Document, encoding="ISO-8859-9"):
     :returns: The same document
 
     """
-    path = doc.local_path
-    # Could consider storing the full extracted text of the document in
-    # the database and indexing it, rather than extracting it to a file.
-    text_path = os.path.join(os.path.dirname(path), "text.txt")
-
-    # TODO: It may be practical to sniff pdfinfo, determine the PDF
-    # producer used, and make a best guess at encoding based on that
-    # information. We should be able to get away with using ISO-8859-9
-    # for now.
-    status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
-
-    if status:
-        task_logger.error("Failed to extract text from %s", path)
-    else:
+    if doc_utils.extract_text(doc):
         task_logger.info("Extracted text from Document #%i to %s.", doc.pk,
                          doc.fulltext)
-        doc.fulltext = text_path
-        doc.encoding = encoding
-        doc.save()
+    else:
+        task_logger.error("Failed to extract text from %s", doc.local_path)
 
         return doc.pk
 
@@ -105,10 +121,10 @@ def extract_images(doc: Document):
 
         return [image.pk for image in images]
     except Exception as exc:
-        task_logger.error(exc)
+        task_logger.exception("Image extraction failed for Document #%i",
+                              doc.pk, exc)
 
         return []
-
 
 @shared_task
 @adapt
@@ -176,12 +192,17 @@ def add_venue_info(proposal: Proposal):
 def add_parcel(proposal: Proposal):
     from parcel.models import Parcel
 
-    parcels = Parcel.objects.containing(proposal.location).exclude(poly_type="ROW")
+    parcels = Parcel.objects.containing(proposal.location)\
+                            .exclude(poly_type="ROW")
     if parcels:
         proposal.parcel = parcels[0]
         proposal.save()
+        task_logger.info("")
 
         return proposal.id
+    else:
+        task_logger.warning("No parcel found for Proposal #%i",
+                            proposal.pk)
 
 
 @shared_task
@@ -284,35 +305,32 @@ def post_process_images(doc: Document, image_ids):
     return image_ids
 
 
-@shared_task
+@shared_task(autoretry_for=(DocumentDownloadException,),
+             default_retry_delay=60*60,
+             max_retries=3,
+             on_failure=document_processing_failed)
 @adapt
 def process_document_sync(doc: Document):
-    fetch_document(doc)
+    updated, _ = fetch_document(doc)
 
-    extract_text(doc)
-    add_doc_attributes(doc)
+    if updated or not doc.fulltext:
+        extracted = bool(extract_text(doc))
 
-    image_ids = extract_images(doc)
-    post_process_images(doc, image_ids)
+    if extracted:
+        add_doc_attributes(doc)
 
-    generate_doc_thumbnail(doc)
+        image_ids = extract_images(doc)
+        post_process_images(doc, image_ids)
 
-
-def process_document(doc):
-    """
-    Run all tasks on a Document.
-    """
-    (fetch_document.s(doc.id) |
-     celery.group(extract_images.s() | post_process_images.s(),
-                  generate_doc_thumbnail.s(),
-                  extract_text.s() | add_doc_attributes.s()))()
+    if updated or not doc.thumbnail:
+        generate_doc_thumbnail(doc)
 
 
 def process_proposal(proposal):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
     add_street_view.delay(proposal.id)
-    #add_venue_info.delay(proposal.id)
+    # add_venue_info.delay(proposal.id)
 
     add_parcel.delay(proposal.id)
 
@@ -463,6 +481,15 @@ def cloud_vision_process(image_id):
 def process_image(image):
     if vision.CLIENT:
         cloud_vision_process.delay(image.pk)
+
+
+def process_proposal_documents(proposal: Proposal):
+    """
+    Helper function that schedules a task for each of a proposal's documents.
+    Returns a list of AsyncTaskResults.
+    """
+    return list(map(process_document_sync.delay,
+                    proposal.documents.values_list("pk", flat=True)))
 
 
 @receiver(post_save, sender=Proposal, dispatch_uid="process_new_proposal")

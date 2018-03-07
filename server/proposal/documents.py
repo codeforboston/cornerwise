@@ -18,34 +18,48 @@ from utils import extension
 from .models import Image
 
 
-def last_modified(url):
-    headers = requests.head(url).headers
-
-    if "Last-Modified" in headers:
-        return dt_parse(headers["Last-Modified"])
-
-    return None
-
-
 def save_from_url(doc, url, filename_base=None):
+    """
+    Downloads the document at `url` and saves it locally, storing the path in
+    the given Document.
+
+    :param doc: a Document model
+    :param url: URL string
+    :param filename_base: optional subpath specifying where to save the
+    document
+
+    Returns a tuple: (success, status_code, updated)
+    """
     filename = path.basename(parse.urlsplit(url).path)
 
     if filename_base:
         filename = "{}.{}".format(filename_base, extension(filename))
 
-    with requests.get(url, stream=True) as response:
-        doc.document.save(filename, File(response.raw), save=False)
+    exists = doc.document and path.exists(doc.document.path)
+    if exists:
+        published = doc.published
+        headers = {"If-Modified-Since": published.strftime("%a, %d %b %Y %H:%M:%S GMT")}
+    else:
+        headers = {}
 
-        file_published = files_metadata.published_date(path)
+    with requests.get(url, headers=headers, stream=True) as response:
+        if response:
+            if response.status_code == 304:
+                return (True, response.status_code, False)
 
-        if file_published:
-            doc.published = file_published
-        elif "Last-Modified" in response.headers:
-            doc.published = dt_parse(response.headers["Last-Modified"])
+            doc.document.save(filename, File(response.raw), save=False)
 
-        doc.save()
+            file_published = files_metadata.published_date(doc.document.path)
 
-    return doc
+            if file_published:
+                doc.published = file_published
+            elif "Last-Modified" in response.headers:
+                doc.published = dt_parse(response.headers["Last-Modified"])
+
+            doc.save()
+            return (True, response.status_code, exists)
+        else:
+            return (False, response.status_code, response.reason)
 
 
 def save_images(doc):
@@ -99,3 +113,24 @@ def generate_thumbnail(doc):
         doc.thumbnail.save("thumbnail.jpg", File(thumb_file))
 
     return thumb_path
+
+
+def extract_text(doc):
+    path = doc.local_path
+    # Could consider storing the full extracted text of the document in
+    # the database and indexing it, rather than extracting it to a file.
+    text_path = path.join(path.dirname(path), "text.txt")
+
+    # TODO: It may be practical to sniff pdfinfo, determine the PDF
+    # producer used, and make a best guess at encoding based on that
+    # information. We should be able to get away with using ISO-8859-9
+    # for now.
+    encoding = files_metadata.encoding(path)
+    status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
+
+    if not status:
+        doc.fulltext = text_path
+        doc.encoding = encoding
+        doc.save()
+
+    return not status
