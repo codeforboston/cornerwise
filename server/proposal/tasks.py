@@ -310,7 +310,7 @@ def post_process_images(doc: Document, image_ids):
              max_retries=3,
              on_failure=document_processing_failed)
 @adapt
-def process_document_sync(doc: Document):
+def process_document(doc: Document):
     updated, _ = fetch_document(doc)
 
     if updated or not doc.fulltext:
@@ -488,7 +488,7 @@ def process_proposal_documents(proposal: Proposal):
     Helper function that schedules a task for each of a proposal's documents.
     Returns a list of AsyncTaskResults.
     """
-    return list(map(process_document_sync.delay,
+    return list(map(process_document.delay,
                     proposal.documents.values_list("pk", flat=True)))
 
 
@@ -501,5 +501,4 @@ def proposal_hook(**kwargs):
 @receiver(post_save, sender=Document, dispatch_uid="process_new_document")
 def document_hook(**kwargs):
     if kwargs["created"]:
-        process_document_sync.delay(kwargs["instance"].pk)
-
+        process_document.delay(kwargs["instance"].pk)
