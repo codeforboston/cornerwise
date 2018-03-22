@@ -1,3 +1,7 @@
+import datetime
+import os
+import re
+import subprocess
 import utils
 
 
@@ -10,6 +14,7 @@ class multimethod(object):
     def add(self, dispatch_val, fn=None):
         def adder(fn):
             self.table[dispatch_val] = fn
+            return self
 
         if fn:
             adder(fn)
@@ -44,3 +49,32 @@ encoding = multimethod(extension)
 encoding.default(lambda _: "utf-8")
 
 extract_text = multimethod(extension)
+
+extract_images = multimethod(extension)
+
+# PDF
+@published_date.add("pdf")
+def published_date(path):
+    proc = subprocess.Popen(["pdfinfo", path],
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+    out, err = proc.communicate()
+    m = re.search(r"CreationDate:\s+(.*?)\n", out.decode("UTF-8"))
+
+    if m:
+        datestr = m.group(1)
+        return datetime.strptime(datestr, "%c")
+
+    return datetime.fromtimestamp(os.path.getmtime(path))
+
+
+@encoding.add("pdf")
+def encoding(_):
+    return "ISO-8859-9"
+
+
+@extract_text.add("pdf")
+def extract_text(path, output_path):
+    status = subprocess.call(["pdftotext", "-enc", encoding(path), path,
+                              output_path])
+    return not status
