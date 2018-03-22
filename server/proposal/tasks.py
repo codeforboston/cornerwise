@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 import os
 import pytz
 import re
-import subprocess
 
 import celery
 from celery.utils.log import get_task_logger
