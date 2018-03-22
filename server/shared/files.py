@@ -32,7 +32,8 @@ class multimethod(object):
         else:
             raise ValueError("Unknown dispatch value:", val)
 
-def extension(path):
+
+def extension(path, *_):
     return utils.extension(path).lower()
 
 
@@ -41,3 +42,5 @@ published_date.default(lambda _: None)
 
 encoding = multimethod(extension)
 encoding.default(lambda _: "utf-8")
+
+extract_text = multimethod(extension)

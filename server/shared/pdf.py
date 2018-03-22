@@ -1,6 +1,6 @@
 import datetime, os, re, subprocess
 
-from .files_metadata import published_date, encoding
+from .files import published_date, encoding, extract_text
 
 @published_date.add("pdf")
 def published_date(path):
@@ -20,3 +20,10 @@ def published_date(path):
 @encoding.add("pdf")
 def encoding(_):
     return "ISO-8859-9"
+
+
+@extract_text.add("pdf")
+def extract_text(path, output_path):
+    status = subprocess.call(["pdftotext", "-enc", encoding(path), path,
+                              output_path])
+    return not status

@@ -12,7 +12,7 @@ from urllib import parse
 import requests
 
 from scripts import pdf
-from shared import files_metadata
+from shared import files
 from utils import extension
 
 from .models import Image
@@ -49,7 +49,7 @@ def save_from_url(doc, url, filename_base=None):
 
             doc.document.save(filename, File(response.raw), save=False)
 
-            file_published = files_metadata.published_date(doc.document.path)
+            file_published = files.published_date(doc.document.path)
 
             if file_published:
                 doc.published = file_published
@@ -116,21 +116,18 @@ def generate_thumbnail(doc):
 
 
 def extract_text(doc):
-    path = doc.local_path
     # Could consider storing the full extracted text of the document in
     # the database and indexing it, rather than extracting it to a file.
-    text_path = path.join(path.dirname(path), "text.txt")
+    text_path = path.join(path.dirname(doc.local_path), "text.txt")
 
     # TODO: It may be practical to sniff pdfinfo, determine the PDF
     # producer used, and make a best guess at encoding based on that
     # information. We should be able to get away with using ISO-8859-9
     # for now.
-    encoding = files_metadata.encoding(path)
-    status = subprocess.call(["pdftotext", "-enc", encoding, path, text_path])
-
-    if not status:
+    if files.extract_text(doc.local_path, text_path):
         doc.fulltext = text_path
-        doc.encoding = encoding
+        doc.encoding = files.encoding(doc.local_path)
         doc.save()
+        return True
 
-    return not status
+    return False
