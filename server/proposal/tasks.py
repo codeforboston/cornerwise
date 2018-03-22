@@ -95,10 +95,9 @@ def extract_text(doc: Document):
     if doc_utils.extract_text(doc):
         task_logger.info("Extracted text from Document #%i to %s.", doc.pk,
                          doc.fulltext)
+        return True
     else:
         task_logger.error("Failed to extract text from %s", doc.local_path)
-
-        return doc.pk
 
 
 @shared_task
