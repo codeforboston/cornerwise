@@ -1,4 +1,6 @@
+# pylint: disable=E402
 import os
+import logging
 from traceback import format_tb
 
 from celery import Celery, signals
@@ -31,3 +33,28 @@ def on_task_failure(sender, **kwargs):
                    "args": kwargs["args"],
                    "kwargs": kwargs["kwargs"]})
 
+
+@signals.task_prerun.connect
+def setup_task_logging(task_id=None, **kwargs):
+    from shared.logger import RedisLoggingHandler
+
+    if task_id:
+        logger = logging.getLogger(f"celery_tasks.{task_id}")
+        logger.propagate = True
+        handler = RedisLoggingHandler(
+            topic=f"cornerwise:task_log:{task_id}",
+            expiration=604800)
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(
+            logging.Formatter("[%(asctime)s][%(levelname)s] %(message)s"))
+        logger.addHandler(handler)
+
+
+@signals.task_postrun.connect
+def cleanup_task_logging(task_id=None, **kwargs):
+    if task_id:
+        logger = logging.getLogger(f"celery_tasks.{task_id}")
+        for handler in logger.handlers:
+            handler.flush()
+            handler.close()
+        logger.handlers = []

@@ -2,6 +2,7 @@
 and their related models (Documents, Images).
 """
 from datetime import datetime, timedelta
+import logging
 import os
 import pytz
 import re
@@ -36,16 +37,25 @@ class DocumentDownloadException(Exception):
     pass
 
 
-def document_processing_failed(exc, task_id, args, kwargs, einfo):
+def get_logger(task):
+    task_id = task.request.id
+    return logging.getLogger(f"celery_tasks.{task_id}") if task_id \
+        else task_logger
+
+
+def document_processing_failed(task, exc, task_id, args, kwargs, einfo, ):
+    """Called when a document processing task fails more than max_retries.
+
+    """
     doc = Document.objects.get(pk=args[0])
     task_logger.warning(
-        "Processing for Document #%i failed repeatedly. Deleting.")
+        "Processing for Document #%i failed repeatedly. Deleting.", doc.pk)
     doc.delete()
 
 
-@shared_task
+@shared_task(bind=True)
 @adapt
-def fetch_document(doc: Document):
+def fetch_document(self, doc: Document):
     """Copy the given document (proposal.models.Document) to a local
     directory.
 
@@ -55,24 +65,25 @@ def fetch_document(doc: Document):
     """
     url = doc.url
 
-    task_logger.info("Fetching Document #%i", doc.pk)
+    logger = get_logger(self)
+    logger.info("Fetching Document #%i", doc.pk)
     dl, status, updated = doc_utils.save_from_url(doc, url, "download")
     if dl:
         if status == 304:
-            task_logger.info("Document #%i is up to date", doc.pk)
+            logger.info("Document #%i is up to date", doc.pk)
             return (False, doc.pk)
         else:
-            task_logger.info("Copied %s Document #%i -> %s",
-                             "updated" if updated else "new",
-                             doc.pk, doc.document.path)
+            logger.info("Copied %s Document #%i -> %s",
+                        "updated" if updated else "new",
+                        doc.pk, doc.document.path)
             return (True, doc.pk)
     else:
-        task_logger.warning(
+        logger.warning(
             "Attempt to download document #%i (%s) failed with code %i",
             doc.pk, doc.url, status)
         if 400 <= status < 500:
             # Further attempts are not going to succeed, so delete the document
-            task_logger.warning("Document #%i deleted.", doc.pk)
+            logger.warning("Document #%i deleted.", doc.pk)
             doc.delete()
             raise DocumentDownloadFatalException()
         else:
@@ -80,9 +91,9 @@ def fetch_document(doc: Document):
             raise DocumentDownloadException()
 
 
-@shared_task
+@shared_task(bind=True)
 @adapt
-def extract_text(doc: Document):
+def extract_text(self, doc: Document):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
 
@@ -91,17 +102,18 @@ def extract_text(doc: Document):
     :returns: The same document
 
     """
+    logger = get_logger(self)
     if doc_utils.extract_text(doc):
-        task_logger.info("Extracted text from Document #%i to %s.", doc.pk,
+        logger.info("Extracted text from Document #%i to %s.", doc.pk,
                          doc.fulltext)
         return True
     else:
-        task_logger.error("Failed to extract text from %s", doc.local_path)
+        logger.error("Failed to extract text from %s", doc.local_path)
 
 
-@shared_task
+@shared_task(bind=True)
 @adapt
-def extract_images(doc: Document):
+def extract_images(self, doc: Document):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
     document's directory (docs/<doc id>/images).
@@ -112,15 +124,16 @@ def extract_images(doc: Document):
     :returns: A list of proposal.models.Image objects
 
     """
+    logger = get_logger(self)
     try:
-        task_logger.info("Extracting images from Document #%s", doc.pk)
+        logger.info("Extracting images from Document #%s", doc.pk)
         images = doc_utils.save_images(doc)
-        task_logger.info("Extracted %i image(s) from %s.", len(images), doc.title)
+        logger.info("Extracted %i image(s) from %s.", len(images), doc.title)
 
         return [image.pk for image in images]
     except Exception as exc:
-        task_logger.exception("Image extraction failed for Document #%i",
-                              doc.pk, exc)
+        logger.exception("Image extraction failed for Document #%i",
+                         doc.pk, exc)
 
         return []
 
@@ -339,7 +352,7 @@ def stringify_address_dict(address):
     return f"{address.street_address}, {address.city}, {address.state}"
 
 
-def create_proposals(dicts):
+def create_proposals(dicts, logger=task_logger):
     """Helper function to create new Proposal objects.
     """
 
@@ -354,11 +367,9 @@ def create_proposals(dicts):
             from io import StringIO
             buff = StringIO()
             pprint.pprint(case_dict, buff)
-            print(f"Could not create create proposal from: {buff.getvalue()}")
-            print(exc)
-            task_logger.error("Could not create proposal from dictionary: %s",
-                              case_dict)
-            task_logger.error("%s", exc)
+            logger.error("Could not create proposal from dictionary: %s",
+                         case_dict)
+            logger.error("%s", exc)
 
 
 def create_events(dicts):
@@ -368,7 +379,8 @@ def create_events(dicts):
 
 @adapt
 def fetch_proposals(since: datetime=None,
-                    importers: QuerySet=None):
+                    importers: QuerySet=None,
+                    logger=task_logger):
     """Task runs each of the importers given.
 
     """
@@ -403,12 +415,12 @@ def fetch_proposals(since: datetime=None,
             found = importer.updated_since(importer_since)
             importer.validate(found)
         except Exception as err:
-            task_logger.warning("Importer %s failed schema validation!\n%s",
-                                importer.name, err)
+            logger.warning("Importer %s failed schema validation!\n%s",
+                           importer.name, err)
             continue
 
         found_description = ", ".join(f"{len(v)} {k}" for k, v in found.items())
-        task_logger.info(f"Fetched: {found_description} w/{importer}")
+        logger.info(f"Fetched: {found_description} w/{importer}")
 
         for k in found:
             for item in found[k]:
@@ -425,28 +437,30 @@ def fetch_proposals(since: datetime=None,
     #     add_locations(all_found["projects"],
     #                   lambda prj: stringify_address_dict(prj["address"]))
 
-    proposal_ids = [p.id for p in create_proposals(all_found["cases"])]
+    proposal_ids = [p.id for p in create_proposals(all_found["cases"], logger)]
     return proposal_ids
 
 
-@shared_task
-def pull_updates(since: datetime=None, importers_filter: str=None):
+@shared_task(bind=True)
+def pull_updates(self, since: datetime=None, importers_filter: str=None):
     "Run all registered proposal importers."
     filters = {}
     if importers_filter:
         filters["region_name__icontains"] = importers_filter
 
     return fetch_proposals(since,
-                           importers=Importer.objects.filter(**filters))
+                           importers=Importer.objects.filter(**filters),
+                           logger=get_logger(self))
 
 
 # Image tasks
-@shared_task
-def cloud_vision_process(image_id):
+@shared_task(bind=True)
+def cloud_vision_process(self, image_id):
     """
     Send the image to the Cloud Vision API. If the image is recognized as a
     logo, delete it.
     """
+    logger = get_logger(self)
     processed_key = f"image:{image_id}:checked"
     image = Image.objects.annotate(region_name=F("proposal__region_name"))\
                          .get(pk=image_id)
@@ -459,13 +473,13 @@ def cloud_vision_process(image_id):
     if logo:
         if city_name in logo["description"]:
             image.delete()
-            task_logger.info("Logo detected: image #%i deleted", image_id)
+            logger.info("Logo detected: image #%i deleted", image_id)
         else:
             cache.set(f"image:{image_id}:logo", logo)
 
     if processed["empty_streetview"]:
         image.delete()
-        task_logger.info("Empty streetview: image #%i deleted", image_id)
+        logger.info("Empty streetview: image #%i deleted", image_id)
 
     if processed["textual"]:
         image.delete()
