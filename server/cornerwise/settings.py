@@ -135,7 +135,7 @@ LOGGING["handlers"]["record"] = {
     "backupCount": 5
 }
 
-LOGGING["loggers"]["proposal.tasks"] = {
+LOGGING["loggers"]["celery_tasks"] = {
     "handlers": ["console", "mail_admins", "record"],
     "level":    "INFO"
 }

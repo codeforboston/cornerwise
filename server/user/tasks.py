@@ -13,7 +13,7 @@ from shared.mail import send as send_mail
 from .models import Subscription
 from . import mail
 
-logger = get_task_logger(__name__)
+logger = get_task_logger("celery_tasks")
 
 User = get_user_model()
 

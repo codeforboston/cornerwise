@@ -24,7 +24,7 @@ from .models import Proposal, Document, Event, Image, Importer
 from . import extract, documents as doc_utils
 
 
-task_logger = get_task_logger(__name__)
+task_logger = get_task_logger("celery_tasks")
 shared_task = celery.shared_task
 
 
