@@ -35,8 +35,6 @@ $manage migrate
 echo "Creating views"
 $manage sync_pgviews
 
-rm /tmp/*.pid
-
 start_celery() {
     celery -A $APP_NAME beat --pidfile=/var/run/celery/celerybeat.pid &
     # celery -A $APP_NAME worker --loglevel=${CELERY_LOGLEVEL:-info} \
