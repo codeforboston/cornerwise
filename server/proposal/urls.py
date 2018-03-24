@@ -15,6 +15,7 @@ urlpatterns = [
     url(r"^view/(?P<pk>[0-9]+)$", views.view_proposal, name="view-proposal"),
     url(r"^events$", views.list_events, name="list-events"),
     url(r"^event/(?P<pk>[0-9]+)$", views.view_event),
+    url(r"^layers$", views.list_layers),
     url(r"^image/(?P<pk>[0-9]+)$", views.view_image),
     url(r"^image$", views.view_image),
 

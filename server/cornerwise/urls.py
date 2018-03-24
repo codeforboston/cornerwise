@@ -1,15 +1,15 @@
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.conf import settings
-from django.contrib import admin
 
 from cornerwise.views import index, contact_us
 
+
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^parcel/', include("parcel.urls")),
-    url(r'^project/', include("project.urls")),
-    url(r'^proposal/', include("proposal.urls")),
+    url(r"^admin/", include("cornerwise.admin_urls")),
+    url(r"^parcel/", include("parcel.urls")),
+    url(r"^project/", include("project.urls")),
+    url(r"^proposal/", include("proposal.urls")),
     url(r"^doc/", include("proposal.doc_urls")),
     url(r"^task/", include("task.urls")),
     url(r"^user/", include("user.urls")),

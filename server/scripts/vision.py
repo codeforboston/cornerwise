@@ -1,16 +1,21 @@
 import base64
-from collections import OrderedDict
-from httplib2 import ServerNotFoundError
-import itertools
 import logging
+from collections import OrderedDict
+from io import BytesIO
 from math import sqrt
+from urllib.request import urlopen
 
 from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials, ApplicationDefaultCredentialsError
-
+from httplib2 import ServerNotFoundError
+from oauth2client.client import (ApplicationDefaultCredentialsError,
+                                 GoogleCredentials)
 from PIL import Image
 
 DISCOVERY_URL = "https://{api}.googleapis.com/$discovery/rest?version={apiVersion}"
+
+
+def is_streetview_url(url):
+    return url.startswith("https://maps.googleapis.com/maps/api/streetview")
 
 
 def get_client():
@@ -42,8 +47,7 @@ def image_similarity(image_path_a, image_path_b):
 
 
 def encode_image(image_file):
-    with open(image_file, "rb") as infile:
-        return base64.b64encode(infile.read()).decode("ascii")
+    return base64.b64encode(image_file.read()).decode("ascii")
 
 
 def annotate_image(client, image_file):
@@ -83,7 +87,7 @@ def find_logo(response, full_width=None, full_height=None):
     fields
     """
     full_area = full_width * full_height if full_width and full_height else None
-    logos = response.get("logoAnnotations")
+    logos = response.get("logoAnnotations", [])
     for logo in logos:
         if full_area:
             vertices = logo["boundingPoly"]["vertices"]
@@ -93,6 +97,27 @@ def find_logo(response, full_width=None, full_height=None):
                 return logo
         elif logo["score"] > 0.80:
             return logo
+
+
+def find_textual(response, full_width=None, full_height=None):
+    for label in response["labelAnnotations"]:
+        if label["score"] < 0.85:
+            break
+        if label["description"] == "text":
+            return True
+
+    if "fullTextAnnotation" in response:
+        if full_width and full_height:
+            total_area = remaining_area = full_width * full_height
+            for page in response["fullTextAnnotation"]["pages"]:
+                remaining_area -= page["width"] * page["height"]
+            if remaining_area/total_area <= 0.8:
+                return True
+
+
+def text(response):
+    if "fullTextAnnotation" in response:
+        return response["fullTextAnnotation"]["text"]
 
 
 def rgb_to_xyz(r, g, b):
@@ -149,13 +174,26 @@ def simplify_labels(response):
                        for l in response["labelAnnotations"])
 
 
-def process_image(image_file):
-    if not CLIENT: return None
+def open_image(image_path=None, image_url=None):
+    if image_path:
+        return open(image_path, "rb")
+    return BytesIO(urlopen(image_url).read())
 
-    image = Image.open(image_file)
+
+def process_image(image_path=None, image_url=None):
+    assert image_path or image_url
+    if not CLIENT:
+        return None
+
     try:
-        response = annotate_image(CLIENT, image_file)["responses"][0]
+        with open_image(image_path, image_url) as infile:
+            response = annotate_image(CLIENT, infile)["responses"][0]
+        textual = find_textual(response)
+        is_empty_streetview = image_url and is_streetview_url(image_url) and textual
         return {"logo": find_logo(response),
-                "colorfulness": colorfulness(response)}
+                "colorfulness": colorfulness(response),
+                "textual": textual,
+                "text": text(response),
+                "empty_streetview": is_empty_streetview}
     except KeyError:
         return None

@@ -1,0 +1,277 @@
+{
+    "id": "https://github.com/codeforboston/cornerwise/docs/scraper-schema",
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "schema for Cornerwise scrapers",
+    "type": "object",
+    "properties": {
+        "cases": {
+            "type": "array",
+            "description": "",
+            "items": {
+                "$ref": "#/definitions/case"
+            }
+        },
+        "events": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/event"
+            }
+        },
+        "projects": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/project"
+            }
+        }
+    },
+    "definitions": {
+        "case": {
+            "type": "object",
+            "required": [
+                "all_addresses",
+                "complete",
+                "case_number",
+                "updated_date"
+            ],
+            "properties": {
+                "case_number": {
+                    "type": "string",
+                    "description": "A case number for this case, unique within the scope of this region."
+                },
+                "first_hearing_date": {
+                    "description": "The date and time of the first public hearing",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "all_addresses": {
+                    "description": "An array of all the addresses associated with this proposal. The first address is used as the primary address (e.g., for display purposes).",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "location": {
+                    "description": "The coordinates of the proposal. If omitted, Cornerwise will geocode the primary address.",
+                    "$ref": "#/definitions/location"
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "A brief description of the case"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A detailed description of the case."
+                },
+                "parcel_id": {
+                    "description": "An identifier for the corresponding parcel, unique within the scope of the region.",
+                    "type": "string"
+                },
+                "updated_date": {
+                    "description": "The last modification date and time",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "region_name": {
+                    "description": "If omitted, Cornerwise will use the region name configured for the importer.",
+                    "type": "string"
+                },
+                "source": {
+                    "description": "A site where users can find additional information",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "status": {
+                    "description": "A descriptive label for the status of the project.",
+                    "type": "string"
+                },
+                "complete": {
+                    "description": "Indicates whether the case is still pending review (false), or if it has been reviewed or withdrawn (true)",
+                    "type": "boolean"
+                },
+                "decision": {
+                    "type": "object",
+                    "description": "Provides additional details about the decision from the reviewing body",
+                    "properties": {
+                        "approved": {
+                            "type": "boolean"
+                        },
+                        "votes_for": {
+                            "type": "number"
+                        },
+                        "votes_against": {
+                            "type": "number"
+                        },
+                        "comments": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "dependencies": {
+                        "votes_for": [
+                            "votes_against"
+                        ]
+                    }
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/event"
+                    }
+                },
+                "documents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/document"
+                    }
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/image"
+                    }
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": [
+                            {"type": "string",
+                             "description": "attribute name"},
+                            {"type": "string",
+                             "description": "attribute value"}
+                        ]
+                    }
+                }
+            }
+        },
+        "event": {
+            "type": "object",
+            "required": [
+                "title",
+                "start"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "duration": {
+                    "type": "string",
+                    "description": "Estimated duration of the event, in hours and minutes (h:mm)",
+                    "pattern": "^(\\d+:)?\\d\\d"
+                },
+                "address": {
+                    "$ref": "#/definitions/address"
+                },
+                "region_name": {
+                    "type": "string"
+                },
+                "cases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": ""
+                    }
+                },
+                "documents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/document"
+                    }
+                }
+            }
+        },
+        "project": {
+            "type": "object",
+            "properties": {
+                "region_name":    { "type": "string" },
+                "name":           { "type": "string" },
+                "description":    { "type": "string" },
+                "approved":       { "type": "boolean" },
+                "justification":  { "type": "string" },
+                "department":     { "type": "string" },
+                "category":       { "type": "string" },
+                "funding_source": { "type": "string" },
+                "location":       { "$ref": "#/definitions/location" },
+                "address":        { "$ref": "#/definitions/address" },
+                "related_cases":  { "type": "array", "items": { "type": "string" }},
+                "budget":         {
+                    "type": "object",
+                    "description": "A dictionary mapping years to budgeted cost (USD)",
+                    "patternProperties": {
+                        "^\\d{4}$": { "type": "integer" }
+                    },
+                    "additionalProperties": false
+                },
+                "updated":        { "type": "string", "format": "date-time" }
+            },
+            "required": ["name", "description", "region_name"]
+        },
+        "document": {
+            "allOf": [
+                {"$ref": "#/definitions/link"},
+
+                {"properties": {
+                    "content-type": {
+                        "description": "MIME type of the document",
+                        "type": "string"
+                    }}
+                }
+            ]
+        },
+        "image": {
+            "$ref": "#/definitions/link"
+        },
+        "link": {
+            "type": "object",
+            "required": [
+                "title",
+                "url"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+
+        "address": {
+            "type": "object",
+            "properties": {
+                "name":           { "type": "string" },
+                "street_address": { "type": "string" },
+                "city":           { "type": "string" },
+                "state":          { "type": "string" },
+                "zip":            { "type": "string" }
+            },
+            "required": ["street_address", "city", "state"]
+        },
+
+        "location": {
+            "type":"object",
+            "properties": {
+                "lat":  {"type": "number"},
+                "long": {"type": "number"}
+            },
+            "required": ["lat", "long"]
+        }
+    }
+}

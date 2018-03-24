@@ -1,7 +1,20 @@
+from datetime import datetime, timedelta
+import json
 import os
+import pickle
 import re
+import pytz
 from collections import deque
+import typing
+from urllib import parse, request
 
+from django.contrib.gis.geos import GeometryCollection, GEOSGeometry
+from django.contrib.gis.geos.polygon import Polygon
+
+from django_redis import get_redis_connection
+
+
+Redis = get_redis_connection()
 
 def normalize(s):
     """
@@ -17,7 +30,9 @@ def normalize(s):
 
 def extension(path):
     "Returns the last piece of the filename after the extension separator."
-    return path.split(os.path.extsep)[-1].lower()
+    filename = os.path.basename(path)
+    pieces = filename.split(os.path.extsep)
+    return pieces[-1] if len(pieces) > 1 else ""
 
 
 class pushback_iter(object):
@@ -41,44 +56,6 @@ be added back to the 'stack' after consideration.
         if self.pushed:
             return self.pushed.pop()
         return next(self.iterable)
-
-
-def make_file_mover(attr):
-    """Returns a function that takes an object and a new name and renames
-    the file associated with that object's `attr` file field.
-
-    :param attr: The name of the FileField attribute on the target
-    object
-
-    :returns: A function that can be bound as a method of an object with
-    the named file field.
-
-    """
-    def move_file(self, new_path):
-        file_field = getattr(self, attr)
-        current_path = file_field and file_field.path
-
-        if not current_path:
-            raise IOError("")
-
-        if os.path.basename(new_path) == new_path:
-            doc_dir, _ = os.path.split(current_path)
-            new_path = os.path.join(doc_dir, new_path)
-
-        if new_path != current_path:
-            os.rename(current_path, new_path)
-
-            try:
-                setattr(self, attr, new_path)
-                self.save()
-            except Exception as err:
-                os.rename(new_path, self.local_file)
-
-                raise err
-
-        return new_path
-
-    return move_file
 
 
 def decompose_coord(ll):
@@ -119,3 +96,159 @@ def prettify_long(lng):
 
     return prettify_format.\
         format(d=d, m=m, s=s, h="E" if lng > 0 else "W")
+
+
+def add_params(url, extra_params):
+    """Given a URL, add new query parameters by merging in the contents of the
+    `extra_params` dictionary.
+
+    :param url: (str)
+    :param extra_params: (dict)
+
+    :returns: (str) URL including new parameters
+    """
+    parsed = parse.urlparse(url)._asdict()
+    params = parse.parse_qs(parsed["query"])
+    params.update(extra_params)
+    parsed["query"] = parse.urlencode(params, doseq=True)
+
+    return parse.urlunparse(parse.ParseResult(**parsed))
+
+
+def bounds_from_box(box):
+    """Converts a `box` string parameter to a Polygon object.
+
+    :param box: (str) with the format latMin,longMin,latMax,longMax
+    """
+    coords = [float(coord) for coord in box.split(",")]
+    assert len(coords) == 4
+    # Coordinates are submitted to the server as
+    # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
+    # different order:
+    return Polygon.from_bbox((coords[1], coords[0], coords[3], coords[2]))
+
+
+def _geometry(feat):
+    if feat["type"] == "FeatureCollection":
+        return sum([_geometry(f) for f in feat["features"]], [])
+
+    return [GEOSGeometry(json.dumps(feat["geometry"]))]
+
+
+def geometry(feat):
+    """Constructs a GEOSGeometryCollection from a GeoJSON dict.
+    """
+    return GeometryCollection(_geometry(feat), srid=4326)
+
+
+def geometry_from_url(url):
+    """Constructs a GEOSGeometryCollection from a URL that points to a GeoJSON
+    resource.
+    """
+    with request.urlopen(url) as resp:
+        raw = resp.read().decode("utf-8")
+        return geometry(json.loads(raw))
+
+
+def utc_now():
+    return pytz.utc.localize(datetime.utcnow())
+
+
+def lazy(fn):
+    memo = [None, False]
+
+    def wrapped():
+        if not memo[1]:
+            memo[0:2] = fn(), True
+        return memo[0]
+    return wrapped
+
+
+def add_locations(dicts, geocoder,
+                  get_address=lambda d: d["all_addresses"][0],
+                  region=lambda d: d.get("region_name", "")):
+    """Alters an iterable of dictionaries in place, adding a "location" field
+                  that contains the geocoded latitude and longitude of each
+                  dictionary's address field.
+
+    :param geocoder: an instance of a geocoder object that takes a 
+    """
+    get_region = region if callable(region) else (lambda _: region)
+    locations = geocoder.geocode(
+        f"{get_address(d)}, {get_region(d)}" for d in dicts)
+    for d, location in zip(dicts, locations):
+        if not location:
+            continue
+        d["location"] = {"lat": location["location"]["lat"],
+                         "long": location["location"]["lng"],
+                         "score": location["properties"].get("score"),
+                         "google_place_id": location["properties"].get("place_id")}
+
+def fn_chain(val, *fns):
+    for fn in fns:
+        val = fn(val) if callable(fn) else val.get(fn)
+        if val is None:
+            return val
+    return val
+
+
+def make_fn_chain(*fns):
+    return lambda x: fn_chain(x, *fns)
+
+
+def parse_duration(s):
+    h, m = s.split(":")
+    return timedelta(hours=int(h), minutes=int(m))
+
+
+def read_n_from_end(fp: typing.IO, n,
+                    split_chunk=lambda c: c.split(b"\n"),
+                    chunksize=1000):
+    """
+    Consume a file in reverse, splitting with function `split_chunk`. By
+    default, takes the last `n` lines from the reader.
+
+    :fp: file handle, must be opened in 'rb' mode
+    :n: the number of lines
+    :split_chunk: function to split chunks into lines
+    """
+    start_pos = fp.tell()
+    lines = deque()
+    pos = fp.seek(0, 2)
+    current = b""
+    try:
+        while True:
+            last_pos = pos
+            pos = fp.seek(-chunksize, 1)
+
+            current = fp.read(last_pos - pos) + current
+            current, *found_lines = split_chunk(current)
+            lines.extendleft(reversed(found_lines[0:n-len(lines)]))
+
+            if len(lines) >= n:
+                break
+
+    except OSError as _err:
+        if len(lines) < n:
+            lines.appendleft(current)
+
+    fp.seek(start_pos, 0)
+
+    return lines
+
+
+def append_to_key_raw(k, *values, limit=1000):
+    with Redis.pipeline() as p:
+        p.lpush(k, *values)
+        if limit:
+            p.ltrim(0, limit-1)
+        return p.execute()
+
+
+def append_to_key(k, *values, limit=1000):
+    """Encode values using pickle and store them in the Redis cache. Newer messages
+    will appear before older messages. Messages beyond the specified limit will
+    be deleted.
+
+    """
+    return append_to_key_raw(k, *map(pickle.dumps, values), limit=limit)

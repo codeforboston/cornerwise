@@ -48,3 +48,5 @@ FOURSQUARE_SECRET = ""
 
 # Used to generate absolute URLS, e.g., for emails
 SERVER_DOMAIN = "localhost:4000"
+
+ADMINS = [("Jane Doe", "janedoe@example.com")]

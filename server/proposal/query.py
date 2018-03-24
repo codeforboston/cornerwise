@@ -1,4 +1,3 @@
-from django.contrib.gis.geos.polygon import Polygon
 from django.db.models import Q
 from collections import defaultdict
 from functools import reduce
@@ -6,6 +5,7 @@ import re
 
 from .models import Attribute
 from parcel.models import LotSize, LotQuantiles
+from utils import bounds_from_box
 
 
 def get_lot_size_groups():
@@ -106,12 +106,7 @@ def build_proposal_query_dict(d):
 
     bounds = d.get("box")
     if bounds:
-        coords = [float(coord) for coord in bounds.split(",")]
-        # Coordinates are submitted to the server as
-        # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
-        # different order:
-        bbox = Polygon.from_bbox((coords[1], coords[0], coords[3], coords[2]))
-        subqueries["location__within"] = bbox
+        subqueries["location__within"] = bounds_from_box(bounds)
 
     # If status is anything other than 'active' or 'closed', find all
     # proposals.

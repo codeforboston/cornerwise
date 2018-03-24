@@ -2,6 +2,7 @@
 """
 import logging
 
+import requests
 import sendgrid
 import toronado
 from django.conf import settings
@@ -101,3 +102,9 @@ def send_template(email, subject, template_name, context=None):
     else:
         LOGGER.info("SendGrid not available. Generated email: %s", html)
 
+
+def _get_sendgrid(url, params=None):
+    response = requests.get(
+        url, params,
+        headers={"Authorization": f"Bearer {settings.SENDGRID_API_KEY}"})
+    return response

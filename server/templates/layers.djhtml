@@ -1,0 +1,38 @@
+{% extends "base.djhtml" %}
+
+{% load humanize %}
+
+{% block body %}
+    {% for layer in layers %}
+        <div class="row" >
+            <div class="col-md-4">
+                {% if layer.icon %}
+                    <img src="{{ layer.icon }}"
+                         alt="Layer icon for {{ layer.name }}"
+                         class="img-thumbnail"/>
+                {% else %}
+                    <div class="iconText">
+                        {{ layer.icon_text }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-8" >
+                <h3>{{ layer.name }}</h3>
+                <h4>{{ layer.region_name }}</h4>
+
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th>GeoJSON URL:</th>
+                            <td>{{ layer.url }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% empty %}
+        <div class="row">
+            No layers
+        </div>
+    {% endfor %}
+{% endblock %}

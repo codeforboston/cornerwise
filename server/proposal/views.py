@@ -8,8 +8,9 @@ from django.shortcuts import get_object_or_404
 
 from shared.request import make_response, ErrorResponse
 
-from .models import Proposal, Attribute, Document, Event, Image
+from .models import Proposal, Attribute, Document, Event, Image, Layer
 from .query import build_proposal_query
+from utils import bounds_from_box
 
 default_attributes = [
     "applicant_name", "legal_notice", "dates_of_public_hearing"
@@ -29,7 +30,7 @@ def proposal_json(proposal,
     }
 
     if include_documents:
-        pdict["documents"] = [d.to_dict() for d in proposal.document_set.all()]
+        pdict["documents"] = [d.to_dict() for d in proposal.documents.all()]
 
     if include_images:
         images = proposal.images.order_by("-priority")
@@ -57,9 +58,16 @@ def proposal_json(proposal,
 
     return pdict
 
+
+def layer_json(layer):
+    return {"name": layer.name,
+            "icon_text": layer.icon_text,
+            "icon": layer.icon.url,
+            "url": layer.url,
+            "region_name": layer.region_name}
+
+
 # Views:
-
-
 @make_response("list.djhtml")
 def list_proposals(req):
     proposals = Proposal.objects.filter(build_proposal_query(req.GET))
@@ -143,6 +151,18 @@ def download_document(req, pk):
         pass
 
     return FileResponse(doc.document)
+
+
+@make_response("layers.djhtml")
+def list_layers(req):
+    query = {}
+    if req.GET.get("box"):
+        query["envelope__overlaps"] = bounds_from_box(req.GET.get("box"))
+    regions = req.GET.getlist("region_name")
+    if regions:
+        query["region_name__in"] = regions
+    layers = Layer.objects.filter(**query)
+    return {"layers": [layer_json(l) for l in layers]}
 
 
 @make_response()

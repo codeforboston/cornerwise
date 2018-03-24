@@ -1,15 +1,11 @@
 import json
-import re
 
 from django.conf import settings
-from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect, render
-from django.template import RequestContext
+from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from parcel.models import LotQuantiles
-from shared import request
 
 from .contact import ContactForm
 

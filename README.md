@@ -41,9 +41,17 @@ Technologies used:
 ----------
 
 - [Docker](https://www.docker.com)
-- [Python 3.6](https://www.python.org) and [Django 1.10](https://www.djangoproject.com)
+- [Python 3.6](https://www.python.org) and [Django 1.11](https://www.djangoproject.com)
 - [Celery](http://www.celeryproject.org/)
 - [PostGIS](http://postgis.net)
 - HTML/CSS
 - [Backbone.js](http://backbonejs.org), [jQuery](http://jquery.com/)
 - [Leaflet](http://leafletjs.com/)
+
+Related Projects:
+-----------
+
+- [Minimap](https://github.com/bdougsand/minimap) for rendering map thumbnails
+  in subscriber emails.
+- [Cornerwise Scrapers](https://github.com/codeforboston/cornerwise-scrapers), a
+  collection of the scrapers that are configured by default.

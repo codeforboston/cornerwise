@@ -1,0 +1,39 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block extrahead %}
+<style type="text/css">
+    .log-output {
+        font-family: monospace;
+        font-size: small;
+        max-height: 80vh;
+        overflow: auto;
+        white-space: pre-wrap;
+    }
+    </style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        {% for task_id, log in logs.items %}
+            <div>
+                <h3>{{ task_id }}</h3>
+                <div class="log-output">
+{% for line in log %}{{ line }}
+{% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

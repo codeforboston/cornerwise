@@ -6,56 +6,60 @@ from django.core.files import File
 
 from dateutil.parser import parse as dt_parse
 from os import path
-from dateutil.parser import parse
-import shutil
 import subprocess
-from urllib import parse, request
+from urllib import parse
+
+import requests
 
 from scripts import pdf
-from shared import files_metadata
+from shared import files
 from utils import extension
 
 from .models import Image
 
 
-def last_modified(url):
-    req = request.Request(url=url, method="HEAD")
-    with request.urlopen(req) as resp:
-        if "Last-Modified" in resp.headers:
-            return parse(resp.headers["Last-Modified"])
-
-    return None
-
-
-def doc_info(doc):
-    enc = doc.encoding
-    if doc.fulltext and doc.fulltext.path:
-        lines = (line.decode(enc) for line in doc.fulltext)
-    else:
-        lines = []
-
-    return {"field": doc.field, "title": doc.title, "lines": lines}
-
-
 def save_from_url(doc, url, filename_base=None):
+    """
+    Downloads the document at `url` and saves it locally, storing the path in
+    the given Document.
+
+    :param doc: a Document model
+    :param url: URL string
+    :param filename_base: optional subpath specifying where to save the
+    document
+
+    Returns a tuple: (success, status_code, updated)
+    """
     filename = path.basename(parse.urlsplit(url).path)
 
     if filename_base:
         filename = "{}.{}".format(filename_base, extension(filename))
 
-    with request.urlopen(url) as resp:
-        doc.document.save(filename, File(resp), save=False)
+    exists = doc.document and path.exists(doc.document.path)
+    if exists:
+        published = doc.published
+        headers = {"If-Modified-Since": published.strftime("%a, %d %b %Y %H:%M:%S GMT")}
+    else:
+        headers = {}
 
-        file_published = files_metadata.published_date(path)
+    with requests.get(url, headers=headers, stream=True) as response:
+        if response:
+            if response.status_code == 304:
+                return (True, response.status_code, False)
 
-        if file_published:
-            doc.published = file_published
-        elif "Last-Modified" in resp.headers:
-            doc.published = dt_parse(resp.headers["Last-Modified"])
+            doc.document.save(filename, File(response.raw), save=False)
 
-        doc.save()
+            file_published = files.published_date(doc.document.path)
 
-    return doc
+            if file_published:
+                doc.published = file_published
+            elif "Last-Modified" in response.headers:
+                doc.published = dt_parse(response.headers["Last-Modified"])
+
+            doc.save()
+            return (True, response.status_code, exists)
+        else:
+            return (False, response.status_code, response.reason)
 
 
 def save_images(doc):
@@ -73,6 +77,7 @@ def save_images(doc):
         image.width = w
         image.height = h
         image.image.save("image-{:0>3}.{}".format(i, ext), image_data)
+        image.save()
         images.append(image)
 
     return images
@@ -81,20 +86,20 @@ def save_images(doc):
 def generate_thumbnail(doc):
     "Generate a Document thumbnail."
     if not doc.document:
-        task_logger.error("Document has not been copied to the local filesystem")
-        return
+        raise FileNotFoundError(
+            "Document has not been copied to the local filesystem")
 
-    path = doc.document.path
+    doc_path = doc.document.path
 
     # TODO: Dispatch on extension. Handle other common file types
-    if extension(path) != "pdf":
+    if extension(doc_path) != "pdf":
         return
 
-    out_prefix = path.join(path.dirname(path), "thumbnail")
+    out_prefix = path.join(path.dirname(doc_path), "thumbnail")
 
     proc = subprocess.Popen(
         [
-            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", path,
+            "pdftoppm", "-jpeg", "-singlefile", "-scale-to", "200", doc_path,
             out_prefix
         ],
         stderr=subprocess.PIPE)
@@ -108,3 +113,21 @@ def generate_thumbnail(doc):
         doc.thumbnail.save("thumbnail.jpg", File(thumb_file))
 
     return thumb_path
+
+
+def extract_text(doc):
+    # Could consider storing the full extracted text of the document in
+    # the database and indexing it, rather than extracting it to a file.
+    text_path = path.join(path.dirname(doc.local_path), "text.txt")
+
+    # TODO: It may be practical to sniff pdfinfo, determine the PDF
+    # producer used, and make a best guess at encoding based on that
+    # information. We should be able to get away with using ISO-8859-9
+    # for now.
+    if files.extract_text(doc.local_path, text_path):
+        doc.fulltext = text_path
+        doc.encoding = files.encoding(doc.local_path)
+        doc.save()
+        return True
+
+    return False

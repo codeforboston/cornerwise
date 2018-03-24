@@ -27,14 +27,37 @@ done
 
 # Prefer Python 3:
 PYTHON_BIN=$(which python3 || which python)
+manage="$PYTHON_BIN $APP_ROOT/manage.py"
 
 echo "Applying any outstanding migrations"
-$PYTHON_BIN $APP_ROOT/manage.py migrate
+$manage migrate
 
 echo "Creating views"
-$PYTHON_BIN $APP_ROOT/manage.py sync_pgviews
+$manage sync_pgviews
 
-rm /tmp/*.pid
+start_celery() {
+    celery -A $APP_NAME beat --pidfile=/var/run/celery/celerybeat.pid &
+    # celery -A $APP_NAME worker --loglevel=${CELERY_LOGLEVEL:-info} \
+        #        --pidfile=/tmp/celery.pid \
+        #        --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
+        #        $celery_opts &
+    mkdir -p /var/run/celery /var/log/celery
+    celery multi start 2 -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
+           --pidfile=/var/run/celery/%n.pid \
+           --logfile=/var/log/celery/%n.log
+}
+
+autoreload_celery() {
+    while : ; do
+        inotifywait -e modify $APP_ROOT/*/tasks.py
+        pids=$(cat /var/run/celery/*.pid)
+        kill $pids
+        while ps $pids > /dev/null; do
+            sleep 1
+        done
+        start_celery $1
+    done
+}
 
 # Start celery in the background of this container if there is not a linked
 # container running with the name 'celery'.
@@ -45,16 +68,16 @@ if ! getent hosts celery; then
         celery_opts="-E"
     fi
 
-    celery -A $APP_NAME beat --pidfile=/tmp/celerybeat.pid &
-    celery -A $APP_NAME worker --loglevel=INFO \
-           --pidfile=/tmp/celery.pid \
-           --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
-           $celery_opts &
+    start_celery "$celery_opts"
+
+    if [ "$APP_MODE" != "production" ]; then
+        which inotifywait && autoreload_celery "$celery_opts" &
+    fi
 fi
 
 if [ "$APP_MODE" = "production" ]; then
     gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
              cornerwise.wsgi:application
 else
-    $PYTHON_BIN manage.py runserver 0.0.0.0:$APP_PORT
+    $manage runserver 0.0.0.0:$APP_PORT
 fi

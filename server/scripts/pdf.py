@@ -1,6 +1,5 @@
 from PyPDF2 import PdfFileReader
 from PIL import Image
-import os
 from io import BytesIO
 
 
@@ -58,8 +57,8 @@ def extract_images(path, filter_fn=default_guard, limit=10):
     for i, (image, ext, width, height) in enumerate(get_images(path, filter_fn)):
         image_out = BytesIO()
         image.save(image_out, ext)
+        image_out.seek(0)
         yield (image_out, ext, width, height)
 
         if i == limit:
             break
-

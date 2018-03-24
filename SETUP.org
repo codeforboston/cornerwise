@@ -169,6 +169,29 @@
     database running in your postgis container. There are over 30,000 parcels in
     Somerville alone, so it can take a while for the process to complete.
 
+* Administrator Interface
+** Setup
+   You'll first need to create a superuser.
+
+   With the server running in Docker Compose, ~cd~ to the repository root and
+   run:
+
+   #+BEGIN_SRC bash
+   docker-compose exec cornerwise ./manage.py createsuperuser <username>
+   #+END_SRC
+
+   You will be prompted to enter a password. See ~./manage.py createsuperuser -h~
+   for full usage details, e.g., if you would like to set the superuser's email
+   address. If SendGrid is configured, superusers with email addresses receive
+   system notifications, such as messages submitted through the *Contact* form.
+
+   Now navigate to ~http://localhost:4000/admin~ and enter your credentials.
+
+** Creating new Scrapers
+   Cornerwise uses a simple scraper interface to import new cases, events, and
+   projects. Every day, it will send a GET request to a configured URL. The
+   scraper should return a JSON result conforming to the [[http://lbovet.github.io/docson/index.html#https://raw.githubusercontent.com/codeforboston/cornerwise/config/docs/scraper-schema.json][scraper schema]].
+
 * Troubleshooting
 ** Broken Icons
    The license agreement for the layer icons forbids us from redistributing them

@@ -3,12 +3,13 @@ contents.
 """
 
 from collections import OrderedDict
-from dateutil.parser import parse as date_parse
 from utils import pushback_iter
 import re
 
-empty_line = re.compile(r"\s*\n$")
-property_pattern = re.compile(r"^([a-z]+(\s+[a-z&]+)*): (.*)(\n|$)", re.I)
+# from shared.text_utils import 
+
+EMPTY_LINE = re.compile(r"\s*\n$")
+PROPERTY_PATTERN = re.compile(r"^([a-z]+(\s+[a-z&]+)*): (.*)(\n|$)", re.I)
 
 
 def properties(lines):
@@ -16,12 +17,12 @@ def properties(lines):
     last_property = None
 
     for line in lines:
-        m = property_pattern.match(line)
+        m = PROPERTY_PATTERN.match(line)
 
         if m:
             properties[m.group(1)] = m.group(3)
             last_property = m.group(1).strip()
-        elif empty_line.match(line):
+        elif EMPTY_LINE.match(line):
             last_property = None
         elif last_property:
             properties[last_property] += " " + line.strip()
@@ -34,7 +35,7 @@ def paragraphize(lines):
     current_p = []
 
     for line in lines:
-        if empty_line.match(line):
+        if EMPTY_LINE.match(line):
             ps.append(current_p)
             current_p = []
         else:
@@ -244,6 +245,11 @@ def field_matches(pattern):
     return lambda doc: re.search(pattern, doc.field)
 
 
+def has_tags(tags):
+    tagset = set([tags] if isinstance(tags, str) else tags)
+    return lambda doc: tagset < doc.tag_set
+
+
 def title_matches(pattern):
     "Extractor predicate that matches the document title."
     return lambda doc: re.search(pattern, doc.title)
@@ -263,6 +269,8 @@ def staff_report_properties(doc):
 
     props.update(properties(sections["header"]))
     props.update(properties(sections["planning staff report"]))
+
+    # TODO: Consider using the legal notice as summary
 
     desc_section = sections.get("project description")
     if desc_section:
@@ -287,20 +295,47 @@ def decision_properties(doc):
     Document.
     """
     sections = decision_sections(doc)
+    attrs = {}
     props = {}
     if "properties" in sections:
-        props.update(properties(sections["properties"]))
+        attrs.update(properties(sections["properties"]))
+
+    del attrs["Date"]
+    del attrs["Site"]
 
     vote, decision = find_vote(" ".join(sections["decision"]))
     if vote:
-        props["Vote"] = vote
-        props["Decision"] = decision
+        concur, dissent, *_ = re.findall(r"\d+", vote)
+        approved = bool(re.match(r"(?i)approve", decision))
+        attrs["Vote"] = vote
+        attrs["Votes to Approve"] = concur if approved else dissent
+        attrs["Votes to Deny"] = dissent if approved else concur
 
-    return props
+        if "Decision" in attrs:
+            attrs["Decision Text"] = attrs["Decision"]
+
+        attrs["Decision"] = decision.title()
+        props["complete"] = True
+        props["status"] = "Approved" if approved else "Denied"
+
+    return props, attrs
 
 
 def get_properties(doc):
-    all_props = {}
+    """Runs all matching extractors on doc and merges the extracted properties.
+    """
+    all_props, all_attributes = {}, {}
     for extract in ALL_EXTRACTORS:
-        all_props.update(extract(doc))
+        extracted = extract(doc)
+        if isinstance(extracted, tuple):
+            all_props.update(extracted[0])
+            all_attributes.update(extracted[1])
+        else:
+            all_attributes.update(extracted)
+
+    all_props["attributes"] = all_attributes
+
+    if "updated_date" in all_props:
+        all_props["updated_date"] = doc.published
+
     return all_props

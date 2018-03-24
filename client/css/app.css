@@ -345,12 +345,14 @@ button.big-submit, a.big-submit {
     background-color: #3c7c3d;
     border: none;
     color: white;
-    display: inline-block;
     margin-top: 1.5em;
     padding: 0.75em;
     text-align: center;
     text-transform: uppercase;
     width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    display: inline-block;
 }
 
 .overlay ::-webkit-input-placeholder {
@@ -1197,6 +1199,9 @@ a.brief-model:hover {
     display: block;
     line-height: 1.5em;
     padding-left: 0.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #info .attribute {
@@ -1222,9 +1227,10 @@ a.thumb-link {
     height: 80px;
     width: 80px;
     text-align: center;
-    vertical-align: middle;
-
     transition: border-color 0.1s linear;
+    display: flex;
+    justify-content: center;
+    align-content: center;
 }
 
 a.thumb-link:hover {
@@ -1232,10 +1238,8 @@ a.thumb-link:hover {
 }
 
 .images .thumb {
-    display: inline-block;
     max-height: 80px;
     max-width: 80px;
-    padding-bottom: 5px;
 }
 
 /* Leaflet info popup */
@@ -2056,6 +2060,12 @@ body.choosing-bounds .leaflet-marker-icon
     }
 }
 
+@media screen and (min-width: 700px) and (max-width: 850px) {
+    #ref-address-form .input {
+        font-size: 2vw !important;
+    }
+
+}
 
 @media screen and (max-width: 700px) {
     body.nointro #search-banner .overlay-contents {
@@ -2231,6 +2241,7 @@ body.choosing-bounds .leaflet-marker-icon
 
     #info .document {
         display: inline-block;
+        max-width: 95%;
     }
 
     #info.expanded .sidebar {
