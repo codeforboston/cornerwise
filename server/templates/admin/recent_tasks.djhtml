@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block extrahead %}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+    <ul>
+        {% for task_name, task_id, state in tasks %}
+            <li>
+                {{ task_name }} ({{ task_id }}) &mdash; {{ state }}
+                <br/>
+                <a href="{% url 'task_logs' %}?task-id={{ task_id }}">
+                    View Log Output
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

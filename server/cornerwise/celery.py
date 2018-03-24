@@ -51,10 +51,15 @@ def setup_task_logging(task_id=None, **kwargs):
 
 
 @signals.task_postrun.connect
-def cleanup_task_logging(task_id=None, **kwargs):
+def cleanup_task_logging(task_id=None, task=None, state=None, **kwargs):
+    from utils import append_to_key
+
     if task_id:
         logger = logging.getLogger(f"celery_tasks.{task_id}")
         for handler in logger.handlers:
             handler.flush()
             handler.close()
         logger.handlers = []
+
+        # Record that a task has recently run
+        append_to_key("cornerwise:recent_tasks", (task.name, task_id, state))
