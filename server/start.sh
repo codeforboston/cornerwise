@@ -68,7 +68,9 @@ if ! getent hosts celery; then
         celery_opts="-E"
     fi
 
+    rm /var/run/celery/*.pid
     start_celery "$celery_opts"
+    celery_started=1
 
     if [ "$APP_MODE" != "production" ]; then
         which inotifywait && autoreload_celery "$celery_opts" &
@@ -80,4 +82,8 @@ if [ "$APP_MODE" = "production" ]; then
              cornerwise.wsgi:application
 else
     $manage runserver 0.0.0.0:$APP_PORT
+fi
+
+if ((celery_started)); then
+    celery multi stop 2
 fi
