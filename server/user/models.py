@@ -2,6 +2,7 @@ import urllib
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from utils import prettify_lat, prettify_long
 from .changes import summarize_subscription_updates
@@ -101,14 +102,41 @@ class Subscription(models.Model):
     # The subscription belong to a registered user:
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name="subscriptions")
-    active = models.BooleanField(default=False,
-                                 help_text="Users only receive updates for active subscriptions")
+    active = models.BooleanField(
+        default=False,
+        help_text="Users only receive updates for active subscriptions")
     created = models.DateTimeField(default=datetime.utcnow)
     updated = models.DateTimeField(default=datetime.utcnow)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
-    include_events = models.CharField(max_length=256, default="", blank=True,
-                                      help_text="Include events for a specified region")
+    center = models.PointField(
+        help_text=("Center point of the query. Along with the radius, "
+                   "determines the notification region."),
+        db_index=True,
+        null=True)
+    radius = models.FloatField(help_text="Radius in meters",
+                               db_index=True,
+                               validators=[MinValueValidator(10),
+                                           MaxValueValidator(10000)],
+                               null=True)
+    box = models.PolygonField(
+        help_text=("The notification region. Either this or the center and "
+                   "radius should be set."),
+        db_index=True,
+        null=True)
+    region_name = models.CharField(
+        help_text="Only subscribe to updates in this region",
+        db_index=True,
+        max_length=128,
+        null=True)
+
+    # Implementation of text search requires more design work
+    # text_search = models.CharField(
+    #     max_length=1000,
+    #     help_text="")
+    include_events = models.CharField(
+        max_length=256, default="", blank=True,
+        help_text="Include events for a specified region")
     last_notified = models.DateTimeField(default=datetime.now)
 
     objects = SubscriptionQuerySet.as_manager()
