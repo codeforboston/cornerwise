@@ -24,6 +24,8 @@ services:
       - ./client:/static
       - ./data:/data
       - ./docker-support:/support
+    stdin_open: true
+    tty: true
   postgres:
     image: mdillon/postgis:9.4
     volumes:
