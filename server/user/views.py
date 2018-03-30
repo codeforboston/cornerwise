@@ -1,20 +1,14 @@
-from django.conf import settings
-
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from django.contrib.auth import login, logout
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
 import logging
-import pytz
-import re
 
-from cornerwise.utils import today
 from shared.request import make_response, make_redirect_response, ErrorResponse
 from shared.mail import render_email_body
 from user import changes, tasks
@@ -169,7 +163,7 @@ def user_login(request, token, pk):
         return render(request, "token_error.djhtml", status=403)
 
     login(request, user)
-    return redirect(reverse(manage))
+    return redirect(reverse("manage-user"))
 
 
 def change_log(request):
