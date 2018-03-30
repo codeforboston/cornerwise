@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F, Q
+from django.utils import timezone
 
 from utils import bounds_from_box, point_from_str, prettify_lat, prettify_long
 from .changes import summarize_subscription_updates
@@ -13,7 +14,6 @@ from base64 import b64encode
 from datetime import datetime
 import os
 import pickle
-import re
 
 
 def make_token():
@@ -107,7 +107,7 @@ class SubscriptionQuerySet(models.QuerySet):
         """Mark that the Subscriptions in the query set have been sent emails.
 
         """
-        return self.update(last_notified=datetime.utcnow())
+        return self.update(last_notified=timezone.now())
 
 
 class Subscription(models.Model):
@@ -117,8 +117,8 @@ class Subscription(models.Model):
     active = models.BooleanField(
         default=False,
         help_text="Users only receive updates for active subscriptions")
-    created = models.DateTimeField(default=datetime.utcnow)
-    updated = models.DateTimeField(default=datetime.utcnow)
+    created = models.DateTimeField(default=timezone.now)
+    updated = models.DateTimeField(default=timezone.now)
     # Stores the pickle serialization of a dictionary describing the query
     query = models.BinaryField()
     center = models.PointField(
@@ -150,7 +150,7 @@ class Subscription(models.Model):
     include_events = models.CharField(
         max_length=256, default="", blank=True,
         help_text="Include events for a specified region")
-    last_notified = models.DateTimeField(default=datetime.now)
+    last_notified = models.DateTimeField(default=timezone.now)
 
     objects = SubscriptionQuerySet.as_manager()
 
