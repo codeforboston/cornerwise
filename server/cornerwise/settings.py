@@ -225,6 +225,9 @@ SENDGRID_TEMPLATES = {
 # If this is set to True, users are only allowed to have one subscription.
 LIMIT_SUBSCRIPTIONS = True
 
+MIN_ALERT_RADIUS = 50
+MAX_ALERT_RADIUS = 300
+
 # URL to use for generating minimap raster images for emails, etc.
 # MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
 #                "tile-provider=cartodb-light&"

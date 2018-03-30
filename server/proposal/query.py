@@ -5,7 +5,7 @@ import re
 
 from .models import Attribute
 from parcel.models import LotSize, LotQuantiles
-from utils import bounds_from_box
+from utils import bounds_from_box, point_from_str
 
 
 def get_lot_size_groups():
@@ -104,9 +104,11 @@ def build_proposal_query_dict(d):
             parcel_ids = LotSize.objects.filter(**parcel_query).values("parcel_id")
             subqueries["parcel_id__in"] = parcel_ids
 
-    bounds = d.get("box")
-    if bounds:
-        subqueries["location__within"] = bounds_from_box(bounds)
+    if "box" in d:
+        subqueries["location__within"] = bounds_from_box(d["box"])
+    elif "center" in d and "r" in d:
+        subqueries["location__distance_lte"] = (point_from_str(d["center"]),
+                                                float(d["r"]))
 
     # If status is anything other than 'active' or 'closed', find all
     # proposals.

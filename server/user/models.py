@@ -1,10 +1,12 @@
 import urllib
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import F, Q
 
-from utils import prettify_lat, prettify_long
+from utils import bounds_from_box, point_from_str, prettify_lat, prettify_long
 from .changes import summarize_subscription_updates
 
 from base64 import b64encode
@@ -94,8 +96,18 @@ class UserProfile(models.Model):
 
 
 class SubscriptionQuerySet(models.QuerySet):
+    def containing(self, point):
+        """
+        Find Subscriptions whose notification area includes the point
+        """
+        return self.filter(Q(center__distance_lte=(point, F("radius"))) |
+                           Q(box__contains=point))
+
     def mark_sent(self):
-        self.update(last_notified=datetime.utcnow())
+        """Mark that the Subscriptions in the query set have been sent emails.
+
+        """
+        return self.update(last_notified=datetime.utcnow())
 
 
 class Subscription(models.Model):
@@ -114,11 +126,12 @@ class Subscription(models.Model):
                    "determines the notification region."),
         db_index=True,
         null=True)
-    radius = models.FloatField(help_text="Radius in meters",
-                               db_index=True,
-                               validators=[MinValueValidator(10),
-                                           MaxValueValidator(10000)],
-                               null=True)
+    radius = models.FloatField(
+        help_text="Radius in meters",
+        db_index=True,
+        validators=[MinValueValidator(settings.MIN_ALERT_RADIUS),
+                    MaxValueValidator(settings.MAX_ALERT_RADIUS)],
+        null=True)
     box = models.PolygonField(
         help_text=("The notification region. Either this or the center and "
                    "radius should be set."),
@@ -144,6 +157,17 @@ class Subscription(models.Model):
     def save(self, *args, **kwargs):
         self.updated = datetime.now()
         super().save(*args, **kwargs)
+
+    def clean(self):
+        if bool(self.center) != bool(self.radius):  # nxor
+            raise ValidationError("center and radius must be set together",
+                                  params=["center", "radius"])
+        if not (self.center or self.box):
+            raise ValidationError("must have either a circle or box set",
+                                  params=["center", "radius"])
+
+        # TODO: If there's an associated region, check that the center lies
+        # inside its bounds, if known.
 
     def confirm(self):
         if settings.LIMIT_SUBSCRIPTIONS:
@@ -175,38 +199,31 @@ class Subscription(models.Model):
 
     @property
     def query_dict(self):
-        return pickle.loads(self.query)
-
-    @query_dict.setter
-    def query_dict(self, new_dict):
-        self.query = pickle.dumps(new_dict)
+        q = {}
+        if self.box:
+            q["box"] = self.box
+        if self.center:
+            q["center"] = self.center
+            q["r"] = self.radius
+        if self.region_name:
+            q["region_name"] = self.region_name
+        return q
 
     def set_validated_query(self, q):
-        self.query_dict = self.validate_query(q)
+        if "box" in q:
+            self.box = bounds_from_box(q["box"])
+        elif "circle" in q:
+            if "r" in q:
+                self.center = point_from_str(q["circle"])
+                self.radius = float(q["r"])
+        if "region_name" in q:
+            self.region_name = q["region_name"]
 
-    valid_keys = {
-        "projects": lambda v: v.lower() in {"all", "null"},
-        "text": lambda _: True,
-        "box": lambda v: (len(v.split(",")) == 4 and
-                          all(re.match(r"-?\d+\.\d+", c)
-                              for c in v.split(",")))
-    }
-
-    @classmethod
-    def validate_query(kls, q):
-        validated = {}
-        for k, v in q.items():
-            if k not in kls.valid_keys:
-                continue
-
-            if kls.valid_keys[k](v):
-                validated[k] = v
-
-        return validated
+        self.query = pickle.dumps(q)
 
     @staticmethod
     def readable_query(query):
-        if "project" in query:
+        if "projects" in query:
             if query["project"] == "all":
                 desc = "Public proposals "
             else:
@@ -233,12 +250,18 @@ class Subscription(models.Model):
 
     @property
     def minimap_src(self):
-        query = self.query_dict
-        if "box" in query:
-            coords = [float(s) for s in query["box"].split(",")]
+        if self.box:
+            box = self.box
+        else:
+            center = self.center
+            # This is good enough for our purposes here:
+            box = center.buffer(self.radius/111000)
+
+        if box:
+            bounds = box.envelope.tuple
+            sw = bounds[2]
+            ne = bounds[0]
             return settings.MINIMAP_SRC\
-                .format(swlat=coords[0], swlon=coords[1],
-                        nelat=coords[2], nelon=coords[3])
+                .format(swlat=sw[1], swlon=sw[0], nelat=ne[1], nelon=ne[0])
         else:
             return None
-

@@ -8,7 +8,7 @@ from collections import deque
 import typing
 from urllib import parse, request
 
-from django.contrib.gis.geos import GeometryCollection, GEOSGeometry
+from django.contrib.gis.geos import GeometryCollection, GEOSGeometry, Point
 from django.contrib.gis.geos.polygon import Polygon
 
 from django_redis import get_redis_connection
@@ -116,16 +116,32 @@ def add_params(url, extra_params):
 
 
 def bounds_from_box(box):
-    """Converts a `box` string parameter to a Polygon object.
+    """Converts a `box` string parameter to a Polygon object. If given a Polygon,
+    it is returned unchanged.
 
     :param box: (str) with the format latMin,longMin,latMax,longMax
+
     """
+    if isinstance(box, Polygon):
+        return box
+
     coords = [float(coord) for coord in box.split(",")]
     assert len(coords) == 4
     # Coordinates are submitted to the server as
     # latMin,longMin,latMax,longMax, but from_bbox wants its arguments in a
     # different order:
     return Polygon.from_bbox((coords[1], coords[0], coords[3], coords[2]))
+
+
+def point_from_str(coord):
+    """Converts a `circle` string parameter to a center point and radius. If
+    given a Point, it is returned unchanged.
+
+    """
+    if isinstance(coord, Point):
+        return coord
+
+    return Point(float(coord[1]), float(coord[0]), srid=4326)
 
 
 def _geometry(feat):

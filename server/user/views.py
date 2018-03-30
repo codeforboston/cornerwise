@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -20,27 +21,6 @@ logger = logging.getLogger(__file__)
 User = get_user_model()
 
 
-def user_dict(user):
-    return {}
-
-# These correspond to the filters the user can apply.
-valid_keys = {"projects", "text", "box", "region"}
-
-
-def validate_query(d):
-    # Remove unrecognized keys:
-    for k in set(d.keys()).difference(valid_keys):
-        del d[k]
-
-    if "projects" in d:
-        d["projects"] = d["projects"].lower()
-        if d["projects"] not in {"all", "null"}:
-            del d["projects"]
-
-    # Verify that all the keys are well-formed
-    return d
-
-
 @make_response("subscribed.djhtml", "subscribe_error.djhtml")
 def subscribe(request):
     """
@@ -56,12 +36,6 @@ def subscribe(request):
         raise ErrorResponse("Missing a 'query' field")
     except ValueError:
         raise ErrorResponse("Malformed JSON in 'query' field.")
-
-    if query_dict != {}:
-        query_dict = validate_query(query_dict)
-        if not query_dict:
-            raise ErrorResponse("Invalid filter options",
-                                {"query": query_dict})
 
     user = request.user
     new_user = False
@@ -90,6 +64,8 @@ def subscribe(request):
         subscription.set_validated_query(query_dict)
         subscription.user = user
         subscription.save()
+    # except ValidationError as verr:
+    #     raise ErrorResponse("")
     except Exception as exc:
         raise ErrorResponse("Invalid subscription", {"exception": exc.args})
 
@@ -184,9 +160,11 @@ def change_log(request):
 
     if "sub_id" in request.GET:
         sub = get_object_or_404(Subscription, pk=request.GET["sub_id"])
-        query = sub.query_dict
     else:
-        query = Subscription.validate_query(params)
+        sub = Subscription()
+        sub.set_validated_query(params)
+
+    query = sub.query_dict
 
     summary = changes.summarize_query_updates(query, since)
     context = {"since": since, "until": until, "changes": summary}
