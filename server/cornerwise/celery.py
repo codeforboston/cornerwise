@@ -21,7 +21,7 @@ def on_task_failure(sender, **kwargs):
     """
     Record details when a task fails.
     """
-    from cornerwise.utils import append_to_key
+    from utils import append_to_key
 
     append_to_key("cornerwise:logs:task_failure",
                   {"task_id": kwargs["task_id"],

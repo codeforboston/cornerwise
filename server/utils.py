@@ -252,3 +252,7 @@ def append_to_key(k, *values, limit=1000):
 
     """
     return append_to_key_raw(k, *map(pickle.dumps, values), limit=limit)
+
+
+def lget_key(k, limit=1000):
+    return [pickle.loads(x) for x in Redis.lrange(k, 0, 1000)]

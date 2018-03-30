@@ -5,7 +5,7 @@ from django import forms
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 
-from utils import read_n_from_end, Redis
+from utils import read_n_from_end, Redis, lget_key
 from shared.geocoder import Geocoder
 
 
@@ -31,6 +31,12 @@ def celery_logs(request):
     return render(request, "admin/log_view.djhtml",
                   {"log_name": "Celery Tasks Log",
                    "lines": log_lines})
+
+
+@is_superuser
+def task_failure_logs(request):
+    return render(request, "admin/task_failure_log.djhtml",
+                  {"messages": lget_key("cornerwise:logs:task_failure")})
 
 
 @is_superuser

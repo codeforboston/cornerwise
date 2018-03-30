@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% load humanize i18n %}
+
+{% block extrastyle %} {% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+{% endblock %}
+
+{% block content %}
+    <h2>Recent Task Failures:</h2>
+    <ul class="task-log log-entries">
+        {% for message in messages %}
+            <li class="entry">
+                Error in task: <code>{{ message.task }}</code>
+                &mdash;
+                {{ message.timestamp|date:"r" }} ({{ message.timestamp|naturaltime }})
+                <br/>
+                <strong class="exception">{{ message.exception }}:</strong> {{ message.message }}
+                {% if not hide_traceback %}
+                    <br/>
+                    <pre>{{ message.traceback|join:" " }}</pre>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>No recent errors</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
