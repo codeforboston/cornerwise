@@ -67,7 +67,7 @@ def send(email, subject, template_name, context=None, content=None):
     return True
 
 
-def render_email_body(template_name, context=None):
+def render_email_body(template_name, context=None, inline=True):
     """Generate text and HTML for an email body using the named email template,
     with substitutions provided by `context`.
     """
@@ -78,7 +78,8 @@ def render_email_body(template_name, context=None):
     except TemplateDoesNotExist:
         text = strip_tags(html)
 
-    html = toronado.from_string(html)
+    if inline:
+        html = toronado.from_string(html)
 
     return (html, text)
 

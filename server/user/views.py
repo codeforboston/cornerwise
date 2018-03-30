@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+# from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from django.contrib.auth import login, logout
@@ -10,9 +11,12 @@ from datetime import datetime
 import json
 import logging
 
+import pytz
+
 from shared.request import make_response, make_redirect_response, ErrorResponse
 from shared.mail import render_email_body
-from user import changes, tasks
+from user import tasks
+from user.mail import updates_context
 from user.models import Subscription, UserProfile
 from user.utils import not_logged_in, with_user
 
@@ -149,25 +153,27 @@ def change_log(request):
     """
     params = request.GET.copy()
     try:
-        since = datetime.strptime(params["since"], "%Y%m%d")
+        since = pytz.utc.localize(
+            datetime.strptime(params["since"], "%Y%m%d"))
+
         del params["since"]
     except KeyError as _kerr:
         raise ErrorResponse("Missing required param: since")
     except ValueError as _err:
         raise ErrorResponse("'since' should have the format YYYYmmdd")
 
-    until = request.GET.get("until")
-
     if "sub_id" in request.GET:
         sub = get_object_or_404(Subscription, pk=request.GET["sub_id"])
     else:
-        sub = Subscription()
+        sub = Subscription(created=since)
         sub.set_validated_query(params)
 
-    query = sub.query_dict
-
-    summary = changes.summarize_query_updates(query, since)
-    context = {"since": since, "until": until, "changes": summary}
+    html, _text = render_email_body(
+        "updates",
+        updates_context(request.user,
+                        sub.summarize_updates(since)),
+        inline=False)
+    return HttpResponse(html)
 
 
 @with_user
