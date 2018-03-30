@@ -3,13 +3,18 @@ from datetime import datetime
 from cornerwise.utils import make_absolute_url
 from django.template.loader import render_to_string
 
-from . import changes
+from . import changes, models
 
 
 def _make_user_context(user, context):
     context = context.copy() if context else {}
-    context["user"] = user.profile.addressal
-    context["unsubscribe_url"] = make_absolute_url(user.profile.unsubscribe_url)
+
+    try:
+        context["user"] = user.profile.addressal
+        context["unsubscribe_url"] = make_absolute_url(user.profile.unsubscribe_url)
+    except models.UserProfile.DoesNotExist:
+        context["user"] = "Unknown"
+        context["unsubscribe_url"] = make_absolute_url("/")
     return context
 
 
