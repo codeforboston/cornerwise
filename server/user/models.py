@@ -180,7 +180,7 @@ class Subscription(models.Model):
         self.active = True
         self.save()
 
-    def summarize_updates(self, since):
+    def summarize_updates(self, since=None):
         """
         since: a datetime
 
