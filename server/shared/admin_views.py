@@ -8,6 +8,8 @@ from django.views.generic.edit import FormView
 from utils import read_n_from_end, Redis, lget_key
 from shared.geocoder import Geocoder
 
+from .admin import cornerwise_admin
+
 
 is_superuser = user_passes_test(lambda user: user.is_superuser, "/admin")
 
@@ -28,22 +30,26 @@ def celery_logs(request):
     with open("logs/celery_tasks.log", "rb") as log:
         log_lines = read_n_from_end(log, nlines)
 
-    return render(request, "admin/log_view.djhtml",
-                  {"log_name": "Celery Tasks Log",
-                   "lines": log_lines})
+    context = cornerwise_admin.each_context(request)
+    context.update({"log_name": "Celery Tasks Log",
+                    "lines": log_lines})
+    return render(request, "admin/log_view.djhtml", context)
 
 
 @is_superuser
 def task_failure_logs(request):
-    return render(request, "admin/task_failure_log.djhtml",
-                  {"failures": lget_key("cornerwise:logs:task_failure")})
+    context = cornerwise_admin.each_context(request)
+    context.update({"failures": lget_key("cornerwise:logs:task_failure")})
+    return render(request, "admin/task_failure_log.djhtml", context)
 
 
 @is_superuser
 def task_logs(request):
     task_ids = request.GET.getlist("task_id")
-    return render(request, "admin/task_logs.djhtml",
-                  {"logs": get_task_logs(task_ids)})
+    context = cornerwise_admin.each_context(request)
+    context.update({"logs": get_task_logs(task_ids)})
+
+    return render(request, "admin/task_logs.djhtml", context)
 
 
 @is_superuser
@@ -52,8 +58,9 @@ def recent_tasks(request):
     n = request.GET.get("n", "100")
     n = max(10, min(1000, int(n)))
     recent_task_info = lget_key("cornerwise:recent_tasks", n)
-    return render(request, "admin/recent_tasks.djhtml",
-                  {"tasks": recent_task_info})
+    context = cornerwise_admin.each_context(request)
+    context.update({"tasks": recent_task_info})
+    return render(request, "admin/recent_tasks.djhtml", context)
 
 
 # Send message to users
@@ -62,6 +69,11 @@ class UserNotificationFormView(FormView):
 
     """
     template_name = "admin/notify_users.djhtml"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(cornerwise_admin.each_context(self.request))
+        return context
 
     class form_class(forms.Form):
         address = forms.CharField(label="Address")
