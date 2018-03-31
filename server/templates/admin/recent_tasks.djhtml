@@ -18,7 +18,7 @@
             <li>
                 {{ task_name }} ({{ task_id }}) &mdash; {{ state }}
                 <br/>
-                <a href="{% url 'task_logs' %}?task-id={{ task_id }}">
+                <a href="{% url 'task_logs' %}?task_id={{ task_id }}">
                     View Log Output
                 </a>
             </li>
