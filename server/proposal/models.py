@@ -76,20 +76,21 @@ class Proposal(models.Model):
     case_number = models.CharField(
         max_length=64,
         unique=True,
-        help_text=("The unique case number "
-                   "assigned by the city"))
+        help_text=("The unique case number assigned by the city"))
     address = models.CharField(max_length=128, help_text="Street address")
     other_addresses = models.CharField(
         max_length=250,
         blank=True,
         help_text="Other addresses covered by this proposal")
-    location = models.PointField(help_text="The latitude and longitude")
+    location = models.PointField(help_text="The latitude and longitude",
+                                 geography=True)
     region_name = models.CharField(
-        max_length=128, default="Somerville, MA", null=True, help_text="")
+        max_length=128, default="Somerville, MA", null=True, help_text="",
+        db_index=True)
     # The time when the proposal was last saved:
     modified = models.DateTimeField(auto_now=True)
     # The last time that the source was changed:
-    updated = models.DateTimeField()
+    updated = models.DateTimeField(db_index=True)
     created = models.DateTimeField(auto_now_add=True)
     summary = models.CharField(max_length=1024, default="")
     description = models.TextField(default="")

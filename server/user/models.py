@@ -103,6 +103,9 @@ class SubscriptionQuerySet(models.QuerySet):
         return self.filter(Q(center__distance_lte=(point, F("radius"))) |
                            Q(box__contains=point))
 
+    def in_radius(self, point, radius):
+        return self.filter(Q(center__distance_lte=(point, radius)))
+
     def mark_sent(self):
         """Mark that the Subscriptions in the query set have been sent emails.
 
@@ -124,6 +127,7 @@ class Subscription(models.Model):
     center = models.PointField(
         help_text=("Center point of the query. Along with the radius, "
                    "determines the notification region."),
+        geography=True,
         db_index=True,
         null=True)
     radius = models.FloatField(

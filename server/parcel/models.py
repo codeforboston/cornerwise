@@ -21,6 +21,9 @@ class Parcel(models.Model):
     plan_id = models.CharField(max_length=40, blank=True, null=True)
     last_edit = models.IntegerField(blank=True, null=True)
     town_id = models.SmallIntegerField(blank=True, null=True)
+
+    # Not using geometry type here, because the typical use of parcels is to
+    # look them up using a 'within' query.
     shape = models.MultiPolygonField(srid=4326, blank=True, null=True)
 
     # Address:
