@@ -106,7 +106,7 @@ def extract_text(self, doc: Document):
     logger = get_logger(self)
     if doc_utils.extract_text(doc):
         logger.info("Extracted text from Document #%i to %s.", doc.pk,
-                         doc.fulltext)
+                    doc.fulltext)
         return True
     else:
         logger.error("Failed to extract text from %s", doc.local_path)

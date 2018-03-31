@@ -86,6 +86,19 @@
                 <a href="{% url 'send_message' %}">Send Message</a>
             </li>
         </ul>
+
+        <h2>Debugging/Monitoring</h2>
+        <ul>
+            <li>
+                <a href="{% url 'recent_tasks' %}">Recently Run Tasks</a>
+            </li>
+            <li>
+                <a href="{% url 'task_failures' %}">Recently Task Failures</a>
+            </li>
+            <li>
+                <a href="{% url 'celery_log' %}">Celery Log</a>
+            </li>
+        </ul>
     </div>
 </div>
 {% endblock %}
