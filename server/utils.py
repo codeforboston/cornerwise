@@ -257,7 +257,7 @@ def append_to_key_raw(k, *values, limit=1000):
     with Redis.pipeline() as p:
         p.lpush(k, *values)
         if limit:
-            p.ltrim(0, limit-1)
+            p.ltrim(k, 0, limit-1)
         return p.execute()
 
 

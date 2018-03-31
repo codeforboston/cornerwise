@@ -10,7 +10,7 @@
 {% block content %}
     <h2>Recent Task Failures:</h2>
     <ul class="task-log log-entries">
-        {% for message in messages %}
+        {% for message in failures %}
             <li class="entry">
                 Error in task: <code>{{ message.task }}</code>
                 &mdash;

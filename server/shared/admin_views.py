@@ -36,7 +36,7 @@ def celery_logs(request):
 @is_superuser
 def task_failure_logs(request):
     return render(request, "admin/task_failure_log.djhtml",
-                  {"messages": lget_key("cornerwise:logs:task_failure")})
+                  {"failures": lget_key("cornerwise:logs:task_failure")})
 
 
 @is_superuser
@@ -51,7 +51,7 @@ def recent_tasks(request):
     """Displays a list of recently completed tasks."""
     n = request.GET.get("n", "100")
     n = max(10, min(1000, int(n)))
-    recent_task_info = Redis.lrange("cornerwise:recent_tasks", 0, n)
+    recent_task_info = lget_key("cornerwise:recent_tasks", n)
     return render(request, "admin/recent_tasks.djhtml",
                   {"tasks": recent_task_info})
 
