@@ -7,5 +7,4 @@ class ProposalConfig(AppConfig):
     def ready(self):
         # Register tasks with Celery:
         from . import tasks
-        from . import image_tasks
 

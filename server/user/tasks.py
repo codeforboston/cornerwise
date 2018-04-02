@@ -2,18 +2,16 @@ from datetime import datetime, timedelta
 from urllib import request
 
 from celery import shared_task
-from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from shared.logger import get_logger
 from shared.mail import send as send_mail
 
 from .models import Subscription
 from . import mail
-
-logger = get_task_logger("celery_tasks")
 
 User = get_user_model()
 
@@ -91,12 +89,13 @@ def send_subscription_confirmation_email(sub_id):
               "replace_subscription", mail.confirmation_context(subscription))
 
 
-@shared_task
-def send_notifications(subscription_ids=None, since=None):
+@shared_task(bind=True)
+def send_notifications(self, subscription_ids=None, since=None):
     """Check the Subscriptions and find those that have new updates since the last
     update was run.
 
     """
+    logger = get_logger(self)
     if subscription_ids:
         subscriptions = Subscription.objects.filter(pk__in=subscription_ids)
     else:
@@ -113,6 +112,8 @@ def send_notifications(subscription_ids=None, since=None):
         logger.info("Sent updates for %s subscription(s)",
                     len(sent))
         Subscription.objects.filter(pk__in=sent).mark_sent()
+    else:
+        logger.info("No updates sent")
 
 
 # Database hook:

@@ -2,13 +2,11 @@
 and their related models (Documents, Images).
 """
 from datetime import datetime, timedelta
-import logging
 import os
 import pytz
 import re
 
 import celery
-from celery.utils.log import get_task_logger
 
 from django.conf import settings
 from django.core.cache import cache
@@ -21,11 +19,11 @@ from cornerwise.adapt import adapt
 from utils import add_locations
 from scripts import foursquare, images, street_view, vision
 from shared.geocoder import Geocoder
+from shared.logger import get_logger, task_logger
 from .models import Proposal, Document, Event, Image, Importer
 from . import extract, documents as doc_utils
 
 
-task_logger = get_task_logger("celery_tasks")
 shared_task = celery.shared_task
 
 
@@ -37,26 +35,21 @@ class DocumentDownloadException(Exception):
     pass
 
 
-def get_logger(task):
-    task_id = task.request.id
-    return logging.getLogger(f"celery_tasks.{task_id}") if task_id \
-        else task_logger
-
-
 def document_processing_failed(task, exc, task_id, args, kwargs, einfo, ):
     """Called when a document processing task fails more than max_retries.
 
     """
+    logger = get_logger(task)
     doc = Document.objects.get(pk=args[0])
-    task_logger.warning(
+    logger.warning(
         "Processing for Document #%i (%s) failed repeatedly. Deleting.",
         doc.pk, doc.url)
     doc.delete()
 
 
-@shared_task(bind=True)
+@shared_task
 @adapt
-def fetch_document(self, doc: Document):
+def fetch_document(doc: Document, logger=task_logger):
     """Copy the given document (proposal.models.Document) to a local
     directory.
 
@@ -66,7 +59,6 @@ def fetch_document(self, doc: Document):
     """
     url = doc.url
 
-    logger = get_logger(self)
     logger.info("Fetching Document #%i", doc.pk)
     dl, status, updated = doc_utils.save_from_url(doc, url, "download")
     if dl:
@@ -92,9 +84,9 @@ def fetch_document(self, doc: Document):
             raise DocumentDownloadException()
 
 
-@shared_task(bind=True)
+@shared_task
 @adapt
-def extract_text(self, doc: Document):
+def extract_text(doc: Document, logger=task_logger):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
 
@@ -103,7 +95,6 @@ def extract_text(self, doc: Document):
     :returns: The same document
 
     """
-    logger = get_logger(self)
     if doc_utils.extract_text(doc):
         logger.info("Extracted text from Document #%i to %s.", doc.pk,
                     doc.fulltext)
@@ -112,9 +103,9 @@ def extract_text(self, doc: Document):
         logger.error("Failed to extract text from %s", doc.local_path)
 
 
-@shared_task(bind=True)
+@shared_task
 @adapt
-def extract_images(self, doc: Document):
+def extract_images(doc: Document, logger=task_logger):
     """If the given document (proposal.models.Document) has been copied to
     the local filesystem, extract its images to a subdirectory of the
     document's directory (docs/<doc id>/images).
@@ -125,7 +116,6 @@ def extract_images(self, doc: Document):
     :returns: A list of proposal.models.Image objects
 
     """
-    logger = get_logger(self)
     try:
         logger.info("Extracting images from Document #%s", doc.pk)
         images = doc_utils.save_images(doc)
@@ -138,9 +128,10 @@ def extract_images(self, doc: Document):
 
         return []
 
+
 @shared_task
 @adapt
-def add_street_view(proposal: Proposal):
+def add_street_view(proposal: Proposal, logger=task_logger):
     api_key = getattr(settings, "GOOGLE_API_KEY")
     secret = getattr(settings, "GOOGLE_STREET_VIEW_SECRET")
 
@@ -162,19 +153,19 @@ def add_street_view(proposal: Proposal):
                     priority=1)
                 return image
         except IntegrityError:
-            task_logger.warning("Image with that URL already exists: %s", url)
+            logger.warning("Image with that URL already exists: %s", url)
         except DataError:
-            task_logger.error(
+            logger.error(
                 "Image could not be saved.  Was the URL too long? %s", url)
 
     else:
-        task_logger.warn("Add a local_settings file with your Google API key "
-                         + "to add Street View images.")
+        logger.warn("Add a local_settings file with your Google API key "
+                    "to add Street View images.")
 
 
 @shared_task
 @adapt
-def add_venue_info(proposal: Proposal):
+def add_venue_info(proposal: Proposal, logger=task_logger):
     client_id = getattr(settings, "FOURSQUARE_CLIENT", None)
     client_secret = getattr(settings, "FOURSQUARE_SECRET")
 
@@ -186,8 +177,8 @@ def add_venue_info(proposal: Proposal):
     venue = foursquare.find_venue(params, client_id, client_secret)
 
     if venue:
-        task_logger.info("Found matching venue for proposal #{}: {}"\
-                         .format(proposal.id, venue["id"]))
+        logger.info("Found matching venue for proposal %s: %s",
+                    proposal.id, venue["id"])
         proposal.attributes.create(
             name="foursquare_id", text_value=venue["id"])
         proposal.attributes.create(
@@ -201,7 +192,7 @@ def add_venue_info(proposal: Proposal):
 
 @shared_task
 @adapt
-def add_parcel(proposal: Proposal):
+def add_parcel(proposal: Proposal, logger=task_logger):
     from parcel.models import Parcel
 
     parcels = Parcel.objects.containing(proposal.location)\
@@ -209,20 +200,19 @@ def add_parcel(proposal: Proposal):
     if parcels:
         proposal.parcel = parcels[0]
         proposal.save()
-        task_logger.info("")
 
         return proposal.id
     else:
-        task_logger.warning("No parcel found for Proposal #%i",
-                            proposal.pk)
+        logger.warning("No parcel found for Proposal #%i",
+                       proposal.pk)
 
 
 @shared_task
 @adapt
-def generate_doc_thumbnail(doc: Document):
+def generate_doc_thumbnail(doc: Document, logger=task_logger):
     "Generate a Document thumbnail."
     if not doc.document:
-        task_logger.error(
+        logger.error(
             "Document has not been copied to the local filesystem")
         return
 
@@ -230,7 +220,7 @@ def generate_doc_thumbnail(doc: Document):
 
 
 @shared_task
-def generate_thumbnail(image_id, replace=False):
+def generate_thumbnail(image_id, replace=False, logger=task_logger):
     """Generate an image thumbnail.
 
     :param image: A proposal.model.Image object with a corresponding
@@ -241,21 +231,21 @@ def generate_thumbnail(image_id, replace=False):
     image = Image.objects.get(pk=image_id)
     thumbnail_path = image.thumbnail and image.thumbnail.name
     if thumbnail_path and os.path.exists(thumbnail_path):
-        task_logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
+        logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
     else:
         if not image.image:
-            task_logger.info("No local image for Image #%s", image.pk)
+            logger.info("No local image for Image #%s", image.pk)
             return
 
         try:
             thumbnail_path = images.make_thumbnail(
                 image.image.path, fit=settings.THUMBNAIL_DIM)
         except Exception as err:
-            task_logger.error(err)
+            logger.error(err)
             return
 
-        task_logger.info("Generate thumbnail for Image #%i: %s", image.pk,
-                         thumbnail_path)
+        logger.info("Generated thumbnail for Image #%i: %s", image.pk,
+                    thumbnail_path)
         image.thumbnail = thumbnail_path
         image.save()
 
@@ -264,7 +254,7 @@ def generate_thumbnail(image_id, replace=False):
 
 @shared_task
 @adapt
-def add_doc_attributes(doc: Document):
+def add_doc_attributes(doc: Document, logger=task_logger):
     props = extract.get_properties(doc)
 
     doc.proposal.update_from_dict(props)
@@ -273,12 +263,12 @@ def add_doc_attributes(doc: Document):
 
 
 @shared_task
-def generate_thumbnails(image_ids):
+def generate_thumbnails(image_ids, logger=task_logger):
     for image_id in image_ids:
         try:
             generate_thumbnail(image_id)
         except Image.DoesNotExist:
-            task_logger.info(
+            logger.info(
                 f"Image #{image_id} was deleted before thumbnail generation"
             )
             continue
@@ -286,7 +276,7 @@ def generate_thumbnails(image_ids):
 
 @shared_task
 @adapt
-def save_image_text(doc: Document, image_ids):
+def save_image_text(doc: Document, image_ids, logger=task_logger):
     if not len(image_ids):
         return
 
@@ -306,13 +296,13 @@ def save_image_text(doc: Document, image_ids):
 
 @shared_task
 @adapt
-def post_process_images(doc: Document, image_ids):
-    task_logger.info(
+def post_process_images(doc: Document, image_ids, logger=task_logger):
+    logger.info(
         f"Post processing image ids {image_ids} for doc {doc.pk}")
     for image_id in image_ids:
-        cloud_vision_process(image_id)
-    generate_thumbnails(image_ids)
-    save_image_text(doc.id, image_ids)
+        cloud_vision_process(image_id, logger)
+    generate_thumbnails(image_ids, logger)
+    save_image_text(doc.id, image_ids, logger)
 
     return image_ids
 
@@ -320,25 +310,27 @@ def post_process_images(doc: Document, image_ids):
 @shared_task(autoretry_for=(DocumentDownloadException,),
              default_retry_delay=60*60,
              max_retries=3,
-             on_failure=document_processing_failed)
+             on_failure=document_processing_failed,
+             bind=True)
 @adapt
-def process_document(doc: Document):
-    updated, _ = fetch_document(doc)
+def process_document(self, doc: Document):
+    logger = get_logger(self)
+    updated, _ = fetch_document(doc, logger)
 
     if updated or not doc.fulltext:
-        extracted = bool(extract_text(doc))
+        extracted = bool(extract_text(doc, logger))
 
     if extracted:
-        add_doc_attributes(doc)
+        add_doc_attributes(doc, logger)
 
-        image_ids = extract_images(doc)
-        post_process_images(doc, image_ids)
+        image_ids = extract_images(doc, logger)
+        post_process_images(doc, image_ids, logger)
 
     if updated or not doc.thumbnail:
-        generate_doc_thumbnail(doc)
+        generate_doc_thumbnail(doc, logger)
 
 
-def process_proposal(proposal):
+def process_proposal(proposal, logger=task_logger):
     "Perform additional processing on proposals."
     # Create a Google Street View image for each proposal:
     add_street_view.delay(proposal.id)
@@ -361,7 +353,7 @@ def create_proposals(dicts, logger=task_logger):
         try:
             (_, p) = Proposal.create_or_update_from_dict(case_dict)
             p.importer = case_dict.get("importer")
-            p.save() # Needed?
+            p.save()  # Needed?
             yield p
         except Exception as exc:
             import pprint
@@ -455,13 +447,12 @@ def pull_updates(self, since: datetime=None, importers_filter: str=None):
 
 
 # Image tasks
-@shared_task(bind=True)
-def cloud_vision_process(self, image_id):
+@shared_task
+def cloud_vision_process(image_id, logger=task_logger):
     """
     Send the image to the Cloud Vision API. If the image is recognized as a
     logo, delete it.
     """
-    logger = get_logger(self)
     processed_key = f"image:{image_id}:checked"
     image = Image.objects.annotate(region_name=F("proposal__region_name"))\
                          .get(pk=image_id)
@@ -489,20 +480,6 @@ def cloud_vision_process(self, image_id):
         cache.set(f"image:{image_id}:text", processed["text"])
 
     cache.set(processed_key, True)
-
-
-def process_image(image):
-    if vision.CLIENT:
-        cloud_vision_process.delay(image.pk)
-
-
-def process_proposal_documents(proposal: Proposal):
-    """
-    Helper function that schedules a task for each of a proposal's documents.
-    Returns a list of AsyncTaskResults.
-    """
-    return list(map(process_document.delay,
-                    proposal.documents.values_list("pk", flat=True)))
 
 
 @receiver(post_save, sender=Proposal, dispatch_uid="process_new_proposal")
