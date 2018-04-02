@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.forms.fields import FloatField, MultiValueField, ChoiceField
 from django.forms.widgets import MultiWidget, NumberInput, Select
 
@@ -15,7 +16,7 @@ class DistanceWidget(MultiWidget):
     def decompress(self, distance):
         if not isinstance(distance, D):
             distance = D(ft=distance)
-        return [distance.ft, "ft"]
+        return [distance.ft, distance._default_unit]
 
 
 class DistanceField(MultiValueField):
@@ -26,13 +27,15 @@ class DistanceField(MultiValueField):
                       ("km", "km"),
                       ("mi", "miles")]
 
-    def __init__(self, *args, min_value=10, max_value=100, initial_unit="ft",
-                 **kwargs):
+    def __init__(self, *args, min_value=D(m=10), max_value=D(m=100),
+                 initial_unit="ft", **kwargs):
         error_messages = {
             "incomplete": "Enter a distance"
         }
+        self.min_value = min_value
+        self.max_value = max_value
         fields = (
-            FloatField(min_value=min_value, max_value=max_value,),
+            FloatField(),
             ChoiceField(choices=self.DISTANCE_UNITS,
                         initial=initial_unit)
         )
@@ -43,6 +46,19 @@ class DistanceField(MultiValueField):
             *args, **kwargs
         )
         self.widget = DistanceWidget(choices=self.DISTANCE_UNITS)
+
+    def clean(self, val):
+        val = super().clean(val)
+        if self.min_value and val < self.min_value:
+            unit = val._default_unit
+            min_as_unit = getattr(self.min_value, unit)
+            raise ValidationError(f"must be at least {min_as_unit} {unit}")
+        elif self.max_value and val > self.max_value:
+            unit = val._default_unit
+            max_as_unit = getattr(self.max_value, unit)
+            raise ValidationError(f"must be no more than {max_as_unit} {unit}")
+
+        return val
 
     def compress(self, values):
         return D(**{values[1]: values[0]})
