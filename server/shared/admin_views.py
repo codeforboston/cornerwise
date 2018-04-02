@@ -32,14 +32,16 @@ def celery_logs(request):
 
     context = cornerwise_admin.each_context(request)
     context.update({"log_name": "Celery Tasks Log",
-                    "lines": log_lines})
+                    "lines": log_lines,
+                    "title": "Task Logs"})
     return render(request, "admin/log_view.djhtml", context)
 
 
 @is_superuser
 def task_failure_logs(request):
     context = cornerwise_admin.each_context(request)
-    context.update({"failures": lget_key("cornerwise:logs:task_failure")})
+    context.update({"failures": lget_key("cornerwise:logs:task_failure"),
+                    "title": "Recent Task Failures"})
     return render(request, "admin/task_failure_log.djhtml", context)
 
 
@@ -47,7 +49,8 @@ def task_failure_logs(request):
 def task_logs(request):
     task_ids = request.GET.getlist("task_id")
     context = cornerwise_admin.each_context(request)
-    context.update({"logs": get_task_logs(task_ids)})
+    context.update({"logs": get_task_logs(task_ids),
+                    "title": "Task Logs"})
 
     return render(request, "admin/task_logs.djhtml", context)
 

@@ -3,10 +3,6 @@
 
 {% block extrastyle %} {% endblock %}
 
-{% block breadcrumbs %}
-    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-{% endblock %}
-
 {% block content %}
     <h2>Recent Task Failures:</h2>
     <ul class="task-log log-entries">
@@ -16,11 +12,22 @@
                 &mdash;
                 {{ message.timestamp|date:"r" }} ({{ message.timestamp|naturaltime }})
                 <br/>
+                {% if message.args %}
+                    Args: {{ message.args|join:", " }}<br/>
+                {% endif %}
+                {% if message.kwargs %}
+                    Kwargs: {% for argkey, arg in message.kwargs.items %}{{argkey}} = {{ arg }}{% endfor %}
+                    <br/>
+                {% endif %}
+
                 <strong class="exception">{{ message.exception }}:</strong> {{ message.message }}
                 {% if not hide_traceback %}
                     <br/>
                     <pre>{{ message.traceback|join:" " }}</pre>
                 {% endif %}
+                <p>
+                    <a href="{% url 'task_logs' %}?task_id={{ message.task_id }}">See Log</a>
+                </p>
             </li>
         {% empty %}
             <li>No recent errors</li>
