@@ -10,8 +10,6 @@
 
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
-{% block breadcrumbs %}{% endblock %}
-
 {% block content %}
     <ul>
         {% for task_name, task_id, state in tasks %}

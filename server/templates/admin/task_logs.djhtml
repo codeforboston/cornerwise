@@ -19,8 +19,6 @@
 
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
-{% block breadcrumbs %}{% endblock %}
-
 {% block content %}
     <div id="content-main">
         {% for task_id, log in logs.items %}

@@ -73,7 +73,8 @@ def recent_tasks(request):
     n = max(10, min(1000, int(n)))
     recent_task_info = lget_key("cornerwise:recent_tasks", n)
     context = cornerwise_admin.each_context(request)
-    context.update({"tasks": recent_task_info})
+    context.update({"tasks": recent_task_info,
+                    "title": "Recent Tasks"})
     return render(request, "admin/recent_tasks.djhtml", context)
 
 
