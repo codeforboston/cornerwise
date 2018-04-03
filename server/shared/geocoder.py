@@ -22,6 +22,6 @@ def as_point(geo_response):
 
 
 def geocode_tuples(addrs, **kwargs):
-    return [gr and (as_point(gr), gr["formatted_name"])
+    return [(addr, as_point(gr), gr["formatted_name"]) if gr else addr
             for addr, gr in
-            Geocoder.geocode(addrs, **kwargs)]
+            zip(addrs, Geocoder.geocode(addrs, **kwargs))]
