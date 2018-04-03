@@ -112,6 +112,9 @@ class Proposal(models.Model):
 
     objects = ProposalManager()
 
+    def __str__(self):
+        return f"{self.address} [{self.case_number}]"
+
     @classmethod
     def create_or_update_from_dict(cls, p_dict: dict, tz: tzinfo=pytz.utc):
         """
