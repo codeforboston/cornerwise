@@ -16,6 +16,7 @@ from django_redis import get_redis_connection
 
 Redis = get_redis_connection()
 
+
 def normalize(s):
     """
     Downcases string s, removes special characters and replaces spaces with _.
@@ -33,6 +34,21 @@ def extension(path):
     filename = os.path.basename(path)
     pieces = filename.split(os.path.extsep)
     return pieces[-1] if len(pieces) > 1 else ""
+
+
+def split_list(pred, items=None):
+    if items is None:
+        items = pred
+        pred = lambda item: bool(item)
+
+    yes = []
+    no = []
+    for item in items:
+        if pred(item):
+            yes.append(item)
+        else:
+            no.append(item)
+    return yes, no
 
 
 class pushback_iter(object):
