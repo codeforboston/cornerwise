@@ -13,6 +13,7 @@ django-pgviews==0.3.0
 django-redis==4.8.0
 django-redis-cache==1.7.1
 django-sendgrid-v5==0.6.87
+django-tinymce==2.7.0
 google-api-python-client==1.6.4
 gunicorn==19.7.1
 httplib2==0.10.3
