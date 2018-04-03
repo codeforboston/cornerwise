@@ -14,6 +14,7 @@ urlpatterns = [
     url(r"^task/", include("task.urls")),
     url(r"^user/", include("user.urls")),
     url(r"^contact$", contact_us, name="contact-us"),
+    url(r"^tinymce/", include("tinymce.urls")),
     url(r"^$", index, name="front-page"),
 ]
 

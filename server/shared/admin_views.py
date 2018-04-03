@@ -1,14 +1,25 @@
+from datetime import timedelta
+from urllib.parse import urljoin
+
+from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
+from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
 from django import forms
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.views.generic.edit import FormView
 
-from utils import read_n_from_end, Redis, lget_key
-from shared.geocoder import Geocoder
+import bleach
+from tinymce.widgets import TinyMCE
+
+from utils import read_n_from_end, Redis, lget_key, split_list
+from shared.geocoder import geocode_tuples
+
 
 from .admin import cornerwise_admin
+from .widgets import DistanceField
 
 
 is_superuser = user_passes_test(lambda user: user.is_superuser, "/admin")
@@ -76,26 +87,80 @@ class UserNotificationFormView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(cornerwise_admin.each_context(self.request))
+        context["title"] = "Send User Notifications"
         return context
 
     class form_class(forms.Form):
-        address = forms.CharField(label="Address")
-        message = forms.CharField(widget=forms.Textarea())
-        region = forms.ChoiceField(choices=(("Somerville, MA", "Somerville, MA"),))
+        addresses = forms.CharField(
+            widget=forms.Textarea(attrs={"rows": 5}),
+            help_text=("Enter one address per line"),
+            required=False)
+        proposals = forms.ModelMultipleChoiceField(queryset=None,
+                                                   required=False)
+        message = forms.CharField(widget=TinyMCE(
+            mce_attrs={"width": 400, "height": 250,
+                       "content_css": urljoin(settings.STATIC_URL,
+                                              "css/tinymce.css")}))
+        notification_radius = DistanceField(
+            min_value=D(ft=100), max_value=D(mi=20), initial=D(ft=300),
+            label="Notify subscribers within distance")
+        include_boilerplate = forms.BooleanField(
+            initial=True, help_text=("Before sending the email to each user, "
+                                     "add a brief message listing the "
+                                     "address(es) or proposal(s) relevant to "
+                                     "that subscription"))
+        region = forms.ChoiceField(choices=(("Somerville, MA", "Somerville, MA"),),
+                                   initial=settings.GEO_REGION)
+
+        def __init__(self, *args, **kwargs):
+            from proposal.models import Proposal
+
+            super().__init__(*args, **kwargs)
+            self.data = self.data.copy()
+            self.fields["proposals"].queryset = Proposal.objects.filter(
+                updated__gte=timezone.now() - timedelta(days=30),
+                region_name=settings.GEO_REGION)
+
+        def geocode_addresses(self, addresses):
+            addresses = list(filter(None, map(str.strip, addresses)))
+            geocoded = geocode_tuples(addresses,
+                                      region=self.cleaned_data["region"])
+            return split_list(tuple.__instancecheck__, geocoded)
 
         def clean(self):
             cleaned = super().clean()
-            address = cleaned["address"]
-            region = cleaned["region"]
-            [result] = Geocoder.geocode([f"{address}, {region}"])
-            if not result:
+
+            addresses = cleaned["addresses"].split("\n")
+            good_addrs, bad_addrs = self.geocode_addresses(addresses)
+
+            self.data["addresses"] = "\n".join(addr for addr, _pt, _fmt in
+                                               good_addrs)
+
+            if bad_addrs:
+                raise ValidationError(("Not all addresses were validated: "
+                                       "%(addresses)s"),
+                                      params={"addresses": ";".join(bad_addrs)})
+
+            if not (good_addrs or cleaned["proposals"]):
                 raise ValidationError(
-                    f"Lookup for address failed: {address}.\n"
-                    f"Please enter a valid street address in {region}.")
-            cleaned["lat"] = result["location"]["lat"]
-            cleaned["lng"] = result["location"]["lng"]
-            cleaned["formatted_address"] = result["formatted_name"]
+                    "Please provide at least one address or proposal")
+
+            cleaned["coded_addresses"] = good_addrs
+
             return cleaned
+
+        def clean_message(self):
+            message = self.cleaned_data["message"]
+            return bleach.clean(
+                message,
+                tags=bleach.ALLOWED_TAGS + ["p", "pre", "span", "h1", "h2",
+                                            "h3", "h4", "h5", "h6"],
+                attributes=["title", "href", "style"],
+                styles=["text-decoration", "text-align"])
+
+        def get_addresses(self):
+            return "; ".join(f"{fmt_addr}: {pt.y}, {pt.x}" for _, pt, fmt_addr
+                             in self.cleaned_data["coded_addresses"])
 
         def send_emails(self):
             data = self.cleaned_data
@@ -104,8 +169,9 @@ class UserNotificationFormView(FormView):
             return data["lat"], data["lng"], data["formatted_address"]
 
     def form_valid(self, form):
-        lat, lng, fmt = form.send_emails()
-        messages.success(self.request, f"Found address: {lat}, {lng} ({fmt})")
+        # lat, lng, fmt = form.send_emails()
+        addresses = form.get_addresses()
+        messages.success(self.request, f"Found addresses: {addresses}")
         return redirect("/admin")
 
 

@@ -1,28 +1,45 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+
+    <style>
+     .helptext {
+         clear: left;
+         display: block;
+         font-size: 11px;
+         color: #999;
+     }
+    </style>
+{% endblock %}
 
 {% block extrahead %}
+    {{ form.media }}
 {% endblock %}
 
 {% block coltype %}colMS{% endblock %}
 
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
-{% block breadcrumbs %}
-    {{ block.super }} &rsaquo; Hello
-{% endblock %}
-
 {% block content %}
     <div id="content-main">
-    <form method="post" action="">
-        {% csrf_token %}
-        <fieldset class="module aligned">
-            {{ form.as_p }}
-            <input type="submit" value="Go" />
-        </fieldset>
-    </form>
+        <p>
+            Use the form below to inform subscribers about changes affecting the
+            given address(es) or proposal(s). After you compose the email, you
+            will see a preview of the full email text and a count of the
+            subscribers who will be notified.
+        </p>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            <fieldset class="module aligned">
+                {{ form.as_p }}
+                <input type="submit" value="Go" />
+            </fieldset>
+        </form>
     </div>
 {% endblock %}
 
