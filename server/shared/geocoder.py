@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from django.contrib.gis.geos import Point
+
 from scripts import gmaps, arcgis
 
 
@@ -11,3 +13,15 @@ elif settings.GEOCODER == "arcgis":
                                   settings.ARCGIS_CLIENT_SECRET)
 else:
     Geocoder = None
+
+
+def as_point(geo_response):
+    return Point(x=geo_response["location"]["lng"],
+                 y=geo_response["location"]["lat"],
+                 srid=4326)
+
+
+def geocode_tuples(addrs, **kwargs):
+    return [gr and (as_point(gr), gr["formatted_name"])
+            for addr, gr in
+            Geocoder.geocode(addrs, **kwargs)]
