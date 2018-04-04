@@ -8,12 +8,13 @@ from functools import reduce
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.views.autocomplete import AutocompleteJsonView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group
 from django.contrib.gis.admin import GeoModelAdmin
 
-from proposal.models import Event, Importer, Layer
+from proposal.models import Event, Importer, Layer, Proposal
 
 from utils import geometry_from_url
 
@@ -23,8 +24,30 @@ import jsonschema
 User = get_user_model()
 
 
+class ProposalAdmin(admin.ModelAdmin):
+    fields = ["case_number", "address", "updated"]
+    search_fields = ["case_number", "address"]
+
+    class Meta:
+        model = Proposal
+
+
 class CornerwiseAdmin(admin.AdminSite):
     site_header = "Cornerwise"
+
+    def get_urls(self):
+        from django.urls import path
+
+        def autocomplete_view(request):
+            return self.admin_view(
+                AutocompleteJsonView.as_view(
+                    model_admin=ProposalAdmin(Proposal, self)))(request)
+
+        return super().get_urls() + [
+            path("autocomplete/proposal",
+                 autocomplete_view,
+                 name="proposal_proposal_autocomplete")
+        ]
 
 
 class ImporterForm(forms.ModelForm):

@@ -1,8 +1,9 @@
+from collections import namedtuple
 from datetime import timedelta
 from urllib.parse import urljoin
 
 from django.conf import settings
-# from django.contrib.admin.widgets import AutocompleteSelectMultiple
+from django.contrib.admin.widgets import AutocompleteSelectMultiple
 from django.contrib.auth.decorators import (permission_required,
                                             user_passes_test)
 from django.contrib import messages
@@ -19,6 +20,7 @@ from tinymce.widgets import TinyMCE
 from utils import read_n_from_end, Redis, lget_key, split_list
 from shared.geocoder import geocode_tuples
 
+from proposal.models import Proposal
 
 from .admin import cornerwise_admin
 from .widgets import DistanceField
@@ -81,6 +83,9 @@ def recent_tasks(request):
     return render(request, "admin/recent_tasks.djhtml", context)
 
 
+RelModel = namedtuple("RelModel", ["model"])
+
+
 # Send message to users
 class UserNotificationFormView(FormView):
     """Form for sending messages to users near an address.
@@ -99,8 +104,10 @@ class UserNotificationFormView(FormView):
             widget=forms.Textarea(attrs={"rows": 5}),
             help_text=("Enter one address per line"),
             required=False)
-        proposals = forms.ModelMultipleChoiceField(queryset=None,
-                                                   required=False)
+        proposals = forms.ModelMultipleChoiceField(
+            queryset=None,
+            required=False,
+            widget=AutocompleteSelectMultiple(RelModel(Proposal), cornerwise_admin,))
         message = forms.CharField(widget=TinyMCE(
             mce_attrs={"width": 400, "height": 250,
                        "content_css": urljoin(settings.STATIC_URL,
