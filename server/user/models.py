@@ -103,6 +103,9 @@ class SubscriptionQuerySet(models.QuerySet):
         return self.filter(Q(center__distance_lte=(point, F("radius"))) |
                            Q(box__contains=point))
 
+    def in_radius(self, point, radius):
+        return self.filter(Q(center__distance_lte=(point, radius)))
+
     def mark_sent(self):
         """Mark that the Subscriptions in the query set have been sent emails.
 
