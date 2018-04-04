@@ -4,11 +4,10 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
-from django.core.urlresolvers import reverse
 from django.dispatch import receiver
-from django.db import IntegrityError
 from django.db.models import Q
 from django.forms.models import model_to_dict
+from django.urls import reverse
 from django.utils import dateparse
 
 import json

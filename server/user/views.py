@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 # from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 

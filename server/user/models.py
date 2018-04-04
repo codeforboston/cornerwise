@@ -2,9 +2,9 @@ import urllib
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F, Q
+from django.urls import reverse
 from django.utils import timezone
 
 from utils import bounds_from_box, point_from_str, prettify_lat, prettify_long
