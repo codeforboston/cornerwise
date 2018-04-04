@@ -20,7 +20,7 @@ import jsonschema
 import pytz
 
 
-class ProposalManager(models.GeoManager):
+class ProposalManager(models.Manager):
     def latest(self):
         results = self.order_by("-created")
         return results and results[0]

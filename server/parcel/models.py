@@ -2,7 +2,7 @@ from django_pgviews import view as pg
 from django.contrib.gis.db import models
 
 
-class ParcelManager(models.GeoManager):
+class ParcelQuerySet(models.QuerySet):
     def containing(self, point):
         return self.filter(shape__contains=point)
 
@@ -28,7 +28,7 @@ class Parcel(models.Model):
     # Stored in all caps:
     full_street = models.CharField(max_length=128, null=True)
 
-    objects = ParcelManager()
+    objects = ParcelQuerySet.as_manager()
 
     def index_attributes(self):
         return {a.name: a.value for a in self.attributes.all()}
@@ -41,7 +41,6 @@ class Attribute(models.Model):
 
     class Meta:
         unique_together = (("parcel", "name"))
-
 
 
 # Views:
