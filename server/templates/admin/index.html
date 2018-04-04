@@ -80,13 +80,16 @@
     </div>
 
     <div class="module" id="admin-actions-module">
+        {% if perms.shared.send_notifications %}
         <h2>Additional Actions</h2>
         <ul>
             <li>
                 <a href="{% url 'send_message' %}">Send User Notifications</a>
             </li>
         </ul>
+        {% endif %}
 
+        {% if perms.shared.view_debug_logs %}
         <h2>Debugging/Monitoring</h2>
         <ul>
             <li>
@@ -99,6 +102,7 @@
                 <a href="{% url 'celery_log' %}">Celery Log</a>
             </li>
         </ul>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
