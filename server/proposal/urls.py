@@ -1,30 +1,29 @@
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import path
 
-from . import views
-from . import feed
+from . import feed, views
 
 doc_urlpatterns = [
-    url(r"^$", views.view_document, name="view-document"),
+    path("", views.view_document, name="view-document"),
 ]
 
 urlpatterns = [
-    url(r"^list$", views.list_proposals, name="list-proposals"),
-    url(r"^closed$", views.closed_proposals),
-    url(r"^view$", views.view_proposal),
-    url(r"^view/(?P<pk>[0-9]+)$", views.view_proposal, name="view-proposal"),
-    url(r"^events$", views.list_events, name="list-events"),
-    url(r"^event/(?P<pk>[0-9]+)$", views.view_event),
-    url(r"^layers$", views.list_layers),
-    url(r"^image/(?P<pk>[0-9]+)$", views.view_image),
-    url(r"^image$", views.view_image),
+    path("list", views.list_proposals, name="list-proposals"),
+    path("closed", views.closed_proposals),
+    path("view", views.view_proposal),
+    path("view/<int:pk>", views.view_proposal, name="view-proposal"),
+    path("events", views.list_events, name="list-events"),
+    path("event/<int:pk>", views.view_event),
+    path("layers", views.list_layers),
+    path("image/<int:pk>", views.view_image),
+    path("image", views.view_image),
 
     # Feeds:
-    url(r"^rss", feed.ReportsAndDecisionsFeed()),
-    url(r"^atom", feed.ReportsAndDecisionsAtom()),
+    path("rss", feed.ReportsAndDecisionsFeed()),
+    path("atom", feed.ReportsAndDecisionsAtom()),
 ]
 
 if settings.DEBUG:
     urlpatterns += [
-        url(r"^images$", views.list_images),
+        path("images", views.list_images),
     ]

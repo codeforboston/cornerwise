@@ -1,10 +1,11 @@
-from django.conf.urls import include, url
+from django.urls import include, path
 
 from . import views
 
+
 urlpatterns = [
-    url(r"^(?P<pk>[0-9]+)/", include([
-        url(r"^$", views.view_document, name="view-document"),
-        url(r"^download/$", views.download_document, name="download-document"),
+    path("<int:pk>/", include([
+        path("", views.view_document, name="view-document"),
+        path("download/", views.download_document, name="download-document"),
     ]))
 ]

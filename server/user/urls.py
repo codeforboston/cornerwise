@@ -1,20 +1,20 @@
-from django.conf import settings
-from django.conf.urls import url
+from django.urls import path, re_path
+
 from . import views
 from .mail_parse_views import mail_inbound
 
 urlpatterns = [
-    url(r"^confirm$", views.confirm, name="confirm"),
-    url(r"^(?P<token>[a-zA-Z0-9\-/+=]+)/(?P<pk>\d+)/", views.user_login,
-        name="user-login"),
-    url(r"^logout$", views.user_logout, name="logout"),
-    url(r"^subscribe$", views.subscribe, name="subscribe"),
-    url(r"^resend$", views.resend_email, name="resend-confirmation"),
-    url(r"^changelog/$", views.change_log, name="view-change-log"),
-    url(r"^deactivate$", views.deactivate_account, name="deactivate-account"),
+    path("confirm", views.confirm, name="confirm"),
+    re_path("(?P<token>[a-zA-Z0-9\-/+=]+)/(?P<pk>\d+)/",
+            views.user_login, name="user-login"),
+    path("logout", views.user_logout, name="logout"),
+    path("subscribe", views.subscribe, name="subscribe"),
+    path("resend", views.resend_email, name="resend-confirmation"),
+    path("changelog/", views.change_log, name="view-change-log"),
+    path("deactivate", views.deactivate_account, name="deactivate-account"),
 
     # Parse incoming mail:
-    url(r"^mail_inbound$", mail_inbound),
+    path("mail_inbound", mail_inbound),
 
 
     # url(r"^manage$", views.manage, name="manage-user"),
