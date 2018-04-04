@@ -8,8 +8,9 @@ from functools import reduce
 
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import GroupAdmin, UserAdmin
+from django.contrib.auth.models import Group
 from django.contrib.gis.admin import GeoModelAdmin
 
 from proposal.models import Event, Importer, Layer
@@ -17,6 +18,9 @@ from proposal.models import Event, Importer, Layer
 from utils import geometry_from_url
 
 import jsonschema
+
+
+User = get_user_model()
 
 
 class CornerwiseAdmin(admin.AdminSite):
@@ -104,4 +108,5 @@ cornerwise_admin = CornerwiseAdmin(name="admin")
 cornerwise_admin.register(Importer, ImporterAdmin)
 cornerwise_admin.register(Layer, LayerAdmin)
 cornerwise_admin.register(User, UserAdmin)
+cornerwise_admin.register(Group, GroupAdmin)
 cornerwise_admin.register(Event, admin.ModelAdmin)
