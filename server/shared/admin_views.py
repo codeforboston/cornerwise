@@ -2,7 +2,9 @@ from datetime import timedelta
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.contrib.auth.decorators import user_passes_test
+# from django.contrib.admin.widgets import AutocompleteSelectMultiple
+from django.contrib.auth.decorators import (permission_required,
+                                            user_passes_test)
 from django.contrib import messages
 from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
@@ -23,6 +25,7 @@ from .widgets import DistanceField
 
 
 is_superuser = user_passes_test(lambda user: user.is_superuser, "/admin")
+is_planning_staff = permission_required("shared.send_notifications")
 
 
 def get_task_logs(task_ids):
@@ -35,7 +38,7 @@ def get_task_logs(task_ids):
                                for l in logs]))
 
 
-@is_superuser
+@permission_required("shared.view_debug_logs")
 def celery_logs(request):
     nlines = int(request.GET.get("n", "100"))
     with open("logs/celery_tasks.log", "rb") as log:
@@ -48,7 +51,7 @@ def celery_logs(request):
     return render(request, "admin/log_view.djhtml", context)
 
 
-@is_superuser
+@permission_required("shared.view_debug_logs")
 def task_failure_logs(request):
     context = cornerwise_admin.each_context(request)
     context.update({"failures": lget_key("cornerwise:logs:task_failure"),
@@ -56,7 +59,7 @@ def task_failure_logs(request):
     return render(request, "admin/task_failure_log.djhtml", context)
 
 
-@is_superuser
+@permission_required("shared.view_debug_logs")
 def task_logs(request):
     task_ids = request.GET.getlist("task_id")
     context = cornerwise_admin.each_context(request)
@@ -66,7 +69,7 @@ def task_logs(request):
     return render(request, "admin/task_logs.djhtml", context)
 
 
-@is_superuser
+@permission_required("shared.view_debug_logs")
 def recent_tasks(request):
     """Displays a list of recently completed tasks."""
     n = request.GET.get("n", "100")
@@ -176,4 +179,4 @@ class UserNotificationFormView(FormView):
         return redirect("/admin")
 
 
-user_notification_form = is_superuser(UserNotificationFormView.as_view())
+user_notification_form = is_planning_staff(UserNotificationFormView.as_view())
