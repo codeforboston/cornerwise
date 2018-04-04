@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('change_blob', models.BinaryField()),
-                ('proposal', models.ForeignKey(related_name='changes', to='proposal.Proposal')),
+                ('proposal', models.ForeignKey(related_name='changes', to='proposal.Proposal', on_delete=models.CASCADE)),
             ],
         ),
         migrations.RemoveField(

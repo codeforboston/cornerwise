@@ -35,7 +35,8 @@ class Parcel(models.Model):
 
 
 class Attribute(models.Model):
-    parcel = models.ForeignKey(Parcel, related_name="attributes")
+    parcel = models.ForeignKey(Parcel, related_name="attributes",
+                               on_delete=models.CASCADE)
     name = models.CharField(max_length=64, db_index=True)
     value = models.CharField(max_length=256, db_index=True)
 
@@ -70,7 +71,8 @@ class LotSize(pg.MaterializedView):
     Since the parcel table does not change often, store this in a materialized
     view. Refresh when new parcels are imported.
     """
-    parcel = models.OneToOneField("parcel.Parcel", primary_key=True)
+    parcel = models.OneToOneField("parcel.Parcel", primary_key=True,
+                                  on_delete=models.CASCADE)
     lot_size = models.DecimalField(max_digits=10, decimal_places=5, db_index=True)
 
     concurrent_index = "parcel_id"

@@ -39,6 +39,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='budgetitem',
             name='project',
-            field=models.ForeignKey(to='project.Project'),
+            field=models.ForeignKey(to='project.Project', on_delete=models.CASCADE),
         ),
     ]

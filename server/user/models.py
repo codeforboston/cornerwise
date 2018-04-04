@@ -113,7 +113,8 @@ class SubscriptionQuerySet(models.QuerySet):
 class Subscription(models.Model):
     # The subscription belong to a registered user:
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             related_name="subscriptions")
+                             related_name="subscriptions",
+                             on_delete=models.CASCADE)
     active = models.BooleanField(
         default=False,
         help_text="Users only receive updates for active subscriptions")

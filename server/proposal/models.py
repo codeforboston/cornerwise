@@ -98,7 +98,8 @@ class Proposal(models.Model):
     status = models.CharField(max_length=64)
 
     # A proposal can be associated with a Project:
-    project = models.ForeignKey("project.Project", blank=True, null=True)
+    project = models.ForeignKey("project.Project", blank=True, null=True,
+                                on_delete=models.PROTECT)
     # A misnomer; if True, indicates that the planning board has issued a
     # ruling (approval or disapproval). Does not actually reflect whether the
     # proposed changes are done.
@@ -243,7 +244,8 @@ class Attribute(models.Model):
     """
     Arbitrary attributes associated with a particular proposal.
     """
-    proposal = models.ForeignKey(Proposal, related_name="attributes")
+    proposal = models.ForeignKey(Proposal, related_name="attributes",
+                                 on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     handle = models.CharField(max_length=128, db_index=True)
 
@@ -364,9 +366,11 @@ class Document(models.Model):
     """
     A document associated with a proposal.
     """
-    proposal = models.ForeignKey(Proposal, related_name="documents")
+    proposal = models.ForeignKey(Proposal, related_name="documents",
+                                 on_delete=models.CASCADE)
     event = models.ForeignKey(
-        Event, null=True, help_text="Event associated with this document")
+        Event, null=True, help_text="Event associated with this document",
+        on_delete=models.SET_NULL)
     url = models.URLField()
     title = models.CharField(
         max_length=256, help_text="The name of the document")
@@ -450,10 +454,11 @@ class Image(models.Model):
     """
     An image associated with a proposal and (optionally) with a document.
     """
-    proposal = models.ForeignKey(Proposal, related_name="images")
+    proposal = models.ForeignKey(Proposal, related_name="images",
+                                 on_delete=models.CASCADE)
     document = models.ForeignKey(
         Document, null=True, help_text="Source document for image",
-        related_name="images")
+        related_name="images", on_delete=models.SET_NULL)
     image = models.FileField(null=True, upload_to=upload_image_to)
     width = models.IntegerField()
     height = models.IntegerField()
@@ -495,7 +500,8 @@ class Changeset(models.Model):
     """
     Model used to record the changes to a Proposal over time.
     """
-    proposal = models.ForeignKey(Proposal, related_name="changesets")
+    proposal = models.ForeignKey(Proposal, related_name="changesets",
+                                 on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     change_blob = models.BinaryField()
 

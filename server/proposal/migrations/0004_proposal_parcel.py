@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proposal',
             name='parcel',
-            field=models.ForeignKey(null=True, to='parcel.Parcel'),
+            field=models.ForeignKey(null=True, to='parcel.Parcel',
+                                    on_delete=models.SET_NULL),
         ),
     ]

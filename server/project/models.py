@@ -68,7 +68,7 @@ class Project(models.Model):
 
 
 class BudgetItem(models.Model):
-    project = models.ForeignKey(Project)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     year = models.IntegerField()
     budget = models.DecimalField(max_digits=11, decimal_places=2)
     funding_source = models.CharField(max_length=64)

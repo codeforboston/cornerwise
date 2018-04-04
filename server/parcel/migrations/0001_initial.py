@@ -41,7 +41,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attribute',
             name='parcel',
-            field=models.ForeignKey(to='parcel.Parcel', related_name='attributes'),
+            field=models.ForeignKey(to='parcel.Parcel', related_name='attributes',
+                                    on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='attribute',

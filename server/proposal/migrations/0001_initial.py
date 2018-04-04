@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ('priority', models.IntegerField(db_index=True, default=0)),
                 ('source', models.CharField(default='document', max_length=64)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('document', models.ForeignKey(help_text='Source document for image', to='proposal.Document', null=True)),
+                ('document', models.ForeignKey(help_text='Source document for image', to='proposal.Document', null=True, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -88,13 +88,13 @@ class Migration(migrations.Migration):
                 ('source', models.URLField(help_text='The data source for the proposal.', null=True)),
                 ('status', models.CharField(max_length=64)),
                 ('complete', models.BooleanField(default=False)),
-                ('project', models.ForeignKey(to='project.Project', blank=True, null=True)),
+                ('project', models.ForeignKey(to='project.Project', blank=True, null=True, on_delete=models.CASCADE)),
             ],
         ),
         migrations.AddField(
             model_name='image',
             name='proposal',
-            field=models.ForeignKey(related_name='images', to='proposal.Proposal'),
+            field=models.ForeignKey(related_name='images', to='proposal.Proposal', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='event',
@@ -104,22 +104,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='event',
-            field=models.ForeignKey(help_text='Event associated with this document', to='proposal.Event', null=True),
+            field=models.ForeignKey(help_text='Event associated with this document', to='proposal.Event', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='document',
             name='proposal',
-            field=models.ForeignKey(to='proposal.Proposal'),
+            field=models.ForeignKey(to='proposal.Proposal', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='change',
             name='proposal',
-            field=models.ForeignKey(related_name='changes', to='proposal.Proposal'),
+            field=models.ForeignKey(related_name='changes', to='proposal.Proposal', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='attribute',
             name='proposal',
-            field=models.ForeignKey(related_name='attributes', to='proposal.Proposal'),
+            field=models.ForeignKey(related_name='attributes', to='proposal.Proposal', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='image',
