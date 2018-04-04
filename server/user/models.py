@@ -125,7 +125,7 @@ class Subscription(models.Model):
     center = models.PointField(
         help_text=("Center point of the query. Along with the radius, "
                    "determines the notification region."),
-        db_index=True,
+        geography=True,
         null=True)
     radius = models.FloatField(
         help_text="Radius in meters",
