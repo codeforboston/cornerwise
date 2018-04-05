@@ -22,7 +22,7 @@ def on_task_failure(**kwargs):
     """
     Record details when a task fails.
     """
-    from utils import append_to_key
+    from redis_utils import append_to_key
 
     append_to_key("cornerwise:logs:task_failure",
                   {"task_id": kwargs["task_id"],
@@ -54,7 +54,7 @@ def setup_task_logging(**kwargs):
 
 @task_postrun.connect
 def cleanup_task_logging(task_id=None, task=None, state=None, **kwargs):
-    from utils import append_to_key
+    from redis_utils import append_to_key
 
     if task_id:
         logger = logging.getLogger(f"celery_tasks.{task_id}")

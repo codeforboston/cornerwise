@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import json
 import os
-import pickle
 import re
 import pytz
 from collections import deque
@@ -10,11 +9,6 @@ from urllib import parse, request
 
 from django.contrib.gis.geos import GeometryCollection, GEOSGeometry, Point
 from django.contrib.gis.geos.polygon import Polygon
-
-from django_redis import get_redis_connection
-
-
-Redis = get_redis_connection()
 
 
 def normalize(s):
@@ -216,6 +210,7 @@ def add_locations(dicts, geocoder,
                          "score": location["properties"].get("score"),
                          "google_place_id": location["properties"].get("place_id")}
 
+
 def fn_chain(val, *fns):
     for fn in fns:
         val = fn(val) if callable(fn) else val.get(fn)
@@ -267,24 +262,3 @@ def read_n_from_end(fp: typing.IO, n,
     fp.seek(start_pos, 0)
 
     return lines
-
-
-def append_to_key_raw(k, *values, limit=1000):
-    with Redis.pipeline() as p:
-        p.lpush(k, *values)
-        if limit:
-            p.ltrim(k, 0, limit-1)
-        return p.execute()
-
-
-def append_to_key(k, *values, limit=1000):
-    """Encode values using pickle and store them in the Redis cache. Newer messages
-    will appear before older messages. Messages beyond the specified limit will
-    be deleted.
-
-    """
-    return append_to_key_raw(k, *map(pickle.dumps, values), limit=limit)
-
-
-def lget_key(k, limit=1000):
-    return [pickle.loads(x) for x in Redis.lrange(k, 0, 1000)]

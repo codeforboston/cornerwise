@@ -17,7 +17,8 @@ from django.views.generic.edit import FormView
 import bleach
 from tinymce.widgets import TinyMCE
 
-from utils import read_n_from_end, Redis, lget_key, split_list
+import redis_utils as red
+from utils import split_list
 from shared.geocoder import geocode_tuples
 
 from proposal.models import Proposal
@@ -31,7 +32,7 @@ is_planning_staff = permission_required("shared.send_notifications")
 
 
 def get_task_logs(task_ids):
-    with Redis.pipeline() as p:
+    with red.Redis.pipeline() as p:
         for task_id in task_ids:
             p.lrange(f"cornerwise:task_log:{task_id}", 0, 100)
         logs = p.execute()
@@ -56,7 +57,7 @@ def celery_logs(request):
 @permission_required("shared.view_debug_logs")
 def task_failure_logs(request):
     context = cornerwise_admin.each_context(request)
-    context.update({"failures": lget_key("cornerwise:logs:task_failure"),
+    context.update({"failures": red.lget_key("cornerwise:logs:task_failure"),
                     "title": "Recent Task Failures"})
     return render(request, "admin/task_failure_log.djhtml", context)
 
@@ -76,7 +77,7 @@ def recent_tasks(request):
     """Displays a list of recently completed tasks."""
     n = request.GET.get("n", "100")
     n = max(10, min(1000, int(n)))
-    recent_task_info = lget_key("cornerwise:recent_tasks", n)
+    recent_task_info = red.lget_key("cornerwise:recent_tasks", n)
     context = cornerwise_admin.each_context(request)
     context.update({"tasks": recent_task_info,
                     "title": "Recent Tasks"})
