@@ -9,6 +9,7 @@
      #message-preview {
          border: 2px solid #aaa;
          padding: 0.1em;
+         height: 350px;
          width: 100%;
      }
     </style>
