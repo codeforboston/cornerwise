@@ -121,6 +121,10 @@ def get_subscribers(geocoded=[], proposals=[],
 RelModel = namedtuple("RelModel", ["model"])
 
 
+def notification_key(nid):
+    return f"cornerwise:notification:{nid}"
+
+
 # Send message to users
 class UserNotificationForm(forms.Form):
     """Create a new message to send to users in the vicinity of given proposals
@@ -228,7 +232,7 @@ class UserNotificationForm(forms.Form):
     def save_data(self):
         notification_id = self.cleaned_data["notification_id"]
 
-        red.set_expire_key(f"notification.{notification_id}",
+        red.set_expire_key(notification_key(notification_id),
                            {"cleaned": self.cleaned_data,
                             "data": self.data},
                            ttl=3600)
@@ -273,15 +277,15 @@ def send_user_notification(request):
     notification_id = request.POST["notification_id"]
     # TODO: Handle localized button text
     go_back = request.POST.get("submit") == "Back"
-    key = f"notification.{notification_id}"
 
     if go_back:
-        saved = red.get_key(key)
+        saved = red.get_key(notification_key(notification_id))
     else:
-        saved = red.get_and_delete_key(key)
+        saved = red.get_and_delete_key(notification_key(notification_id))
 
     if not saved:
         messages.error(
+            request,
             "Something went wrong, and the message could not "
             "be sent.")
         return redirect("notification_form")
