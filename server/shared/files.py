@@ -6,6 +6,9 @@ import utils
 
 
 class multimethod(object):
+    class DispatchValueError(ValueError):
+        pass
+
     def __init__(self, fn):
         self.default_fn = None
         self.dispatch_fn = fn
@@ -35,7 +38,8 @@ class multimethod(object):
         elif self.default_fn:
             return self.default_fn(*args)
         else:
-            raise ValueError("Unknown dispatch value:", val)
+            raise multimethod.DispatchValueError(
+                "Unknown dispatch value:", val)
 
 
 def extension(path, *_):
