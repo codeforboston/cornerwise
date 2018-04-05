@@ -17,10 +17,11 @@ if getattr(settings, "SENDGRID_API_KEY", None):
 else:
     SG = None
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-def send(email, subject, template_name, context=None, content=None):
+def send(email, subject, template_name=None, context=None, content=None,
+         template_id=None, logger=logger):
     """
     Send an email to an email address. If there is a SendGrid template id
     configured for the given template name, create substitutions from `context`
@@ -63,7 +64,7 @@ def send(email, subject, template_name, context=None, content=None):
         data["content"] = [{"type": "text/html", "value": content}]
 
     SG.client.mail.send.post(request_body=data)
-    LOGGER.info("Email sent to {}".format(email))
+    logger.info("Email sent to {}".format(email))
     return True
 
 
@@ -83,24 +84,25 @@ def render_email_body(template_name, context=None):
     return (html, text)
 
 
-def send_template(email, subject, template_name, context=None):
+def send_template(email, subject, template_name, context=None, logger=logger):
     """Construct and send an email with subject `subject` to `email`, using the
     named email template.
     """
     context = context or {}
     html, _text = render_email_body(template_name, context)
-    LOGGER.info("Generated email: %s", html)
+    logger.info("Generated email: %s", html)
     addressal = context.get("user")
 
     if SG:
         message = mail.Mail(
             mail.Email(settings.EMAIL_ADDRESS), subject,
-            mail.Email(email, addressal), mail.Content("text/html", html))
+            mail.Email(email, addressal or email),
+            mail.Content("text/html", html))
         response = SG.client.mail.send.post(request_body=message.get())
-        LOGGER.info("Sent '%s' email to %s (response %s)", template_name,
+        logger.info("Sent '%s' email to %s (response %s)", template_name,
                     email, response)
     else:
-        LOGGER.info("SendGrid not available. Generated email: %s", html)
+        logger.info("SendGrid not available. Generated email: %s", html)
 
 
 def _get_sendgrid(url, params=None):
