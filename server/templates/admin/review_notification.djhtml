@@ -7,6 +7,7 @@
 
     <style>
      #message-preview {
+         border: 2px solid #aaa;
          padding: 0.1em;
          width: 100%;
      }
@@ -72,10 +73,11 @@
 
          body.open();
          body.write("<head><link type='text/css' rel='stylesheet' href='{% static 'css/tinymce.css' %}'/></head>");
-         body.write("<body>{{ message|escapejs }}</body>");
+         body.write("<body>{{ example_greeting|escapejs }}<br/>{{ message|escapejs }}</body>");
          body.close();
         </script>
         <hr/>
+        <br/>
 
         <form method="post" action="{% url 'send_notification' %}">
             {% csrf_token %}
