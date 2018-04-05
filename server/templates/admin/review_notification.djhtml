@@ -74,7 +74,12 @@
 
          body.open();
          body.write("<head><link type='text/css' rel='stylesheet' href='{% static 'css/tinymce.css' %}'/></head>");
-         body.write("<body>{{ example_greeting|escapejs }}<br/>{{ message|escapejs }}</body>");
+         body.write("<body>");
+         {% if title %}
+         body.write("<h3>{{ title|escape|escapejs }}</h3>");
+         {% endif %}
+         body.write("{{ example_greeting|escapejs }}<br/>{{ message|escapejs }}");
+         body.write("</body>");
          body.close();
         </script>
         <hr/>

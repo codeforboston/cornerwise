@@ -103,6 +103,8 @@ class UserNotificationForm(forms.Form):
         queryset=Proposal.objects.all(),
         required=False,
         widget=AutocompleteSelectMultiple(RelModel(Proposal), cornerwise_admin,))
+    title = forms.CharField(max_length=100, required=False,
+                            widget=forms.TextInput(attrs={"size": 40}))
     greeting = forms.CharField(
         initial=("You are receiving this message from the "
                  "planning staff in %region% because you "
@@ -112,7 +114,7 @@ class UserNotificationForm(forms.Form):
                  "%addresses%"),
         widget=forms.Textarea(attrs={"rows": 4}),
         help_text=("Use %region% to insert the region name, "
-                   "<proposals> to insert a list of proposal "
+                   "%proposals% to insert a list of proposal "
                    "addresses and case numbers and %addresses% "
                    "to insert a list of addresses relevant to "
                    "the email recipient"))

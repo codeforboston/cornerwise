@@ -28,9 +28,9 @@
     <div id="content-main">
         <p>
             Use the form below to inform subscribers about changes affecting the
-            given address(es) or proposal(s). After you compose the email, you
-            will see a preview of the full email text and a count of the
-            subscribers who will be notified.
+            given addresses or proposals. After you compose the email, you will
+            see a preview of the full email text and a count of the subscribers
+            who will be notified.
         </p>
 
         <form method="post" action="{% url 'notification_form' %}">
