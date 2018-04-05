@@ -1,0 +1,96 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
+
+    <style>
+     #message-preview {
+         padding: 0.1em;
+         width: 100%;
+     }
+    </style>
+{% endblock %}
+
+{% block extrahead %}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        <p>
+            Please carefully review the {{ total_address_count }} affected address{{ total_address_count|pluralize:"es" }} and
+            the message below. Press <strong>Confirm and Send</strong> to
+            send it.
+        </p>
+
+        {% if subscribers %}
+            <p>
+                <strong>{{ recipient_count  }}}}</strong>
+                subscriber{{ recipient_count }} will receive this
+                notification.
+            </p>
+        {% else %}
+            <p>
+                <strong>There are no subscribers for the addresses given.</strong>
+            </p>
+        {% endif %}
+
+        {% if proposals %}
+            <h2>Proposals</h2>
+            <ul>
+                {% for proposal in proposals %}
+                <li>
+                    <strong>{{ proposal.case_number }}</strong>
+                    {{ proposal.address }}
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if coded_addresses %}
+            <h2>Addresses</h2>
+            <ul>
+                {% for _, pt, formatted_addr in coded_addresses %}
+                    <li>
+                        {{ formatted_addr }} ({{ pt.y }}, {{ pt.x }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <hr/>
+        <h2>Message Preview</h2>
+        <iframe frameborder="0" src="" id="message-preview"></iframe>
+        <script type="text/javascript">
+         var doc = document.getElementById("message-preview"),
+             body = doc.contentDocument;
+
+         body.open();
+         body.write("<head><link type='text/css' rel='stylesheet' href='{% static 'css/tinymce.css' %}'/></head>");
+         body.write("<body>{{ message|escapejs }}</body>");
+         body.close();
+        </script>
+        <hr/>
+
+        <form method="post" action="{% url 'send_notification' %}">
+            {% csrf_token %}
+            <input name="notification_id" type="hidden" value="{{ notification_id }}"/>
+
+            <input name="submit" type="submit" value="Back"/>
+            <input type="submit" class="default" value="Confirm and Send"/>
+        </form>
+
+        <br/><br/>
+        <div class="help small">
+            Message id: {{ notification_id }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

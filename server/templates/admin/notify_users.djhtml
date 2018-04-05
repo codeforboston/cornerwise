@@ -33,7 +33,7 @@
             subscribers who will be notified.
         </p>
 
-        <form method="post" action="">
+        <form method="post" action="{% url 'notification_form' %}">
             {% csrf_token %}
             <fieldset class="module aligned">
                 {{ form.as_p }}

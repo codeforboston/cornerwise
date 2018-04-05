@@ -1,5 +1,8 @@
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from datetime import timedelta
+from itertools import chain
+import re
+from uuid import uuid4
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -12,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from django.views.generic.edit import FormView
+from django.views.decorators.http import require_POST
 
 import bleach
 from tinymce.widgets import TinyMCE
@@ -22,13 +25,14 @@ from utils import split_list
 from shared.geocoder import geocode_tuples
 
 from proposal.models import Proposal
+from user.models import Subscription
 
 from .admin import cornerwise_admin
 from .widgets import DistanceField
 
 
 is_superuser = user_passes_test(lambda user: user.is_superuser, "/admin")
-is_planning_staff = permission_required("shared.send_notifications")
+can_send_notifications = permission_required("shared.send_notifications")
 
 
 def get_task_logs(task_ids):
@@ -45,7 +49,7 @@ def get_task_logs(task_ids):
 def celery_logs(request):
     nlines = int(request.GET.get("n", "100"))
     with open("logs/celery_tasks.log", "rb") as log:
-        log_lines = read_n_from_end(log, nlines)
+        log_lines = red.read_n_from_end(log, nlines)
 
     context = cornerwise_admin.each_context(request)
     context.update({"log_name": "Celery Tasks Log",
@@ -84,107 +88,205 @@ def recent_tasks(request):
     return render(request, "admin/recent_tasks.djhtml", context)
 
 
+def get_subscribers(geocoded=[], proposals=[],
+                    region=settings.GEO_REGION,
+                    notify_radius=D(ft=300)):
+    """Get the Subscriptions that should be informed about the given geocoded
+    addresses and/or proposals. Returns a dictionary of Subscriptions to
+    (address/proposal, Point).
+
+    :param geocoded: a list of tuples (address, Point, formatted_address)
+    :param proposals: a list of Proposals
+
+    """
+    if not isinstance(notify_radius, D):
+        notify_radius = D(ft=notify_radius)
+
+    prop_coords = ((p, p.location, p.address) for p in proposals)
+
+    sub_near = defaultdict(list)
+    for thing, coords, address in chain(prop_coords, geocoded):
+        if notify_radius:
+            subs = Subscription.objects.filter(
+                center__distance_lte=(coords, notify_radius))
+        else:
+            subs = Subscription.objects.containing(coords)
+
+        for sub in subs:
+            sub_near[sub].append((thing, coords))
+
+    return sub_near
+
+
 RelModel = namedtuple("RelModel", ["model"])
 
 
 # Send message to users
-class UserNotificationFormView(FormView):
-    """Form for sending messages to users near an address.
+class UserNotificationForm(forms.Form):
+    """Create a new message to send to users in the vicinity of given proposals
+    and/or addresses.
 
     """
-    template_name = "admin/notify_users.djhtml"
+    addresses = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text=("Enter one address per line"),
+        required=False)
+    proposals = forms.ModelMultipleChoiceField(
+        queryset=Proposal.objects.all(),
+        required=False,
+        widget=AutocompleteSelectMultiple(RelModel(Proposal), cornerwise_admin,))
+    message = forms.CharField(widget=TinyMCE(
+        mce_attrs={"width": 400, "height": 250,
+                   "content_css": urljoin(settings.STATIC_URL,
+                                          "css/tinymce.css")}))
+    notification_radius = DistanceField(
+        min_value=D(ft=100), max_value=D(mi=20), initial=D(ft=300),
+        label="Notify subscribers within distance")
+    include_boilerplate = forms.BooleanField(
+        initial=True, help_text=("Before sending the email to each user, "
+                                 "add a brief message listing the "
+                                 "address(es) or proposal(s) relevant to "
+                                 "that subscription"))
+    region = forms.ChoiceField(choices=(("Somerville, MA", "Somerville, MA"),),
+                               initial=settings.GEO_REGION)
+    notification_id = forms.CharField(required=False,
+                                      widget=forms.HiddenInput())
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(cornerwise_admin.each_context(self.request))
-        context["title"] = "Send User Notifications"
-        return context
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data = self.data.copy()
+        self.fields["notification_id"].initial = str(uuid4())
 
-    class form_class(forms.Form):
-        addresses = forms.CharField(
-            widget=forms.Textarea(attrs={"rows": 5}),
-            help_text=("Enter one address per line"),
-            required=False)
-        proposals = forms.ModelMultipleChoiceField(
-            queryset=None,
-            required=False,
-            widget=AutocompleteSelectMultiple(RelModel(Proposal), cornerwise_admin,))
-        message = forms.CharField(widget=TinyMCE(
-            mce_attrs={"width": 400, "height": 250,
-                       "content_css": urljoin(settings.STATIC_URL,
-                                              "css/tinymce.css")}))
-        notification_radius = DistanceField(
-            min_value=D(ft=100), max_value=D(mi=20), initial=D(ft=300),
-            label="Notify subscribers within distance")
-        include_boilerplate = forms.BooleanField(
-            initial=True, help_text=("Before sending the email to each user, "
-                                     "add a brief message listing the "
-                                     "address(es) or proposal(s) relevant to "
-                                     "that subscription"))
-        region = forms.ChoiceField(choices=(("Somerville, MA", "Somerville, MA"),),
-                                   initial=settings.GEO_REGION)
+    @property
+    def confirmed(self):
+        return self.cleaned_data["confirm"]
 
-        def __init__(self, *args, **kwargs):
-            from proposal.models import Proposal
+    def mark_confirm(self):
+        self.data["confirm"] = "1"
 
-            super().__init__(*args, **kwargs)
-            self.data = self.data.copy()
-            self.fields["proposals"].queryset = Proposal.objects.filter(
-                updated__gte=timezone.now() - timedelta(days=30),
-                region_name=settings.GEO_REGION)
+    def geocode_addresses(self, addresses):
+        addresses = list(filter(None, map(str.strip, addresses)))
+        geocoded = geocode_tuples(addresses,
+                                  region=self.cleaned_data["region"])
+        return split_list(tuple.__instancecheck__, geocoded)
 
-        def geocode_addresses(self, addresses):
-            addresses = list(filter(None, map(str.strip, addresses)))
-            geocoded = geocode_tuples(addresses,
-                                      region=self.cleaned_data["region"])
-            return split_list(tuple.__instancecheck__, geocoded)
+    def find_matching_proposals(self, region):
+        proposals = self.cleaned_data["proposals"]
 
-        def clean(self):
-            cleaned = super().clean()
+        return split_list(lambda p: p.region_name == region,
+                          proposals)
 
-            addresses = cleaned["addresses"].split("\n")
-            good_addrs, bad_addrs = self.geocode_addresses(addresses)
+    def clean(self):
+        cleaned = super().clean()
 
-            self.data["addresses"] = "\n".join(addr for addr, _pt, _fmt in
-                                               good_addrs)
-
-            if bad_addrs:
-                raise ValidationError(("Not all addresses were validated: "
-                                       "%(addresses)s"),
-                                      params={"addresses": ";".join(bad_addrs)})
-
-            if not (good_addrs or cleaned["proposals"]):
+        # Check that the Proposals are within the selected region
+        region = cleaned["region"]
+        if region:
+            good_props, bad_props = self.find_matching_proposals(region)
+            if bad_props:
+                self.data.setlist("proposals", [p.id for p in good_props])
                 raise ValidationError(
-                    "Please provide at least one address or proposal")
+                    (f"{len(bad_props)} proposal(s) are outside {region}."))
 
-            cleaned["coded_addresses"] = good_addrs
+        addresses = cleaned["addresses"].split("\n")
+        good_addrs, bad_addrs = self.geocode_addresses(addresses)
 
-            return cleaned
+        # Remove bad addresses, so that they don't show up when the form is
+        # redisplayed.
+        self.data["addresses"] = "\n".join(addr for addr, _pt, _fmt in
+                                           good_addrs)
 
-        def clean_message(self):
-            message = self.cleaned_data["message"]
-            return bleach.clean(
-                message,
-                tags=bleach.ALLOWED_TAGS + ["p", "pre", "span", "h1", "h2",
-                                            "h3", "h4", "h5", "h6"],
-                attributes=["title", "href", "style"],
-                styles=["text-decoration", "text-align"])
+        if bad_addrs:
+            raise ValidationError(("Not all addresses were valid: "
+                                   "%(addresses)s"),
+                                  params={"addresses": ";".join(bad_addrs)})
 
-        def get_addresses(self):
-            return "; ".join(f"{fmt_addr}: {pt.y}, {pt.x}" for _, pt, fmt_addr
-                             in self.cleaned_data["coded_addresses"])
+        if not (good_addrs or cleaned["proposals"]):
+            raise ValidationError(
+                "Please provide at least one address or proposal")
 
-        def send_emails(self):
-            data = self.cleaned_data
-            address = data["address"]
-            message = data["message"]
-            return data["lat"], data["lng"], data["formatted_address"]
+        cleaned["coded_addresses"] = good_addrs
 
-    def form_valid(self, form):
-        # lat, lng, fmt = form.send_emails()
-        addresses = form.get_addresses()
-        messages.success(self.request, f"Found addresses: {addresses}")
-        return redirect("/admin")
+        return cleaned
+
+    def clean_message(self):
+        message = self.cleaned_data["message"]
+        return bleach.clean(
+            message,
+            tags=bleach.ALLOWED_TAGS + ["p", "pre", "span", "h1", "h2",
+                                        "h3", "h4", "h5", "h6"],
+            attributes=["title", "href", "style"],
+            styles=["text-decoration", "text-align"])
+
+    def clean_notification_id(self):
+        nid = self.cleaned_data["notification_id"]
+        if nid and re.match(r"[0-9a-f]{32}$", nid, re.I):
+            return nid
+        else:
+            return str(uuid4())
+
+    def save_data(self):
+        notification_id = self.cleaned_data["notification_id"]
+
+        red.set_expire_key(f"notification.{notification_id}",
+                           {"cleaned": self.cleaned_data,
+                            "data": self.data},
+                           ttl=3600)
+        return notification_id
+
+    def get_subscribers(self):
+        data = self.cleaned_data
+        return get_subscribers(data["coded_addresses"],
+                               data["proposals"], data["region"],
+                               data["notification_radius"])
 
 
-user_notification_form = is_planning_staff(UserNotificationFormView.as_view())
+@can_send_notifications
+def user_notification_form(request, form_data=None):
+    context = cornerwise_admin.each_context(request).copy()
+
+    if not form_data and request.method == "POST":
+        form = UserNotificationForm(request.POST)
+        context["title"] = "Review Notification"
+        context["form"] = form
+        if form.is_valid():
+            subscribers = form.get_subscribers()
+            context.update(form.cleaned_data)
+            context.update({"subscribers": subscribers,
+                            "recipient_count": len(subscribers),
+                            "total_address_count": (len(form.cleaned_data["coded_addresses"]) + len(form.cleaned_data["proposals"])),
+                            "notification_id": form.save_data()})
+
+            return render(request, "admin/review_notification.djhtml",
+                          context)
+    else:
+        context["form"] = UserNotificationForm(form_data)
+
+    context["title"] = "Send User Notifications"
+
+    return render(request, "admin/notify_users.djhtml",
+                  context)
+
+
+@require_POST
+def send_user_notification(request):
+    notification_id = request.POST["notification_id"]
+    # TODO: Handle localized button text
+    go_back = request.POST.get("submit") == "Back"
+    key = f"notification.{notification_id}"
+
+    if go_back:
+        saved = red.get_key(key)
+    else:
+        saved = red.get_and_delete_key(key)
+
+    if not saved:
+        messages.error(
+            "Something went wrong, and the message could not "
+            "be sent.")
+        return redirect("notification_form")
+
+    if go_back:
+        return user_notification_form(request, saved["data"])
+
+    # Otherwise, send it!

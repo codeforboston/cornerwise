@@ -8,6 +8,9 @@ urlpatterns = [
     path("task_logs", admin_views.task_logs, name="task_logs"),
     path("task_failures", admin_views.task_failure_logs, name="task_failures"),
     path("recent_tasks", admin_views.recent_tasks, name="recent_tasks"),
-    path("message", admin_views.user_notification_form, name="send_message"),
+    path("message", admin_views.user_notification_form,
+         name="notification_form"),
+    path("send_notification", admin_views.send_user_notification,
+         name="send_notification"),
     path("", admin.cornerwise_admin.urls)
 ]
