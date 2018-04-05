@@ -68,6 +68,10 @@ def published_date(path):
     return datetime.fromtimestamp(os.path.getmtime(path))
 
 
+# TODO: It may be practical to sniff pdfinfo, determine the PDF
+# producer used, and make a best guess at encoding based on that
+# information. We should be able to get away with using ISO-8859-9
+# for now.
 @encoding.add("pdf")
 def encoding(_):
     return "ISO-8859-9"

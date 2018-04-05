@@ -120,10 +120,6 @@ def extract_text(doc):
     # the database and indexing it, rather than extracting it to a file.
     text_path = path.join(path.dirname(doc.local_path), "text.txt")
 
-    # TODO: It may be practical to sniff pdfinfo, determine the PDF
-    # producer used, and make a best guess at encoding based on that
-    # information. We should be able to get away with using ISO-8859-9
-    # for now.
     if files.extract_text(doc.local_path, text_path):
         doc.fulltext = text_path
         doc.encoding = files.encoding(doc.local_path)
