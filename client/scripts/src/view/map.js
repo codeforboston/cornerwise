@@ -7,7 +7,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
            var zoomThreshold = 17;
 
            return B.View.extend({
-               initialize: function() {
+               initialize: function(options) {
                    var state = appState.getState(),
                        mapOptions = {minZoom: 13,
                                      maxBounds: config.bounds,
@@ -61,6 +61,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    // Place the reference location marker:
                    this.placeReferenceMarker(refLocation);
 
+                   this.shouldZoomToReference = options.zoomToRefLocation;
+
                    // ... and subscribe to updates:
                    this.listenTo(this.collection, "add", this.proposalAdded)
                        .listenTo(this.collection, "remove", this.proposalRemoved)
@@ -73,7 +75,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        .listenTo(regions, "selectionLoaded", this.showRegions)
                        .listenTo(regions, "selectionRemoved", this.removeRegions)
                    // App behaviors:
-                       .listenTo(appState, "shouldFocus", this.onFocused);
+                       .listenTo(appState, "shouldFocus", this.onFocused)
+                       .listenTo(appState, "subscribeStart", this.onSubscribeStart)
+                       .listenTo(appState, "subscribeEnd", this.onSubscribeEnd);
 
                    appState.onStateKeyChange("f.box", this.onBoxFilterChanged,
                                              this);
@@ -134,7 +138,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
 
                                layer.on("dblclick", function(e) {
-                                   self.onDblClick(e);
+                                   return self.onDblClick(e);
                                });
                                bounds.extend(layer.getBounds());
                                self.regionLayers[id] = layer;
@@ -371,12 +375,24 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        }
 
                        // Recenter
-                       this.map.setView(loc, Math.max(this.map.getZoom(), 16));
+                       if (this.shouldZoomToReference)
+                           this.map.setView(loc, Math.max(this.map.getZoom(), 16));
+                       else
+                           this.map.panTo(loc);
+
                        this._refMarker.bringToBack();
                    } else if (this._refMarker) {
                        this.markersLayer.removeLayer(this._refMarker);
                        this._refMarker = null;
                    }
+               },
+
+               onSubscribeStart: function() {
+                   this.shouldZoomToReference = false;
+               },
+
+               onSubscribeEnd: function() {
+                   this.shouldZoomToReference = true;
                },
 
                getBounds: function() {

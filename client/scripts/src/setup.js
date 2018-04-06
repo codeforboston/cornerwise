@@ -83,7 +83,8 @@ define(
 
                 appViews.mapView = new MapView({
                     collection: proposals,
-                    el: "#map"
+                    el: "#map",
+                    zoomToRefLocation: true
                 });
 
                 appViews.filtersView = new FiltersView({
