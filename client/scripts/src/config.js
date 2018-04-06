@@ -38,7 +38,9 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         subscribeCircleStyle: {
             stroke: true,
             weight: 2,
-            color: "red"
+            color: "green",
+            fillColor: "gray",
+            dashArray: "5, 5"
         },
 
         // The style that will be applied to the rectangle representing the
