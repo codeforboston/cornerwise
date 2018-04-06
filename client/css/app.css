@@ -1377,11 +1377,16 @@ a.thumb-link:hover {
 }
 
 #alert.error, #alert.danger {
-    background-color: lightpink;
+    background-color: rgba(255, 182, 193, 0.6);
 }
 
 #alert.notice {
     background-color: rgba(190, 131, 0, 0.9);
+}
+
+#alert .content-wrapper {
+    flex: 1;
+    align-self: center;
 }
 
 #alert .title {
