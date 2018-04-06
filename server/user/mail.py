@@ -10,7 +10,7 @@ def _make_user_context(user, context):
     context = context.copy() if context else {}
 
     try:
-        context["user"] = user.profile.addressal
+        context["user"] = user.profile.addressal or user.email
         context["unsubscribe_url"] = make_absolute_url(user.profile.unsubscribe_url)
     except models.UserProfile.DoesNotExist:
         context["user"] = "Unknown"
@@ -65,3 +65,12 @@ def confirmation_context(subscription):
         "old_minimap_src": existing.minimap_src,
         "confirmation_link": make_absolute_url(subscription.confirm_url)
     }
+
+
+def staff_notification_context(subscription, title, message):
+    """
+    Context passed to templates for messages sent by staff.
+    """
+    user = subscription.user
+
+    return _make_user_context(user, {"message": message, "title": title})

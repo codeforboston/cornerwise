@@ -234,6 +234,7 @@ SENDGRID_TEMPLATES = {
     "replace_subscription": "5d3e9ef4-960b-4fb9-906e-75474dca8720",
     "delete_account": "e5e4fccd-be70-4abf-b6cf-86382926a0f6",
     "threshold": "4422c280-ac97-4668-aef0-6c1c9faaf9d1",
+    "staff_notification": "36dc83a7-dea8-4316-b951-14868af62c5f",
 }
 
 # If this is set to True, users are only allowed to have one subscription.

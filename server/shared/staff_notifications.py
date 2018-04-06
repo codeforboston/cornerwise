@@ -14,6 +14,7 @@ from django.contrib.admin.widgets import AutocompleteSelectMultiple
 from django.contrib.auth.decorators import permission_required
 from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
+from django.utils.html import escape
 
 import bleach
 from tinymce.widgets import TinyMCE
@@ -24,6 +25,7 @@ from shared.geocoder import geocode_tuples
 
 from proposal.models import Proposal
 from user.models import Subscription
+from user.tasks import send_staff_notification
 
 from .admin import cornerwise_admin
 from .widgets import DistanceField
@@ -281,3 +283,18 @@ def send_user_notification(request):
         return user_notification_form(request, saved["data"])
 
     # Otherwise, send it!
+    title = saved["title"]
+    title_markup = ("<h3>" + escape(title) + "</h3>\n") if title else ""
+    message = saved["message"]
+
+    subscribers = saved["subscribers"]
+    for sub, related in subscribers.items():
+        boilerplate = replace_boilerplate(saved["greeting"],
+                                          related,
+                                          saved["region_name"])
+        send_staff_notification.delay(
+            sub.pk, title,
+            f"{title_markup}{boilerplate}<br/>{message}")
+
+    messages.success(request, "Message sent to {len(subscribers)} subscribers.")
+    return redirect("admin:index")

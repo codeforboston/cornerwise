@@ -41,10 +41,7 @@ class UserProfile(models.Model):
 
     @property
     def addressal(self):
-        if self.nickname:
-            return self.nickname
-
-        return self.user.email
+        return self.nickname or self.user.first_name
 
     def activate(self):
         """Activates a user account.

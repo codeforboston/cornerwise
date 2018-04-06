@@ -118,6 +118,15 @@ def send_notifications(self, subscription_ids=None, since=None):
         logger.info("No updates sent")
 
 
+@shared_task(bind=True)
+def send_staff_notification(self, sub_id, title, message):
+    sub = Subscription.objects.get(pk=sub_id)
+    title = title or "New Message"
+    send_mail(sub.user.email, f"Cornerwise: {title}", "staff_notification",
+              mail.staff_notification_context(sub, title, message),
+              logger=get_logger(self))
+
+
 # Database hook:
 @receiver(
     post_save,
