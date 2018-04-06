@@ -445,7 +445,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                                    ];
                                promise.reject({reason: message, error: err});
                            },
-                           {timeout: 5000});
+                           {timeout: 10000});
                    } else {
                        promise.reject({reason: errors.geolocation.unavailable});
                    }
