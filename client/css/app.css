@@ -1962,6 +1962,10 @@ body.choosing-radius .ref-marker {
         top: 120px;
     }
 
+    body.nointro #ref-address-form .status {
+        right: 2.5em;
+    }
+
     body.nointro .filters-button {
         display: block;
     }
