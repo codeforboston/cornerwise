@@ -12,6 +12,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        mapOptions = {minZoom: 13,
                                      maxBounds: config.bounds,
                                      attributionControl: false,
+                                     doubleClickZoom: false,
                                      zoomControl: false},
                        lat = parseFloat(state.lat),
                        lng = parseFloat(state.lng),
