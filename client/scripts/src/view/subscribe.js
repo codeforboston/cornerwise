@@ -36,6 +36,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                startSubscribe: function() {
                    var opts = this.options;
 
+                   appState.trigger("subscribeStart");
                    appState.setHashKey("view", "main");
                    this.showSubscriptionForm();
                    this.removeCircle();
@@ -66,6 +67,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                    $("body").removeClass("choosing-bounds subscribe-mode choosing-radius");
                    alerts.remove("subscription-alert");
                    this.removeCircle();
+                   appState.trigger("subscribeEnd");
                },
 
                removeCircle: function() {
