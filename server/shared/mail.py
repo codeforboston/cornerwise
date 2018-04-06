@@ -32,12 +32,15 @@ def send(email, subject, template_name=None, context=None, content=None,
     template in <templates>/email.
 
     """
+    assert template_name or template_id, "missing argument"
     context = {} if context is None else context
-    try:
-        template_id = settings.SENDGRID_TEMPLATES[template_name]
-    except KeyError:
-        # Fall back to Django templates
-        return send_template(email, subject, template_name, context)
+
+    if not template_id:
+        try:
+            template_id = settings.SENDGRID_TEMPLATES[template_name]
+        except KeyError:
+            # Fall back to Django templates
+            return send_template(email, subject, template_name, context)
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items()}
 
