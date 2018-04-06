@@ -94,7 +94,12 @@ define(
                 appViews.subscribeView = new SubscribeView({
                     collection: proposals,
                     el: "#subscribe",
-                    mapView: appViews.mapView
+                    mapView: appViews.mapView,
+                    refLocation: refLocation,
+                    minRadius: config.minSubscribeRadius,
+                    maxRadius: config.maxSubscribeRadius,
+                    circleStyle: config.subscribeCircleStyle,
+                    instructions: config.subscribeInstructions
                 });
 
                 appViews.imageView = new ImageView({

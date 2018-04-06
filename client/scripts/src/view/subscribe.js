@@ -1,8 +1,11 @@
-define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
-       function($, B, _, alerts, appState, $u) {
+define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appState", "utils"],
+       function($, B, _, L, alerts, appState, $u) {
            return B.View.extend({
                initialize: function(options) {
+                   this.options = options;
                    this.mapView = options.mapView;
+
+                   this.listenTo(options.refLocation, "change", this.onRefChanged);
                },
 
                events: {
@@ -19,19 +22,39 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                        .find("input").focus();
                },
 
+               onRefChanged: function(refLocation) {
+                   if (this._radiusCircle) {
+                       this._radiusCircle.setLatLng(refLocation.getPoint());
+                   }
+               },
+
                onClickSubscribe: function(e) {
                    this.startSubscribe();
                    e.preventDefault();
                },
 
                startSubscribe: function() {
+                   var opts = this.options;
+
                    appState.setHashKey("view", "main");
                    this.showSubscriptionForm();
-                   $("body").addClass("choosing-bounds");
-                   var instructions = ("Move and zoom the map to set the " +
-                                       "area you want to receive updates " +
-                                       "about. Your filter settings will " +
-                                       "apply.");
+                   this.removeCircle();
+
+                   if (opts.maxRadius) {
+                       if (!opts.minRadius ||
+                           opts.minRadius === opts.maxRadius) {
+                           var radius = opts.minRadius * 0.3048,
+                               c =  L.circle(opts.refLocation.getPoint(),
+                                             _.extend({ radius: radius },
+                                                      opts.circleStyle))
+                               .addTo(this.mapView.getMap());
+                           this._radiusCircle = c;
+                       }
+                       $("body").addClass("subscribe-mode choosing-radius");
+                   } else {
+                       $("body").addClass("subscribe-mode choosing-bounds");
+                   }
+                   var instructions = opts.instructions;
                    alerts.show(instructions, "instructions", "modal",
                                "subscription-alert");
 
@@ -40,8 +63,16 @@ define(["jquery", "backbone", "underscore", "view/alerts", "appState", "utils"],
                dismiss: function() {
                    this.$(".screen").hide();
                    this.$(".screen1").show();
-                   $("body").removeClass("choosing-bounds");
+                   $("body").removeClass("choosing-bounds subscribe-mode choosing-radius");
                    alerts.remove("subscription-alert");
+                   this.removeCircle();
+               },
+
+               removeCircle: function() {
+                   if (this._radiusCircle) {
+                       this._radiusCircle.remove();
+                       this._radiusCircle = null;
+                   }
                },
 
                onKeyUp: function(e) {

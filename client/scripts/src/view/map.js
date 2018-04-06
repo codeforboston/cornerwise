@@ -58,7 +58,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.caseMarker = {};
 
                    // Place the reference location marker:
-                   this.placeReferenceMarker();
+                   this.placeReferenceMarker(refLocation);
 
                    // ... and subscribe to updates:
                    this.listenTo(this.collection, "add", this.proposalAdded)
@@ -357,7 +357,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                // Store a reference to the reference marker
                _refMarker: null,
-               placeReferenceMarker: function(change) {
+               placeReferenceMarker: function(refLocation) {
                    var loc = refLocation.getPoint();
 
                    // Don't show the ref marker if the user has not entered an

@@ -6,7 +6,8 @@ define(["lib/leaflet", "config", "underscore"],
                    var fg = L.FeatureGroup.prototype.initialize.call(this, []);
                    var icon = L.icon({iconUrl: "/static/images/cornerwise-owl.png",
                                       iconRetinaUrl: "/static/images/cornerwise-owl.png",
-                                      iconSize: [51, 68]});
+                                      iconSize: [51, 68],
+                                      className: "ref-marker"});
                    this.marker = L.marker(refLoc.getPoint(),
                                           {icon: icon}).addTo(this);
                    this.marker.bindPopup("")
