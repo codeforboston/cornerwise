@@ -182,6 +182,16 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         clientId: "jYLY7AeA1U9xDiWu",
         clientSecret: "64a66909ff724a0a9928838ef4462909",
 
+        // Error messages:
+        errors: {
+            geolocation: {
+                unavailable: "Geolocation unavailable in your browser.",
+                denied: "Could not set location without your permission.",
+                unavailable: "Could not determine your position",
+                timeout: "Geolocation took too long."
+            }
+        },
+
         // Map of handles to names
         attributeNames: {
 

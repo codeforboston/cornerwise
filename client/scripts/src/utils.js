@@ -1,5 +1,7 @@
-define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templates"],
-       function(_, $, locale, L, templates) {
+define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!build/templates"],
+       function(_, $, locale, config, L, templates) {
+           var errors = config.errors;
+
            /**
             * Takes a numeric string s and adds thousands separators.
             * For example: commas("12345678.3") -> "12,345,678.3"
@@ -434,14 +436,18 @@ define(["underscore", "jquery", "locale", "lib/leaflet", "optional!build/templat
                                                 coords.longitude,
                                                 coords.altitude]);
                            },
-                           function() {
-                               promise.reject(
-                                   {reason: ("Could not set location without " +
-                                             "user permission.")});
-                           });
+                           function(err) {
+                               var reason = err.code,
+                                   message = errors.geolocation[
+                                       reason === 1 ? "denied" :
+                                           reason === 3 ? "timeout" :
+                                           "unavailable"
+                                   ];
+                               promise.reject({reason: message, error: err});
+                           },
+                           {timeout: 5000});
                    } else {
-                       promise.reject({reason: ("Geolocation unavailable " +
-                                                "in this browser.")});
+                       promise.reject({reason: errors.geolocation.unavailable});
                    }
 
                    return promise;
