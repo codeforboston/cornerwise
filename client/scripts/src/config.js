@@ -31,7 +31,7 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         refPointName: "City Hall",
 
         // Configuration for subscriptions:
-        subscribeInstructions: "Double-click the map or enter an address in the search box to set the area you want to receive updates about. We will send updates about projects in the circle to the email address you provide.",
+        subscribeInstructions: "Double-click the map or enter an address in the search box above to set the area you want to receive updates about. We will send updates about projects in the circle to the email address you provide.",
         minSubscribeRadius: 300,
         maxSubscribeRadius: 300,
         // See: http://leafletjs.com/reference-1.3.0.html#circle-option
