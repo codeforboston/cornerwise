@@ -370,8 +370,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        }
 
                        // Recenter
-                       this.map.setView(loc, Math.max(this.map.getZoom(), 16),
-                                        {animate: false});
+                       this.map.setView(loc, Math.max(this.map.getZoom(), 16));
                        this._refMarker.bringToBack();
                    } else if (this._refMarker) {
                        this.markersLayer.removeLayer(this._refMarker);
