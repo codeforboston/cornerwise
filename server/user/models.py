@@ -213,9 +213,9 @@ class Subscription(models.Model):
     def set_validated_query(self, q):
         if "box" in q:
             self.box = bounds_from_box(q["box"])
-        elif "circle" in q:
+        elif "center" in q:
             if "r" in q:
-                self.center = point_from_str(q["circle"])
+                self.center = point_from_str(q["center"])
                 self.radius = float(q["r"])
         if "region_name" in q:
             self.region_name = q["region_name"]
