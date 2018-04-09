@@ -2,20 +2,13 @@
 """
 import logging
 
-import requests
-import sendgrid
 import toronado
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from sendgrid.helpers import mail
 
-if getattr(settings, "SENDGRID_API_KEY", None):
-    SG = sendgrid.SendGridAPIClient(
-        apikey=settings.SENDGRID_API_KEY, raise_errors=True)
-else:
-    SG = None
 
 logger = logging.getLogger(__name__)
 
@@ -43,30 +36,22 @@ def send(email, subject, template_name=None, context=None, content=None,
             return send_template(email, subject, template_name, context)
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items()}
-
-    if not isinstance(email, list):
-        email = [email]
-
+    email = email if isinstance(email, list) else [email]
     recipients = [{"email": addr} if isinstance(addr, str) else addr
                   for addr in email]
 
-    data = {
-        "personalizations": [{
-            "to": recipients,
-            "substitutions": substitutions,
-            "subject": subject,
-        }],
-        "from": {
-            "email": settings.EMAIL_ADDRESS,
-            "name": settings.EMAIL_NAME
-        },
-        "template_id": template_id
-    }
+    mail = EmailMultiAlternatives(
+        subject=subject,
+        body="",
+        to=recipients
+    )
+    mail.template_id = template_id
+    mail.substitutions = substitutions
 
     if content:
-        data["content"] = [{"type": "text/html", "value": content}]
+        mail.attach_alternative(content, "text/html")
 
-    SG.client.mail.send.post(request_body=data)
+    mail.send()
     logger.info("Email sent to {}".format(email))
     return True
 
@@ -92,24 +77,14 @@ def send_template(email, subject, template_name, context=None, logger=logger):
     named email template.
     """
     context = context or {}
-    html, _text = render_email_body(template_name, context)
+    html, text = render_email_body(template_name, context)
     logger.info("Generated email: %s", html)
-    addressal = context.get("user")
 
-    if SG:
-        message = mail.Mail(
-            mail.Email(settings.EMAIL_ADDRESS), subject,
-            mail.Email(email, addressal or email),
-            mail.Content("text/html", html))
-        response = SG.client.mail.send.post(request_body=message.get())
-        logger.info("Sent '%s' email to %s (response %s)", template_name,
-                    email, response)
-    else:
-        logger.info("SendGrid not available. Generated email: %s", html)
-
-
-def _get_sendgrid(url, params=None):
-    response = requests.get(
-        url, params,
-        headers={"Authorization": f"Bearer {settings.SENDGRID_API_KEY}"})
-    return response
+    mail = EmailMultiAlternatives(
+        subject=subject,
+        body=text,
+        to=(email if isinstance(email, list) else [email]))
+    mail.attach_alternative(html, "text/html")
+    mail.send()
+    logger.info("Sent '%s' email to %s", template_name,
+                email)
