@@ -1377,11 +1377,16 @@ a.thumb-link:hover {
 }
 
 #alert.error, #alert.danger {
-    background-color: lightpink;
+    background-color: rgba(255, 182, 193, 0.6);
 }
 
 #alert.notice {
     background-color: rgba(190, 131, 0, 0.9);
+}
+
+#alert .content-wrapper {
+    flex: 1;
+    align-self: center;
 }
 
 #alert .title {
@@ -1790,27 +1795,40 @@ textarea {
     width: 100%;
 }
 
-/* Subscription workflow */
+/* Subscription workflow
 
+ .subscribe-mode - applied to body for all selection methods
+
+ .choosing-bounds - applied when the user is selecting a region of the mqp to
+ receive updates about.
+
+ .choosing-radius - applied when the user is selecting a circle around a
+ specified point.
+
+*/
 body.choosing-bounds #map-container {
     border: 3px solid #FF6005;
 }
 
-body.choosing-bounds .proposal-info-popup {
+body.subscribe-mode .proposal-info-popup
+{
     display: none !important;
 }
 
-body.choosing-bounds #alert-container {
+body.subscribe-mode #alert-container {
     margin-top: 0;
 }
 
-
 body.choosing-bounds #search-banner .overlay-contents,
-body.choosing-bounds #hamburger,
-body.choosing-bounds .leaflet-marker-icon
+body.subscribe-mode #hamburger,
+body.subscribe-mode .leaflet-marker-icon
 {
     opacity: 0.6;
     pointer-events: none;
+}
+
+body.choosing-radius .ref-marker {
+    display: none;
 }
 
 #subscribe a:hover {
@@ -1949,6 +1967,10 @@ body.choosing-bounds .leaflet-marker-icon
         top: 120px;
     }
 
+    body.nointro #ref-address-form .status {
+        right: 2.5em;
+    }
+
     body.nointro .filters-button {
         display: block;
     }
@@ -1963,11 +1985,14 @@ body.choosing-bounds .leaflet-marker-icon
         transition-duration: 0.1s;
     }
 
-    body.choosing-bounds #subscribe {
-        border-bottom: 3px solid #FF6005;
+    body.subscribe-mode #subscribe {
         left: 0;
         top: 65px;
         right: 0;
+    }
+
+    body.choosing-bounds #subscribe {
+        border-bottom: 3px solid #FF6005;
     }
 
     body.main #subscribe,
@@ -1981,7 +2006,7 @@ body.choosing-bounds .leaflet-marker-icon
         opacity: 0.8;
     }
 
-    body.choosing-bounds #search-banner > #alert-container {
+    body.subscribe-mode #search-banner > #alert-container {
         filter: none;
         opacity: 1;
         pointer-events: all;
@@ -2169,19 +2194,19 @@ body.choosing-bounds .leaflet-marker-icon
         display: none;
     }
 
-    body.choosing-bounds #search-banner > #alert-container {
-        display: block;
-    }
-
-    body.choosing-bounds #map-container {
-        border-bottom: none;
-    }
-
     body.choosing-bounds #alert-container {
         top: 1px;
     }
 
-    body.choosing-bounds #alert {
+    body.subscribe-mode #search-banner > #alert-container {
+        display: block;
+    }
+
+    body.subscribe-mode #map-container {
+        border-bottom: none;
+    }
+
+    body.subscribe-mode #alert {
         left: 3px;
         right: 3pxa;
         top: 2px;
@@ -2191,7 +2216,7 @@ body.choosing-bounds .leaflet-marker-icon
         border-top: 3px solid #FF6005;
     }
 
-    body.choosing-bounds #map-controls {
+    body.subscribe-mode #map-controls {
         bottom: 6em;
     }
 

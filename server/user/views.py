@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from django.contrib.auth import login, logout
 
@@ -26,14 +27,12 @@ User = get_user_model()
 
 
 @make_response("subscribed.djhtml", "subscribe_error.djhtml")
+@require_POST
 def subscribe(request):
     """
     Set up a new subscription.
     """
     # Validate the request:
-    if request.method != "POST":
-        raise ErrorResponse("Request must use POST method.", status=405)
-
     try:
         query_dict = json.loads(request.POST["query"])
     except KeyError:
@@ -41,27 +40,25 @@ def subscribe(request):
     except ValueError:
         raise ErrorResponse("Malformed JSON in 'query' field.")
 
-    user = request.user
     new_user = False
     has_subscriptions = False
 
-    if user.is_anonymous():
-        try:
-            email = request.POST["email"]
-            user = User.objects.get(email=email)
-            has_subscriptions = user.subscriptions.filter(active=True).exists()
-        except KeyError as kerr:
-            raise ErrorResponse("Missing required key:" + kerr.args[0], {})
-        except User.DoesNotExist:
-            language = request.GET.get("language", "en-US")
-            lang, _reg = language.split("-", 1)
-            user = User.objects.create(
-                is_active=False,
-                username=email,
-                email=email, )
-            profile = UserProfile.objects.create(user=user, language=lang)
-            profile.save()
-            new_user = True
+    try:
+        email = request.POST["email"]
+        user = User.objects.get(email=email)
+        has_subscriptions = user.subscriptions.filter(active=True).exists()
+    except KeyError as kerr:
+        raise ErrorResponse("Missing required key:" + kerr.args[0], {})
+    except User.DoesNotExist:
+        language = request.GET.get("language", "en-US")
+        lang, _reg = language.split("-", 1)
+        user = User.objects.create(
+            is_active=False,
+            username=email,
+            email=email, )
+        profile = UserProfile.objects.create(user=user, language=lang)
+        profile.save()
+        new_user = True
 
     try:
         subscription = Subscription()

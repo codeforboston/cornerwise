@@ -30,6 +30,19 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         refMarkerColor: "red",
         refPointName: "City Hall",
 
+        // Configuration for subscriptions:
+        subscribeInstructions: "Double-click the map or enter an address in the search box above to set the area you want to receive updates about. We will send updates about projects in the circle to the email address you provide.",
+        minSubscribeRadius: 300,
+        maxSubscribeRadius: 300,
+        // See: http://leafletjs.com/reference-1.3.0.html#circle-option
+        subscribeCircleStyle: {
+            stroke: true,
+            weight: 2,
+            color: "green",
+            fillColor: "gray",
+            dashArray: "5, 5"
+        },
+
         // The style that will be applied to the rectangle representing the
         // bounds of the current area filter:
         filterBoundsStyle: {
@@ -168,6 +181,16 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         // Esri:
         clientId: "jYLY7AeA1U9xDiWu",
         clientSecret: "64a66909ff724a0a9928838ef4462909",
+
+        // Error messages:
+        errors: {
+            geolocation: {
+                unavailable: "Geolocation unavailable in your browser.",
+                denied: "Could not set location without your permission.",
+                unavailable: "Could not determine your position",
+                timeout: "Geolocation took too long."
+            }
+        },
 
         // Map of handles to names
         attributeNames: {

@@ -7,11 +7,12 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
            var zoomThreshold = 17;
 
            return B.View.extend({
-               initialize: function() {
+               initialize: function(options) {
                    var state = appState.getState(),
                        mapOptions = {minZoom: 13,
                                      maxBounds: config.bounds,
                                      attributionControl: false,
+                                     doubleClickZoom: false,
                                      zoomControl: false},
                        lat = parseFloat(state.lat),
                        lng = parseFloat(state.lng),
@@ -58,7 +59,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.caseMarker = {};
 
                    // Place the reference location marker:
-                   this.placeReferenceMarker();
+                   this.placeReferenceMarker(refLocation);
+
+                   this.shouldZoomToReference = options.zoomToRefLocation;
 
                    // ... and subscribe to updates:
                    this.listenTo(this.collection, "add", this.proposalAdded)
@@ -72,7 +75,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        .listenTo(regions, "selectionLoaded", this.showRegions)
                        .listenTo(regions, "selectionRemoved", this.removeRegions)
                    // App behaviors:
-                       .listenTo(appState, "shouldFocus", this.onFocused);
+                       .listenTo(appState, "shouldFocus", this.onFocused)
+                       .listenTo(appState, "subscribeStart", this.onSubscribeStart)
+                       .listenTo(appState, "subscribeEnd", this.onSubscribeEnd);
 
                    appState.onStateKeyChange("f.box", this.onBoxFilterChanged,
                                              this);
@@ -133,7 +138,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
 
                                layer.on("dblclick", function(e) {
-                                   self.onDblClick(e);
+                                   return self.onDblClick(e);
                                });
                                bounds.extend(layer.getBounds());
                                self.regionLayers[id] = layer;
@@ -357,7 +362,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                // Store a reference to the reference marker
                _refMarker: null,
-               placeReferenceMarker: function(change) {
+               placeReferenceMarker: function(refLocation) {
                    var loc = refLocation.getPoint();
 
                    // Don't show the ref marker if the user has not entered an
@@ -370,8 +375,11 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        }
 
                        // Recenter
-                       this.map.setView(loc, Math.max(this.map.getZoom(), 16),
-                                        {animate: false});
+                       if (this.shouldZoomToReference)
+                           this.map.setView(loc, Math.max(this.map.getZoom(), 16));
+                       else
+                           this.map.panTo(loc);
+
                        this._refMarker.bringToBack();
                    } else if (this._refMarker) {
                        this.markersLayer.removeLayer(this._refMarker);
@@ -379,8 +387,20 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    }
                },
 
+               onSubscribeStart: function() {
+                   this.shouldZoomToReference = false;
+               },
+
+               onSubscribeEnd: function() {
+                   this.shouldZoomToReference = true;
+               },
+
                getBounds: function() {
                    return this.map.getBounds();
+               },
+
+               getCenter: function() {
+                   return this.map.getCenter();
                },
 
                resetBounds: function() {

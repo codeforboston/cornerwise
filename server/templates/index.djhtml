@@ -129,7 +129,7 @@
                     <div id="alert-container">
                         <div id="alert">
                             <a href="#" class="close">&times;</a>
-                            <div>
+                            <div class="content-wrapper">
                                 <h2 class="title"></h2>
                                 <span class="content"></span>
                             </div>
