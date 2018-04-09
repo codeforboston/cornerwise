@@ -16,7 +16,8 @@ define(["backbone", "underscore", "config", "utils"],
                                },
                                "ref": {
                                    "lat": config.refPointDefault.lat,
-                                   "lng": config.refPointDefault.lng
+                                   "lng": config.refPointDefault.lng,
+                                   "setMethod": "auto"
                                },
                                sort: "-updated"
                            };

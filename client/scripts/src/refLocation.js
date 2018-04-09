@@ -27,21 +27,21 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                checkedAttrs: function(ref, attrs) {
                    var lat = parseFloat(ref.lat),
-                       lng = parseFloat(ref.lng),
-                       newAttrs = {};
+                       lng = parseFloat(ref.lng);
 
                    if (!isNaN(lat) && !isNaN(lng)) {
-                       newAttrs.lat = lat;
-                       newAttrs.lng = lng;
+                       return _.extend({}, ref, {lat: lat, lng: lng});
                    }
 
-                   return _.extend(newAttrs, attrs);
+                   return null;
                },
 
                checkedSet: function(ref, oldRef) {
                    var attrs = this.checkedAttrs(ref);
 
-                   this.set(attrs);
+                   if (attrs) {
+                       this.set(attrs);
+                   }
                },
 
                getPoint: function() {
@@ -74,12 +74,12 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                            }
 
                            self.set({
-                               altitude: loc[2],
-                               setMethod: "geolocate"
+                               altitude: loc[2]
                            });
                            appState.setHashKey("ref", {
                                lat: loc[0],
-                               lng: loc[1]
+                               lng: loc[1],
+                               setMethod: "geolocate"
                            });
 
                            return loc;
@@ -92,17 +92,11 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                },
 
                setFromLatLng: function(lat, long, address) {
-                   if (address) {
-                       this.set({
-                           setMethod: "address",
-                           address: address
-                       });
-                   } else {
-                       this.set("setMethod", "map");
-                   }
                    appState.setHashKey("ref", {
                        lat: lat,
-                       lng: long
+                       lng: long,
+                       setMethod: address ? "address" : "map",
+                       address: address || ""
                    });
                },
 
@@ -117,12 +111,11 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                        }
 
                        self.set({
-                           altitude: null,
-                           setMethod: "address",
-                           address: addr
+                           altitude: null
                        });
                        appState.setHashKey("ref", {
                            address: addr,
+                           setMethod: "address",
                            lat: loc[0],
                            lng: loc[1]
                        });
