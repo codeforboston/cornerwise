@@ -50,6 +50,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                                                       opts.circleStyle))
                                .addTo(this.mapView.getMap());
                            this._radiusCircle = c;
+                           this._currentRadius = radius;
                        }
                        $("body").addClass("subscribe-mode choosing-radius");
                    } else {
@@ -73,7 +74,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                removeCircle: function() {
                    if (this._radiusCircle) {
                        this._radiusCircle.remove();
-                       this._radiusCircle = null;
+                       this._currentRadius = this._radiusCircle = null;
                    }
                },
 
@@ -93,7 +94,14 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                    var form = e.target,
                        self = this,
                        query = _.clone(this.collection.query);
-                   query.box = $u.boundsToBoxString(this.mapView.getBounds());
+
+                   if (this._currentRadius) {
+                       query.center = $u.llToString(this.mapView.getCenter());
+                       query.r = ""+this._currentRadius;
+                   } else {
+                       query.box = $u.boundsToBoxString(this.mapView.getBounds());
+                   }
+
                    $.ajax("/user/subscribe",
                           {method: "POST",
                            data: {query: JSON.stringify(query),

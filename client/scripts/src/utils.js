@@ -637,6 +637,10 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                    return [sw.lat, sw.lng, ne.lat, ne.lng].join(",");
                },
 
+               llToString: function(ll) {
+                   return ll.lat + "," + ll.lng;
+               },
+
                /**
                 * Like _.template, except that it adds helper functions to the
                 * data passed to the resulting template function.

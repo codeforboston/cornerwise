@@ -399,6 +399,10 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    return this.map.getBounds();
                },
 
+               getCenter: function() {
+                   return this.map.getCenter();
+               },
+
                resetBounds: function() {
                    this.map.fitBounds(config.bounds);
                },
