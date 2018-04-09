@@ -1986,10 +1986,13 @@ body.choosing-radius .ref-marker {
     }
 
     body.subscribe-mode #subscribe {
-        border-bottom: 3px solid #FF6005;
         left: 0;
         top: 65px;
         right: 0;
+    }
+
+    body.choosing-bounds #subscribe {
+        border-bottom: 3px solid #FF6005;
     }
 
     body.main #subscribe,

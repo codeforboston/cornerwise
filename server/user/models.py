@@ -259,7 +259,7 @@ class Subscription(models.Model):
             box = center.buffer(self.radius/111000)
 
         if box:
-            bounds = box.envelope.tuple
+            bounds = box.envelope.tuple[0]
             sw = bounds[2]
             ne = bounds[0]
             return settings.MINIMAP_SRC\
