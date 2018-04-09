@@ -7,8 +7,8 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from shared.logger import get_logger, task_logger
-from shared.mail import send as send_mail, SG
+from shared.logger import get_logger
+from shared.mail import send as send_mail
 
 from .models import Subscription
 from . import mail
