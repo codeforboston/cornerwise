@@ -16,7 +16,9 @@ define(
                 this.listenTo(refLocation, "change:radius",
                               this.updateRadius)
                     .listenTo(refLocation, "change:geolocating",
-                              this.toggleGeolocating);
+                              this.toggleGeolocating)
+                    .listenTo(refLocation, "change:address",
+                              this.maybeUpdateAddress);
 
                 this.buildRegionSelection();
 
@@ -39,6 +41,7 @@ define(
                 var self = this,
                     placesOptions = {types: ["geocode"]},
                     input = $("#ref-address-form input")[0];
+
                 places.setup(input, placesOptions)
                     .done(function(ac) {
                         self.placesSetup(ac, input);
@@ -206,6 +209,10 @@ define(
             toggleGeolocating: function(loc, isGeolocating) {
                 $(document.body)
                     .toggleClass("geolocating", isGeolocating);
+            },
+
+            maybeUpdateAddress: function(loc, addr) {
+                $("#ref-address-form input:not(:focus)").val(addr);
             },
 
             filterText: _.debounce(function(e) {
