@@ -51,6 +51,8 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                                .addTo(this.mapView.getMap());
                            this._radiusCircle = c;
                            this._currentRadius = radius;
+                       } else {
+                           this.showRadiusInput();
                        }
                        $("body").addClass("subscribe-mode choosing-radius");
                    } else {
@@ -68,7 +70,27 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                    $("body").removeClass("choosing-bounds subscribe-mode choosing-radius");
                    alerts.remove("subscription-alert");
                    this.removeCircle();
+                   this.hideRadiusInput();
                    appState.trigger("subscribeEnd");
+               },
+
+               setRadius: function(m, unit) {
+                   if (unit && unit.match(/^f(ee)?t$/i))
+                       m *= 0.3048;
+
+                   if (this._radiusCircle) {
+                       this._radiusCircle.setRadius(m);
+                       this._currentRadius = m;
+                   }
+               },
+
+               showRadiusInput: function() {
+                   // Implement if needed
+                   throw new Error("showRadiusInput is not implemented.");
+               },
+
+               hideRadiusInput: function() {
+                   // Implement if needed
                },
 
                removeCircle: function() {
