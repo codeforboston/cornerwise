@@ -5,13 +5,14 @@ from datetime import datetime, timedelta
 import os
 import pytz
 import re
+from typing import Iterable
 
 import celery
 
 from django.conf import settings
 from django.core.cache import cache
 from django.dispatch import receiver
-from django.db.models import F, QuerySet
+from django.db.models import F
 from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
@@ -372,7 +373,7 @@ def create_events(dicts):
 
 @adapt
 def fetch_proposals(since: datetime=None,
-                    importers: QuerySet=None,
+                    importers: Iterable[Importer]=None,
                     logger=task_logger):
     """Task runs each of the importers given.
 
@@ -426,9 +427,6 @@ def fetch_proposals(since: datetime=None,
         importer.save()
 
     add_locations(all_found["cases"], Geocoder)
-
-    #     add_locations(all_found["projects"],
-    #                   lambda prj: stringify_address_dict(prj["address"]))
 
     proposal_ids = [p.id for p in create_proposals(all_found["cases"], logger)]
     return proposal_ids
