@@ -9,6 +9,11 @@ from django.db import models
 import pytz
 
 
+def takes_iterable(fn):
+    fn.takes_iterable = True
+    return fn
+
+
 def now_utc():
     return pytz.utc.localize(datetime.utcnow())
 
@@ -20,11 +25,16 @@ def adapt_datetime(arg, _type) -> datetime:
         return now_utc() - arg
 
 
+@takes_iterable
 def adapt_model(arg, Model):
     if isinstance(arg, int):
         return Model.objects.get(pk=arg)
     if isinstance(arg, Model):
         return arg
+    try:
+        return Model.objects.filter(pk__in=arg)
+    except TypeError:
+        return None
 
 
 def adapt_iterable(args, it, deserializers):
@@ -33,6 +43,10 @@ def adapt_iterable(args, it, deserializers):
 
     try:
         it_type = it.__args__[0]
+
+        des = get_deserializer(it_type, deserializers)
+        if des and des.takes_iterable:
+            return des(args, it_type)
 
         return (adapt_arg(arg, it_type, deserializers) for arg in args)
     except (IndexError, TypeError):
@@ -52,6 +66,13 @@ DESERIALIZERS = {
     models.Model: adapt_model,
 }
 
+def get_deserializer(ann, deserializers):
+    for t in ann.__mro__:
+        deserializer = deserializers.get(t)
+        if deserializer:
+            return deserializer
+
+
 def adapt_arg(arg, ann, deserializers=DESERIALIZERS):
     if not ann or ann is inspect._empty:
         return arg
@@ -65,12 +86,11 @@ def adapt_arg(arg, ann, deserializers=DESERIALIZERS):
     if isinstance(arg, ann):
         return arg
 
-    for t in ann.__mro__:
-        deserializer = deserializers.get(t)
-        if deserializer:
-            adapted = deserializer(arg, ann)
-            if adapted:
-                return adapted
+    deserializer = get_deserializer(ann, deserializers)
+    if deserializer:
+        adapted = deserializer(arg, ann)
+        if adapted:
+            return adapted
 
     return arg
 
