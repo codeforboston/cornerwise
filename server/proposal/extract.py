@@ -300,8 +300,10 @@ def decision_properties(doc):
     if "properties" in sections:
         attrs.update(properties(sections["properties"]))
 
-    del attrs["Date"]
-    del attrs["Site"]
+    if "Date" in attrs:
+        del attrs["Date"]
+    if "Site" in attrs:
+        del attrs["Site"]
 
     vote, decision = find_vote(" ".join(sections["decision"]))
     if vote:

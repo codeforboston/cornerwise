@@ -124,7 +124,7 @@ def extract_images(doc: Document, logger=task_logger):
         return [image.pk for image in images]
     except Exception as exc:
         logger.exception("Image extraction failed for Document #%i",
-                         doc.pk, exc)
+                         doc.pk)
 
         return []
 
