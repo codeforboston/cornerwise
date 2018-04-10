@@ -124,25 +124,6 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             //     features: null
             // },
             {
-                source: "/static/scripts/src/layerdata/MBTABus88.geojson",
-                id: "mbtabus",
-                icon: "mbta",
-                iconCredit: "Freepik",
-                info: "Major MBTA bus routes",
-                title: "Major Bus Routes",
-                short: "Bus",
-                color: "black",
-                shown: false,
-                marker: {
-                    type: "circle",
-                    color: "black",
-                    fillColor: "blue",
-                    radius: 5,
-                    fillOpacity: 1
-                },
-                features: null
-            },
-            {
                 source: "https://raw.githubusercontent.com/cityofsomerville/geodata/master/neighborhoods.geojson",
                 id: "neighborhoods",
                 icon: "home",
