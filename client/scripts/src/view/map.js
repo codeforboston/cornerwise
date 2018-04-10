@@ -19,6 +19,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        zoom = parseInt(state.zoom),
                        bounds = null;
 
+                   this.autopan = false;
+                   this.autozoom = true;
+
                    if (_.isFinite(lat) && _.isFinite(lng))
                        mapOptions.center = L.latLng(lat, lng);
                    else
@@ -61,8 +64,6 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    // Place the reference location marker:
                    this.placeReferenceMarker(refLocation);
 
-                   this.shouldZoomToReference = options.zoomToRefLocation;
-
                    // ... and subscribe to updates:
                    this.listenTo(this.collection, "add", this.proposalAdded)
                        .listenTo(this.collection, "remove", this.proposalRemoved)
@@ -75,9 +76,10 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        .listenTo(regions, "selectionLoaded", this.showRegions)
                        .listenTo(regions, "selectionRemoved", this.removeRegions)
                    // App behaviors:
+                       .listenTo(appState, "initialized", this.autoPanOn)
                        .listenTo(appState, "shouldFocus", this.onFocused)
-                       .listenTo(appState, "subscribeStart", this.onSubscribeStart)
-                       .listenTo(appState, "subscribeEnd", this.onSubscribeEnd);
+                       .listenTo(appState, "subscribeStart", this.autoZoomOff)
+                       .listenTo(appState, "subscribeEnd", this.autoZoomOn);
 
                    appState.onStateKeyChange("f.box", this.onBoxFilterChanged,
                                              this);
@@ -107,7 +109,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                                  function(model) {
                                      return model.get("location");
                                  }));
-                   this.map.setView(bounds.getCenter());
+
+                   if (this.autopan)
+                       this.map.setView(bounds.getCenter());
                },
 
                regionLayers: {},
@@ -154,7 +158,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        self.map.setMaxBounds(bounds.pad(1));
 
                        if (!bounds.contains(self.map.getBounds()))
-                           self.map.fitBounds(bounds.pad(-1));
+                           if (self.autopan)
+                               self.map.fitBounds(bounds.pad(-1));
 
                        // HACK Do this here rather than inside the bounds
                        // collection because this is where we actually load the
@@ -300,6 +305,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                            return L.latLng(loc.lat, loc.lng);
                        });
 
+                   if (!this.autopan) return;
+
                    if (models.length == 1) {
                        this.map.setView(ll[0], zoom ? zoomThreshold : this.map.getZoom());
                    } else {
@@ -310,6 +317,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                onPopupOpened: function(e) {
                    // Recenter the map view on the popup when it opens.
+                   if (!this.autopan) return;
+
                    var pos = this.map.project(e.popup._latlng);
                    pos.y -= e.popup._container.clientHeight/2;
                    this.map.panTo(this.map.unproject(pos), {animate: true});
@@ -375,9 +384,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        }
 
                        // Recenter
-                       if (this.shouldZoomToReference)
+                       if (this.autozoom)
                            this.map.setView(loc, Math.max(this.map.getZoom(), 16));
-                       else
+                       else if (this.autopan)
                            this.map.panTo(loc);
 
                        this._refMarker.bringToBack();
@@ -387,12 +396,16 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    }
                },
 
-               onSubscribeStart: function() {
-                   this.shouldZoomToReference = false;
+               autoPanOn: function() {
+                   this.autopan = true;
                },
 
-               onSubscribeEnd: function() {
-                   this.shouldZoomToReference = true;
+               autoZoomOn: function() {
+                   this.autozoom = true;
+               },
+
+               autoZoomOff: function() {
+                   this.autozoom = false;
                },
 
                getBounds: function() {
@@ -401,15 +414,6 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                getCenter: function() {
                    return this.map.getCenter();
-               },
-
-               resetBounds: function() {
-                   this.map.fitBounds(config.bounds);
-               },
-
-               zoomToRefLocation: function() {
-                   var bounds = this._refMarker.getBounds();
-                   this.map.fitBounds(bounds, {padding: [5, 5]});
                },
 
                _infoLayers: {},

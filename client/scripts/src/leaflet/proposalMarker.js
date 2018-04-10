@@ -97,7 +97,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                                L.popup({className: "proposal-info-popup",
                                         minWidth: 300,
                                         maxWidth: 300,
-                                        autoPanPaddingTopLeft: L.point(5, 15)});
+                                        autoPan: false});
                            popup.setContent(view.render().el);
 
                            this.bindPopup(popup);

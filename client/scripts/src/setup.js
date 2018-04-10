@@ -1,10 +1,10 @@
 define(
-    ["jquery", "collection/proposals", "collection/manager", "view/map",
-     "view/proposalInfo", "view/proposal", "glossary", "config", "appState",
-     "viewManager", "refLocation", "view/layers", "view/alerts",
-     "view/filters", "view/image", "view/subscribe", "legalNotice",
-     "view/modal", "view/list", "view/info"],
-    function($, Proposals, CollectionManager, MapView, ProposalInfoView,
+    ["jquery", "collection/proposals", "view/map", "view/proposalInfo",
+     "view/proposal", "glossary", "config", "appState", "viewManager",
+     "refLocation", "view/layers", "view/alerts", "view/filters",
+     "view/image", "view/subscribe", "legalNotice", "view/modal",
+     "view/list", "view/info"],
+    function($, Proposals, MapView, ProposalInfoView,
              ProposalItemView, glossary, config, appState, ViewManager,
              refLocation, LayersView, alerts, FiltersView, ImageView,
              SubscribeView) {
@@ -15,7 +15,16 @@ define(
                         alerts: alerts,
                         proposals: proposals,
                         glossary: glossary
-                    };
+                    },
+                    loading = {proposals: true};
+
+                function markLoaded(what) {
+                    if (!loading[what]) return;
+
+                    delete loading[what];
+                    if ($.isEmptyObject(loading))
+                        appState.trigger("initialized");
+                }
 
                 proposals
                     .on("fetching",
@@ -26,11 +35,13 @@ define(
                         })
                     .on("fetchingComplete",
                         function() {
+                            markLoaded("proposals");
                             $(document.body)
                                 .removeClass("loading-proposals");
                         })
                     .on("fetchingFailed",
                         function() {
+                            markLoaded("proposals");
                             $(document.body).addClass("loading-failed");
                         });
 
@@ -83,8 +94,7 @@ define(
 
                 appViews.mapView = new MapView({
                     collection: proposals,
-                    el: "#map",
-                    zoomToRefLocation: true
+                    el: "#map"
                 });
 
                 appViews.filtersView = new FiltersView({
