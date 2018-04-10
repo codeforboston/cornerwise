@@ -177,13 +177,14 @@
    run:
 
    #+BEGIN_SRC bash
-   docker-compose exec cornerwise ./manage.py createsuperuser <username>
+   docker-compose exec cornerwise ./manage.py createsuperuser
    #+END_SRC
 
-   You will be prompted to enter a password. See ~./manage.py createsuperuser -h~
-   for full usage details, e.g., if you would like to set the superuser's email
-   address. If SendGrid is configured, superusers with email addresses receive
-   system notifications, such as messages submitted through the *Contact* form.
+   You will be prompted to enter a username, email (optional), and password. See
+   ~./manage.py createsuperuser -h~ for full usage details, e.g., if you would
+   like to set the superuser's email address. If SendGrid is configured,
+   superusers with email addresses receive system notifications, such as
+   messages submitted through the *Contact* form.
 
    Now navigate to ~http://localhost:4000/admin~ and enter your credentials.
 
