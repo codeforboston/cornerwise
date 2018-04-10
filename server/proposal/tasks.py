@@ -461,23 +461,24 @@ def cloud_vision_process(image_id, logger=task_logger):
 
     city_name = re.split(r"\s*,\s*", image.region_name, 1)[0]
     processed = vision.process_image(image.image and image.image.path, image.url)
-    logo = processed["logo"]
-    if logo:
-        if city_name in logo["description"]:
+    if processed:
+        logo = processed["logo"]
+        if logo:
+            if city_name in logo["description"]:
+                image.delete()
+                logger.info("Logo detected: image #%i deleted", image_id)
+            else:
+                cache.set(f"image:{image_id}:logo", logo)
+
+        if processed["empty_streetview"]:
             image.delete()
-            logger.info("Logo detected: image #%i deleted", image_id)
-        else:
-            cache.set(f"image:{image_id}:logo", logo)
+            logger.info("Empty streetview: image #%i deleted", image_id)
 
-    if processed["empty_streetview"]:
-        image.delete()
-        logger.info("Empty streetview: image #%i deleted", image_id)
+        if processed["textual"]:
+            image.delete()
 
-    if processed["textual"]:
-        image.delete()
-
-    if "text" in processed:
-        cache.set(f"image:{image_id}:text", processed["text"])
+        if "text" in processed:
+            cache.set(f"image:{image_id}:text", processed["text"])
 
     cache.set(processed_key, True)
 
