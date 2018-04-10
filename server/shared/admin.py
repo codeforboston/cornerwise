@@ -13,6 +13,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group
 from django.contrib.gis.admin import GeoModelAdmin
+from django.utils.safestring import mark_safe
+from django.utils.formats import date_format
 
 from proposal.models import Event, Importer, Layer, Proposal
 
@@ -56,8 +58,8 @@ class ImporterForm(forms.ModelForm):
                                           ("US/Mountain", "Mountain"),
                                           ("US/Pacific", "Pacific")])
     class Meta:
-        model = Importer
         exclude = ["last_run"]
+        model = Importer
 
 
 def run_importers(_modeladmin, request, importers):
@@ -93,6 +95,13 @@ class ImporterAdmin(admin.ModelAdmin):
     model = Importer
     form = ImporterForm
     actions = [run_importers, validate_importers]
+    readonly_fields = ["last_run_date"]
+
+    def last_run_date(self, importer):
+        if importer.last_run:
+            return date_format(importer.last_run)
+
+        return mark_safe("<em>Never run</em>")
 
 
 class LayerForm(forms.ModelForm):
