@@ -3,11 +3,13 @@ from django.contrib.auth.decorators import (permission_required,
 from django.shortcuts import render
 
 import redis_utils as red
+from utils import read_n_from_end
 
 from .admin import cornerwise_admin
 
 
 is_superuser = user_passes_test(lambda user: user.is_superuser, "/admin")
+can_view_logs = permission_required("shared.view_debug_logs", login_url="admin:login")
 
 
 def get_task_logs(task_ids):
@@ -20,11 +22,11 @@ def get_task_logs(task_ids):
                                for l in logs]))
 
 
-@permission_required("shared.view_debug_logs")
+@can_view_logs
 def celery_logs(request):
     nlines = int(request.GET.get("n", "100"))
     with open("logs/celery_tasks.log", "rb") as log:
-        log_lines = red.read_n_from_end(log, nlines)
+        log_lines = read_n_from_end(log, nlines)
 
     context = cornerwise_admin.each_context(request)
     context.update({"log_name": "Celery Tasks Log",
@@ -33,7 +35,7 @@ def celery_logs(request):
     return render(request, "admin/log_view.djhtml", context)
 
 
-@permission_required("shared.view_debug_logs")
+@can_view_logs
 def task_failure_logs(request):
     context = cornerwise_admin.each_context(request)
     context.update({"failures": red.lget_key("cornerwise:logs:task_failure"),
@@ -41,7 +43,7 @@ def task_failure_logs(request):
     return render(request, "admin/task_failure_log.djhtml", context)
 
 
-@permission_required("shared.view_debug_logs")
+@can_view_logs
 def task_logs(request):
     task_ids = request.GET.getlist("task_id")
     context = cornerwise_admin.each_context(request)
@@ -51,7 +53,7 @@ def task_logs(request):
     return render(request, "admin/task_logs.djhtml", context)
 
 
-@permission_required("shared.view_debug_logs")
+@can_view_logs
 def recent_tasks(request):
     """Displays a list of recently completed tasks."""
     n = request.GET.get("n", "100")

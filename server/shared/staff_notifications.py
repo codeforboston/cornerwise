@@ -31,9 +31,6 @@ from .admin import cornerwise_admin
 from .widgets import DistanceField
 
 
-can_send_notifications = permission_required("shared.send_notifications")
-
-
 def get_subscribers(geocoded=[], proposals=[],
                     region=settings.GEO_REGION,
                     notify_radius=D(ft=300)):
@@ -233,7 +230,7 @@ class UserNotificationForm(forms.Form):
             self.cleaned_data["region"])
 
 
-@can_send_notifications
+@permission_required("shared.send_notifications", login_url="admin:login")
 def user_notification_form(request, form_data=None):
     context = cornerwise_admin.each_context(request).copy()
 
