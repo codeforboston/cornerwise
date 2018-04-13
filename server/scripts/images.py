@@ -1,6 +1,9 @@
 from collections import namedtuple
+from io import BytesIO
 import os
 import subprocess
+
+from PIL import Image
 
 ImageInfo = namedtuple("ImageInfo", "name type width height depth space size")
 
@@ -46,32 +49,50 @@ def is_interesting(image_path):
     return w > 200 and h > 200
 
 
-def make_thumbnail(image_path, percent=None, fit=None, dim=None, dest_file=None):
-    """Uses the 'convert' command line utility to resize the image at the
-    given path. """
+def pad(image, width, height, fill="black"):
+    """Pads an image to `width` x `height` by adding space on all sides. Fills the
+    additional pixels by the `fill` argument, which must be appropriate to the
+    image mode.
 
-    if percent:
-        resize = "{}%".format(percent)
-    else:
+    """
+    w, h = image.size
+    new_image = Image.new(image.mode, (width, height), fill)
+    new_image.paste(image, ((w-width)/2, (h-height)/2))
+    return new_image
+
+
+def thumbnail_name(image_path):
+    return "thumb_" + os.path.basename(image_path)
+
+
+def make_thumbnail(image, percent=None, fit=None, dim=None, dest_file=None,
+                   pad=False, pad_fill="black"):
+    """Resizes an image to fit within given bounds, or scales it down to a percent
+    of its original size. Returns a PIL Image.
+
+    """
+
+    if not isinstance(image, Image.Image):
+        image = Image.open(image, "r")
+    w, h = image.size
+
+    if not percent:
         if fit:
-            w, h = dimensions(image_path)
             fit_w, fit_h = fit
+            percent = min(fit_w/w, fit_h/h)
 
-            if w > h:
-                dim = (fit_w, h/w*fit_w)
-            else:
-                dim = (w/h*fit_h, fit_h)
+    if percent >= 1:
+        # The original is smaller than the desired dimensions.
+        resized = image
+    else:
+        resized = image.resize(
+            (int(w*percent), int(h*percent)),
+            Image.LANCZOS)
+    return pad(image, fit_w, fit_h, pad_fill or "black") if pad else image
 
-        if dim:
-            resize = "{dim[0]}x{dim[1]}".format(dim=dim)
-        else:
-            raise Exception("")
 
-    if not dest_file:
-        image_dir = os.path.dirname(image_path)
-        image_name = os.path.basename(image_path)
-        dest_file = os.path.join(image_dir, "thumb_" + image_name)
-
-    subprocess.call(["convert", "-resize", resize, image_path, dest_file])
-
-    return dest_file
+def image_data(image, ext="jpeg"):
+    image_out = BytesIO()
+    image.save(image_out, ext)
+    image_out.seek(0)
+    return image_out

@@ -465,7 +465,7 @@ class Image(models.Model):
     image = models.FileField(null=True, upload_to=upload_image_to)
     width = models.IntegerField()
     height = models.IntegerField()
-    thumbnail = models.FileField(null=True)
+    thumbnail = models.FileField(null=True, upload_to=upload_image_to)
     url = models.URLField(null=True, unique=True, max_length=512)
     # Crude way to specify that an image should not be copied to the
     # local filesystem:

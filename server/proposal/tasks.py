@@ -221,7 +221,8 @@ def generate_doc_thumbnail(doc: Document, logger=task_logger):
 
 
 @shared_task
-def generate_thumbnail(image_id, replace=False, logger=task_logger):
+def generate_thumbnail(image_id, replace=False, logger=task_logger,
+                       force=False):
     """Generate an image thumbnail.
 
     :param image: A proposal.model.Image object with a corresponding
@@ -231,24 +232,25 @@ def generate_thumbnail(image_id, replace=False, logger=task_logger):
 
     image = Image.objects.get(pk=image_id)
     thumbnail_path = image.thumbnail and image.thumbnail.name
-    if thumbnail_path and os.path.exists(thumbnail_path):
+    if not force and thumbnail_path and os.path.exists(thumbnail_path):
         logger.info("Thumbnail already exists (%s)", image.thumbnail.name)
     else:
         if not image.image:
-            logger.info("No local image for Image #%s", image.pk)
+            logger.error("No local image for Image #%s", image.pk)
             return
 
         try:
-            thumbnail_path = images.make_thumbnail(
-                image.image.path, fit=settings.THUMBNAIL_DIM)
+            image_path = image.image.path
+            thumbnail = images.image_data(
+                images.make_thumbnail(image_path, fit=settings.THUMBNAIL_DIM))
         except Exception as err:
             logger.error(err)
             return
 
+        thumbnail_path = images.thumbnail_name(image_path)
+        image.thumbnail.save(thumbnail_path, thumbnail)
         logger.info("Generated thumbnail for Image #%i: %s", image.pk,
                     thumbnail_path)
-        image.thumbnail = thumbnail_path
-        image.save()
 
     return thumbnail_path
 
@@ -267,7 +269,7 @@ def add_doc_attributes(doc: Document, logger=task_logger):
 def generate_thumbnails(image_ids, logger=task_logger):
     for image_id in image_ids:
         try:
-            generate_thumbnail(image_id)
+            generate_thumbnail(image_id, logger=task_logger)
         except Image.DoesNotExist:
             logger.info(
                 f"Image #{image_id} was deleted before thumbnail generation"

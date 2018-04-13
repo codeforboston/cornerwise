@@ -207,6 +207,8 @@ GEO_BOUNDS = [
 
 # The 'fit-width' of image thumbnails:
 THUMBNAIL_DIM = (300, 300)
+# Set to a color name to pad thumbnails to the desired dimensions
+THUMBNAIL_PAD = None
 
 GEOCODER = "arcgis"
 
