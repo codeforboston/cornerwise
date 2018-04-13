@@ -22,7 +22,7 @@ oauth2client==4.1.2
 Pillow==3.4.2
 Pillow-PIL==0.1.dev0
 ply==3.9
-psycopg2==2.6.2
+psycopg2-binary>=2.7
 py==1.4.32
 pyasn1==0.3.6
 pyasn1-modules==0.1.4
