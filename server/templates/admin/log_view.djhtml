@@ -13,12 +13,7 @@
     </style>
 {% endblock %}
 
-{% block breadcrumbs %}
-    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-{% endblock %}
-
 {% block content %}
-    <h2>{{ log_name }}</h2>
     <p>{{ lines | length }} line{{ lines | length | pluralize }}</p>
     <div id="log-output">
 {% for line in lines %} {{ line }}

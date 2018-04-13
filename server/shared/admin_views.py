@@ -31,7 +31,7 @@ def celery_logs(request):
     context = cornerwise_admin.each_context(request)
     context.update({"log_name": "Celery Tasks Log",
                     "lines": log_lines,
-                    "title": "Task Logs"})
+                    "title": "Celery Logs"})
     return render(request, "admin/log_view.djhtml", context)
 
 
