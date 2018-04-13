@@ -9,7 +9,7 @@ import re
 # from shared.text_utils import 
 
 EMPTY_LINE = re.compile(r"\s*\n$")
-PROPERTY_PATTERN = re.compile(r"^([a-z]+(\s+[a-z&]+)*): (.*)(\n|$)", re.I)
+PROPERTY_PATTERN = re.compile(r"^([a-z]+(\s+[a-z&/]+)*): (.*)(\n|$)", re.I)
 
 
 def properties(lines):
@@ -258,6 +258,22 @@ def title_matches(pattern):
 SomervilleMA = region_matches(r"^Somerville, MA$")
 CambridgeMA = region_matches(r"^Cambridge, MA$")
 
+def somerville_properties(lines):
+    props = properties(lines)
+    app_owner_name = props.get("Applicant / Owner Name")
+    app_owner_addr = props.get("Applicant / Owner Address")
+
+    if app_owner_name:
+        props["Applicant Name"] = app_owner_name
+        props["Owner Name"] = app_owner_name
+        del props["Applicant / Owner Name"]
+    if app_owner_addr:
+        props["Applicant Address"] = app_owner_addr
+        props["Owner Address"] = app_owner_addr
+        del props["Applicant / Owner Address"]
+    return props
+
+
 @extractor(SomervilleMA, field_matches(r"^reports$"),
            title_matches(r"(?i)staff report"))
 def staff_report_properties(doc):
@@ -267,8 +283,8 @@ def staff_report_properties(doc):
     sections = staff_report_sections(filter_lines(doc.line_iterator, STRIP_LINES))
     props = {}
 
-    props.update(properties(sections["header"]))
-    props.update(properties(sections["planning staff report"]))
+    props.update(somerville_properties(sections["header"]))
+    props.update(somerville_properties(sections["planning staff report"]))
 
     # TODO: Consider using the legal notice as summary
 
@@ -298,7 +314,7 @@ def decision_properties(doc):
     attrs = {}
     props = {}
     if "properties" in sections:
-        attrs.update(properties(sections["properties"]))
+        attrs.update(somerville_properties(sections["properties"]))
 
     if "Date" in attrs:
         del attrs["Date"]
