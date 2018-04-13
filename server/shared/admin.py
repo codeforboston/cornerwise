@@ -13,6 +13,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group
 from django.contrib.gis.admin import GeoModelAdmin
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.formats import date_format
 
@@ -65,10 +67,16 @@ class ImporterForm(forms.ModelForm):
 def run_importers(_modeladmin, request, importers):
     from proposal import tasks
 
-    for importer in importers:
-        found = len(tasks.fetch_proposals(None, importers=[importer]))
-        messages.info(
-            request, f"Found {found} new proposal(s) using {importer}")
+    pks = list(importers.values_list("pk", flat=True))
+    res = tasks.pull_updates.delay(None, {"pk__in": pks})
+    n = len(pks)
+    s, p = (" is", "its") if n == 1 else ("s are", "their")
+
+    messages.info(
+        request, (f"The importer{s} now running in the background. "
+                  f"Refresh this page to monitor {p} progress."))
+
+    return redirect(reverse("task_logs")  + f"?task_id={res.task_id}")
 
 
 def validate_importers(_, request, importers):
