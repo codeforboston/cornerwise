@@ -435,14 +435,16 @@ def fetch_proposals(since: datetime=None,
 
 
 @shared_task(bind=True)
-def pull_updates(self, since: datetime=None, importers_filter: str=None):
-    "Run all registered proposal importers."
-    filters = {}
-    if importers_filter:
-        filters["region_name__icontains"] = importers_filter
+def pull_updates(self, since: datetime=None, importers_filter={}):
+    """Run importers that match the given filters, or all filters if no filters are
+    specified.
+
+    """
+    if isinstance(importers_filter, str):
+        importers_filter = {"region_name__icontains": importers_filter}
 
     return fetch_proposals(since,
-                           importers=Importer.objects.filter(**filters),
+                           importers=Importer.objects.filter(**importers_filter),
                            logger=get_logger(self))
 
 
