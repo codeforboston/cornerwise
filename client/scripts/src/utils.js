@@ -349,8 +349,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                    return s.replace(/[.*+?\^$[\]\\(){}|\-]/g, "\\$&");
                },
 
-               wordsRegex: function(s) {
-                   var words = s.split(/\s+/);
+               wordsRegex: function(words) {
+                   words = _.isString(words) ? words.split(/\s+/) : words;
 
                    return new RegExp(_.map(words, $u.escapeRegex).join("|"), "i");
                },
