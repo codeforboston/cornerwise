@@ -25,9 +25,8 @@ def normalize(s):
 
 def extension(path):
     "Returns the last piece of the filename after the extension separator."
-    filename = os.path.basename(path)
-    pieces = filename.split(os.path.extsep)
-    return pieces[-1] if len(pieces) > 1 else ""
+    _, ext = os.path.splitext(os.path.basename(path))
+    return ext[1:] if ext else ""
 
 
 def split_list(pred, items=None):
