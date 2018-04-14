@@ -44,11 +44,13 @@
 var notice = proposal.getAttributeValue("legal_notice");
 var applicant = proposal.getAttributeValue("applicant_name");
 var hearing = proposal.getAttributeValue("dates_of_public_hearing");
+var region_name = proposal.get("region_name");
 
 if (notice) {
 %>
 <div class="legal-notice">
-    <%= gloss(abridge(notice)) %>
+    <%= region_name %>
+    <%= gloss(abridge(notice), false, region_name) %>
 </div>
 <% } %>
 
