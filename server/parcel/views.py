@@ -70,7 +70,7 @@ def parcels_for_request(req):
     longitude.
     """
     query = make_query(req.GET)
-    queryset = Parcel.objects.filter(query).transform()
+    queryset = Parcel.objects.filter(query)
 
     # Include attributes
     if req.GET.get("attributes"):
