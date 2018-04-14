@@ -8,13 +8,12 @@ import shutil
 import glob
 import tempfile
 from urllib import request
-from urllib.parse import urlparse
 from zipfile import ZipFile
 
 from parcel.models import Parcel
 
 name = "Somerville, MA"
-shapefile_url = "http://wsgw.mass.gov/data/gispub/shape/l3parcels/L3_SHP_M274_SOMERVILLE.zip"
+shapefile_url = "http://download.massgis.digital.mass.gov/shapefiles/l3parcels/L3_SHP_M274_SOMERVILLE.zip"
 
 # Note: This is the WKT from M274TaxPar.prj, with one important difference. The
 # given WKT specifies Lambert_Conformal_Conic, which is ambiguous. The intended
