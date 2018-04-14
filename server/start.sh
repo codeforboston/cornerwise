@@ -36,11 +36,10 @@ echo "Creating views"
 $manage sync_pgviews
 
 start_celery() {
-    celery -A $APP_NAME beat --pidfile=/var/run/celery/celerybeat.pid &
-    # celery -A $APP_NAME worker --loglevel=${CELERY_LOGLEVEL:-info} \
-        #        --pidfile=/tmp/celery.pid \
-        #        --autoscale=$CELERY_MAX_WORKERS,$CELERY_MIN_WORKERS \
-        #        $celery_opts &
+    celery -A $APP_NAME beat \
+           --pidfile=/var/run/celery/celerybeat.pid \
+           --detach \
+           --logfile=/var/log/celery/beat.log
     mkdir -p /var/run/celery /var/log/celery
     celery multi start 2 -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
            --pidfile=/var/run/celery/%n.pid \
