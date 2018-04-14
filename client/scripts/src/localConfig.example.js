@@ -7,10 +7,6 @@
 // application.
 define([], function() {
     return {
-        // Configure the client to retrieve files from the Django server
-        // instead of from the Google Spreadsheet script:
-        pzURL: "http://localhost:3000/proposal/list",
-
         // You should sign up for an Esri account at
         // https://developers.arcgis.com/ so that we're not all hitting
         // the same quota. Put your credentials here.

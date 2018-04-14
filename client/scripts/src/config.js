@@ -13,10 +13,6 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
 
         backendURL: "",
 
-        // URL from which to fetch the JSON representing the latest
-        // planning and zoning report.
-        pzURL: "/proposal/list",
-
         // Lat/long for the southwest and northeasth corners of the
         // map's initial viewing area.
         bounds:  [[42.37236882604975, -71.14565849304199],

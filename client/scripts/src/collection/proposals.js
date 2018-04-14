@@ -30,8 +30,7 @@ define(
             },
 
             url: function() {
-                return config.pzURL + "?" +
-                    (_.isEmpty(this.query) ? "" : $u.encodeQuery(this.query));
+                return config.backendURL + "/proposal/list?" + $u.encodeQuery(this.query);
             },
 
             fetch: function() {
