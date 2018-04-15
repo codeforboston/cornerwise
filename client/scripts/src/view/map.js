@@ -58,8 +58,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                            }, true);
                        });
 
-                   // Map from case numbers to L.Markers
-                   this.caseMarker = {};
+                   // Map from proposal ids to L.Markers
+                   this.proposalMarker = {};
 
                    // Place the reference location marker:
                    this.placeReferenceMarker(refLocation);
@@ -206,7 +206,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    marker.addTo(this.markersLayer);
 
-                   this.caseMarker[proposal.get("caseNumber")] = marker;
+                   this.proposalMarker[proposal.id] = marker;
 
                    marker
                        .on("mouseover", function(e) {
@@ -231,13 +231,11 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                },
 
                proposalRemoved: function(proposal) {
-                   // debugger;
-                   var caseNumber = proposal.get("caseNumber"),
-                       marker = this.caseMarker[caseNumber],
-                       parcel = this.parcelLayers[caseNumber];
+                   var marker = this.proposalMarker[proposal.id],
+                       parcel = this.parcelLayers[proposal.id];
                    if (marker) {
                        this.markersLayer.removeLayer(marker);
-                       delete this.caseMarker[caseNumber];
+                       delete this.proposalMarker[proposal.id];
                    }
                    if (parcel)
                        this.parcelLayer.removeLayer(parcel);
@@ -250,8 +248,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                changed: function(change) {
                    var self = this,
                        excluded = change.get("_excluded"),
-                       caseNumber = change.get("caseNumber"),
-                       marker= this.caseMarker[caseNumber];
+                       marker= this.proposalMarker[change.id];
 
                    if (marker) {
                        if (excluded) {
@@ -262,7 +259,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    }
 
                    // Hide or show parcel outlines:
-                   var parcelLayer = this.parcelLayers[change.get("caseNumber")];
+                   var parcelLayer = this.parcelLayers[change.id];
                    if (change.get("_selected") || change.get("_hovered")) {
                        if (!parcelLayer) {
                            var parcel = change.get("parcel");
@@ -271,7 +268,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                            parcelLayer = L.GeoJSON.geometryToLayer(parcel);
                            parcelLayer.setStyle(config.parcelStyle);
-                           this.parcelLayers[change.get("caseNumber")] = parcelLayer;
+                           this.parcelLayers[change.id] = parcelLayer;
                        }
 
                        this.parcelLayer.addLayer(parcelLayer);
@@ -348,7 +345,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        bounds = map.getBounds(),
                        zoom = map.getZoom();
 
-                   _.each(this.caseMarker, function(marker) {
+                   _.each(this.proposalMarker, function(marker) {
                        var inBounds = bounds.contains(marker.getLatLng());
 
                        if (zoom >= zoomThreshold) {

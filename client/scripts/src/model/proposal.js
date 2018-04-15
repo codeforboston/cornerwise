@@ -42,10 +42,6 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
             if (!attrs.address)
                 attrs.address = [attrs.number, attrs.street].join(" ");
 
-            // TODO: Remove this once the migration to the Python
-            // backend is complete
-            attrs.caseNumber = attrs.caseNumber || attrs.case_number;
-
             if (!attrs.documents)
                 attrs.documents = [];
 
