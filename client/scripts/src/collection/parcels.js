@@ -13,10 +13,29 @@ define(["backbone", "underscore", "utils", "config", "collection/selectable", "m
                },
 
                url: function() {
-                   return config.backendURL + "/parcel/find?" + $u.encodeQuery(this.query);
+                   var params = $u.encodeQuery(this._fetchQuery || this.query);
+                   return config.backendURL + "/parcel/find?" + params;
                },
 
-               updateQuery: function(newQuery) {
+               _loading: {},
+               _loadFailed: {},
+
+               fetch: function(query, options) {
+                   this._fetchQuery = query;
+                   options = options || {remove: false};
+                   var result = Selectable.prototype.fetch.call(this, options);
+                   this._fetchQuery = null;
+                   return result;
+               },
+
+               /**
+                  The active query determines which parcels are selected. If
+                  necessary, it will also attempt to load them. If `loadOnly` is
+                  true, load the parcels that match the query, but do not change
+                  the active query and do not set the selection.
+                */
+               updateQuery: function(newQuery, loadOnly) {
+                   // TODO: Merge queries
                    var deferred = $.Deferred();
 
                    if (_.isEqual(newQuery, this.query)) {
@@ -25,6 +44,8 @@ define(["backbone", "underscore", "utils", "config", "collection/selectable", "m
                        this.set([]);
                    } else {
                        var self = this;
+                       // TODO: Instead of doing 'all or nothing', only load
+                       // unknown ids.
 
                        // This code crudely implements the idea that if the
                        // query is only selecting parcels by ID, check if the
@@ -33,19 +54,29 @@ define(["backbone", "underscore", "utils", "config", "collection/selectable", "m
                        if (newQuery.id) {
                            if (_.size(newQuery) === 1) {
                                if (_.all(newQuery.id, function(id) {
-                                   return self.get(id);
+                                   return self.get(id) ||
+                                       self._loading[id] ||
+                                       self._loadFailed[id];
                                })) {
+
+                                   if (!loadOnly)
+                                       self.setSelection(newQuery.id);
                                    return deferred;
                                }
                            }
 
                            newQuery.id = newQuery.id.join(",");
                        }
-                       this.query = newQuery;
-                       return this.fetch().then(function(response) {
-                           self.setSelection([response.properties.id]);
+                       if (!loadOnly) this.query = newQuery;
+
+                       return this.fetch(newQuery).then(function(response) {
+                           if (!loadOnly)
+                               self.setSelection([response.properties.id]);
 
                            return response;
+                       }, function(err) {
+                           if (!loadOnly)
+                               self.setSelection([]);
                        });
                    }
 
@@ -72,11 +103,11 @@ define(["backbone", "underscore", "utils", "config", "collection/selectable", "m
                    }
                },
 
-               setParcelIds: function(ids) {
+               setParcelIds: function(ids, loadOnly) {
                    if (!_.isArray(ids))
                        ids = [ids];
 
-                   this.updateQuery({id: ids});
+                   this.updateQuery({id: ids}, loadOnly);
                }
            });
        });

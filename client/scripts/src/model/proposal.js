@@ -90,13 +90,13 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
         },
 
         onHovered: function(proposal) {
-            if (this._parcelLoadAttempted)
+            if (!(proposal.changed._selected || proposal.changed._hovered))
                 return;
 
             var pk = this.get("parcel");
 
             if (pk) {
-                this.collection.parcels.setParcelIds(pk);
+                this.collection.parcels.setParcelIds(pk, !proposal.changed._selected);
             }
         },
 
