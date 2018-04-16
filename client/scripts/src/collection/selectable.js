@@ -10,11 +10,10 @@ define(["backbone", "underscore", "appState", "utils"],
             *   ids: ids of all selected children, including those
             *   that have not yet been loaded.
             *
-            * - selectionLoaded (collection, ids, loadedIds)
+            * - selectionLoaded (collection, ids)
             *   Triggered when the entire selection is loaded (meaning that
             *   there is local data for id in the selection).
             *   ids: ids of all selected children
-            *   loadedIds: ids of the newly loaded ids
             *
             * - selectionRemoved (collection, ids, selectedIds)
             *   ids: ids of all deselected children
@@ -82,11 +81,11 @@ define(["backbone", "underscore", "appState", "utils"],
                },
 
                setSelection: function(selection) {
-                   if (!this.hashParam)
-                       return this._setSelection(selection);
-
                    if (!_.isArray(selection))
                        selection = [selection];
+
+                   if (!this.hashParam)
+                       return this._setSelection(selection);
 
                    appState.setHashKey(this.hashParam,
                                        selection.join(","));
@@ -107,9 +106,6 @@ define(["backbone", "underscore", "appState", "utils"],
                 * @param {?boolean} add
                 */
                _setSelection: function(selection, add) {
-                   if (!_.isArray(selection))
-                       selection = [selection];
-
                    if (add)
                        selection = _.union(this.selection, selection);
                    else
@@ -147,7 +143,7 @@ define(["backbone", "underscore", "appState", "utils"],
                        this.trigger("selectionRemoved", this, deselect, select);
 
                    if (!pending.length)
-                       this.trigger("selectionLoaded", this, selection, pending);
+                       this.trigger("selectionLoaded", this, selection);
 
                },
 

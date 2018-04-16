@@ -1,18 +1,20 @@
 define(
-    ["jquery", "collection/proposals", "view/map", "view/proposalInfo",
-     "view/proposal", "glossary", "config", "appState", "viewManager",
-     "refLocation", "view/layers", "view/alerts", "view/filters",
-     "view/image", "view/subscribe", "legalNotice", "view/modal",
-     "view/list", "view/info"],
-    function($, Proposals, MapView, ProposalInfoView,
+    ["jquery", "collection/proposals", "collection/parcels", "view/map",
+     "view/proposalInfo", "view/proposal", "glossary", "config", "appState",
+     "viewManager", "refLocation", "view/layers", "view/alerts", "view/filters",
+     "view/image", "view/subscribe", "legalNotice", "view/modal", "view/list",
+     "view/info"],
+    function($, Proposals, Parcels, MapView, ProposalInfoView,
              ProposalItemView, glossary, config, appState, ViewManager,
              refLocation, LayersView, alerts, FiltersView, ImageView,
              SubscribeView) {
         return {
             start: function() {
-                var proposals = new Proposals(),
+                var parcels = new Parcels({appState: appState}),
+                    proposals = new Proposals(),
                     appViews = {
                         alerts: alerts,
+                        parcels: parcels,
                         proposals: proposals,
                         glossary: glossary
                     },
@@ -94,6 +96,7 @@ define(
 
                 appViews.mapView = new MapView({
                     collection: proposals,
+                    parcels: parcels,
                     el: "#map"
                 });
 
@@ -128,6 +131,7 @@ define(
                     }
                 });
 
+                appViews.appState = appState;
                 appState.init();
                 glossary.init();
 

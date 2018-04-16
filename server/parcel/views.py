@@ -64,6 +64,7 @@ def geojson_data(geom):
         "coordinates": geom.coords
     }
 
+
 def parcels_for_request(req):
     """
     Helper function for retrieving the parcel(s) at a given latitude and
@@ -113,7 +114,9 @@ def parcels_for_multi_request(req):
 
 def make_parcel_data(parcel, include_attributes=False):
     d = geojson_data(parcel.shape)
-    d["properties"] = {"type": parcel.poly_type, "loc_id": parcel.loc_id}
+    d["properties"] = {"type": parcel.poly_type,
+                       "loc_id": parcel.loc_id,
+                       "id": parcel.pk}
 
     if include_attributes:
         d["properties"].update({

@@ -47,6 +47,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.markersLayer = markersLayer;
 
                    map.on("zoomend", _.bind(this.updateControls, this))
+                       .on("click", _.bind(this.onClick, this))
                        .on("moveend", _.bind(this.updateMarkers, this))
                        .on("popupopen", _.bind(this.onPopupOpened, this))
                        .on("moveend", function() {
@@ -68,6 +69,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.listenTo(this.collection, "add", this.proposalAdded)
                        .listenTo(this.collection, "remove", this.proposalRemoved)
                        .listenTo(this.collection, "change", this.changed)
+                   // Parcels:
+                       .listenTo(options.parcels, "selectionLoaded", this.parcelsSelected)
+                       .listenTo(options.parcels, "selectionRemoved", this.parcelsDeselected)
                    // Reference location marker:
                        .listenTo(refLocation, "change", this.placeReferenceMarker)
                    // Informational overlays:
@@ -241,7 +245,42 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        this.parcelLayer.removeLayer(parcel);
                },
 
-               // Map of case # -> ILayer objects
+               changeParcels: function(parcels, ids, remove) {
+                   var layers = this.parcelLayers,
+                       parent = this.parcelLayer;
+
+                   _.forEach(ids, function(id) {
+                       if (layers[id]) {
+                           if (remove) {
+                               parent.removeLayer(layers[id]);
+                               delete layers[id];
+                           }
+                           return;
+                       } else if (remove) {
+                           return;
+                       }
+
+                       var parcel = parcels.get(id),
+                           geom = parcel.get("geom");
+
+                       if (!geom) return;
+
+                       var layer = L.GeoJSON.geometryToLayer(geom);
+                       layer.setStyle(config.parcelStyle);
+                       layers[id] = layer;
+                       parent.addLayer(layer);
+                   });
+               },
+
+               parcelsSelected: function(parcels, loadedIds) {
+                   this.changeParcels(parcels, loadedIds);
+               },
+
+               parcelsDeselected: function(parcels, ids) {
+                   this.changeParcels(parcels, ids, true);
+               },
+
+               // Map of proposal id -> ILayer objects
                parcelLayers: {},
 
                // Triggered when a child proposal changes
@@ -364,6 +403,10 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        min = !max && zoom <= this.map.getMinZoom();
                    $(".map-zoom-in").toggleClass("disabled", max);
                    $(".map-zoom-out").toggleClass("disabled", min);
+               },
+
+               onClick: function(e) {
+                   appState.setHashKey("p", e.latlng);
                },
 
                // Store a reference to the reference marker
