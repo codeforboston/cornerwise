@@ -296,26 +296,6 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                            marker.addTo(self.markersLayer);
                        }
                    }
-
-                   // Hide or show parcel outlines:
-                   var parcelLayer = this.parcelLayers[change.id];
-                   if (change.get("_selected") || change.get("_hovered")) {
-                       if (!parcelLayer) {
-                           var parcel = change.get("parcel");
-
-                           if (!parcel) return;
-
-                           parcelLayer = L.GeoJSON.geometryToLayer(parcel);
-                           parcelLayer.setStyle(config.parcelStyle);
-                           this.parcelLayers[change.id] = parcelLayer;
-                       }
-
-                       this.parcelLayer.addLayer(parcelLayer);
-                   } else if (parcelLayer &&
-                              (change.changed._selected === false ||
-                               change.changed._hovered === false)) {
-                       this.parcelLayer.removeLayer(parcelLayer);
-                   }
                },
 
                onDblClick: function(e) {

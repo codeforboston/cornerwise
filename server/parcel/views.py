@@ -132,7 +132,7 @@ def find_parcels(req):
     try:
         parcel = parcels_for_request(req)[0]
 
-        include_attributes = req.GET.get("attributes", False)
+        include_attributes = req.GET.get("attributes", "1") == "1"
     except IndexError:
         raise ErrorResponse("No matching parcels found", status=404)
     return make_parcel_data(parcel, include_attributes=include_attributes)

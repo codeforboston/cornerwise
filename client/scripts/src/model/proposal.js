@@ -32,9 +32,6 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
         },
 
         parse: function(attrs) {
-            attrs.parcelId = attrs.parcel;
-            delete attrs.parcel;
-
             attrs.submitted = new Date(attrs.submitted);
             attrs.refDistance =
                 this.getDistance(attrs.location, refLocation.getLatLng());
@@ -96,27 +93,11 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
             if (this._parcelLoadAttempted)
                 return;
 
-            var loc = this.get("location"),
-                pk = this.get("parcelId"),
-                self = this;
+            var pk = this.get("parcel");
 
-            this._parcelLoadAttempted = true;
-
-            var query = pk ? {id: pk} : {lat: loc.lat,
-                                         lng: loc.lng,
-                                         mode: "or",
-                                         address: this.get("address")};
-            query.attributes = true;
-
-            $.getJSON(config.backendURL + "/parcel/find", query)
-                .done(function(parcel) {
-                    self.set("parcel", parcel);
-                })
-                .fail(function(error) {
-                    if (error.status === 404) {
-                        // There is no matching parcel:
-                    }
-                });
+            if (pk) {
+                this.collection.parcels.setParcelIds(pk);
+            }
         },
 
         getName: function() {
@@ -290,6 +271,10 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
 
         getProject: function() {
             return this.get("project");
+        },
+
+        getParcel: function() {
+            return this.collection.parcels.get(this.get("parcel"));
         },
 
         projectYearRange: function() {

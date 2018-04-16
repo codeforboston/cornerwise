@@ -25,6 +25,8 @@ define(
 
                 this._includeProjects = this._includeProposals = true;
 
+                this.parcels = options.parcels;
+
                 appState.onStateKeyChange(
                     "f", this.onFiltersChange, this);
             },

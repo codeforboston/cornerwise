@@ -11,7 +11,7 @@ define(
         return {
             start: function() {
                 var parcels = new Parcels({appState: appState}),
-                    proposals = new Proposals(),
+                    proposals = new Proposals({parcels: parcels}),
                     appViews = {
                         alerts: alerts,
                         parcels: parcels,

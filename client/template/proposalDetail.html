@@ -41,34 +41,35 @@ var address = proposal.get("address"); %>
             <img class="main-thumb" src="<%= proposal.getImage() %>"/>
         </div>
 
-        <% if (proposal.get("parcel")) { %>
-        <% with(proposal.get("parcel")) {
-        var lotSize = properties.LOT_SIZE,
-        area = properties.BLD_AREA,
-        zone = properties.ZONING;
+        <%
+        var parcel = proposal.getParcel();
+        if (parcel) { %>
+        <%
+        var lotSize = parcel.get("LOT_SIZE"),
+            area = parcel.get("BLD_AREA"),
+            zone = parcel.get("ZONING");
         %>
-                <table class="table parcel-info">
-                    <% if (lotSize) { %>
-                    <tr class="attribute">
-                        <th>Lot Size:</th>
-                        <td><%- commas(acresToSqFt(lotSize)) %> square feet</td>
-                    </tr>
-                    <% } %>
+        <table class="table parcel-info">
+            <% if (lotSize) { %>
+            <tr class="attribute">
+                <th>Lot Size:</th>
+                <td><%- commas(acresToSqFt(lotSize)) %> square feet</td>
+            </tr>
+            <% } %>
 
-                    <% if (area) { %>
-                    <tr class="attribute">
-                        <th>Floor Area</th>
-                        <td><%- commas(area) %> square feet</td>
-                    </tr>
-                    <% } %>
-                    <% if (zone) { %>
-                    <tr class="attribute">
-                        <th>Current Zone:</th>
-                        <td><%- zone %></td>
-                    </tr>
-                    <% } %>
-                </table>
-            <% }  %>
+            <% if (area) { %>
+            <tr class="attribute">
+                <th>Floor Area</th>
+                <td><%- commas(area) %> square feet</td>
+            </tr>
+            <% } %>
+            <% if (zone) { %>
+            <tr class="attribute">
+                <th>Current Zone:</th>
+                <td><%- zone %></td>
+            </tr>
+            <% } %>
+        </table>
         <% }  %>
 
         <%

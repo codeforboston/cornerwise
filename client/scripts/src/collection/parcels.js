@@ -24,8 +24,24 @@ define(["backbone", "underscore", "utils", "config", "collection/selectable", "m
                    } else if (_.isEmpty(newQuery)) {
                        this.set([]);
                    } else {
-                       this.query = newQuery;
                        var self = this;
+
+                       // This code crudely implements the idea that if the
+                       // query is only selecting parcels by ID, check if the
+                       // IDs have already been loaded locally. This may be
+                       // generalizable on Selectable.
+                       if (newQuery.id) {
+                           if (_.size(newQuery) === 1) {
+                               if (_.all(newQuery.id, function(id) {
+                                   return self.get(id);
+                               })) {
+                                   return deferred;
+                               }
+                           }
+
+                           newQuery.id = newQuery.id.join(",");
+                       }
+                       this.query = newQuery;
                        return this.fetch().then(function(response) {
                            self.setSelection([response.properties.id]);
 
@@ -54,6 +70,13 @@ define(["backbone", "underscore", "utils", "config", "collection/selectable", "m
                    if (lat && lng) {
                        this.updateQuery({lat: lat, lng: lng});
                    }
+               },
+
+               setParcelIds: function(ids) {
+                   if (!_.isArray(ids))
+                       ids = [ids];
+
+                   this.updateQuery({id: ids});
                }
            });
        });
