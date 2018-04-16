@@ -1,9 +1,14 @@
 from django.contrib.auth.decorators import (permission_required,
                                             user_passes_test)
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 import redis_utils as red
 from utils import read_n_from_end
+
+from proposal.models import Proposal
+from proposal.tasks import add_parcel
 
 from .admin import cornerwise_admin
 
@@ -63,3 +68,13 @@ def recent_tasks(request):
     context.update({"tasks": recent_task_info,
                     "title": "Recent Tasks"})
     return render(request, "admin/recent_tasks.djhtml", context)
+
+
+@is_superuser
+@require_POST
+def refresh_parcels(request):
+    unmatched = Proposal.objects.filter(parcel=None)
+    count = sum(bool(add_parcel(p)) for p in unmatched)
+    messages.success(request,
+                     f"Found matching parcel(s) for {count} proposal(s)")
+    return redirect("admin:index")

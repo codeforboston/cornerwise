@@ -59,12 +59,16 @@ class Command(BaseCommand):
         self.run_import(find_importers())
 
     def run_import(self, modules):
+        out = self.stdout
         for module in modules:
             run_fn = getattr(module, "run")
             mod_name = getattr(module, "name", module.__name__)
-            self.stdout.write("Running importer for '%s'\n" % mod_name)
-            self.stdout.write("This will take a while!")
+            out.write("Running importer for '%s'\n" % mod_name)
+            out.write("This will take a while!")
             run_fn(logger)
-        self.stdout.write("Import complete")
+        out.write("Import complete")
+        out.write("Run 'Refresh Parcels' in the admin interface to "
+                  "match existing Proposals to the newly imported "
+                  "parcels.")
 
         LotSize.refresh()

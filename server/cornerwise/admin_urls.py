@@ -13,5 +13,6 @@ urlpatterns = [
          name="notification_form"),
     path("send_notification", send_user_notification,
          name="send_notification"),
+    path("refresh_parcels", admin_views.refresh_parcels, name="refresh_parcels"),
     path("", admin.cornerwise_admin.urls)
 ]

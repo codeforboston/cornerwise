@@ -105,6 +105,17 @@
             </li>
         </ul>
         {% endif %}
+        {% if user.is_superuser %}
+        <h2>Other</h2>
+        <ul>
+            <li style="list-style-type: none">
+                <form action="{% url 'refresh_parcels' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" value="Refresh Parcels"/>
+                </form>
+            </li>
+        </ul>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
