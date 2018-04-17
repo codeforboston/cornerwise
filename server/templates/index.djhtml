@@ -156,6 +156,8 @@
                     <a href="#" class="map-zoom-out" >&minus;</a>
                 </div>
 
+                <div id="parcel-info" class="control"> </div>
+
                 <div id="info" class="overlay default">
                     <div class="loading-message" >Loading...</div>
                     <div class="when-empty">

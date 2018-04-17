@@ -2,12 +2,12 @@ define(
     ["jquery", "collection/proposals", "collection/parcels", "view/map",
      "view/proposalInfo", "view/proposal", "glossary", "config", "appState",
      "viewManager", "refLocation", "view/layers", "view/alerts", "view/filters",
-     "view/image", "view/subscribe", "legalNotice", "view/modal", "view/list",
-     "view/info"],
+     "view/image", "view/subscribe", "view/parcelInfo", "legalNotice", "view/modal",
+     "view/list", "view/info"],
     function($, Proposals, Parcels, MapView, ProposalInfoView,
              ProposalItemView, glossary, config, appState, ViewManager,
              refLocation, LayersView, alerts, FiltersView, ImageView,
-             SubscribeView) {
+             SubscribeView, ParcelInfoView) {
         return {
             start: function() {
                 var parcels = new Parcels({appState: appState}),
@@ -98,6 +98,11 @@ define(
                     collection: proposals,
                     parcels: parcels,
                     el: "#map"
+                });
+
+                appViews.parcelInfoView = new ParcelInfoView({
+                    el: "#parcel-info",
+                    collection: parcels
                 });
 
                 appViews.filtersView = new FiltersView({

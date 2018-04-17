@@ -130,6 +130,20 @@ body:not(.nointro) #map-controls {
     display: none;
 }
 
+#parcel-info {
+    font-size: small;
+    left: 1em;
+    bottom: 1em;
+    opacity: 0;
+    padding: 0.5em;
+
+    transition: opacity 0.2s linear;
+}
+
+#parcel-info.show {
+    opacity: 1;
+}
+
 #info-menu {
     display: none;
 }
@@ -1563,12 +1577,15 @@ ul.model-list li {
     top: -0.5em;
 }
 
+th {
+    padding-right: 5px;
+    text-align: left;
+}
+
 #list-view .attribute th {
     color: #555;
     font-weight: normal;
-    text-align: left;
     font-size: smaller;
-    padding-right: 5px;
     padding-top: 3px;
     text-transform:uppercase;
     vertical-align: top;
