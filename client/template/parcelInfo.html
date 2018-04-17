@@ -1,32 +1,29 @@
 <%
-var attrs = parcel.attributes,
-lotSize = attrs.LOT_SIZE,
-yearBuilt = attrs.YEAR_BUILT,
-zoning = attrs.ZONING;
+var attrs = parcel.attributes;
 %>
 
 <table>
-    <% if (lotSize) { %>
+    <% if (attrs.lotSize) { %>
     <tr>
         <th> Lot Size: </th>
-        <td><%- commas(acresToSqFt(lotSize)) %> ft<sup>2</sup></td>
+        <td><%- commas(acresToSqFt(attrs.lotSize)) %> ft<sup>2</sup></td>
     </tr>
     <% } %>
-    <% if (yearBuilt) { %>
+    <% if (attrs.yearBuilt) { %>
     <tr>
         <th>
             Year Built:
         </th>
         <td>
-            <%= yearBuilt %>
+            <%= attrs.yearBuilt %>
         </td>
     </tr>
     <% } %>
-    <% if (zoning) { %>
+    <% if (attrs.zoning) { %>
     <tr>
         <th> Current Zone: </th>
 
-        <td> <%= zoning %> </td>
+        <td> <%= attrs.zoning %> </td>
     </tr>
     <% } %>
 </table>
