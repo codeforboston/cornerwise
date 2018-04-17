@@ -8,6 +8,7 @@ import os
 from pathlib import PurePosixPath
 import re
 
+path = os.path
 
 def file_contents(f):
     return "".join(line.strip() for line in f)
@@ -20,7 +21,7 @@ def collect_files(template_dir, url_base):
     for dirname, _, files in os.walk(template_dir):
         rel_dirname = PurePosixPath(dirname).relative_to(template_dir)
         for filename in files:
-            path = os.path.join(dirname, filename)
+            path = path.join(dirname, filename)
             url = baseurl.joinpath(rel_dirname, filename)
             with open(path) as f:
                 yield str(url), file_contents(f)
@@ -36,15 +37,18 @@ def templates_file(file_dict):
 
 
 def do_main():
-    file_dir = os.path.dirname(__file__)
-    template_dir = os.path.join(file_dir, "../client/template")
+    file_dir = path.dirname(__file__)
+    client_dir = os.environ.get("CLIENT_DIR", path.join(file_dir, "../client"))
+    template_dir = path.join(client_dir, "template")
     url_base = "/static/template"
-    out_dir = os.path.join(
-        os.path.dirname(__file__), "../client/scripts/src/build/")
+    out_dir = path.join(client_dir, "scripts/src/build/")
+
+    template_dir = os.environ.get("JS_TEMPLATES_DIR", template_dir)
+    out_dir = os.environ.get("JS_TEMPLATES_BUILD_DIR", out_dir)
 
     os.makedirs(out_dir, exist_ok=True)
 
-    with open(os.path.join(out_dir, "templates.js"), "w") as outfile:
+    with open(path.join(out_dir, "templates.js"), "w") as outfile:
         outfile.write(
             templates_file(
                 make_file_dict(collect_files(template_dir, url_base))))
