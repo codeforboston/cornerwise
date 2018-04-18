@@ -255,6 +255,8 @@ MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
                "sw-lat={swlat}&sw-lng={swlon}&"
                "ne-lat={nelat}&ne-lng={nelon}")
 
+GEO_REGION = "Somerville, MA"
+
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
                            "django.contrib.auth.backends.ModelBackend"]
 
