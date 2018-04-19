@@ -21,9 +21,9 @@ def collect_files(template_dir, url_base):
     for dirname, _, files in os.walk(template_dir):
         rel_dirname = PurePosixPath(dirname).relative_to(template_dir)
         for filename in files:
-            path = path.join(dirname, filename)
+            template_path = path.join(dirname, filename)
             url = baseurl.joinpath(rel_dirname, filename)
-            with open(path) as f:
+            with open(template_path, "r", encoding="utf8") as f:
                 yield str(url), file_contents(f)
 
 
