@@ -6,8 +6,8 @@ version: "3"
 # nginx # container (nginx), a container that dynamically generates the nginx
 # configuration (nginx-gen), and a container that automatically requests and
 # renews the SSL certificate from Lets Encrypt. Finally, there is
-# cornerwise_jsbuild container, which runs the JS/CSS build process and stores
-# the results in the static_jsbuild volume.
+# jsbuild container, which runs the JS/CSS build process and stores the
+# results in the static_jsbuild volume.
 
 services:
   nginx:
@@ -51,14 +51,14 @@ services:
     environment:
       NGINX_DOCKER_GEN_CONTAINER: nginx-gen
       NGINX_PROXY_CONTAINER: nginx
-  cornerwise_jsbuild:
+  jsbuild:
     build:
       context: ./docker-support
       dockerfile: ./Dockerfile-jsbuild
+    image: bdsand/cornerwise_jsbuild
     volumes:
       - static_jsbuild:/static
       - ./client:/client
-      - ./docker-support/postcss.config.js:/config/postcss.config.js
     environment:
       CLIENT_DIR: "/client"
       CSS_OUTPUT_DIR: "/static"
@@ -72,6 +72,7 @@ services:
     volumes:
       - redis_data:/data
   cornerwise:
+    build: .
     image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
