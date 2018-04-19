@@ -68,12 +68,12 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             {
                 id: "somerville",
                 name: "Somerville, MA",
-                source: "/static/scripts/src/layerdata/somerville.geojson"
+                source: "/static/layerdata/somerville.geojson"
             },
             {
                 id: "cambridge",
                 name: "Cambridge, MA",
-                source: "/static/scripts/src/layerdata/cambridge.geojson"
+                source: "/static/layerdata/cambridge.geojson"
             }
         ],
 

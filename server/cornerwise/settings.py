@@ -159,7 +159,24 @@ STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = "/media/"
-STATICFILES_DIRS = ("/static", "/media")
+
+# Files to be copied when static files are collected for deployment.
+STATICFILES_DIRS = [
+    ("images", "/static/images"),
+    ("errors", "/static/errors"),
+    ("build", "/static/build"),
+    ("layerdata", "/static/scripts/src/layerdata")
+]
+
+
+if IS_PRODUCTION:
+    STATIC_ROOT = "/static_build"
+else:
+    STATICFILES_DIRS.extend([
+        ("css", "/static/css"),
+        ("scripts", "/static/scripts"),
+        ("template", "/static/template"),
+    ])
 
 SERVE_STATIC = os.environ.get("DJANGO_SERVE_STATIC", "1") == "1"
 SERVE_MEDIA = os.environ.get("DJANGO_SERVE_MEDIA", "1") == "1"
