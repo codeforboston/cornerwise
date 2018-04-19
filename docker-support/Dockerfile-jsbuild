@@ -1,0 +1,15 @@
+FROM node:9.11.1
+
+ENV CLIENT_DIR=/client
+ENV NODE_PATH=/usr/local/lib/node_modules
+WORKDIR "/jsbuild"
+
+RUN apt-get update && \
+    apt-get install -y python3 && \
+    rm -rf /var/cache/apt && \
+    npm -g install cssnano requirejs postcss-cli
+
+ADD ./build_js.sh /jsbuild/build_js.sh
+ADD ./build_templates.py /jsbuild/build_templates.py
+
+CMD bash build_js.sh

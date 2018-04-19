@@ -1,0 +1,123 @@
+version: "3"
+
+######
+# Configuration for https://dev.cornerwise.org
+# In addition to the standard application/db/cache containers, this includes an
+# nginx # container (nginx), a container that dynamically generates the nginx
+# configuration (nginx-gen), and a container that automatically requests and
+# renews the SSL certificate from Lets Encrypt. Finally, there is
+# cornerwise_jsbuild container, which runs the JS/CSS build process and stores
+# the results in the static_jsbuild volume.
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_conf:/etc/nginx/conf.d
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - nginx_certs:/etc/nginx/certs
+      - ./docker-support/cornerwise.org_location.conf:/etc/nginx/vhost.d/dev.cornerwise.org_location
+      - static_resources:/static
+  nginx-gen:
+    image: jwilder/docker-gen
+    container_name: nginx-gen
+    command: -notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    restart: always
+    volumes:
+      - nginx_conf:/etc/nginx/conf.d
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - nginx_certs:/etc/nginx/certs
+      - ./docker-support/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
+      - ./docker-support/dev.cornerwise.org_location.conf:/etc/nginx/vhost.d/dev.cornerwise.org_location
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  nginx-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - nginx_conf:/etc/nginx/conf.d
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - nginx_certs:/etc/nginx/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      NGINX_DOCKER_GEN_CONTAINER: nginx-gen
+      NGINX_PROXY_CONTAINER: nginx
+  cornerwise_jsbuild:
+    build:
+      context: ./docker-support
+      dockerfile: ./Dockerfile-jsbuild
+    volumes:
+      - static_jsbuild:/static
+      - ./client:/client
+      - ./docker-support/postcss.config.js:/config/postcss.config.js
+    environment:
+      CLIENT_DIR: "/client"
+      CSS_OUTPUT_DIR: "/static"
+      JS_OUTPUT_DIR: "/static"
+  postgres:
+    image: mdillon/postgis:9.4
+    volumes:
+      - data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+  cornerwise:
+    image: bdsand/cornerwise:latest
+    env_file:
+      - ./docker-support/common.env
+      - ./docker-support/nginx.env
+    environment:
+      APP_MODE: "production"
+      ALLOWED_HOSTS: "*"
+      DJANGO_SERVE_STATIC: "0"
+      DJANGO_SERVE_MEDIA: "0"
+      GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
+      VIRTUAL_HOST: "dev.cornerwise.org"
+      LETSENCRYPT_HOST: "dev.cornerwise.org"
+      LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
+    expose:
+      - "3000"
+    links:
+      - postgres
+      - redis
+    working_dir: /app/
+    command: bash /app/start.sh
+    volumes:
+      - media:/media
+      - static_jsbuild:/static/build
+      - static_resources:/static_build
+      - ./server:/app
+      - ./client:/static
+      - ./server/cornerwise/google_credentials.json:/google_credentials.json
+
+volumes:
+  redis_data:
+    driver: local
+  data:
+    driver: local
+  media:
+    driver: local
+  nginx_conf:
+    driver: local
+  nginx_vhost:
+    driver: local
+  nginx_html:
+    driver: local
+  nginx_certs:
+    driver: local
+  # Built CSS and JS will go here:
+  static_jsbuild:
+    driver: local
+  # ./admin.py collectstatic will put static files here:
+  static_resources:
+    driver: local
