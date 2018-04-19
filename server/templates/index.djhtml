@@ -27,7 +27,6 @@
 
          var SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}null{% endif %};
         </script>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
         {% if production %}
             <link rel="stylesheet" href="/static/css/app.build.css" type="text/css" media="screen" />
             <script src="/static/build/require.js"></script>
@@ -36,6 +35,7 @@
              require(["main"]);
             </script>
         {% else %}
+            <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
             <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
             <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
         {% endif %}

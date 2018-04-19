@@ -7,9 +7,10 @@ WORKDIR "/jsbuild"
 RUN apt-get update && \
     apt-get install -y python3 && \
     rm -rf /var/cache/apt && \
-    npm -g install cssnano requirejs postcss-cli
+    npm -g install cssnano requirejs postcss@">=6" postcss-cli@latest postcss-import-url
 
 ADD ./build_js.sh /jsbuild/build_js.sh
-ADD ./build_templates.py /jsbuild/build_templates.py
-
 CMD bash build_js.sh
+
+ADD ./build_templates.py /jsbuild/build_templates.py
+ADD ./postcss.config.js /config/postcss.config.js

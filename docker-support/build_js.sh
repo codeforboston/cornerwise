@@ -43,7 +43,7 @@ rm -r $client_dir/dist/
 
 echo "Minifying CSS"
 app_sha="$css_output_dir/app.build.css"
-postcss "$client_dir/css/app.css" --config /config/postcss.config.js --output "$app_css"
+cat "$client_dir/css/_imports.css" "$client_dir/css/app.css" | postcss --config /config/postcss.config.js --output "$app_css"
 
 css_hash=$(file_hash "$app_css")
 app_css_hash="$css_output_dir/app.${css_hash}.css"
