@@ -14,6 +14,8 @@ def file_contents(f):
     return "".join(line.strip() for line in f)
 
 
+# TODO Rewrite this to remove the dependency on Python 3-only 'pathlib', so
+# that we don't need py3 in the JS build image.
 def collect_files(template_dir, url_base):
     basepath = PurePosixPath(template_dir)
     baseurl = PurePosixPath(url_base)
