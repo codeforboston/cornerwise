@@ -61,8 +61,7 @@ services:
       - ./client:/client
     environment:
       CLIENT_DIR: "/client"
-      CSS_OUTPUT_DIR: "/static"
-      JS_OUTPUT_DIR: "/static"
+      OUTPUT_DIR: "/static"
   postgres:
     image: mdillon/postgis:9.4
     volumes:

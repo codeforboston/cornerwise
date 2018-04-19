@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
 
+set -e
+
 script_dir=$(dirname "$BASH_SOURCE")
 cd $(dirname "$BASH_SOURCE")
 
 client_dir=${CLIENT_DIR:-"$script_dir/../client"}
-output_dir=${OUTPUT_DIR:-"$client_dir"}
-js_output_dir=${JS_OUTPUT_DIR:-"$output_dir/build"}
-css_output_dir=${CSS_OUTPUT_DIR:-"$output_dir/css"}
+if [ -n "$OUTPUT_DIR" ]; then
+    js_output_dir="$OUTPUT_DIR"
+    css_output_dir="$OUTPUT_DIR"
+    json_output_file="$OUTPUT_DIR/built.json"
+else
+    js_output_dir="$client_dir/build"
+    css_output_dir="$client_dir/build"
+    json_output_file="$client_dir/built.json"
+fi
 
 if ! which r.js; then
     echo "Please install require.js (npm install -g requirejs) and rerun the script." && exit 1
@@ -42,15 +50,16 @@ cp "$app_js" "$app_js_hash"
 rm -r $client_dir/dist/
 
 echo "Minifying CSS"
-app_sha="$css_output_dir/app.build.css"
+app_css="$css_output_dir/app.build.css"
 cat "$client_dir/css/_imports.css" "$client_dir/css/app.css" | postcss --config /config/postcss.config.js --output "$app_css"
 
 css_hash=$(file_hash "$app_css")
 app_css_hash="$css_output_dir/app.${css_hash}.css"
 cp "$app_css" "$app_css_hash"
 
-echo j
 echo "New JavaScript build: $app_js_hash"
 echo "New CSS build: $app_css_hash"
+
+echo '{"js_filename": "app.'$js_hash'.js", "css_filename": "app.'$css_hash'.css"}' > $json_output_file
 
 cd -

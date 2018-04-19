@@ -23,7 +23,7 @@ google_credentials.json
 /docker-support/prod.env
 client/css/font
 .DS_Store
-/client/scripts/build/templates.js
+/client/build/
 /client/dist/
 /client/scripts/src/build
 /client/app.js
