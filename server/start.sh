@@ -36,6 +36,8 @@ echo "Creating views"
 $manage sync_pgviews
 
 start_celery() {
+    mkdir -p /var/log/celery /var/run/celery
+
     celery -A $APP_NAME beat \
            --pidfile=/var/run/celery/celerybeat.pid \
            --detach \
