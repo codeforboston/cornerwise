@@ -1,9 +1,15 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 set -e
 
-script_dir=$(dirname "$BASH_SOURCE")
-cd $(dirname "$BASH_SOURCE")
+if [ -n "$BASH_SOURCE" ]; then
+    script_dir=$(dirname "$BASH_SOURCE")
+    cd $(dirname "$BASH_SOURCE")
+else
+    script_dir="$PWD"
+fi
+
+python_bin=$(which python3 || echo "python")
 
 client_dir=${CLIENT_DIR:-"$script_dir/../client"}
 if [ -n "$OUTPUT_DIR" ]; then
@@ -25,15 +31,15 @@ if ! which postcss; then
 fi
 
 file_hash() {
-    python << EOF | cut -b -15
+    $python_bin << EOF | cut -b -15
 from hashlib import sha1
 with open("$1") as infile:
-    print(sha1(infile.read()).hexdigest())
+    print(sha1(infile.read().encode("utf8")).hexdigest())
 EOF
 }
 
 echo "Assembling templates."
-python3 $script_dir/build_templates.py || exit 1
+$python_bin $script_dir/build_templates.py || exit 1
 
 echo "Minifying JS."
 r.js -o $client_dir/app.build.js || exit 1
