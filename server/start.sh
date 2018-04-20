@@ -78,12 +78,33 @@ if ! getent hosts celery; then
     fi
 fi
 
+on_usr1() {
+    # On receiving a SIGUSR1 signal, re-collect the static files, then restart
+    # the server.
+    # Note: Only one container should receive the signal.
+    echo "Received SIGUSR1"
+    if [ "$APP_MODE" = "production" ]; then
+        $manage collectstatic
+    else
+        echo "Do not need to collectstatic outside production mode."
+    fi
+}
+
 if [ "$APP_MODE" = "production" ]; then
     gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
+             -p /var/run/gunicorn.pid \
+             --daemon \
              cornerwise.wsgi:application
+
+    server_pid="$!"
 else
-    $manage runserver 0.0.0.0:$APP_PORT
+    $manage runserver 0.0.0.0:$APP_PORT &
+
+    server_pid="$!"
 fi
+
+trap on_usr1 SIGUSR1
+while : ; do wait "$server_pid"; done
 
 if ((celery_started)); then
     celery multi stop 2
