@@ -1,13 +1,12 @@
 ({
-    appDir: "./scripts",
-    baseUrl: "src",
-    dir: "./dist",
-    fileExclusionRegExp: /^(site|require)\.js$/,
-    mainConfigFile: "./scripts/main.js",
-    modules: [
-        {
-            name: "../main"
-        }
-    ],
-    removeCombined: true
+    baseUrl: "scripts/src",
+    // fileExclusionRegExp: /^(site)\.js$/,
+    mainConfigFile: "./scripts/src/main.js",
+    name: "main",
+    removeCombined: true,
+    paths: {
+        requireLib: "lib/require"
+    },
+    include: ["requireLib"],
+    out: "app.js"
 })

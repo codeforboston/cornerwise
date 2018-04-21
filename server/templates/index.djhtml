@@ -28,16 +28,12 @@
          var SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}null{% endif %};
         </script>
         {% if production %}
-            <link rel="stylesheet" href="/static/build/app.build.css" type="text/css" media="screen" />
-            <script src="/static/build/require.js"></script>
-            <script>
-             require.config({paths: {"main": "/static/build/app"}});
-             require(["main"]);
-            </script>
+            <link rel="stylesheet" href="/static/build/{{ css_filename }}" type="text/css" media="screen" />
+            <script src="/static/build/{{ js_filename }}"/>
         {% else %}
             <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
             <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
-            <script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+            <script data-main="/static/scripts/src/main" src="/static/scripts/src/lib/require.js"></script>
         {% endif %}
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
 

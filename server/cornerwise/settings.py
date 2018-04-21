@@ -164,14 +164,30 @@ MEDIA_ROOT = "/media/"
 STATICFILES_DIRS = [
     ("images", "/static/images"),
     ("errors", "/static/errors"),
-    ("build", "/static/build"),
     ("layerdata", "/static/scripts/src/layerdata")
 ]
 
 
+def get_built_resources():
+    with open("/static/build/built.json", "r") as built:
+        import json
+        info = json.load(built)
+        return info["js_filename"], info["css_filename"]
+
 if IS_PRODUCTION:
+    STATICFILES_DIRS.extend([
+        ("build", "/static/build"),
+    ])
+
     STATIC_ROOT = "/static_build"
+
+    try:
+        JS_FILENAME, CSS_FILENAME = get_built_resources()
+    except:
+        JS_FILENAME ="app.build.js"
+        CSS_FILENAME = "app.build.css"
 else:
+    JS_FILENAME = CSS_FILENAME = ""
     STATICFILES_DIRS.extend([
         ("css", "/static/css"),
         ("scripts", "/static/scripts"),

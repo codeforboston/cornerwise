@@ -54,5 +54,7 @@ def index(request):
         "google_key": settings.GOOGLE_BROWSER_API_KEY,
         "production": settings.IS_PRODUCTION,
         "lot_sizes": lot_sizes(),
-        "preload_data": json.dumps({})
+        "preload_data": json.dumps({}),
+        "js_filename": settings.JS_FILENAME,
+        "css_filename": settings.CSS_FILENAME
     })

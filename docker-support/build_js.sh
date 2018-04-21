@@ -46,8 +46,7 @@ r.js -o $client_dir/app.build.js || exit 1
 
 mkdir -p "$js_output_dir"
 app_js="$js_output_dir/app.js"
-mv "$client_dir/dist/main.js" "$app_js"
-cp "$client_dir/scripts/require.js" "$js_output_dir/require.js"
+mv "$client_dir/app.js" "$app_js"
 
 js_hash=$(file_hash "$app_js")
 app_js_hash="$js_output_dir/app.${js_hash}.js"
