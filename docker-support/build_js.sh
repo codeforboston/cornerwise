@@ -68,4 +68,17 @@ echo "New CSS build: $app_css_hash"
 
 echo '{"js_filename": "app.'$js_hash'.js", "css_filename": "app.'$css_hash'.css"}' > $json_output_file
 
+
+function docker_api() {
+    curl --silent --unix-socket /var/run/docker.sock -X${2:-GET} http://localhost/${1}
+}
+
+if (( AUTO_COLLECT_STATIC )); then
+    if [ -f /var/run/docker.sock ]; then
+        container_ids=$(docker_api containers/json | jq 'map(select(.Labels["com.docker.compose.service"] == "cornerwise") | .Id)')
+        container_id=$(echo "$container_ids" | jq -r '.[0]')
+        docker_api "container/${container_id}/kill?signal=SIGUSR1" "POST"
+    fi
+fi
+
 cd -
