@@ -78,25 +78,51 @@ if ! getent hosts celery; then
     fi
 fi
 
-on_usr1() {
-    # On receiving a SIGUSR1 signal, re-collect the static files, then restart
-    # the server.
-    # Note: Only one container should receive the signal.
-    echo "Received SIGUSR1"
-    if [ "$APP_MODE" = "production" ]; then
-        $manage collectstatic
-    else
-        echo "Do not need to collectstatic outside production mode."
-    fi
-}
-
-if [ "$APP_MODE" = "production" ]; then
+start_gunicorn() {
     gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
              -p /var/run/gunicorn.pid \
              --daemon \
              cornerwise.wsgi:application
 
     server_pid="$!"
+    echo $server_pid
+}
+
+on_sigterm() {
+    kill -SIGTERM $server_pid
+
+    if ((celery_started)); then
+        celery multi stop 2
+    fi
+}
+
+on_usr1() {
+    # On receiving a SIGUSR1 signal, re-collect the static files, then restart
+    # the server.
+    # Note: Only one container should receive the signal.
+    echo "Received SIGUSR1"
+    if [ "$APP_MODE" = "production" ]; then
+        yes | $manage collectstatic
+    else
+        echo "Do not need to collectstatic outside production mode."
+    fi
+}
+
+on_sighup() {
+    # Gunicorn reloads the configuration and restarts the workers:
+    kill -SIGHUP $server_pid
+}
+
+on_usr2() {
+    echo "Received SIGUSR2"
+    kill -SIGUSR2 $server_pid
+    kill -SIGWINCH $server_pid
+}
+
+if [ "$APP_MODE" = "production" ]; then
+    start_gunicorn
+
+    trap on_sighup SIGHUP
 else
     $manage runserver 0.0.0.0:$APP_PORT &
 
@@ -104,8 +130,5 @@ else
 fi
 
 trap on_usr1 SIGUSR1
-while : ; do wait "$server_pid"; done
-
-if ((celery_started)); then
-    celery multi stop 2
-fi
+trap on_sigterm SIGTERM
+while : ; do wait $server_pid; done
