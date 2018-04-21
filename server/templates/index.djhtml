@@ -28,7 +28,7 @@
          var SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}null{% endif %};
         </script>
         {% if production %}
-            <link rel="stylesheet" href="/static/css/app.build.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/static/build/app.build.css" type="text/css" media="screen" />
             <script src="/static/build/require.js"></script>
             <script>
              require.config({paths: {"main": "/static/build/app"}});
