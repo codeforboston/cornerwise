@@ -1,4 +1,4 @@
-define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function($, B, L, refLocation, config) {
+define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], function($, B, L, $u, refLocation, config) {
     return B.Model.extend({
         urlRoot: "/proposal/view",
 
@@ -9,6 +9,18 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
         promoteAttributes: ["applicant_name", "date", "alderman",
                             "applicant_address", "owner_address",
                             "recommendation"],
+
+        specialAttributes: {
+            agent: {attr: "Agent", type: "person"},
+            applicant: {attr: "Applicant", type: "person"},
+            owner: {attr: "Owner", type: "person"},
+            decision: {attr: "Decision", type: "decision", decision: "decision", vote: "vote"}
+        },
+
+        attributeType: {
+            decision: ["decision", "vote"],
+            person: ["name", "address"]
+        },
 
         initialize: function() {
             this.listenTo(refLocation, "change", this.recalculateDistance)
@@ -146,7 +158,27 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
         },
 
         getAttribute: function(handle) {
-            return this.get("attributes")[handle];
+            var attrs = this.get("attributes");
+            if (this.specialAttributes[handle]) {
+                var spec = this.specialAttributes[handle],
+                    type = spec.type,
+                    typeSpec = type && this.attributeType[type],
+                    empty = true,
+                    value = _.reduce(typeSpec, function(d, k) {
+                        var v = attrs[spec[k] || handle + "_" + k];
+                        if (v) {
+                            d[k] = v.value;
+                            empty = false;
+                        }
+                        return d;
+                    }, {});
+
+                if (empty) return null;
+                return {name: spec.name || $u.fromUnder(handle),
+                        type: type,
+                        value: value};
+            }
+            return attrs[handle];
         },
 
         /**
@@ -200,6 +232,18 @@ define(["jquery", "backbone", "lib/leaflet", "refLocation", "config"], function(
                 this._handlerCmp = this._makeHandlerComparator(this.promoteAttributes);
             }
             return this._handlerCmp;
+        },
+
+        getAttributesForDisplay() {
+            // TODO Show recommendation conditionally,
+            var attrs = this.get("attributes"),
+                order = ["applicant", "owner",
+                         attrs.decision ? "decision" : "recommendation",
+                         "subject_property",
+                         "proposal",
+                         "green_building_practices"];
+
+            return this.getAttributes(order);
         },
 
         getAttributes: function(handles) {
