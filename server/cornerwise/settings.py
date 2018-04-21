@@ -277,7 +277,7 @@ GEO_REGION = "Somerville, MA"
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
                            "django.contrib.auth.backends.ModelBackend"]
 
-IMPORTER_SCHEMA = "https://raw.githubusercontent.com/codeforboston/cornerwise/config/docs/scraper-schema.json"
+IMPORTER_SCHEMA = "https://raw.githubusercontent.com/codeforboston/cornerwise/master/docs/scraper-schema.json"
 
 # Load select environment variables into settings:
 for envvar in [
