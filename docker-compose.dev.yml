@@ -90,6 +90,7 @@ services:
     links:
       - postgres
       - redis
+    restart: unless-stopped
     working_dir: /app/
     command: bash /app/start.sh
     volumes:
