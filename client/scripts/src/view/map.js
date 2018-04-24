@@ -22,10 +22,12 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.autopan = false;
                    this.autozoom = true;
 
-                   if (_.isFinite(lat) && _.isFinite(lng))
+                   if (_.isFinite(lat) && _.isFinite(lng)) {
                        mapOptions.center = L.latLng(lat, lng);
-                   else
+                   } else {
                        mapOptions.center = config.refPointDefault;
+                       this.autopan = true;
+                   }
 
                    if (_.isFinite(zoom))
                        mapOptions.zoom = zoom;
