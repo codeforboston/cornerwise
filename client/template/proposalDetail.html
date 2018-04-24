@@ -168,5 +168,22 @@ var address = proposal.get("address"); %>
         <br style="clear:both" />
     </div>
     <% } %>
+
+    <div class="footnotes">
+        <div>
+            <% if (attributes.length || notice) { %>
+            Proposal details may have been automatically extracted from text files and may be incomplete or inaccurate.
+            <% if (documents && documents.length) { %>
+            View the attached documents for complete information.
+            <% } %>
+            <% } else { %>
+            Proposal details will be added when the appropriate documents become available.
+            <% } %>
+        </div>
+
+        <% if (parcel) { %>
+        <div>Parcel details may be out of date.</div>
+        <% } %>
+    </div>
 </div>
 
