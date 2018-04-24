@@ -1,4 +1,7 @@
 from celery import shared_task
+from functools import reduce
+import json
+from operator import or_
 
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -70,7 +73,8 @@ def layer_json(layer):
 # Views:
 @make_response("list.djhtml")
 def list_proposals(req):
-    proposals = Proposal.objects.filter(build_proposal_query(req.GET))
+    query = reduce(or_, (build_proposal_query(json.loads(q)) for q in req.GET.getlist("query")))
+    proposals = Proposal.objects.filter(query)
     if "include_projects" in req.GET:
         proposals = proposals.select_related("project")
 
