@@ -211,7 +211,7 @@ span.icon {
 }
 
 #logo {
-    background: url(/static/images/cornerwise-beta-logo.png);
+    background: url(../images/cornerwise-beta-logo.png);
     background-color: #222;
     background-position: 50% 0%;
     background-repeat: no-repeat;
@@ -403,7 +403,7 @@ input:focus::-webkit-input-placeholder {
 }
 
 #geolocate {
-    background: url(/static/images/geolocate-button.png) no-repeat;
+    background: url(../images/geolocate-button.png) no-repeat;
     display: none;
     background-color: rgb(43, 43, 43);
     background-position: 0.5em 50%;
@@ -637,7 +637,7 @@ body.main .map-mode-button, body.list .list-mode-button {
 }
 
 div.proposal-marker {
-    background: url(/static/images/marker-orange.png) no-repeat;
+    background: url(../images/marker-orange.png) no-repeat;
     background-size: contain;
     padding-top: 5px;
     height: 30px;
@@ -646,13 +646,13 @@ div.proposal-marker {
 }
 
 div.marker-hovered {
-    background-image: url(/static/images/marker-orange-hover.png) !important;
+    background-image: url(../images/marker-orange-hover.png) !important;
 }
 
 div.marker-selected {
 /*     animation-duration: 1s;
     animation-name: selection-highlight; */
-    background-image: url(/static/images/marker-orange-active.png) !important;
+    background-image: url(../images/marker-orange-active.png) !important;
     border-radius: 15px;
 }
 
@@ -774,7 +774,7 @@ img.project-type-badge {
 
 .thumbnail a.show-on-map {
     background-color: white;
-    background-image: url(/static/images/icon/youarehere.png);
+    background-image: url(../images/icon/youarehere.png);
     background-position: 50% 50%;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1803,7 +1803,7 @@ input.big {
 
 select {
     background-color: transparent;
-    background: url(/static/images/down-arrow.png) right / contain no-repeat;
+    background: url(../images/down-arrow.png) right / contain no-repeat;
     border-radius: 0;
     color: #3c7c3d;
     display: block;
@@ -2155,7 +2155,7 @@ body.choosing-radius .ref-marker {
     }
 
     body #hamburger {
-        background: url(/static/images/menu-icon@3x.png) center / contain;
+        background: url(../images/menu-icon@3x.png) center / contain;
         position: absolute;
         right: 1em;
         top: -50px;
@@ -2335,7 +2335,7 @@ body.choosing-radius .ref-marker {
 
 @media screen and (max-width: 1000px) {
     body.nointro #logo {
-        background: url(/static/images/cornerwise-owl.png);
+        background: url(../images/cornerwise-owl.png);
         background-repeat: no-repeat;
         background-size: contain;
         height: 40px;
