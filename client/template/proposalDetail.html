@@ -130,13 +130,29 @@ var address = proposal.get("address"); %>
     %>
 
     <%
-    var attributes = proposal.getAttributes();
+    var attributes = proposal.getAttributesForDisplay();
     %>
     <div class="attributes">
         <% _.each(attributes, function(attr) { %>
-        <% if (attr) { %>
-        <div class="attribute"><%- attr.name %> </div>
-        <div class="attribute-value"><%- attr.value %></div>
+
+        <% if (attr) {
+            var value = attr.value;
+        %>
+            <div class="attribute"><%- attr.name %> </div>
+
+            <div class="attribute-value <%= attr.type %>-attr %>">
+            <% if (attr.type === "person") { %>
+                <%- value.name %>
+                <% if (value.address) { %>
+                    (<%- value.address %>)
+                <% } %>
+            <% } else if (attr.type === "decision") {%>
+                <%= value.decision %>
+                <% if (value.vote) { %> (<%= value.vote %>) <% } %>
+            <% } else { %>
+                <%- attr.value %>
+            <% } %>
+            </div>
         <% } %>
         <% }); %>
     </div>
@@ -152,5 +168,22 @@ var address = proposal.get("address"); %>
         <br style="clear:both" />
     </div>
     <% } %>
+
+    <div class="footnotes">
+        <div>
+            <% if (attributes.length || notice) { %>
+            Proposal details may have been automatically extracted from text files and may be incomplete or inaccurate.
+            <% if (documents && documents.length) { %>
+            View the attached documents for complete information.
+            <% } %>
+            <% } else { %>
+            Proposal details will be added when the appropriate documents become available.
+            <% } %>
+        </div>
+
+        <% if (parcel) { %>
+        <div>Parcel details may be out of date.</div>
+        <% } %>
+    </div>
 </div>
 

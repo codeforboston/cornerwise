@@ -76,7 +76,8 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                        if (others) {
                            text += "<br/>" + others.split(";").join("<br/>");
                        }
-                       this.bindTooltip(text, {permanent: true});
+                       this.bindTooltip(text, {offset: L.point(10, 0),
+                                               permanent: true});
                    } else if (proposal.changed._hovered === false) {
                        this.unbindTooltip();
                    }

@@ -32,7 +32,17 @@ define(
             },
 
             url: function() {
-                return config.backendURL + "/proposal/list?" + $u.encodeQuery(this.query);
+                var pending = this.pending,
+                    queries = [this.query];
+
+                if (pending.length) {
+                    queries.push({id: pending.join(","), status: "all"});
+                }
+
+                var qp = _.map(queries, function(q) {
+                    return "query=" + encodeURIComponent(JSON.stringify(q));
+                }).join("&");
+                return config.backendURL + "/proposal/list?" + qp;
             },
 
             fetch: function() {

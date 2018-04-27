@@ -1103,6 +1103,7 @@ body.info #loading-indicator {
 
 #info.displayed {
     display: block;
+    display: flex;
     top: 0;
     height: auto;
     bottom: 0;
@@ -1160,7 +1161,14 @@ a.brief-model:hover {
 }
 
 #info {
-    padding-right: 300px;
+    flex-direction: column;
+    padding-right: 310px;
+}
+
+#info .content {
+    display: flex;
+    flex: 1;
+    flex-grow: 1;
 }
 
 #info .sidebar {
@@ -1171,6 +1179,22 @@ a.brief-model:hover {
     bottom: 0;
     right: 0;
     width: 250px;
+}
+
+.sidebar .table {
+    margin: auto;
+}
+
+#info .images {
+    flex-grow: 1;
+}
+
+#info .footnotes {
+    color: goldenrod;
+    font-style: italic;
+    opacity: 0.7;
+    margin-top: 1em;
+    /* width: 60%; */
 }
 
 .main-thumb-container {
@@ -1184,6 +1208,9 @@ a.brief-model:hover {
 }
 
 .details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
     overflow: auto;
 }
 
@@ -1194,7 +1221,8 @@ a.brief-model:hover {
 .details h4 {
     font-size: x-large;
     font-weight: 400;
-    margin-bottom: 0.3em;
+    margin-bottom: 0;
+    padding-bottom: 0.3em;
 }
 
 .details h5 {
@@ -2284,6 +2312,11 @@ body.choosing-radius .ref-marker {
     #info .document {
         display: inline-block;
         max-width: 95%;
+    }
+
+    #info .footnotes {
+        margin-top: 2em;
+        position: relative;
     }
 
     #info.expanded .sidebar {
