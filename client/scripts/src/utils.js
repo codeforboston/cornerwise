@@ -158,6 +158,14 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return n == 1 ? s : pl;
            }
 
+           function classNames(d) {
+               var baseList = Array.prototype.slice.call(arguments, 1);
+               return _.reduce(d, function(l, check, className) {
+                   if (check) l.push(className);
+                   return l;
+               }, baseList).join(" ");
+           }
+
            function strToDate(dateStr) {
                var m = /^(\d\d\d\d)(\d\d)(\d\d)/.exec(dateStr);
 
@@ -354,6 +362,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
 
                    return new RegExp(_.map(words, $u.escapeRegex).join("|"), "i");
                },
+
+               classNames: classNames,
 
                /**
                 * Generate an equivalent regular expression for the given glob
