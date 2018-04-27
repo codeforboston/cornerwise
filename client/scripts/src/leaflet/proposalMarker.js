@@ -1,5 +1,5 @@
-define(["lib/leaflet", "view/proposalPopup", "underscore"],
-       function(L, ProposalPopupView, _) {
+define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
+       function(L, ProposalPopupView, _, $u) {
            function projectTypeIcon(p) {
                var cat = p.category.replace(/[&.]+/g, "")
                        .replace(/[\s-]+/g, "_")
@@ -8,16 +8,16 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
            }
 
            function getBadgeClassName(proposal) {
-               var isHovered = proposal.get("_hovered"),
-                   isSelected = proposal.get("_selected"),
-                   project = proposal.getProject();
+               var attrs = proposal.attributes,
+                   approved = (attrs.status||"").match(/^approved$/i);
 
-               return [
-                   "proposal-marker",
-                   isHovered ? "marker-hovered" : "",
-                   isSelected ? "marker-selected" : "",
-                   project ? "project-marker" : ""
-               ].join(" ");
+               return $u.classNames({
+                   "marker-hovered": attrs._hovered,
+                   "marker-selected": attrs._selected,
+                   "proposal-complete": attrs.complete,
+                   "proposal-approved": approved,
+                   "project-marker": proposal.getProject()
+               }, "proposal-marker");
            }
 
            function getBadge(proposal) {

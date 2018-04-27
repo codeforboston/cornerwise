@@ -646,14 +646,38 @@ div.proposal-marker {
 }
 
 div.marker-hovered {
-    background-image: url(/static/images/marker-orange-hover.png) !important;
+    background-image: url(/static/images/marker-orange-hover.png);
 }
 
 div.marker-selected {
 /*     animation-duration: 1s;
     animation-name: selection-highlight; */
-    background-image: url(/static/images/marker-orange-active.png) !important;
+    background-image: url(/static/images/marker-orange-active.png);
     border-radius: 15px;
+}
+
+div.proposal-complete {
+    background: center / contain no-repeat url(/static/images/ex-mark.png),
+                center / contain no-repeat url(/static/images/marker-green.png);
+}
+
+div.proposal-complete.proposal-approved {
+    background: center / contain no-repeat url(/static/images/check-mark.png),
+                center / contain no-repeat url(/static/images/marker-green.png);
+}
+
+div.proposal-complete.marker-hovered,
+div.proposal-complete.marker-selected
+{
+    background: center / contain no-repeat url(/static/images/ex-mark.png),
+                center / contain no-repeat url(/static/images/marker-green-hover.png);
+}
+
+div.proposal-complete.proposal-approved.marker-hovered,
+div.proposal-complete.proposal-approved.marker-selected
+{
+    background: center / contain no-repeat url(/static/images/check-mark.png),
+                center / contain no-repeat url(/static/images/marker-green-hover.png);
 }
 
 div.leaflet-marker.zoomed-proposal-marker {
