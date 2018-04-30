@@ -104,6 +104,9 @@ def build_proposal_query_dict(d):
             parcel_ids = LotSize.objects.filter(**parcel_query).values("parcel_id")
             subqueries["parcel_id__in"] = parcel_ids
 
+    if "parcel" in d:
+        subqueries["parcel_pk__in"] = d["parcel"].split(",")
+
     if "box" in d:
         subqueries["location__within"] = bounds_from_box(d["box"])
     elif "center" in d and "r" in d:
