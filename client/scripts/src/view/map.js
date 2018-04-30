@@ -228,7 +228,11 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                            proposals.setSelection(proposal.id);
                        })
                        .on("popupclose", function(e) {
-                           proposals.removeFromSelection(proposal.id);
+                           // Really horrible hack. I'm not sure why this is
+                           // triggered at all when another popup is selected.
+                           // Figure THAT out and remove this abomination:
+                           if (!this._autoClosedPopup)
+                               proposals.removeFromSelection(proposal.id);
                        });
 
 

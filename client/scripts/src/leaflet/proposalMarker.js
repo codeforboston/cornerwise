@@ -101,10 +101,12 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
                                         autoPan: false});
                            popup.setContent(view.render().el);
 
+                           this._autoClosedPopup = false;
                            this.bindPopup(popup);
                        }
                        this.openPopup();
                    } else {
+                       this._autoClosedPopup = true;
                        this.closePopup().unbindPopup();
                    }
                },
