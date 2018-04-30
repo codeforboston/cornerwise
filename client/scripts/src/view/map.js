@@ -4,7 +4,9 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
        function(B, config, L, $, _, refLocation, RefMarker,
                 ProposalMarker, infoLayers, regions, info, appState, $u) {
 
-           var zoomThreshold = 17;
+           var zoomThreshold = 17,
+               parcelStyle = _.extend({className: "parcel-polygon"},
+                                      config.parcelStyle);
 
            return B.View.extend({
                initialize: function(options) {
@@ -19,6 +21,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        zoom = parseInt(state.zoom),
                        bounds = null;
 
+                   this.pointSelection = !options.pointSelectionDisabled;
                    this.autopan = false;
                    this.autozoom = true;
 
@@ -84,8 +87,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    // App behaviors:
                        .listenTo(appState, "initialized", this.autoPanOn)
                        .listenTo(appState, "shouldFocus", this.onFocused)
-                       .listenTo(appState, "subscribeStart", this.autoZoomOff)
-                       .listenTo(appState, "subscribeEnd", this.autoZoomOn);
+                       .listenTo(appState, "subscribeStart", this.onSubscribeStart)
+                       .listenTo(appState, "subscribeEnd", this.onSubscribeEnd);
 
                    appState.onStateKeyChange("f.box", this.onBoxFilterChanged,
                                              this);
@@ -268,7 +271,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        if (!geom) return;
 
                        var layer = L.GeoJSON.geometryToLayer(geom);
-                       layer.setStyle(config.parcelStyle);
+                       layer.setStyle(parcelStyle);
                        layers[id] = layer;
                        parent.addLayer(layer);
                    });
@@ -388,7 +391,8 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                },
 
                onClick: function(e) {
-                   appState.setHashKey("p", e.latlng);
+                   if (this.pointSelection)
+                       appState.setHashKey("p", e.latlng);
                },
 
                // Store a reference to the reference marker
@@ -422,11 +426,13 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    this.autopan = true;
                },
 
-               autoZoomOn: function() {
+               onSubscribeEnd: function() {
+                   this.pointSelection = true;
                    this.autozoom = true;
                },
 
-               autoZoomOff: function() {
+               onSubscribeStart: function() {
+                   this.pointSelection = false;
                    this.autozoom = false;
                },
 

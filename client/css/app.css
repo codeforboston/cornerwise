@@ -1900,6 +1900,10 @@ body.subscribe-mode .leaflet-marker-icon
     pointer-events: none;
 }
 
+body.subscribe-mode .parcel-polygon {
+    opacity: 0.4;
+}
+
 body.choosing-radius .ref-marker {
     display: none;
 }
