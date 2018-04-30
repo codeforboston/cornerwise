@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 import calendar
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -99,6 +100,8 @@ def time_query(d):
     return start, end
 
 
+# If any of these params is specified in the query, look for Proposals where
+# the field matches literally.
 query_params = {
     "case": "case_number",
     "address": "address",
@@ -171,4 +174,23 @@ def build_proposal_query_dict(d):
 
 def build_proposal_query(d):
     subqueries = build_proposal_query_dict(d)
+    return Q(**subqueries)
+
+
+def build_event_query(d):
+    subqueries = {}
+    if "region" in d:
+        subqueries["region_name__in"] = re.split(r"\s*;\s*", d["region"])
+
+    time_range = time_query(d)
+    if time_range:
+        start, end = time_range
+        subqueries["date__gte"] = start
+        subqueries["date__lt"] = end
+    else:
+        subqueries["date__gte"] = timezone.now()
+
+    if "proposal" in d:
+        subqueries["proposals__pk__in"] = d["proposal"].split(",")
+
     return Q(**subqueries)

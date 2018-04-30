@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from shared.request import make_response, ErrorResponse
 
 from .models import Proposal, Attribute, Document, Event, Image, Layer
-from .query import build_proposal_query
+from .query import build_proposal_query, build_event_query
 from utils import bounds_from_box
 
 default_attributes = [
@@ -169,11 +169,14 @@ def list_layers(req):
     return {"layers": [layer_json(l) for l in layers]}
 
 
-@make_response()
+@make_response("events.djhtml")
 def list_events(req):
-    events = Event.objects.upcoming()
+    query = build_event_query(req.GET)
+    events = Event.objects.filter(query).order_by("date")
+    title = "Events" if query else "Upcoming Events"
 
-    return {"events": [event.to_json_dict() for event in events]}
+    return {"events": [event.to_json_dict() for event in events],
+            "title": title}
 
 
 @make_response("event.djhtml")
