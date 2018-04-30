@@ -114,9 +114,9 @@ def build_proposal_query_dict(d):
     # proposals.
     status = d.get("status", "active").lower()
     if status == "closed":
-        subqueries["complete"] = True
+        subqueries["complete__isnull"] = False
     elif status == "active":
-        subqueries["complete"] = False
+        subqueries["complete__isnull"] = True
 
     event = d.get("event")
     if event:
