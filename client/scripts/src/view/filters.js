@@ -22,9 +22,15 @@ define(
 
                 this.buildRegionSelection();
 
+                /**
+                   Filters are all stored in the app state, which is 'persisted'
+                   in the location hash. Changes to filters must therefore pass
+                   through appState first. Here, we subscribe to filter changes
+                   made on appState and update the GUI appropriately.
+                 */
                 appState.onStateKeyChange("showmenu", function(show, oldValue) {
                     if (_.isString(show))
-                        this.toggleSideMenu(show == "1");
+                        this.toggleFiltersMenu(show == "1");
                 }, this, true);
 
                 appState.onStateKeyChange(
@@ -46,7 +52,12 @@ define(
                     .done(function(ac) {
                         self.placesSetup(ac, input);
                         $(input).keypress(function(e) {
-                            if (e.which == 13) {
+                            if (e.which === 13) {
+                                e.preventDefault();
+                                input.blur();
+                            }
+                        }).keyup(function(e) {
+                            if (e.which === 27) {
                                 e.preventDefault();
                                 input.blur();
                             }
@@ -54,6 +65,10 @@ define(
                     });
             },
 
+            /**
+               Callback to complete the setup of the Google Places API once it
+               has fully loaded.
+             */
             placesSetup: function(ac, input) {
                 var self = this;
 
@@ -61,6 +76,8 @@ define(
                     self.onPlaceChanged(ac, input);
                 });
 
+                // Restrict the Places query to the bounds of the currently
+                // active region(s).
                 this.listenTo(
                     regions, "regionBounds",
                     function(bounds) {
@@ -69,7 +86,7 @@ define(
                     });
             },
 
-            toggleSideMenu: function(show) {
+            toggleFiltersMenu: function(show) {
                 $("#show-filters-button").toggle(!show);
                 $("#hide-filters-button").toggle(show);
                 $("#side-menu")
@@ -92,6 +109,9 @@ define(
                 }
             },
 
+            // NOTE Many of these filters do not appear in the UI at this time.
+            // They are preserve here for possible later use, since most or all
+            // generate the correct Proposal query and have backend support.
             events: {
                 //"submit #ref-address-form": "submitAddress",
                 "focus #ref-address-form": "removeGuessClass",
