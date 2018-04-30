@@ -1,1 +1,2 @@
 *.geojson
+./client/scripts/src/lib/*

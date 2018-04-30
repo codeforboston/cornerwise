@@ -19,10 +19,6 @@ define(["backbone", "underscore", "utils", "appState"],
 
                el: "#info",
 
-               events: {
-                   "click .close": "clearSelection"
-               },
-
                show: function() {
                    this.toggle(true);
                },
@@ -91,10 +87,6 @@ define(["backbone", "underscore", "utils", "appState"],
                onSelectionRemoved: function(coll, remIds, ids) {
                    if (this.shouldShow)
                        this.render();
-               },
-
-               clearSelection: function() {
-                   this.collection.setSelection([]);
                },
 
                onNav: function(dir) {
