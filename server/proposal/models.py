@@ -12,11 +12,32 @@ from django.utils import dateparse
 
 import json
 import pickle
+import pytz
 from urllib import request
 import utils
 
 import jsonschema
 import pytz
+
+
+RegionTimeZones = {
+    "somerville, ma": "US/Eastern",
+    "cambridge, ma": "US/Eastern",
+}
+
+
+def region_tz(region_name):
+    return pytz.timezone(RegionTimeZones.get(region_name.lower()), "US/Eastern")
+
+
+def localize_dt(dt: datetime, region_name=None):
+    tz = region_tz(region_name)
+    return tz.normalize(dt) if dt.tzinfo else tz.localize(dt)
+
+
+def local_now(region_name=None):
+    tz = region_tz(region_name)
+    return tz.normalize(pytz.utc.localize(datetime.utcnow()))
 
 
 class ProposalManager(models.Manager):
