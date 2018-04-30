@@ -98,17 +98,22 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
                                L.popup({className: "proposal-info-popup",
                                         minWidth: 300,
                                         maxWidth: 300,
-                                        autoPan: false});
+                                        autoPan: false,
+                                        handleCloseEvent: _.bind(this.onPopupCloseButton, this)});
                            popup.setContent(view.render().el);
 
-                           this._autoClosedPopup = false;
                            this.bindPopup(popup);
                        }
                        this.openPopup();
                    } else {
-                       this._autoClosedPopup = true;
                        this.closePopup().unbindPopup();
                    }
+               },
+
+               onPopupCloseButton: function(e) {
+                   var proposal = this.proposal;
+                   proposal.collection.removeFromSelection(proposal.id);
+                   L.DomEvent.stop(e);
                },
 
                setZoomed: function(n) {

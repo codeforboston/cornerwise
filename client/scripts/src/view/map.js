@@ -226,15 +226,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        })
                        .on("click", function(e) {
                            proposals.setSelection(proposal.id);
-                       })
-                       .on("popupclose", function(e) {
-                           // Really horrible hack. I'm not sure why this is
-                           // triggered at all when another popup is selected.
-                           // Figure THAT out and remove this abomination:
-                           if (!this._autoClosedPopup)
-                               proposals.removeFromSelection(proposal.id);
                        });
-
 
                    if (z >= 0 && this.map.getBounds().contains(marker.getLatLng())) {
                        marker.setZoomed(z);
