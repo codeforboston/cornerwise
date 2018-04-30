@@ -12,6 +12,11 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    lng: config.refPointDefault.lng,
                    // The search radius, centered on the current latitude and longitude:
                    radius: null,
+                   // Typical values:
+                   //  - "auto": using the default coords
+                   //  - "geolocate": set from the user's browser
+                   //  - "map": set by double-clicking the map
+                   //  - "address": set from a geocoded address
                    setMethod: "auto"
                },
 
