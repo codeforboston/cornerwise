@@ -1,9 +1,13 @@
 from django.db.models import Q
+import calendar
 from collections import defaultdict
+from datetime import datetime, timedelta
 from functools import reduce
 import re
 
-from .models import Attribute
+from dateutil.parser import parse as parse_date
+
+from .models import Attribute, local_now, localize_dt
 from parcel.models import LotSize, LotQuantiles
 from utils import bounds_from_box, point_from_str
 
@@ -68,6 +72,33 @@ def run_attributes_query(d):
         return [pid for pid, c in attr_maps.items() if c == len(subqueries)]
 
 
+def month_range(dt):
+    _, days = calendar.monthrange(dt.year, dt.month)
+    start = dt.replace(day=1)
+    return (start, start+timedelta(days=days))
+
+
+def time_query(d):
+    if "month" in d:
+        dt = parse_date(d["month"])
+        start, end = month_range(dt)
+    elif "start" in d:
+        start = parse_date(d["start"])
+        end = "end" in d and parse_date(d["end"])
+    else:
+        return None
+
+    if "region" in d:
+        region = d["regions"].split(";", 1)[0].strip()
+    else:
+        region = None
+
+    start = localize_dt(start, region)
+    end = localize_dt(end, region) if end else local_now(region)
+
+    return start, end
+
+
 query_params = {
     "case": "case_number",
     "address": "address",
@@ -91,6 +122,12 @@ def build_proposal_query_dict(d):
 
     if ids:
         subqueries["pk__in"] = ids
+
+    time_range = time_query(d)
+    if time_range:
+        (start_date, end_date) = time_range
+        subqueries["created__gte"] = start_date
+        subqueries["created__lt"] = end_date
 
     if "projects" in d:
         if d["projects"] == "null":
@@ -123,10 +160,7 @@ def build_proposal_query_dict(d):
 
     event = d.get("event")
     if event:
-        try:
-            subqueries["event"] = int(event)
-        except ValueError:
-            pass
+        subqueries["event"] = int(event)
 
     for k in d:
         if k in query_params:
