@@ -106,6 +106,15 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return commas(ft) + " feet";
            }
 
+           function _call(k) {
+               return function(d) { return d[k](); };
+           }
+           function _pad(fn) {
+               return function(d, opts) {
+                   var n = fn(d, opts);
+                   return ((n < 10 && opts.pad) ? "0" : "") + n;
+               };
+           }
            // A crummy, incomplete date formatter:
 
            // TODO: Use the Internationalization API when available
@@ -124,14 +133,15 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                B: function(d) {
                    return locale.monthNames[d.getMonth()];
                },
-               d: function(d, opts) {
-                   var date = d.getDate();
-                   return ((date < 10 && opts.pad) ? "0" : "") + date;
+               d: _pad(_call("getDate")),
+               H: _pad(_call("getHours")),
+               I: _pad(function(d) {
+                   return d.getHours()%12||12;
+               }),
+               p: function(d) {
+                   return locale.amPM[d.getHours()<12?0:1];
                },
-               I: function(d, opts) {
-                   var hr = d.getHours()%12||12;
-                   return ((hr < 10 && opts.pad) ? "0" : "") + hr;
-               },
+               m: _pad(function(d) { return d.getMonth()+1; }),
                S: function(d) {
                    return ordinal(d.getDate());
                },
@@ -165,8 +175,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return pieces.join("");
            }
 
-           function prettyDate(d) {
-               return formatDate("%B %-d%S", d);
+           function shortDate(d) {
+               return formatDate("%-m/%-d/%y", d);
            }
 
            /**
@@ -341,7 +351,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
 
                formatDate: formatDate,
 
-               prettyDate: prettyDate,
+               shortDate: shortDate,
 
                acresToSqFt: acresToSqFt
            };
@@ -544,7 +554,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                 */
                prettyDistance: prettyDistance,
 
-               prettyDate: prettyDate,
+               shortDate: shortDate,
 
                formatDate: formatDate,
 

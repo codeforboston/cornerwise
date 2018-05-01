@@ -96,7 +96,7 @@ var address = proposal.get("address"); %>
             <% _.each(events, function(event) { %>
             <div>
                 <a class="event" href="/proposal/event/<%- event.id %>" target="_blank">
-                    <%- prettyDate(event.date) %> &mdash;
+                    <%- shortDate(event.date) %> &mdash;
                     <%- event.title %>
                 </a>
             </div>
