@@ -121,10 +121,7 @@ class Proposal(models.Model):
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True,
                                 on_delete=models.PROTECT)
-    # A misnomer; if True, indicates that the planning board has issued a
-    # ruling (approval or disapproval). Does not actually reflect whether the
-    # proposed changes are done.
-    complete = models.BooleanField(default=False)
+    complete = models.DateTimeField(null=True)
     importer = models.ForeignKey("proposal.Importer", blank=True,
                                  null=True, on_delete=models.SET_NULL)
 
