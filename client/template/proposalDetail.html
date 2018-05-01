@@ -27,7 +27,9 @@ var address = proposal.get("address"); %>
     }
     } %>
 
-    <div class="case-number"><%- proposal.get("case_number") %></div>
+    <a class="case-number" title="Proposal Permalink" target="_blank" href="<%- proposal.getPermalink() %>">
+        <%- proposal.get("case_number") %>
+    </a>
     <%
     var notice = proposal.getAttributeValue("legal_notice");
 

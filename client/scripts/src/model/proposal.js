@@ -121,6 +121,10 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
             return others ? others.split(";") : [];
         },
 
+        getPermalink: function() {
+            return "/proposal/view/" + this.id;
+        },
+
         getThumb: function() {
             var images = this.get("images");
 
