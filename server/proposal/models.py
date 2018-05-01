@@ -116,7 +116,7 @@ class Proposal(models.Model):
     description = models.TextField(default="")
     source = models.URLField(
         null=True, help_text="The data source for the proposal.")
-    status = models.CharField(max_length=64)
+    status = models.CharField(max_length=64, db_index=True)
 
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True,
