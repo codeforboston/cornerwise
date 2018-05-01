@@ -338,6 +338,15 @@ class Event(models.Model):
         datestr = self.date.strftime("%b %d, %Y")
         return f"{self.title}, {datestr}, {self.region_name}"
 
+    @property
+    def local_start(self):
+        return localize_dt(self.date, self.region_name)
+
+    @property
+    def local_end(self):
+        if self.duration:
+            return localize_dt(self.date + self.duration, self.region_name)
+
     def to_json_dict(self):
         d = model_to_dict(self, exclude=["created", "proposals"])
         return d
