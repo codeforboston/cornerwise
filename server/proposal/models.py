@@ -327,6 +327,7 @@ class Event(models.Model):
     proposals = models.ManyToManyField(
         Proposal, related_name="events", related_query_name="event")
     minutes = models.URLField(blank=True)
+    agenda_url = models.URLField(blank=True)
 
     objects = EventManager()
 
@@ -347,11 +348,11 @@ class Event(models.Model):
         event_dict should have the following fields:
         - title (str) - Name of the event
         - description (str)
-        - date (datetime with local timezone) - When will the event occur?
+        - start (datetime with local timezone) - When will the event occur?
+        - duration (timedelta, optional) - how long will the event last?
         - cases - A list of case numbers
         - region_name
-        - duration (timedelta, optional) - how long will the event last?
-        - agenda_url (string, optional)
+        - documents (string, optional)
         """
         start = dateparse.parse_datetime(event_dict["start"])
         kwargs = {"title": event_dict["title"],
@@ -360,12 +361,20 @@ class Event(models.Model):
         try:
             event = cls.objects.get(**kwargs)
         except cls.DoesNotExist:
-            kwargs["minutes"] = event_dict.get("agenda_url", "")
             event = cls(**kwargs)
 
+        # TODO Perform actual processing on Event documents
+        for doc in event_dict.get("documents", []):
+            if re.search(r"\bagenda\b", doc["title"], re.I):
+                event.agenda_url = doc["url"]
+            elif re.search(r"\bminutes\b", doc["title"], re.I):
+                event.minutes = doc["url"]
+
         event.date = start
-        event.minutes = event_dict.get("agenda_url", "")
-        event.duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
+
+        duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
+        if duration:
+            event.duration = duration
 
         event.save()
 
