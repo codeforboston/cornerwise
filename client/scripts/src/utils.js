@@ -46,7 +46,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                    end = ends[n[n.length-1]] || "th";
                }
 
-               return n + end;
+               return end;
            }
 
            function prettyAmount(amount, currency) {
@@ -106,30 +106,67 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return commas(ft) + " feet";
            }
 
+           // A crummy, incomplete date formatter:
 
-           function prettyDate(d, format) {
-               // TODO: Use the Internationalization API when available
-               // https://marcoscaceres.github.io/jsi18n/
-               if (!(d instanceof Date)) {
-                   d = new Date(d);
+           // TODO: Use the Internationalization API when available
+           // https://marcoscaceres.github.io/jsi18n/
+           var FMT = {
+               a: function(d) {
+                   return locale.dayNames[d.getDay()].substring(0, 3);
+               },
+               A: function(d) {
+                   return locale.dayNames[d.getDay()];
+               },
+               b: function(d) {
+                   // Not locale friendly
+                   return locale.monthNames[d.getMonth()].substring(0, 3);
+               },
+               B: function(d) {
+                   return locale.monthNames[d.getMonth()];
+               },
+               d: function(d, opts) {
+                   var date = d.getDate();
+                   return ((date < 10 && opts.pad) ? "0" : "") + date;
+               },
+               I: function(d, opts) {
+                   var hr = d.getHours()%12||12;
+                   return ((hr < 10 && opts.pad) ? "0" : "") + hr;
+               },
+               S: function(d) {
+                   return ordinal(d.getDate());
+               },
+               Y: function(d) {
+                   return d.getFullYear();
+               },
+               y: function(d) {
+                   return (""+d.getFullYear()).slice(2);
+               }
+           };
+
+           function formatDate(pattern, dt) {
+               var re = /%(-?)([a-z])/gi,
+                   pieces = [],
+                   idx = 0,
+                   l = pattern.length,
+                   m, fn;
+
+               if (!(dt instanceof Date))
+                   dt = new Date(dt);
+
+               while ((m = re.exec(pattern))) {
+                   if (m.index > idx)
+                       pieces.push(pattern.slice(idx, m.index));
+                   if ((fn = FMT[m[2]])) {
+                       pieces.push(fn(dt, {pad: !m[1]}));
+                   }
+                   idx = m.index + m[0].length;
                }
 
-               if (isNaN(d)) {
-                   return "unknown date";
-               }
+               return pieces.join("");
+           }
 
-               format = format || "s";
-
-               if (format == "s") {
-                   return [d.getMonth()+1,
-                           d.getDate(),
-                           d.getFullYear().toString().slice(2)].join("/");
-               } else if (format === "m") {
-                   return [locale.monthNames[d.getMonth()],
-                           ordinal(d.getDate())].join(" ");
-               }
-
-               return "";
+           function prettyDate(d) {
+               return formatDate("%B %-d%S", d);
            }
 
            /**
@@ -205,7 +242,6 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
 
                return null;
            }
-
 
            /**
             * @param {string} s
@@ -293,12 +329,6 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
            }
 
            var defaultHelpers = {
-               formatDate: function(d) {
-                   return (d.toLocaleDateString) ?
-                       d.toLocaleDateString() :
-                       d.toString().slice(0, 15);
-               },
-
                capitalize: capitalize,
 
                commas: commas,
@@ -308,6 +338,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                prettyAmount: prettyAmount,
 
                prettyDistance: prettyDistance,
+
+               formatDate: formatDate,
 
                prettyDate: prettyDate,
 
@@ -512,6 +544,9 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                 */
                prettyDistance: prettyDistance,
 
+               prettyDate: prettyDate,
+
+               formatDate: formatDate,
 
                currentYear: function() {
                    return (new Date()).getFullYear();
