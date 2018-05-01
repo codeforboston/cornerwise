@@ -1195,6 +1195,16 @@ a.brief-model:hover {
     flex-grow: 1;
 }
 
+#info .decision {
+    margin-bottom: 1em;
+    padding-left: 1em;
+}
+
+.approved {
+    color: #3c7c3d;
+    font-weight: bold;
+}
+
 #info .sidebar {
     padding-right: 3em;
     padding-top: 4em;
@@ -1258,10 +1268,6 @@ a.brief-model:hover {
     font-size: large;
     margin-bottom: 0.5em;
     margin-top: 0.5em;
-}
-
-.details .case-number {
-    display: none;
 }
 
 #info .document, #info .event {

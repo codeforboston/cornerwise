@@ -325,6 +325,10 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
             return this.collection.parcels.get(this.get("parcel"));
         },
 
+        isApproved: function() {
+            return (this.get("status") || "").match(/approved?/i);
+        },
+
         projectYearRange: function() {
             var project = this.getProject();
 

@@ -179,6 +179,13 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return formatDate("%-m/%-d/%y", d);
            }
 
+           function mediumDate(d, relDate) {
+               relDate = relDate || new Date();
+               d = (d instanceof Date) ? d : new Date(d);
+               var format = "%B %-d%S" + ((d.getYear() !== relDate.getYear()) ? ", %Y" : "");
+               return formatDate(format, d);
+           }
+
            /**
             * @param {string} s
             *
@@ -352,6 +359,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                formatDate: formatDate,
 
                shortDate: shortDate,
+
+               mediumDate: mediumDate,
 
                acresToSqFt: acresToSqFt
            };
@@ -555,6 +564,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                prettyDistance: prettyDistance,
 
                shortDate: shortDate,
+
+               mediumDate: mediumDate,
 
                formatDate: formatDate,
 
