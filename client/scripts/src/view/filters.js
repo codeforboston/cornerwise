@@ -30,7 +30,7 @@ define(
                  */
                 appState.onStateKeyChange("showmenu", function(show, oldValue) {
                     if (_.isString(show))
-                        this.toggleFiltersMenu(show == "1");
+                        this.toggleFiltersMenu(show === "1");
                 }, this, true);
 
                 appState.onStateKeyChange(
@@ -97,13 +97,13 @@ define(
                     var self = this;
                     if (!this._hideHandler) {
                         var handler = _.bind(function(e) {
-                            if (!$(e.target).closest("#map-container,#side-menu").length) {
+                            if (!$(e.target).closest("#side-menu").length) {
                                 appState.setHashKey("showmenu", "0", true);
                                 $(document.body).unbind("click", handler);
                                 delete self._hideHandler;
                             }
                         }, this);
-                        $(document.body).click(handler);
+                        $(document.body).mousedown(handler);
                         this._hideHandler = null;
                     }
                 }
