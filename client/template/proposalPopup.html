@@ -2,6 +2,17 @@
     <h4> <%- proposal.get("address") %> </h4>
     <h5> <%- proposal.get("region_name") %> </h5>
 
+    <% var complete = proposal.get("complete"), status = proposal.get("status")
+
+    if (complete) {
+    %>
+    <a class="complete-badge <%- status.match(/approved/i) ? 'proposal-approved' : '' %>"
+       title="Proposal <%- status %> on <%- shortDate(complete) %>">
+    </a>
+    <%
+    }
+    %>
+
     <div class="applicant">
         <%- proposal.getAttributeValue("applicant_name") %>
     </div>
