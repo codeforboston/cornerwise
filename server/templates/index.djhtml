@@ -22,7 +22,7 @@
          );
          {% endfor %}
          var _CornerwisePreload = {{ preload_data|escapejs }};
-         var SITE_CONFIG = {{ site_config|safe }};
+         var SITE_CONFIG = {% if site_config %}{{ site_config|escapejs }}{% else %}{}{% endif %};
         </script>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
         {% if production %}
