@@ -10,7 +10,6 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
 
                events: {
                    "click .sort-button": "changeSort",
-                   "click a.show-on-map": "showOnMap",
                    "scroll": "onScroll"
                },
 
@@ -151,23 +150,6 @@ define(["backbone", "jquery", "utils", "underscore", "appState"],
                hide: function() {
                    this.shouldShow = false;
                    this.$el.removeClass("showing");
-               },
-
-               showOnMap: function(e) {
-                   var modelId = e.target.getAttribute("data-model-id"),
-                       coll = this.collection;
-
-                   if (!modelId || !coll) return true;
-
-                   var model = coll.get(modelId);
-
-                   if (!model) return true;
-
-                   // This is still incredibly kludgy.
-                   coll.setSelection(modelId);
-                   appState.setHashKey("view", "main");
-                   appState.trigger("shouldFocus", [model], true);
-                   return false;
                }
            });
 

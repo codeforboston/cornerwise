@@ -121,6 +121,10 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
             return others ? others.split(";") : [];
         },
 
+        getPermalink: function() {
+            return "/proposal/view/" + this.id;
+        },
+
         getThumb: function() {
             var images = this.get("images");
 
@@ -319,6 +323,10 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
 
         getParcel: function() {
             return this.collection.parcels.get(this.get("parcel"));
+        },
+
+        isApproved: function() {
+            return (this.get("status") || "").match(/approved?/i);
         },
 
         projectYearRange: function() {

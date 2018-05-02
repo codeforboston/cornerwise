@@ -27,15 +27,29 @@ var address = proposal.get("address"); %>
     }
     } %>
 
-    <div class="case-number"><%- proposal.get("case_number") %></div>
+    <a class="case-number" title="Proposal Permalink" target="_blank" href="<%- proposal.getPermalink() %>">
+        <%- proposal.get("case_number") %>
+    </a>
+
     <%
     var notice = proposal.getAttributeValue("legal_notice");
 
     if (notice) {
     %>
     <div class="legal-notice"><%- notice %></div>
-    <% } %>
+    <% }
 
+    var complete = proposal.get("complete"), status = proposal.get("status");
+
+    if (complete) {
+    %>
+    <div class="decision">
+        <span class="<%- (proposal.isApproved())? 'approved' : 'denied' %>">
+            <%- status %>
+        </span> on
+        <%- mediumDate(complete) %>
+    </div>
+    <% } %>
     <div class="sidebar">
         <div class="main-thumb-container">
             <img class="main-thumb" src="<%= proposal.getImage() %>"/>
@@ -94,7 +108,7 @@ var address = proposal.get("address"); %>
             <% _.each(events, function(event) { %>
             <div>
                 <a class="event" href="/proposal/event/<%- event.id %>" target="_blank">
-                    <%- prettyDate(event.date) %> &mdash;
+                    <%- shortDate(event.date) %> &mdash;
                     <%- event.title %>
                 </a>
             </div>

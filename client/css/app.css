@@ -637,23 +637,45 @@ body.main .map-mode-button, body.list .list-mode-button {
 }
 
 div.proposal-marker {
-    background: url(../images/marker-orange.png) no-repeat;
+    background-color: #ef6f49;
+    background: radial-gradient( #e2a192, #ff5a29);
+    border: 1px solid transparent;
+    border-radius: 17px;
     background-size: contain;
-    padding-top: 5px;
     height: 30px;
     width: 30px;
     text-align: center;
 }
 
-div.marker-hovered {
-    background-image: url(../images/marker-orange-hover.png) !important;
+div.marker-selected, div.marker-hovered {
+    background: radial-gradient( #e2a192, #ff7c55);
+    border: 1px solid white;
 }
 
-div.marker-selected {
-/*     animation-duration: 1s;
-    animation-name: selection-highlight; */
-    background-image: url(../images/marker-orange-active.png) !important;
-    border-radius: 15px;
+div.proposal-complete {
+    --base-proposal-bg: radial-gradient(lime, green);
+    --active-proposal-bg: radial-gradient(lime, green);
+    background: center / contain no-repeat url(/static/images/ex-mark.png),
+                var(--base-proposal-bg);
+}
+
+div.proposal-complete.proposal-approved {
+    background: center / contain no-repeat url(/static/images/check-mark.png),
+                var(--base-proposal-bg);
+}
+
+div.proposal-complete.marker-hovered,
+div.proposal-complete.marker-selected
+{
+    background: center / contain no-repeat url(/static/images/ex-mark.png),
+                var(--active-proposal-bg);
+}
+
+div.proposal-complete.proposal-approved.marker-hovered,
+div.proposal-complete.proposal-approved.marker-selected
+{
+    background: center / contain no-repeat url(/static/images/check-mark.png),
+                var(--active-proposal-bg);
 }
 
 div.leaflet-marker.zoomed-proposal-marker {
@@ -1171,6 +1193,16 @@ a.brief-model:hover {
     flex-grow: 1;
 }
 
+#info .decision {
+    margin-bottom: 1em;
+    padding-left: 1em;
+}
+
+.approved {
+    color: #3c7c3d;
+    font-weight: bold;
+}
+
 #info .sidebar {
     padding-right: 3em;
     padding-top: 4em;
@@ -1234,10 +1266,6 @@ a.brief-model:hover {
     font-size: large;
     margin-bottom: 0.5em;
     margin-top: 0.5em;
-}
-
-.details .case-number {
-    display: none;
 }
 
 #info .document, #info .event {
@@ -1334,6 +1362,20 @@ a.thumb-link:hover {
 .leaflet-popup h5 {
     font-size: larger;
     margin-bottom: 0.5em;
+}
+
+.popup-contents .complete-badge {
+    background: center / contain no-repeat url(/static/images/ex-mark.png);
+
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    right: 35px;;
+    top: 5px;
+}
+
+.complete-badge.proposal-approved {
+    background: center / contain no-repeat url(/static/images/check-mark.png);
 }
 
 .proposal-info-popup .main-thumb-container {
@@ -1874,6 +1916,10 @@ body.subscribe-mode .leaflet-marker-icon
 {
     opacity: 0.6;
     pointer-events: none;
+}
+
+body.subscribe-mode .parcel-polygon {
+    opacity: 0.4;
 }
 
 body.choosing-radius .ref-marker {

@@ -24,8 +24,7 @@
          {% if preload_data %}
          var _CornerwisePreload = {{ preload_data|escapejs }};
          {% endif %}
-
-         var SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}null{% endif %};
+         var SITE_CONFIG = {% if site_config %}{{ site_config|escapejs }}{% else %}{}{% endif %};
         </script>
         {% if production %}
             <link rel="stylesheet" href="/static/build/{{ css_filename }}" type="text/css" media="screen" />

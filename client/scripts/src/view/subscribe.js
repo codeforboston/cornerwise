@@ -4,8 +4,13 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                initialize: function(options) {
                    this.options = options;
                    this.mapView = options.mapView;
+                   this._pointRadiusSubscription = !!(options.maxRadius);
 
                    this.listenTo(options.refLocation, "change", this.onRefChanged);
+
+                   if (this._pointRadiusSubscription) {
+                       $("#subscribe").hide();
+                   }
                },
 
                events: {
@@ -23,6 +28,10 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                },
 
                onRefChanged: function(refLocation) {
+                   if (this._pointRadiusSubscription && refLocation.changed.setMethod &&
+                       refLocation.changed.setMethod !== "auto") {
+                       $("#subscribe").show();
+                   }
                    if (this._radiusCircle) {
                        this._radiusCircle.setLatLng(refLocation.getPoint());
                    }
@@ -41,7 +50,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                    this.showSubscriptionForm();
                    this.removeCircle();
 
-                   if (opts.maxRadius) {
+                   if (this._pointRadiusSubscription) {
                        if (!opts.minRadius ||
                            opts.minRadius === opts.maxRadius) {
                            var radius = opts.minRadius * 0.3048,

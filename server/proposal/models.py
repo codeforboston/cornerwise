@@ -12,11 +12,32 @@ from django.utils import dateparse
 
 import json
 import pickle
+import pytz
 from urllib import request
 import utils
 
 import jsonschema
 import pytz
+
+
+RegionTimeZones = {
+    "somerville, ma": "US/Eastern",
+    "cambridge, ma": "US/Eastern",
+}
+
+
+def region_tz(region_name):
+    return pytz.timezone(RegionTimeZones.get(region_name.lower()), "US/Eastern")
+
+
+def localize_dt(dt: datetime, region_name=None):
+    tz = region_tz(region_name)
+    return tz.normalize(dt) if dt.tzinfo else tz.localize(dt)
+
+
+def local_now(region_name=None):
+    tz = region_tz(region_name)
+    return tz.normalize(pytz.utc.localize(datetime.utcnow()))
 
 
 class ProposalManager(models.Manager):
@@ -95,15 +116,12 @@ class Proposal(models.Model):
     description = models.TextField(default="")
     source = models.URLField(
         null=True, help_text="The data source for the proposal.")
-    status = models.CharField(max_length=64)
+    status = models.CharField(max_length=64, db_index=True)
 
     # A proposal can be associated with a Project:
     project = models.ForeignKey("project.Project", blank=True, null=True,
                                 on_delete=models.PROTECT)
-    # A misnomer; if True, indicates that the planning board has issued a
-    # ruling (approval or disapproval). Does not actually reflect whether the
-    # proposed changes are done.
-    complete = models.BooleanField(default=False)
+    complete = models.DateTimeField(null=True)
     importer = models.ForeignKey("proposal.Importer", blank=True,
                                  null=True, on_delete=models.SET_NULL)
 
@@ -309,6 +327,7 @@ class Event(models.Model):
     proposals = models.ManyToManyField(
         Proposal, related_name="events", related_query_name="event")
     minutes = models.URLField(blank=True)
+    agenda_url = models.URLField(blank=True)
 
     objects = EventManager()
 
@@ -318,6 +337,15 @@ class Event(models.Model):
     def __str__(self):
         datestr = self.date.strftime("%b %d, %Y")
         return f"{self.title}, {datestr}, {self.region_name}"
+
+    @property
+    def local_start(self):
+        return localize_dt(self.date, self.region_name)
+
+    @property
+    def local_end(self):
+        if self.duration:
+            return localize_dt(self.date + self.duration, self.region_name)
 
     def to_json_dict(self):
         d = model_to_dict(self, exclude=["created", "proposals"])
@@ -329,11 +357,11 @@ class Event(models.Model):
         event_dict should have the following fields:
         - title (str) - Name of the event
         - description (str)
-        - date (datetime with local timezone) - When will the event occur?
+        - start (datetime with local timezone) - When will the event occur?
+        - duration (timedelta, optional) - how long will the event last?
         - cases - A list of case numbers
         - region_name
-        - duration (timedelta, optional) - how long will the event last?
-        - agenda_url (string, optional)
+        - documents (string, optional)
         """
         start = dateparse.parse_datetime(event_dict["start"])
         kwargs = {"title": event_dict["title"],
@@ -342,12 +370,20 @@ class Event(models.Model):
         try:
             event = cls.objects.get(**kwargs)
         except cls.DoesNotExist:
-            kwargs["minutes"] = event_dict.get("agenda_url", "")
             event = cls(**kwargs)
 
+        # TODO Perform actual processing on Event documents
+        for doc in event_dict.get("documents", []):
+            if re.search(r"\bagenda\b", doc["title"], re.I):
+                event.agenda_url = doc["url"]
+            elif re.search(r"\bminutes\b", doc["title"], re.I):
+                event.minutes = doc["url"]
+
         event.date = start
-        event.minutes = event_dict.get("agenda_url", "")
-        event.duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
+
+        duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
+        if duration:
+            event.duration = duration
 
         event.save()
 

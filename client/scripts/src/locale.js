@@ -5,7 +5,8 @@ define([],
                           "Thursday", "Friday", "Saturday"],
                monthNames: ["January", "February", "March", "April", "May",
                             "June", "July", "August", "September", "October",
-                            "November", "December"]
+                            "November", "December"],
+               amPM: ["am", "pm"]
            };
            return US;
        });

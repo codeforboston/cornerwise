@@ -29,4 +29,5 @@ client/css/font
 /client/app.js
 /server/celerybeat-schedule
 /client/css/app.build.css
+build/
 /docker-support/nginx.env

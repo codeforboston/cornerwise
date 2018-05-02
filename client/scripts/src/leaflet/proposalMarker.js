@@ -1,5 +1,5 @@
-define(["lib/leaflet", "view/proposalPopup", "underscore"],
-       function(L, ProposalPopupView, _) {
+define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
+       function(L, ProposalPopupView, _, $u) {
            function projectTypeIcon(p) {
                var cat = p.category.replace(/[&.]+/g, "")
                        .replace(/[\s-]+/g, "_")
@@ -8,16 +8,16 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
            }
 
            function getBadgeClassName(proposal) {
-               var isHovered = proposal.get("_hovered"),
-                   isSelected = proposal.get("_selected"),
-                   project = proposal.getProject();
+               var attrs = proposal.attributes,
+                   approved = (attrs.status||"").match(/^approved$/i);
 
-               return [
-                   "proposal-marker",
-                   isHovered ? "marker-hovered" : "",
-                   isSelected ? "marker-selected" : "",
-                   project ? "project-marker" : ""
-               ].join(" ");
+               return $u.classNames({
+                   "marker-hovered": attrs._hovered,
+                   "marker-selected": attrs._selected,
+                   "proposal-complete": attrs.complete,
+                   "proposal-approved": approved,
+                   "project-marker": proposal.getProject()
+               }, "proposal-marker");
            }
 
            function getBadge(proposal) {
@@ -98,7 +98,8 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                                L.popup({className: "proposal-info-popup",
                                         minWidth: 300,
                                         maxWidth: 300,
-                                        autoPan: false});
+                                        autoPan: false,
+                                        handleCloseEvent: _.bind(this.onPopupCloseButton, this)});
                            popup.setContent(view.render().el);
 
                            this.bindPopup(popup);
@@ -107,6 +108,12 @@ define(["lib/leaflet", "view/proposalPopup", "underscore"],
                    } else {
                        this.closePopup().unbindPopup();
                    }
+               },
+
+               onPopupCloseButton: function(e) {
+                   var proposal = this.proposal;
+                   proposal.collection.removeFromSelection(proposal.id);
+                   L.DomEvent.stop(e);
                },
 
                setZoomed: function(n) {

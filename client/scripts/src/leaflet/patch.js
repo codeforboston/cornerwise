@@ -21,4 +21,13 @@ define(["lib/leaflet"], function(L) {
         setPosition.call(this, pos);
         this.options.offset = offset;
 	  };
+
+    var onCloseButtonClick = L.Popup.prototype._onCloseButtonClick;
+    L.Popup.prototype._onCloseButtonClick = function(e) {
+        if (this.options.handleCloseEvent) {
+            return this.options.handleCloseEvent(e);
+        } else {
+            return onCloseButtonClick.apply(this, arguments);
+        }
+    };
 });
