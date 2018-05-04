@@ -11,7 +11,7 @@
              if (window._onPlacesReady) onPlacesReady();
          }
 
-         var ResponseMessages = [];
+         ResponseMessages = [];
          {% for message in messages %}
          ResponseMessages.push(
              {% templatetag openbrace %}
@@ -21,8 +21,8 @@
              {% templatetag closebrace %}
          );
          {% endfor %}
-         var _CornerwisePreload = {{ preload_data|escapejs }};
-         var SITE_CONFIG = {% if site_config %}{{ site_config|escapejs }}{% else %}{}{% endif %};
+         _CornerwisePreload = {{ preload_data|safe }};
+         SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}{}{% endif %};
         </script>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
         {% if production %}

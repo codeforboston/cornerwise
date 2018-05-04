@@ -77,6 +77,9 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             }
         ],
 
+        // Specify the ids of regions to include
+        includeRegions: null,
+
         regionStyle: {
             weight: 3,
             color: "#4fb8f7",
