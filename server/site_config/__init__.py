@@ -8,10 +8,11 @@ class SiteMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        host = request.GET.get("_hostname", request.META.get("HTTP_HOST", "")).lower()
-        host_config = HOSTNAMES.get(host)
+        host = request.GET.get("_hostname", request.META.get("HTTP_HOST")).lower()
+        host_config = HOSTNAMES.get(host, HOSTNAMES["default"])
         request.site_config = host_config
         request.site_hostname = host
+        request.site_name = host_config["hostname"]
 
         return self.get_response(request)
 
@@ -20,7 +21,8 @@ def context_processor(request):
     if request.site_config:
         js_config = request.site_config.get("js_config", {})
         context = {"site_config": json.dumps(js_config),
-                   "hostname": request.site_hostname}
+                   "hostname": request.site_hostname,
+                   "logo_text": request.site_config.get("logo_text")}
         context.update(request.site_config.get("extra_context", {}))
         return context
 
@@ -44,9 +46,15 @@ def find_site_configurations(path=None):
 
 
 def add_configuration(config, module, name):
-    config.setdefault("name", name)
+    hostnames = config.get("hostnames", [])
+    if not hostnames:
+        raise Exception(f"Site configuration '{name}' must have at least one hostname")
 
-    for hostname in config.get("hostnames", []):
+    config.setdefault("name", name)
+    # Default hostname:
+    config.setdefault("hostname", hostnames[0])
+
+    for hostname in hostnames:
         if hostname not in HOSTNAMES:
             HOSTNAMES[hostname] = config
             MODULES[hostname] = module
