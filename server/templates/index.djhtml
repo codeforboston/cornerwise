@@ -44,7 +44,7 @@
         <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning board,urban planning,zoning,zoning board" />
         <!-- OpenGraph -->
         <meta name="og:type" content="website" />
-        <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
+        <meta name="og:image" content="/static/images/cornerwise-logo.png" />
 
         <body>
             <noscript>
@@ -74,7 +74,11 @@
                 <div id="event-eater" class="_setview" data-goto="main"></div>
 
                 <div id="search-banner" class="overlay">
-                    <a href="#view=about" id="logo" class="_setview"></a>
+                    <a href="#view=about" id="logo" class="_setview">
+                        {% if logo_text %}
+                            <span class="logo-text">{{ logo_text }}</span>
+                        {% endif %}
+                    </a>
                     <a href="#showmenu=1" id="hamburger" data-replace-history="1"></a>
                     <div class="overlay-contents">
                         <h3>What&rsquo;s Being Built Near&hellip;</h3>

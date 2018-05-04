@@ -221,7 +221,7 @@ span.icon {
 }
 
 #logo {
-    background: url(/static/images/cornerwise-beta-logo.png);
+    background: url(/static/images/cornerwise-logo.png);
     background-color: #222;
     background-position: 50% 0%;
     background-repeat: no-repeat;
@@ -234,6 +234,21 @@ span.icon {
     height: 50px;
     z-index: 2;
     transition: width 0.2s linear, top 0.2s linear, left 0.2s linear;
+}
+
+#logo .logo-text {
+    color: #c03233;
+    font-size: small;
+    text-transform: uppercase;
+    position: relative;
+    right: -2em;
+    top: 2em;
+    text-align: right;
+}
+
+body.nointro #logo .logo-text {
+    position: relative;
+    top: 1.6em;
 }
 
 .overlay {
@@ -2387,5 +2402,9 @@ body.choosing-radius .ref-marker {
         background-size: contain;
         height: 40px;
         width: 40px;
+    }
+
+    body.nointro #logo .logo-text {
+        display: none;
     }
 }
