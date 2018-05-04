@@ -272,6 +272,8 @@ define(
                 });
 
                 $("#filter-region").html(html.join(""));
+
+                $("#region-filter-group").toggle(regions.length !== 1);
             },
 
             updateLotSize: function(e) {
