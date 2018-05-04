@@ -227,6 +227,8 @@ class Subscription(models.Model):
             if "r" in q:
                 self.center = point_from_str(q["center"])
                 self.radius = float(q["r"])
+            else:
+                raise ValidationError(f"Missing query parameter: r")
         if "region_name" in q:
             self.region_name = q["region_name"]
 
