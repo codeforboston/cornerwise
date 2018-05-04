@@ -97,12 +97,6 @@ DATABASES = {
         "HOST": POSTGRES_HOST,
         "NAME": "postgres",
         "USER": "postgres"
-    },
-    "migrate": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": POSTGRES_HOST,
-        "NAME": "postgres",
-        "USER": "postgres"
     }
 }
 
