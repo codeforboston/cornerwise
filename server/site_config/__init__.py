@@ -8,7 +8,7 @@ class SiteMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        host = request.GET.get("_hostname", request.META["HTTP_HOST"]).lower()
+        host = request.GET.get("_hostname", request.META.get("HTTP_HOST", "")).lower()
         host_config = HOSTNAMES.get(host)
         request.site_config = host_config
         request.site_hostname = host
