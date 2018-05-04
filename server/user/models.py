@@ -38,6 +38,11 @@ class UserProfile(models.Model):
     language = models.CharField(max_length=10, default="en")
     nickname = models.CharField(max_length=128,
                                 help_text="What do you prefer to be called?")
+    site_name = models.CharField(
+        help_text="The site where the user created his/her account",
+        db_index=True,
+        max_length=64,
+        default="somerville.cornerwise.org")
 
     @property
     def addressal(self):
@@ -143,6 +148,11 @@ class Subscription(models.Model):
         db_index=True,
         max_length=128,
         null=True)
+    site_name = models.CharField(
+        help_text="The site where the user created his/her account",
+        db_index=True,
+        max_length=64,
+        default="somerville.cornerwise.org")
 
     # Implementation of text search requires more design work
     # text_search = models.CharField(
