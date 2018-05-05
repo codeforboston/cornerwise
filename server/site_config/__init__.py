@@ -35,18 +35,22 @@ def site_config(site_name) -> SiteConfig:
     return HOSTNAMES.get(site_name, DEFAULT_CONFIG)
 
 
+by_hostname = site_config
+
+
+def by_name(name: str) -> SiteConfig:
+    return NAMES.get(name.lower())
+
+
 def base_url(site_name):
     return site_config(site_name).hostname
 
-
-def site_module(site_name):
-    return MODULES.get(site_name, DEFAULT_CONFIG)
 
 
 # Maps module hostnames to their configuration.
 DEFAULT_CONFIG = None
 HOSTNAMES = {}
-MODULES = {}
+NAMES = {}
 
 
 def find_site_configurations(path=None):
@@ -65,6 +69,8 @@ def add_configuration(config: SiteConfig, module, name):
     if not hostnames:
         raise Exception(f"Site configuration '{name}' must have at least one hostname")
 
+    NAMES[config.name.lower()] = config
+
     for hostname in hostnames:
         if hostname == "default":
             global DEFAULT_CONFIG
@@ -72,7 +78,6 @@ def add_configuration(config: SiteConfig, module, name):
             continue
         if hostname not in HOSTNAMES:
             HOSTNAMES[hostname] = config
-            MODULES[hostname] = module
         else:
             return False
 

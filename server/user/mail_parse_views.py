@@ -13,10 +13,12 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-def send_fowarded_message(users, from_email, text):
+def send_fowarded_message(users, from_email, text, to_username="admin"):
     emails = [user.email for user in users]
     mail.send(emails, "Cornerwise: Received Message",
-              "forwarded", {"text": text, "from": from_email})
+              "forwarded", {"text": text,
+                            "from": from_email,
+                            "to_username": to_username})
 
 
 def forward_mail(username, from_email, text):
@@ -25,7 +27,7 @@ def forward_mail(username, from_email, text):
             users = User.objects.filter(is_staff=True)
         else:
             users = [User.objects.get(username=username, is_staff=True)]
-        send_fowarded_message(users, from_email, text)
+        send_fowarded_message(users, from_email, text, username)
         return HttpResponse(f"OK: Forwarded email to {len(users)} user(s)", status=200)
     except User.DoesNotExist:
         logger.warn(f"Received email for unknown user '{username}' from {from_email}")
@@ -49,8 +51,8 @@ def mail_inbound(request):
         from_email = request.POST["from"]
         body = request.POST["text"]
 
-        (username, _) = request.POST["to"].split("@", 1)
-        if username.lower() not in {"cornerwise", "noreply"}:
+        (username, hostname) = request.POST["to"].lower().split("@", 1)
+        if username not in {"cornerwise", "noreply"}:
             return forward_mail(username, from_email, body)
 
         user = User.objects.get(email=from_email)
