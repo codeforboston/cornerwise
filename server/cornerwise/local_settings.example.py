@@ -34,6 +34,11 @@ SOCRATA_APP_SECRET = ""
 
 # Used for sending email:
 SENDGRID_API_KEY = ""
+# This key is used as a soft verification that messages posted to the inbound
+# mail endpoint originate from a trusted source. On SendGrid, you must
+# configure the URL to include a 'key' query param matching this value:
+# '?key=SENDGRIDPARSEKEY'
+SENDGRID_PARSE_KEY = ""
 
 SENDGRID_TEMPLATES = {
     # Dictionary of human readable names to SendGrid template ids:

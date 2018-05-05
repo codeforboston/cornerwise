@@ -1,3 +1,5 @@
 Forwarded message from {{ from }}:
-
+<hr/>
+<div style="white-space: pre-wrap">
 {{ text }}
+</div>
