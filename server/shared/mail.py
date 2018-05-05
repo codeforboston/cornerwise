@@ -41,6 +41,7 @@ def send(email, subject, template_name=None, context=None, content=None,
                   for addr in email]
 
     mail = EmailMultiAlternatives(
+        from_email=f"{settings.EMAIL_NAME} <{settings.EMAIL_ADDRESS}>",
         subject=subject,
         body="",
         to=recipients
@@ -67,7 +68,7 @@ def render_email_body(template_name, context=None):
     except TemplateDoesNotExist:
         text = strip_tags(html)
 
-    html = toronado.from_string(html)
+    html = toronado.from_string(html).decode("utf-8")
 
     return (html, text)
 
@@ -81,6 +82,7 @@ def send_template(email, subject, template_name, context=None, logger=logger):
     logger.info("Generated email: %s", html)
 
     mail = EmailMultiAlternatives(
+        from_email=f"{settings.EMAIL_NAME} <{settings.EMAIL_ADDRESS}>",
         subject=subject,
         body=text,
         to=(email if isinstance(email, list) else [email]))
