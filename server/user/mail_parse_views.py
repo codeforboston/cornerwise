@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import logging
 
+import site_config
 from shared import mail
 from . import tasks
 
@@ -26,7 +27,12 @@ def forward_mail(username, from_email, text):
         if username == "admin":
             users = User.objects.filter(is_staff=True)
         else:
-            users = [User.objects.get(username=username, is_staff=True)]
+            config = site_config.by_name(username)
+            if config and config.group_name:
+                users = User.objects.filter(groups__name=config.group_name)\
+                                    .exclude(email="")
+            else:
+                users = [User.objects.get(username=username, is_staff=True)]
         send_fowarded_message(users, from_email, text, username)
         return HttpResponse(f"OK: Forwarded email to {len(users)} user(s)", status=200)
     except User.DoesNotExist:

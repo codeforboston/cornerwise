@@ -1,4 +1,6 @@
 class SiteConfig():
+    # If set, Users in the Group will receive forwarded messages.
+    group_name = None
     hostnames = []
     extra_context = {}
     js_config = {}

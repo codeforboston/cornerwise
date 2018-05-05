@@ -5,6 +5,7 @@ from site_config.site_config import SiteConfig
 
 
 class SomervilleConfig(SiteConfig):
+    group_name = "somervillema"
     hostnames = ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
     name = "Somerville"
 
