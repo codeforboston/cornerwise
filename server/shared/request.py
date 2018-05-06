@@ -122,8 +122,7 @@ def make_redirect_response(redirect_to_url=None, redirect_to=None):
 
                 messages.add_message(req, level, message, extra_tags=extra_tags)
             except ErrorResponse as err:
-                data = err.data
-                messages.error(req, error.data["error"])
+                messages.error(req, err.data["error"])
 
             url = redirect_to_url or \
                   (redirect_to and reverse(redirect_to)) or \
