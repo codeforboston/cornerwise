@@ -54,15 +54,19 @@ HOSTNAMES = {}
 NAMES = {}
 
 
-def find_site_configurations(path=None):
-    if not path:
-        path = os.path.dirname(__file__)
+def find_site_configurations():
+    from django.conf import settings
 
-    for module_finder, name, _ in pkgutil.iter_modules([path]):
-        site_module = module_finder.find_module(name)\
-                                   .load_module(name)
+    from importlib import import_module
+
+    configs = getattr(settings, "SITE_CONFIG", {})
+    for name, config_dict in configs.items():
+        site_module = import_module(config_dict["module"])
         config = getattr(site_module, "SITE_CONFIG", None)
-        config and add_configuration(config, site_module, name)
+        if config:
+            if "hostnames" in config_dict:
+                config.hostnames = config_dict["hostnames"]
+            add_configuration(config, site_module, name)
 
 
 def add_configuration(config: SiteConfig, module, name):

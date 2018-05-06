@@ -256,15 +256,27 @@ AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
 
 IMPORTER_SCHEMA = "https://raw.githubusercontent.com/codeforboston/cornerwise/master/docs/scraper-schema.json"
 
+# Site config
+SITE_CONFIG = {
+    "somerville": {
+        "module": "site_config.somervillema",
+        "hostnames": ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
+    }
+}
+
+USE_SITE_HOSTNAMES = True
+
 # Load select environment variables into settings:
 for envvar in [
         "GOOGLE_API_KEY", "GOOGLE_BROWSER_API_KEY",
         "GOOGLE_STREET_VIEW_SECRET", "GEOCODER", "ARCGIS_CLIENT_ID",
         "ARCGIS_CLIENT_SECRET", "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET",
         "SENDGRID_API_KEY", "FOURSQUARE_CLIENT", "FOURSQUARE_SECRET",
-        "SENDGRID_PARSE_KEY"
+        "SENDGRID_PARSE_KEY", "SERVER_DOMAIN", "USE_SITE_HOSTNAMES"
 ]:
-    globals()[envvar] = os.environ.get(envvar, "")
+    env_val = os.environ.get(envvar, "")
+    if env_val or envvar not in globals():
+        globals()[envvar] = env_val
 
 
 def get_admins():
