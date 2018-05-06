@@ -15,7 +15,9 @@ class SomervilleConfig(SiteConfig):
     }
 
     js_config = {
-        "includeRegions": ["somerville"]
+        "includeRegions": ["somerville"],
+        "minSubscribeRadius": 300,
+        "maxSubscribeRadius": 300,
     }
 
     max_subscription_radius = D(ft=300)

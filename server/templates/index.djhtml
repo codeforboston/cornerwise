@@ -40,8 +40,7 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <meta name="description" content="Find and explore current and future zoning projects near you - City of Somerville."/>
-        <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning board,urban planning,zoning,zoning board" />
+        <meta name="description" content="{{ site_description }}"/>
         <!-- OpenGraph -->
         <meta name="og:type" content="website" />
         <meta name="og:image" content="/static/images/cornerwise-logo.png" />
