@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.urls import reverse
-from django.utils import dateparse
+from django.utils import dateparse, timezone
 
 import json
 import pickle
@@ -111,7 +111,7 @@ class Proposal(models.Model):
     modified = models.DateTimeField(auto_now=True)
     # The last time that the source was changed:
     updated = models.DateTimeField(db_index=True)
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(default=timezone.now)
     summary = models.CharField(max_length=1024, default="")
     description = models.TextField(default="")
     source = models.URLField(
@@ -317,7 +317,7 @@ class Event(models.Model):
     Meeting or hearing associated with a proposal.
     """
     title = models.CharField(max_length=256, db_index=True)
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(default=timezone.now)
     date = models.DateTimeField(db_index=True)
     duration = models.DurationField(null=True)
     location = models.CharField(
@@ -420,7 +420,7 @@ class Document(models.Model):
                             help_text="comma-separated list of tags",
                             blank=True)
     # Record when the document was first observed:
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(default=timezone.now)
 
     # If available: when the document was published.
     published = models.DateTimeField(null=True)
@@ -510,7 +510,7 @@ class Image(models.Model):
     # in the UI.
     priority = models.IntegerField(default=0, db_index=True)
     source = models.CharField(max_length=64, default="document")
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(default=timezone.now)
 
     class Meta:
         unique_together = (("proposal", "image"))
@@ -541,7 +541,7 @@ class Changeset(models.Model):
     """
     proposal = models.ForeignKey(Proposal, related_name="changesets",
                                  on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(default=timezone.now)
     change_blob = models.BinaryField()
 
     @classmethod
