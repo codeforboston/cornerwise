@@ -4,6 +4,7 @@ from utils import make_absolute_url
 
 register = template.Library()
 
-@register.filter
-def absolutize(url):
-    return make_absolute_url(url)
+
+@register.simple_tag(takes_context=True)
+def absolutize(context, url):
+    return make_absolute_url(url, context["hostname"])

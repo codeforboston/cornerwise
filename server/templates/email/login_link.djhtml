@@ -5,6 +5,6 @@
 </p>
 
 <p>
-    <a href="{{ user.profile.manage_url|absolutize }}">Click here</a> to manage
+    <a href="{% absolutize user.profile.manage_url %}">Click here</a> to manage
     your Cornerwise settings.
 </p>
