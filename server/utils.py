@@ -7,8 +7,11 @@ from collections import deque
 import typing
 from urllib import parse, request
 
+from django.conf import settings
 from django.contrib.gis.geos import GeometryCollection, GEOSGeometry, Point
 from django.contrib.gis.geos.polygon import Polygon
+
+from site_config import base_url
 
 
 def normalize(s):
@@ -117,8 +120,7 @@ def add_params(url, extra_params):
     :returns: (str) URL including new parameters
     """
     parsed = parse.urlparse(url)._asdict()
-    params = parse.parse_qs(parsed["query"])
-    params.update(extra_params)
+    params = parse.parse_qsl(parsed["query"]) + list(extra_params.items())
     parsed["query"] = parse.urlencode(params, doseq=True)
 
     return parse.urlunparse(parse.ParseResult(**parsed))
@@ -261,3 +263,26 @@ def read_n_from_end(fp: typing.IO, n,
     fp.seek(start_pos, 0)
 
     return lines
+
+
+def make_absolute_url(path, site_name=None):
+    if re.match(r"^https?://", path):
+        return path
+
+    if site_name:
+        if settings.USE_SITE_HOSTNAMES:
+            hostname = base_url(site_name)
+        else:
+            parts = parse.urlsplit(path)
+            site_hostname = base_url()
+            path = f"{parts.path}?{parts.query}" + \
+                (f"&" if parts.query else "") + \
+                f"_hostname={site_hostname}"
+    else:
+        hostname = settings.SERVER_DOMAIN
+
+    return parse.urljoin(f"https://{hostname}", path + f"?_hostname={hostname}")
+
+
+def today():
+    return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)

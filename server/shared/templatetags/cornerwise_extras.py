@@ -1,6 +1,6 @@
 from django import template
 
-from cornerwise.utils import make_absolute_url
+from utils import make_absolute_url
 
 register = template.Library()
 
