@@ -252,6 +252,9 @@ def user_notification_form(request, form_data=None):
     else:
         context["form"] = UserNotificationForm(form_data)
 
+    if request.site_config and request.site_config.region_name:
+        context["form"].fields["region"].initial = request.site_config.region_name
+
     context["title"] = "Send User Notifications"
 
     return render(request, "admin/notify_users.djhtml",
