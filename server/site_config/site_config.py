@@ -2,9 +2,17 @@ class SiteConfig():
     # If set, Users in the Group will receive forwarded messages.
     group_name = None
     hostnames = []
+    # Extra template context
     extra_context = {}
     js_config = {}
     name = ""
+    region_name = ""
+
+    query_defaults = {}
+
+    @property
+    def proposal_query_defaults(self):
+        return self.query_defaults
 
     @property
     def hostname(self):

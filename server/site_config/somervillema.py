@@ -8,6 +8,7 @@ class SomervilleConfig(SiteConfig):
     group_name = "somervillema"
     hostnames = ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
     name = "Somerville"
+    region_name = "Somerville, MA"
 
     extra_context = {
         "site_description": ("Find and explore current and future zoning "

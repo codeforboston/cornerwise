@@ -298,5 +298,6 @@ if not IS_PRODUCTION:
         print("Could not find local_settings.py -- ", err)
 
 
-if globals().get("SENDGRID_API_KEY"):
+if SENDGRID_API_KEY:
     EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False

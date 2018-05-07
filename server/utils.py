@@ -152,7 +152,9 @@ def point_from_str(coord):
     if isinstance(coord, Point):
         return coord
 
-    return Point(float(coord[1]), float(coord[0]), srid=4326)
+    coords = coord.split(",")
+
+    return Point(float(coords[1]), float(coords[0]), srid=4326)
 
 
 def _geometry(feat):
@@ -268,6 +270,8 @@ def read_n_from_end(fp: typing.IO, n,
 def make_absolute_url(path, site_name=None):
     if re.match(r"^https?://", path):
         return path
+
+
 
     if site_name:
         if settings.USE_SITE_HOSTNAMES:
