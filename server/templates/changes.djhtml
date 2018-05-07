@@ -7,7 +7,7 @@
             <div class="thumb">
                 {% with image=proposal.images.0 %}
                     {% if image and image.thumb %}
-                        <img src="{{ image.thumb|absolutize }}"/>
+                        <img src="{% absolutize image.thumb %}"/>
                     {% endif %}
                 {% endwith %}
             </div>

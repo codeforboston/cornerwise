@@ -1,3 +1,7 @@
 Forwarded message from {{ from }}:
 
+----------
 {{ text }}
+----------
+
+Message sent to {{ to_username }}

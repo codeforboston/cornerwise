@@ -11,7 +11,7 @@
              if (window._onPlacesReady) onPlacesReady();
          }
 
-         var ResponseMessages = [];
+         ResponseMessages = [];
          {% for message in messages %}
          ResponseMessages.push(
              {% templatetag openbrace %}
@@ -21,10 +21,8 @@
              {% templatetag closebrace %}
          );
          {% endfor %}
-         {% if preload_data %}
-         var _CornerwisePreload = {{ preload_data|escapejs }};
-         {% endif %}
-         var SITE_CONFIG = {% if site_config %}{{ site_config|escapejs }}{% else %}{}{% endif %};
+         _CornerwisePreload = {{ preload_data|safe }};
+         SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}{}{% endif %};
         </script>
         {% if production %}
             <link rel="stylesheet" href="/static/build/{{ css_filename }}" type="text/css" media="screen" />
@@ -38,11 +36,10 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <meta name="description" content="Find and explore current and future zoning projects near you - City of Somerville."/>
-        <meta name="keywords" content="civic engagement,code for america,code for boston, permit, zoning,development,planning,planning board,urban planning,zoning,zoning board" />
+        <meta name="description" content="{{ site_description }}"/>
         <!-- OpenGraph -->
         <meta name="og:type" content="website" />
-        <meta name="og:image" content="/static/images/cornerwise-beta-logo.png" />
+        <meta name="og:image" content="/static/images/cornerwise-logo.png" />
 
         <body>
             <noscript>
@@ -72,7 +69,11 @@
                 <div id="event-eater" class="_setview" data-goto="main"></div>
 
                 <div id="search-banner" class="overlay">
-                    <a href="#view=about" id="logo" class="_setview"></a>
+                    <a href="#view=about" id="logo" class="_setview">
+                        {% if logo_text %}
+                            <span class="logo-text">{{ logo_text }}</span>
+                        {% endif %}
+                    </a>
                     <a href="#showmenu=1" id="hamburger" data-replace-history="1"></a>
                     <div class="overlay-contents">
                         <h3>What&rsquo;s Being Built Near&hellip;</h3>
@@ -183,43 +184,49 @@
 
                         <!-- <input id="filter-text" type="text" placeholder="Find text" /> -->
 
-                        <label for="filter-status" class="select">
-                            Application Status
-                        </label>
-                        <select id="filter-status" class="filter-selector">
-                            <option value="active">Pending</option>
-                            <option value="closed">Complete</option>
-                            <option value="all">All</option>
-                        </select>
+                        <div id="stat-filter-group" class="filter-group">
+                            <label for="filter-status" class="select">
+                                Application Status
+                            </label>
+                            <select id="filter-status" class="filter-selector">
+                                <option value="active">Pending</option>
+                                <option value="closed">Complete</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
 
 
                         <!-- <input id="filter-private" type="checkbox" checked/> Private -->
                         <!-- &mdash; -->
                         <!-- <input id="filter-public" type="checkbox" checked/> Public -->
 
-                        <label for="filter-lotsize" class="select">
-                            Lot Size
-                        </label>
-                        <select id="filter-lotsize" name="property_size" class="filter-selector">
-                            <option value="">(all)</option>
-                            <option value="small">
-                                &lt; {{ lot_sizes.small }} ft&#xb2;
-                            </option>
-                            <option value="medium">
-                                {{ lot_sizes.small }}&ndash;{{ lot_sizes.medium }} ft&#xb2;
-                            </option>
-                            <option value="large">
-                                &gt; {{ lot_sizes.medium }} ft&#xb2;
-                            </option>
-                        </select>
+                        <div id="lotsize-filter-group" class="filter-group">
+                            <label for="filter-lotsize" class="select">
+                                Lot Size
+                            </label>
+                            <select id="filter-lotsize" name="property_size" class="filter-selector">
+                                <option value="">(all)</option>
+                                <option value="small">
+                                    &lt; {{ lot_sizes.small }} ft&#xb2;
+                                </option>
+                                <option value="medium">
+                                    {{ lot_sizes.small }}&ndash;{{ lot_sizes.medium }} ft&#xb2;
+                                </option>
+                                <option value="large">
+                                    &gt; {{ lot_sizes.medium }} ft&#xb2;
+                                </option>
+                            </select>
+                        </div>
 
-                        <label for="filter-region" class="select">
-                            Region
-                        </label>
-                        <select id="filter-region" name="region" class="filter-selector">
-                            <option value="somerville" selected>Somerville, MA</option>
-                            <option value="cambridge">Cambridge, MA</option>
-                        </select>
+                        <div id="region-filter-group" class="filter-group">
+                            <label for="filter-region" class="select">
+                                Region
+                            </label>
+                            <select id="filter-region" name="region" class="filter-selector">
+                                <option value="somerville" selected>Somerville, MA</option>
+                                <option value="cambridge">Cambridge, MA</option>
+                            </select>
+                        </div>
                     </div>
 
                     <hr class="group-separator _mobile-only" />

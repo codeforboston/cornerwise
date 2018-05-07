@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from utils import bounds_from_box, point_from_str, prettify_lat, prettify_long
 from .changes import summarize_subscription_updates
+from site_config import site_config
 
 from base64 import b64encode
 from datetime import datetime
@@ -20,7 +21,7 @@ def make_token():
     """
     :returns: (str) an authentication token
     """
-    return b64encode(os.urandom(32))
+    return b64encode(os.urandom(32)).decode("utf-8")
 
 
 class UserProfile(models.Model):
@@ -38,6 +39,11 @@ class UserProfile(models.Model):
     language = models.CharField(max_length=10, default="en")
     nickname = models.CharField(max_length=128,
                                 help_text="What do you prefer to be called?")
+    site_name = models.CharField(
+        help_text="The site where the user created his/her account",
+        db_index=True,
+        max_length=64,
+        default="somerville.cornerwise.org")
 
     @property
     def addressal(self):
@@ -143,6 +149,11 @@ class Subscription(models.Model):
         db_index=True,
         max_length=128,
         null=True)
+    site_name = models.CharField(
+        help_text="The site where the user created his/her account",
+        db_index=True,
+        max_length=64,
+        default="somerville.cornerwise.org")
 
     # Implementation of text search requires more design work
     # text_search = models.CharField(
@@ -211,16 +222,31 @@ class Subscription(models.Model):
         return q
 
     def set_validated_query(self, q):
+        """
+        Ensures that the query, a dict, is well-formed and valid.
+        """
         if "box" in q:
             self.box = bounds_from_box(q["box"])
         elif "center" in q:
             if "r" in q:
                 self.center = point_from_str(q["center"])
                 self.radius = float(q["r"])
+            else:
+                raise ValidationError(f"Missing query parameter: r")
         if "region_name" in q:
             self.region_name = q["region_name"]
 
+        q = self.validate_site_settings(q)
+
         self.query = pickle.dumps(q)
+
+    def validate_site_settings(self, q):
+        if not self.site_name:
+            return q
+
+        config = site_config(self.site_name)
+
+        return config.validate_subscription_query(self, q)
 
     @staticmethod
     def readable_query(query):

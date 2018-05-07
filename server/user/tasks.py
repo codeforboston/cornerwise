@@ -17,14 +17,14 @@ User = get_user_model()
 
 
 @shared_task(bind=True)
-def send_user_updates(self, user_id, updates):
+def send_user_updates(self, sub_id, updates):
     """Sends an email to a user containing a summary of recent updates to a
     Subscription.
 
     """
-    user = User.objects.get(pk=user_id)
+    sub = Subscription.objects.get(pk=user_id)
     send_mail(user.email, "Cornerwise: New Updates", "updates",
-              mail.updates_context(user, updates),
+              mail.updates_context(sub, updates),
               logger=get_logger(self))
 
 
@@ -36,7 +36,7 @@ def send_subscription_updates(subscription, since):
         since = subscription.last_notified
     updates = subscription.summarize_updates(since)
     if updates["total"]:
-        send_user_updates.delay(subscription.user_id, updates)
+        send_user_updates.delay(subscription.pk, updates)
         return True
 
 

@@ -1,6 +1,5 @@
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
-# from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate, get_user_model
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -56,18 +55,20 @@ def subscribe(request):
             is_active=False,
             username=email,
             email=email, )
-        profile = UserProfile.objects.create(user=user, language=lang)
+        profile = UserProfile.objects.create(user=user, language=lang,
+                                             site_name=request.site_name)
         profile.save()
         new_user = True
 
     try:
-        subscription = Subscription()
+        subscription = Subscription(site_name=request.site_name)
         subscription.set_validated_query(query_dict)
         subscription.user = user
         subscription.save()
-    # except ValidationError as verr:
-    #     raise ErrorResponse("")
+    except (ValidationError, ValueError) as exc:
+        raise ErrorResponse("Invalid subscription", {"exception": exc.args})
     except Exception as exc:
+        logging.exception("Error while creating subscription:")
         raise ErrorResponse("Invalid subscription", {"exception": exc.args})
 
     return {
@@ -162,7 +163,7 @@ def change_log(request):
     if "sub_id" in request.GET:
         sub = get_object_or_404(Subscription, pk=request.GET["sub_id"])
     else:
-        sub = Subscription(created=since)
+        sub = Subscription(created=since, site_name=request.site_name)
         sub.set_validated_query(params)
 
     html, _text = render_email_body(

@@ -1,3 +1,13 @@
+:root {
+    --active-proposal-bg: radial-gradient( #e2a192, #ff7c55);
+    --proposal-bg: radial-gradient( #e2a192, #ff5a29);
+    --completed-proposal-bg: radial-gradient(lime, green);
+    --active-completed-proposal-bg: radial-gradient(lime, green);
+
+    --action-color: #3c7c3d;
+    --active-action-color: #7fc87a;
+}
+
 body {
     font-family: proxima-nova, "Avenir", sans-serif;
     height: 100%;
@@ -211,7 +221,7 @@ span.icon {
 }
 
 #logo {
-    background: url(../images/cornerwise-beta-logo.png);
+    background: url(../images/cornerwise-logo.png);
     background-color: #222;
     background-position: 50% 0%;
     background-repeat: no-repeat;
@@ -224,6 +234,21 @@ span.icon {
     height: 50px;
     z-index: 2;
     transition: width 0.2s linear, top 0.2s linear, left 0.2s linear;
+}
+
+#logo .logo-text {
+    color: #c03233;
+    font-size: small;
+    text-transform: uppercase;
+    position: relative;
+    right: -2em;
+    top: 2em;
+    text-align: right;
+}
+
+body.nointro #logo .logo-text {
+    position: relative;
+    top: 1.6em;
 }
 
 .overlay {
@@ -356,7 +381,7 @@ button.big, a.big {
 }
 
 button.big-submit, a.big-submit {
-    background-color: #3c7c3d;
+    background-color: var(--action-color);
     border: none;
     color: white;
     margin-top: 1.5em;
@@ -628,17 +653,17 @@ body.main .map-mode-button, body.list .list-mode-button {
 }
 
 .action {
-    background-color: #3c7c3d;
+    background-color: var(--action-color);
 }
 
 .action:hover {
-    background-color: #7fc87a;
+    background-color: var(--active-action-color);
     text-decoration: none;
 }
 
 div.proposal-marker {
     background-color: #ef6f49;
-    background: radial-gradient( #e2a192, #ff5a29);
+    background: var(--proposal-bg);
     border: 1px solid transparent;
     border-radius: 17px;
     background-size: contain;
@@ -648,34 +673,32 @@ div.proposal-marker {
 }
 
 div.marker-selected, div.marker-hovered {
-    background: radial-gradient( #e2a192, #ff7c55);
+    background: --active-proposal-bg;
     border: 1px solid white;
 }
 
 div.proposal-complete {
-    --base-proposal-bg: radial-gradient(lime, green);
-    --active-proposal-bg: radial-gradient(lime, green);
     background: center / contain no-repeat url(/static/images/ex-mark.png),
-                var(--base-proposal-bg);
+                var(--completed-proposal-bg);
 }
 
 div.proposal-complete.proposal-approved {
     background: center / contain no-repeat url(/static/images/check-mark.png),
-                var(--base-proposal-bg);
+                var(--completed-proposal-bg);
 }
 
 div.proposal-complete.marker-hovered,
 div.proposal-complete.marker-selected
 {
     background: center / contain no-repeat url(/static/images/ex-mark.png),
-                var(--active-proposal-bg);
+                var(--active-completed-proposal-bg);
 }
 
 div.proposal-complete.proposal-approved.marker-hovered,
 div.proposal-complete.proposal-approved.marker-selected
 {
     background: center / contain no-repeat url(/static/images/check-mark.png),
-                var(--active-proposal-bg);
+                var(--active-completed-proposal-bg);
 }
 
 div.leaflet-marker.zoomed-proposal-marker {
@@ -686,17 +709,6 @@ div.zoomed-proposal-marker.marker-selected {
     background-color: white;
     background-image: none !important;
     border-color: #EE6C43;
-}
-
-@keyframes selection-highlight {
-    from {
-        background-color: goldenrod;
-        box-shadow: 0 0 10px 10px goldenrod;
-    }
-
-    to {
-        box-shadow: none;
-    }
 }
 
 img.project-type-badge {
@@ -1199,7 +1211,7 @@ a.brief-model:hover {
 }
 
 .approved {
-    color: #3c7c3d;
+    color: var(--action-color);
     font-weight: bold;
 }
 
@@ -1825,7 +1837,7 @@ body.nointro #side-menu.expanded {
     position: absolute;
     top: 0em;
     left: 0.5em;
-    color: #3c7c3d;
+    color: var(--action-color);
 }
 
 .menu-group {
@@ -1851,7 +1863,7 @@ select {
     background-color: transparent;
     background: url(../images/down-arrow.png) right / contain no-repeat;
     border-radius: 0;
-    color: #3c7c3d;
+    color: var(--action-color);
     display: block;
     appearance: none;
     width: 100%;
@@ -1931,7 +1943,7 @@ body.choosing-radius .ref-marker {
 }
 
 #subscribe {
-    background-color: #3c7c3d;
+    background-color: var(--action-color);
 }
 
 #subscribe .screen {
@@ -2390,5 +2402,9 @@ body.choosing-radius .ref-marker {
         background-size: contain;
         height: 40px;
         width: 40px;
+    }
+
+    body.nointro #logo .logo-text {
+        display: none;
     }
 }

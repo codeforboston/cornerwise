@@ -97,12 +97,6 @@ DATABASES = {
         "HOST": POSTGRES_HOST,
         "NAME": "postgres",
         "USER": "postgres"
-    },
-    "migrate": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": POSTGRES_HOST,
-        "NAME": "postgres",
-        "USER": "postgres"
     }
 }
 
@@ -276,13 +270,9 @@ SENDGRID_TEMPLATES = {
 LIMIT_SUBSCRIPTIONS = True
 
 MIN_ALERT_RADIUS = 50
-MAX_ALERT_RADIUS = 300
+MAX_ALERT_RADIUS = 10000
 
 # URL to use for generating minimap raster images for emails, etc.
-# MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
-#                "tile-provider=cartodb-light&"
-#                "sw-lat={swlat}&sw-lng={swlon}&"
-#                "ne-lat={nelat}&ne-lng={nelon}&clip=1")
 MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
                "tile-provider=cartodb-light&"
                "sw-lat={swlat}&sw-lng={swlon}&"
@@ -295,15 +285,27 @@ AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
 
 IMPORTER_SCHEMA = "https://raw.githubusercontent.com/codeforboston/cornerwise/master/docs/scraper-schema.json"
 
+# Site config
+SITE_CONFIG = {
+    "somerville": {
+        "module": "site_config.somervillema",
+        "hostnames": ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
+    }
+}
+
+USE_SITE_HOSTNAMES = True
+
 # Load select environment variables into settings:
 for envvar in [
         "GOOGLE_API_KEY", "GOOGLE_BROWSER_API_KEY",
         "GOOGLE_STREET_VIEW_SECRET", "GEOCODER", "ARCGIS_CLIENT_ID",
         "ARCGIS_CLIENT_SECRET", "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET",
         "SENDGRID_API_KEY", "FOURSQUARE_CLIENT", "FOURSQUARE_SECRET",
-        "SENDGRID_PARSE_KEY"
+        "SENDGRID_PARSE_KEY", "SERVER_DOMAIN", "USE_SITE_HOSTNAMES"
 ]:
-    globals()[envvar] = os.environ.get(envvar, "")
+    env_val = os.environ.get(envvar, "")
+    if env_val or envvar not in globals():
+        globals()[envvar] = env_val
 
 
 def get_admins():
@@ -329,5 +331,6 @@ if not IS_PRODUCTION:
         print("Could not find local_settings.py -- ", err)
 
 
-if globals().get("SENDGRID_API_KEY"):
+if SENDGRID_API_KEY:
     EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False

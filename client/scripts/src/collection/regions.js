@@ -1,5 +1,5 @@
-define(["backbone", "jquery", "underscore", "collection/selectable", "config"],
-       function(B, $, _, SelectableCollection, config) {
+define(["backbone", "jquery", "underscore", "collection/selectable", "utils", "config"],
+       function(B, $, _, SelectableCollection, $u, config) {
            var RegionModel = B.Model.extend({
                loadShape: function() {
                    var shape = this.get("shape");
@@ -22,9 +22,17 @@ define(["backbone", "jquery", "underscore", "collection/selectable", "config"],
                }
            });
 
-           var regions = _.map(config.regions, function(region) {
-               return new RegionModel(region);
-           });
+           var allowRegions = config.includeRegions,
+               filter = _.isArray(allowRegions) ? (function(region) {
+                   return _.contains(allowRegions, region.id);
+               }) : allowRegions;
+
+               regions = $u.keep(config.regions, function(region) {
+                   if (!filter || filter(region))
+                       return new RegionModel(region);
+
+                   return null;
+               });
 
            var RegionCollection = SelectableCollection.extend({
                selection: [config.regions[0].id],

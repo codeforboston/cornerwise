@@ -1,3 +1,7 @@
 Forwarded message from {{ from }}:
-
+<hr/>
+<div style="white-space: pre-wrap">
 {{ text }}
+</div>
+<hr/>
+Message sent to <strong>{{ to_username }}</strong>
