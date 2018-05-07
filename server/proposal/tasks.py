@@ -41,11 +41,16 @@ def document_processing_failed(task, exc, task_id, args, kwargs, einfo, ):
 
     """
     logger = get_logger(task)
-    doc = Document.objects.get(pk=args[0])
-    logger.warning(
-        "Processing for Document #%i (%s) failed repeatedly. Deleting.",
-        doc.pk, doc.url)
-    doc.delete()
+    if isinstance(exc, (DocumentDownloadException, DocumentDownloadFatalException)):
+        doc = Document.objects.get(pk=args[0])
+        logger.warning(
+            "Processing for Document #%i (%s) failed repeatedly. Deleting.",
+            doc.pk, doc.url)
+        doc.delete()
+    else:
+        logger.warning(
+            "Processing for Document #%i (%s) failed repeatedly",
+            doc.pk, doc.url)
 
 
 @shared_task
