@@ -11,7 +11,7 @@ class SiteMiddleware:
 
     def __call__(self, request):
         host = request.GET.get("_hostname", request.META.get("HTTP_HOST"))
-        if host: host = host.lower()
+        if host: host = host.casefold()
         host_config = HOSTNAMES.get(host, DEFAULT_CONFIG)
         request.site_config = host_config
         request.site_hostname = host

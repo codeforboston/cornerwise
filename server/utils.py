@@ -23,7 +23,7 @@ def normalize(s):
     s = re.sub(r"[',!@#$%^&*()-=[\]]+", "", s)
     s = re.sub(r"\s+", "_", s)
 
-    return s.lower()
+    return s.casefold()
 
 
 def extension(path):

@@ -57,7 +57,7 @@ def mail_inbound(request):
         from_email = request.POST["from"]
         body = request.POST["text"]
 
-        (username, hostname) = request.POST["to"].lower().split("@", 1)
+        (username, hostname) = request.POST["to"].casefold().split("@", 1)
         if username not in {"cornerwise", "noreply"}:
             return forward_mail(username, from_email, body)
 

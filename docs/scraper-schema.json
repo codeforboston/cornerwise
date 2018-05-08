@@ -29,7 +29,6 @@
             "type": "object",
             "required": [
                 "all_addresses",
-                "complete",
                 "case_number",
                 "updated_date"
             ],
@@ -85,8 +84,9 @@
                     "type": "string"
                 },
                 "complete": {
-                    "description": "Indicates whether the case is still pending review (false), or if it has been reviewed or withdrawn (true)",
-                    "type": "boolean"
+                    "description": "The date that this proposal was closed, whether for approval or denial.",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "decision": {
                     "type": "object",

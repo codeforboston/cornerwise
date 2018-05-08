@@ -44,11 +44,21 @@
 var notice = proposal.getAttributeValue("legal_notice");
 var applicant = proposal.getAttributeValue("applicant_name");
 var hearing = proposal.getAttributeValue("dates_of_public_hearing");
+var documents = proposal.get("documents") || [];
 
 if (notice) {
 %>
 <div class="legal-notice">
     <%= gloss(abridge(notice)) %>
+</div>
+<% } else { %>
+<div class="missing">
+    There's currently no description available.
+    <% if (documents.length) { %>
+        See the attached documents for more details
+    <% } else { %>
+        More information will become available once more documents are uploaded.
+    <% } %>
 </div>
 <% } %>
 
@@ -72,7 +82,6 @@ if (notice) {
 <a class=" more" href="#view=info&ps=<%- proposal.id %>">More&hellip;</a>
 
 <%
-var documents = proposal.get("documents");
 if (documents && documents.length) { %>
 <div class="documents" >
     <% _.each(documents, function(doc) { %>
