@@ -43,7 +43,7 @@ start_celery() {
            --detach \
            --logfile=/var/log/celery/beat.log
     mkdir -p /var/run/celery /var/log/celery
-    celery multi start 2 -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
+    celery multi start ${CELERY_WORKER_COUNT:-2} -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
            --pidfile=/var/run/celery/%n.pid \
            --logfile=/var/log/celery/%n.log
 }
@@ -110,13 +110,13 @@ on_usr1() {
 
 on_sighup() {
     # Gunicorn reloads the configuration and restarts the workers:
-    kill -SIGHUP $server_pid
+    kill -s SIGHUP $server_pid
 }
 
 on_usr2() {
     echo "Received SIGUSR2"
-    kill -SIGUSR2 $server_pid
-    kill -SIGWINCH $server_pid
+    kill -s SIGUSR2 $server_pid
+    kill -s SIGWINCH $server_pid
 }
 
 if [ "$APP_MODE" = "production" ]; then

@@ -41,8 +41,8 @@ def document_processing_failed(task, exc, task_id, args, kwargs, einfo, ):
 
     """
     logger = get_logger(task)
+    doc = Document.objects.get(pk=args[0])
     if isinstance(exc, (DocumentDownloadException, DocumentDownloadFatalException)):
-        doc = Document.objects.get(pk=args[0])
         logger.warning(
             "Processing for Document #%i (%s) failed repeatedly. Deleting.",
             doc.pk, doc.url)

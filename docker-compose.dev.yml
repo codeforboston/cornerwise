@@ -24,7 +24,7 @@ services:
       - nginx_vhost:/etc/nginx/vhost.d
       - nginx_html:/usr/share/nginx/html
       - nginx_certs:/etc/nginx/certs
-      - ./docker-support/cornerwise.org_location.conf:/etc/nginx/vhost.d/dev.cornerwise.org_location
+      - ./docker-support/cornerwise.org_location.conf:/etc/nginx/vhost.d/default_location
       - static_resources:/static
   nginx-gen:
     image: jwilder/docker-gen
@@ -37,7 +37,7 @@ services:
       - nginx_html:/usr/share/nginx/html
       - nginx_certs:/etc/nginx/certs
       - ./docker-support/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
-      - ./docker-support/dev.cornerwise.org_location.conf:/etc/nginx/vhost.d/default_location
+      - ./docker-support/cornerwise.org_location.conf:/etc/nginx/vhost.d/default_location
       - /var/run/docker.sock:/tmp/docker.sock:ro
   nginx-letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
@@ -78,13 +78,14 @@ services:
       - ./docker-support/nginx.env
     environment:
       APP_MODE: "production"
-      ALLOWED_HOSTS: "*"
+      ALLOWED_HOSTS: ".cornerwise.org,.somervillema.gov"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
       VIRTUAL_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov"
       LETSENCRYPT_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
       LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
+      CELERY_WORKER_COUNT: 1
     expose:
       - "3000"
     links:
