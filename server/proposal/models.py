@@ -16,6 +16,7 @@ import pytz
 from urllib import request
 import utils
 
+from dateutil.parser import parse as date_parse
 import jsonschema
 import pytz
 
@@ -84,8 +85,8 @@ def make_property_map():
             ("description", _g("description")),
             ("source", _g("source")),
             ("region_name", _g("region_name")),
-            ("updated", utils.make_fn_chain(_G("updated_date"), dateparse.parse_datetime)),
-            ("complete", _G("complete")),
+            ("updated", utils.make_fn_chain(_G("updated_date"), dateparse.parse_datetime), max),
+            ("complete", _g("complete")),
             ("status", _g("status"))]
 
 
@@ -172,15 +173,17 @@ class Proposal(models.Model):
         if changed:
             prop_changes = []
 
-        for prop, fn in property_map:
+        for prop, fn, *choose in property_map:
             old_val = changed and getattr(self, prop)
             try:
                 val = fn(p_dict)
                 if isinstance(val, datetime):
-                    if val.tzinfo:
-                        val = tz.normalize(val)
+                    val = tz.normalize(val) if val.tzinfo else tz.localize(val)
                 if val is not UNSET:
-                    if changed:
+                    if old_val and choose:
+                        val = choose[0](old_val, val)
+
+                    if changed and val != val:
                         prop_changes.append({
                             "name": prop,
                             "new": val,
@@ -210,18 +213,27 @@ class Proposal(models.Model):
         if changed:
             attr_changes = []
 
-        attributes = p_dict.get("attributes")
+        attributes = p_dict.get("attributes", [])
         if hasattr(attributes, "items"):
             attributes = attributes.items()
         for attr_name, attr_val in attributes:
             try:
+                date_value = date_parse(attr_val)
+            except (ValueError, TypeError) as _:
+                date_value = None
+            try:
                 handle = utils.normalize(attr_name)
                 attr = self.attributes.get(handle=handle)
                 old_val = attr.text_value
+                attr.date_value = date_value
+                attr.text_value = attr_val
+                attr.published = updated
+                attr.save()
             except Attribute.DoesNotExist:
                 self.attributes.create(
                     name=attr_name,
                     handle=handle,
+                    date_value=date_value,
                     text_value=attr_val,
                     published=updated)
                 old_val = None
@@ -241,6 +253,9 @@ class Proposal(models.Model):
             return changeset
 
     def create_documents(self, docs):
+        return list(self.do_create_documents(docs))
+
+    def do_create_documents(self, docs):
         for doc_link in docs:
             taglist = ",".join(doc_link.get("tags"))
             field = doc_link.get("tags", [None])[0]
@@ -250,12 +265,16 @@ class Proposal(models.Model):
                     doc.tags = taglist
                 if doc_link.get("title"):
                     doc.title = doc_link["title"]
+                doc.save()
+                yield (False, doc)
             except Document.DoesNotExist:
-                self.documents.create(url=doc_link["url"],
-                                      title=doc_link["title"],
-                                      field=field,
-                                      tags=taglist,
-                                      published=self.updated)
+                doc = self.documents.create(url=doc_link["url"],
+                                            title=doc_link["title"],
+                                            field=field,
+                                            tags=taglist,
+                                            published=self.updated)
+                yield (True, doc)
+
 
     def create_events(self, event_dicts):
         return list(map(Event.make_event, event_dicts)) if event_dicts else []
