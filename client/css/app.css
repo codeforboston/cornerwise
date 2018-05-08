@@ -1035,6 +1035,11 @@ a.glossary:hover {
     margin-bottom: 1em;
 }
 
+.missing {
+    color: #aaa;
+    font-style: italic;
+}
+
 .proposal-info > * {
     padding: 0.2em;
 }
