@@ -176,7 +176,7 @@ def filter_lines(lines, strip_lines=STRIP_LINES):
 
 
 STAFF_REPORT_SECTION_MATCHERS = [
-    make_matcher(r"PLANNING STAFF REPORT", fn=str.lower),
+    make_matcher(r"(PLANNING|ZBA) STAFF REPORT", fn=str.lower),
     make_matcher(r"^[IVX]+\. ([^a-z]+)(\n|$)", group=1, fn=str.lower)
 ]
 
@@ -284,7 +284,9 @@ def staff_report_properties(doc):
     props = {}
 
     props.update(somerville_properties(sections["header"]))
-    props.update(somerville_properties(sections["planning staff report"]))
+    for section in sections:
+        if "staff report" in section:
+            props.update(somerville_properties(sections[section]))
 
     # TODO: Consider using the legal notice as summary
 
@@ -316,6 +318,12 @@ def decision_properties(doc):
     if "properties" in sections:
         attrs.update(somerville_properties(sections["properties"]))
 
+    if "header" in sections:
+        header_props = somerville_properties(sections["header"])
+        copy_header_attrs = ["Decision", "Date of Decision", "Date Filed with City Clerk"]
+        attrs.update(
+            {k: header_props[k] for k in copy_header_attrs if k in header_props})
+
     if "Date" in attrs:
         del attrs["Date"]
     if "Site" in attrs:
@@ -329,11 +337,9 @@ def decision_properties(doc):
         attrs["Votes to Approve"] = concur if approved else dissent
         attrs["Votes to Deny"] = dissent if approved else concur
 
-        if "Decision" in attrs:
-            attrs["Decision Text"] = attrs["Decision"]
-
-        attrs["Decision"] = decision.title()
-        props["complete"] = True
+        if "Decision" not in attrs:
+            attrs["Decision"] = decision.title()
+        props["complete"] = doc.published.isoformat()
         props["status"] = "Approved" if approved else "Denied"
 
     return props, attrs
@@ -353,7 +359,7 @@ def get_properties(doc):
 
     all_props["attributes"] = all_attributes
 
-    if "updated_date" in all_props:
-        all_props["updated_date"] = doc.published
+    if "updated_date" not in all_props:
+        all_props["updated_date"] = doc.published.isoformat()
 
     return all_props
