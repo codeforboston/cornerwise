@@ -37,7 +37,7 @@ services:
       - nginx_html:/usr/share/nginx/html
       - nginx_certs:/etc/nginx/certs
       - ./docker-support/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
-      - ./docker-support/dev.cornerwise.org_location.conf:/etc/nginx/vhost.d/dev.cornerwise.org_location
+      - ./docker-support/dev.cornerwise.org_location.conf:/etc/nginx/vhost.d/default_location
       - /var/run/docker.sock:/tmp/docker.sock:ro
   nginx-letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
@@ -82,8 +82,8 @@ services:
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
-      VIRTUAL_HOST: "dev.cornerwise.org"
-      LETSENCRYPT_HOST: "dev.cornerwise.org"
+      VIRTUAL_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov"
+      LETSENCRYPT_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
       LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
     expose:
       - "3000"
