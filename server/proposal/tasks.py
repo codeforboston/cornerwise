@@ -3,11 +3,12 @@ and their related models (Documents, Images).
 """
 from datetime import datetime, timedelta
 import os
-import pytz
 import re
 from typing import Iterable
 
 import celery
+import jsonschema
+import pytz
 
 from django.conf import settings
 from django.core.cache import cache
@@ -373,9 +374,13 @@ def create_proposals(dicts, logger=task_logger):
             logger.error("%s", exc)
 
 
-def create_events(dicts):
+def create_events(dicts, logger=task_logger):
     for event_dict in dicts:
-        yield Event.objects.make_event(event_dict)
+        yield Event.make_event(event_dict)
+
+
+def create_projects(dicts):
+    pass
 
 
 @adapt
@@ -415,9 +420,13 @@ def fetch_proposals(since: datetime=None,
         try:
             found = importer.updated_since(importer_since)
             importer.validate(found)
-        except Exception as err:
+        except jsonschema.exceptions.ValidationError as err:
             logger.warning("Importer %s failed schema validation!\n%s",
                            importer.name, err)
+            continue
+        except Exception as err:
+            logger.exception("An unknown error occurred while running importer %s",
+                             importer.name)
             continue
 
         found_description = ", ".join(f"{len(v)} {k}" for k, v in found.items())
@@ -425,8 +434,7 @@ def fetch_proposals(since: datetime=None,
 
         for k in found:
             for item in found[k]:
-                if "region_name" not in item:
-                    item["region_name"] = importer.region_name
+                item.setdefault("region_name", importer.region_name)
                 item["importer"] = importer
                 all_found[k].append(item)
 
@@ -435,8 +443,10 @@ def fetch_proposals(since: datetime=None,
 
     add_locations(all_found["cases"], Geocoder)
 
-    proposal_ids = [p.id for p in create_proposals(all_found["cases"], logger)]
-    return proposal_ids
+    return {
+        "proposal_ids": [p.id for p in create_proposals(all_found["cases"], logger)],
+        "event_ids": [event.id for event in create_events(all_found["events"], logger)]
+    }
 
 
 @shared_task(bind=True)

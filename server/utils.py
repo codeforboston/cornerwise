@@ -213,6 +213,7 @@ def add_locations(dicts, geocoder,
             continue
         d["location"] = {"lat": location["location"]["lat"],
                          "long": location["location"]["lng"],
+                         "formatted": location["formatted_name"],
                          "score": location["properties"].get("score"),
                          "google_place_id": location["properties"].get("place_id")}
 
