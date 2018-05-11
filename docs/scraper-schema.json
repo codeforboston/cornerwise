@@ -37,6 +37,12 @@
                     "type": "string",
                     "description": "A case number for this case, unique within the scope of this region."
                 },
+                "case_numbers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "first_hearing_date": {
                     "description": "The date and time of the first public hearing",
                     "type": "string",
