@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% load humanize i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block extrahead %}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content %}
+    <h2>Run Counts</h2>
+    {% for node, stats in nodes.items %}
+        <div class="node-stats">
+            <h2>Worker: {{ node }}</h2>
+            <strong>Started:</strong> {{ stats.up_since|naturaltime }}
+            <h3>Run counts (since last reboot):</h3>
+            <ul>
+                {% for task, count in stats.tasks.items %}
+                    <li>
+                        <strong>{{ task }}</strong>: {{ count }}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if stats.active %}
+                <h3>Running:</h3>
+                <ul>
+                    {% for task in stats.active %}
+                        <li>{{ task }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if stats.scheduled %}
+                <h3>Scheduled:</h3>
+                <ul>
+                    {% for task in stats.scheduled %}
+                        <li>{{ task }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

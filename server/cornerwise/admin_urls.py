@@ -8,6 +8,7 @@ urlpatterns = [
     path("celery_log", admin_views.celery_logs, name="celery_log"),
     path("task_logs", admin_views.task_logs, name="task_logs"),
     path("task_failures", admin_views.task_failure_logs, name="task_failures"),
+    path("task_stats", admin_views.task_stats, name="task_stats"),
     path("recent_tasks", admin_views.recent_tasks, name="recent_tasks"),
     path("message", user_notification_form,
          name="notification_form"),

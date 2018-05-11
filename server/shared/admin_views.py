@@ -1,8 +1,13 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import (permission_required,
                                             user_passes_test)
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
+
+from celery.task import control
 
 import redis_utils as red
 from utils import read_n_from_end
@@ -68,6 +73,29 @@ def recent_tasks(request):
     context.update({"tasks": recent_task_info,
                     "title": "Recent Tasks"})
     return render(request, "admin/recent_tasks.djhtml", context)
+
+
+def uptime_to_date(seconds):
+    return timezone.now() - timedelta(seconds=seconds)
+
+
+@can_view_logs
+def task_stats(request):
+    celery_inspect = control.inspect()
+    stats = celery_inspect.stats()
+    active = celery_inspect.active()
+    scheduled = celery_inspect.scheduled()
+
+    context = cornerwise_admin.each_context(request)
+    context.update({"nodes": {node: {"tasks": nodestats["total"],
+                                     "active": active[node],
+                                     "scheduled": scheduled[node],
+                                     "up_since": uptime_to_date(int(nodestats["clock"]))
+    }
+                             for node, nodestats in stats.items()},
+                    "title": "Celery Stats"})
+
+    return render(request, "admin/task_stats.djhtml", context)
 
 
 @is_superuser

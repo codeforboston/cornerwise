@@ -103,6 +103,9 @@
             <li>
                 <a href="{% url 'celery_log' %}">Celery Log</a>
             </li>
+            <li>
+                <a href="{% url 'task_stats' %}">Celery Stats</a>
+            </li>
         </ul>
         {% endif %}
         {% if user.is_superuser %}
