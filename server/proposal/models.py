@@ -347,6 +347,8 @@ class Event(models.Model):
         Proposal, related_name="events", related_query_name="event")
     minutes = models.URLField(blank=True)
     agenda_url = models.URLField(blank=True)
+    importer = models.ForeignKey("proposal.Importer", blank=True,
+                                 null=True, on_delete=models.SET_NULL)
 
     objects = EventManager()
 
@@ -381,6 +383,8 @@ class Event(models.Model):
         - cases - A list of case numbers
         - region_name
         - documents (string, optional)
+
+        - importer (Importer )
         """
         start = dateparse.parse_datetime(event_dict["start"])
         kwargs = {"title": event_dict["title"],
@@ -399,6 +403,7 @@ class Event(models.Model):
                 event.minutes = doc["url"]
 
         event.date = start
+        event.importer = event_dict.get("importer")
 
         duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
         if duration:
@@ -408,7 +413,8 @@ class Event(models.Model):
 
         for case_number in event_dict.get("cases", []):
             try:
-                proposal = Proposal.objects.get(case_number=case_number)
+                proposal = Proposal.objects.get(case_number=case_number,
+                                                region_name=event_dict["region_name"])
                 event.proposals.add(proposal)
             except Proposal.DoesNotExist:
                 continue
@@ -649,7 +655,7 @@ class Importer(models.Model):
         params = when and {"when": when.strftime("%Y%m%d")}
         return utils.add_params(self.url, params)
 
-    def updated_since(self, when):
+    def updated_since(self, when=None):
         with request.urlopen(self.url_for(when)) as u:
             return json.load(u)
 

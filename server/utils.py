@@ -119,6 +119,9 @@ def add_params(url, extra_params):
 
     :returns: (str) URL including new parameters
     """
+    if not extra_params:
+        return url
+
     parsed = parse.urlparse(url)._asdict()
     params = parse.parse_qsl(parsed["query"]) + list(extra_params.items())
     parsed["query"] = parse.urlencode(params, doseq=True)
