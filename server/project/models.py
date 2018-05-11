@@ -51,15 +51,13 @@ class Project(models.Model):
         if d["address"]:
             # Future notes: Each location associated with a project could
             # potentially have its own description.
-            project.proposal_set.create(case_number="CP " + str(project.pk),
+            project.proposal_set.create(case_number=f"CP {project.pk}",
                                         summary=d["description"],
                                         source="",
                                         updated=d["updated"],
                                         region_name=d["region_name"],
                                         address=d["address"],
                                         status=d["status"],
-                                        # TODO: Rethink this.
-                                        complete=False,
                                         location=Point(d["long"], d["lat"]))
             project.address = d["address"]
             project.location = Point(d["long"], d["lat"])
