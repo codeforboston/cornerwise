@@ -156,6 +156,11 @@
                 "title": {
                     "type": "string"
                 },
+                "url": {
+                    "type": "string",
+                    "pattern": "uri",
+                    "description": "Link to a webpage containing additional information about this event."
+                },
                 "description": {
                     "type": "string"
                 },
@@ -178,7 +183,7 @@
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": ""
+                        "description": "Canonical case numbers for the proposals related to this event"
                     }
                 },
                 "documents": {
@@ -186,6 +191,12 @@
                     "items": {
                         "$ref": "#/definitions/document"
                     }
+                },
+                "cost": {
+                    "type": "string"
+                },
+                "accessibility": {
+                    "type": "string"
                 }
             }
         },
