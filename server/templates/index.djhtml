@@ -265,9 +265,9 @@
 
                     <div class="menu-group _mobile-only" >
                         <div class="group-contents">
-                            <a href="#view=about&showmenu=0" class="_setview">About Cornerwise</a>
+                            <a href="#view=about&showmenu=0">About Cornerwise</a>
                             <br/>
-                            <a href="#" >Contact</a>
+                            <a href="#view=contact&showmenu=0">Contact</a>
                         </div>
                     </div>
                 </div>
