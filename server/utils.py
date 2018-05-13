@@ -9,6 +9,7 @@ from urllib import parse, request
 
 from django.conf import settings
 from django.contrib.gis.geos import GeometryCollection, GEOSGeometry, Point
+from django.contrib.gis.measure import D
 from django.contrib.gis.geos.polygon import Polygon
 
 from site_config import base_url
@@ -160,6 +161,18 @@ def point_from_str(coord):
     return Point(float(coords[1]), float(coords[0]), srid=4326)
 
 
+units_patt = "(" + "|".join(D.UNITS.keys()) + ")"
+distance_patt = rf"(\d+(?:\.\d+)?)\s*{units_patt}?\s*$"
+def distance_from_str(distance):
+    if isinstance(distance, str):
+        m = re.match(distance_patt, distance)
+        if m:
+            unit = m.group(2) or "m"
+            return D(**{unit: float(m.group(1))})
+    else:
+        return D(m=float(distance))
+
+
 def _geometry(feat):
     if feat["type"] == "FeatureCollection":
         return sum([_geometry(f) for f in feat["features"]], [])
@@ -275,21 +288,21 @@ def make_absolute_url(path, site_name=None):
     if re.match(r"^https?://", path):
         return path
 
-
-
+    scheme = "https"
     if site_name:
         if settings.USE_SITE_HOSTNAMES:
             hostname = base_url(site_name)
         else:
             parts = parse.urlsplit(path)
-            site_hostname = base_url()
-            path = f"{parts.path}?{parts.query}" + \
-                (f"&" if parts.query else "") + \
-                f"_hostname={site_hostname}"
+            hostname = settings.SERVER_DOMAIN
+            site_hostname = base_url(site_name)
+            path = add_params(path, {"_hostname": site_hostname})
     else:
         hostname = settings.SERVER_DOMAIN
 
-    return parse.urljoin(f"https://{hostname}", path + f"?_hostname={hostname}")
+    if hostname == "localhost":
+        scheme = "http"
+    return parse.urljoin(f"{scheme}://{hostname}", path)
 
 
 def today():

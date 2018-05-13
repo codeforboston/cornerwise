@@ -7,7 +7,7 @@ from django.db.models import F, Q
 from django.urls import reverse
 from django.utils import timezone
 
-from utils import bounds_from_box, point_from_str, prettify_lat, prettify_long
+from utils import bounds_from_box, distance_from_str, point_from_str, prettify_lat, prettify_long
 from .changes import summarize_subscription_updates
 from site_config import site_config
 
@@ -230,7 +230,7 @@ class Subscription(models.Model):
         elif "center" in q:
             if "r" in q:
                 self.center = point_from_str(q["center"])
-                self.radius = float(q["r"])
+                self.radius = distance_from_str(q["r"])
             else:
                 raise ValidationError(f"Missing query parameter: r")
         if "region_name" in q:
