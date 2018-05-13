@@ -13,7 +13,7 @@ from django.utils.html import strip_tags
 logger = logging.getLogger(__name__)
 
 
-def send(email, subject, template_name=None, context=None, content=None,
+def send(recipients, subject, template_name=None, context=None, content=None,
          template_id=None, logger=logger):
     """
     Send an email to an email address. If there is a SendGrid template id
@@ -33,12 +33,10 @@ def send(email, subject, template_name=None, context=None, content=None,
             template_id = settings.SENDGRID_TEMPLATES[template_name]
         except KeyError:
             # Fall back to Django templates
-            return send_template(email, subject, template_name, context)
+            return send_template(recipients, subject, template_name, context)
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items()}
-    email = email if isinstance(email, list) else [email]
-    recipients = [{"email": addr} if isinstance(addr, str) else addr
-                  for addr in email]
+    recipients = recipients if isinstance(recipients, list) else [recipients]
 
     mail = EmailMultiAlternatives(
         from_email=f"{settings.EMAIL_NAME} <{settings.EMAIL_ADDRESS}>",
@@ -48,12 +46,13 @@ def send(email, subject, template_name=None, context=None, content=None,
     )
     mail.template_id = template_id
     mail.substitutions = substitutions
+    mail.alternatives = [(" ", "text/html")]
 
     if content:
         mail.attach_alternative(content, "text/html")
 
     mail.send()
-    logger.info("Email sent to {}".format(email))
+    logger.info("Email sent to %s", recipients)
     return True
 
 

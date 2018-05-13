@@ -1,14 +1,19 @@
 from datetime import datetime
 
-from utils import make_absolute_url
 from django.template.loader import render_to_string
 
+from django.contrib.auth import get_user_model
+
+from utils import make_absolute_url
+
 from . import changes, models
+
+User = get_user_model()
 
 
 def _make_user_context(subscription, context):
     user = subscription.user
-    context = context.copy() if context else {}
+    # context = context.copy() if context else {}
 
     try:
         context["user"] = user.profile.addressal or user.email
@@ -17,6 +22,7 @@ def _make_user_context(subscription, context):
     except models.UserProfile.DoesNotExist:
         context["user"] = "Unknown"
         context["unsubscribe_url"] = make_absolute_url("/", subscription.site_name)
+    context["site_root"] = make_absolute_url("/", subscription.site_name)
     return context
 
 
@@ -45,24 +51,17 @@ def welcome_context(subscription):
     if not profile.token:
         profile.generate_token()
 
-    return {
+    return _make_user_context(subscription, {
         "confirm_url": make_absolute_url(profile.confirm_url, subscription.site_name),
         "minimap_src": subscription.minimap_src,
         "subscription-preview": subscription.minimap_src
-    }
+    })
 
 
-def confirmation_context(subscription):
-    try:
-        user = subscription.user
-        existing = user.subscriptions.filter(active=True).exists()
-    except IndexError:
-        # The user doesn't have any active Subscriptions
-        return
+def replace_subscription_context(subscription, existing):
     return {
         "subscription": subscription.readable_description,
         "minimap_src": subscription.minimap_src,
-        "subscription-preview": subscription.minimap_src,
         "old_minimap_src": existing.minimap_src,
         "confirmation_link": make_absolute_url(subscription.confirm_url, subscription.site_name)
     }
@@ -72,4 +71,7 @@ def staff_notification_context(subscription, title, message):
     """
     Context passed to templates for messages sent by staff.
     """
-    return _make_user_context(subscription, {"message": message, "title": title})
+    return _make_user_context(subscription, {
+        "message": message,
+        "title": title
+    })

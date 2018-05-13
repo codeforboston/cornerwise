@@ -40,10 +40,10 @@ def send_subscription_updates(subscription, since):
         return True
 
 
-def send_user_welcome(user, subscription):
+def send_user_welcome(subscription):
     """Send an email requesting confirmation of a subscription.
     """
-    send_mail(user.email, "Cornerwise: Welcome", "welcome",
+    send_mail(subscription.user.email, "Cornerwise: Welcome", "welcome",
               mail.welcome_context(subscription))
 
 
@@ -67,7 +67,7 @@ def send_subscription_confirmation_email(self, sub_id):
     user = subscription.user
 
     if not user.is_active:
-        send_user_welcome(user, subscription)
+        send_user_welcome(subscription)
         return
 
     # Revisit this if we turn off subscription limiting. We'd still want the
@@ -88,7 +88,7 @@ def send_subscription_confirmation_email(self, sub_id):
     request.urlopen(existing.minimap_src).close()
 
     send_mail(user.email, "Cornerwise: Confirm New Subscription",
-              "replace_subscription", mail.confirmation_context(subscription),
+              "replace_subscription", mail.replace_subscription_context(subscription),
               logger=logger)
 
 
