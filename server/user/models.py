@@ -297,6 +297,7 @@ class Subscription(models.Model):
 class UserComment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                              null=True)
+    created = models.DateTimeField(default=timezone.now)
     subject = models.CharField(max_length=100)
     send_to = models.CharField(max_length=100)
     comment = models.CharField(max_length=1000)
