@@ -169,7 +169,7 @@ class TestSubscribe(TestCase):
         with self.assertRaises(ValidationError):
             subscription.set_validated_query(add_box({}))
 
-        query["r"] = D(ft=300).m
+        query["r"] = "300m"
         query["region_name"] = "Tunguska, Krasnoyarsk Krai"
 
         with self.assertRaises(ValidationError):

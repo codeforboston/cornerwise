@@ -230,7 +230,7 @@ class Subscription(models.Model):
         elif "center" in q:
             if "r" in q:
                 self.center = point_from_str(q["center"])
-                self.radius = distance_from_str(q["r"])
+                self.radius = distance_from_str(q["r"]).m
             else:
                 raise ValidationError(f"Missing query parameter: r")
         if "region_name" in q:
