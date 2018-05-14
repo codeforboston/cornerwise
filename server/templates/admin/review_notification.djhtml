@@ -32,8 +32,8 @@
 
         {% if subscribers %}
             <p>
-                <strong>{{ recipient_count  }}}}</strong>
-                subscriber{{ recipient_count }} will receive this
+                <strong>{{ recipient_count  }}</strong>
+                subscriber{{ recipient_count|pluralize }} will receive this
                 notification.
             </p>
         {% else %}
@@ -78,7 +78,7 @@
          {% if title %}
          body.write("<h3>{{ title|escape|escapejs }}</h3>");
          {% endif %}
-         body.write("{{ example_greeting|escapejs }}<br/>{{ message|escapejs }}");
+         body.write("{{ message|escapejs }}<br/><hr/><br/>{{ example_greeting|escapejs }}");
          body.write("</body>");
          body.close();
         </script>
