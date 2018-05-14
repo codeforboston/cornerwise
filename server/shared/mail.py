@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def send(recipients, subject, template_name=None, context=None, content=None,
-         template_id=None, logger=logger):
+         template_id=None, logger=logger, use_generic_template=False):
     """
     Send an email to an email address. If there is a SendGrid template id
     configured for the given template name, create substitutions from `context`
@@ -32,8 +32,14 @@ def send(recipients, subject, template_name=None, context=None, content=None,
         try:
             template_id = settings.SENDGRID_TEMPLATES[template_name]
         except KeyError:
-            # Fall back to Django templates
-            return send_template(recipients, subject, template_name, context)
+            generic_id = settings.SENDGRID_TEMPLATES.get("generic")
+            if use_generic_template and generic_id:
+                html, text = render_email_body(template_name, context)
+                context["message_html"] = html
+                context["message_text"] = text
+            else:
+                # Fall back to Django templates
+                return send_template(recipients, subject, template_name, context)
 
     substitutions = {"-{}-".format(k): str(v) for k, v in context.items()}
     recipients = recipients if isinstance(recipients, list) else [recipients]
@@ -78,7 +84,6 @@ def send_template(email, subject, template_name, context=None, logger=logger):
     """
     context = context or {}
     html, text = render_email_body(template_name, context)
-    logger.info("Generated email: %s", html)
 
     mail = EmailMultiAlternatives(
         from_email=f"{settings.EMAIL_NAME} <{settings.EMAIL_ADDRESS}>",

@@ -261,9 +261,8 @@ TINYMCE_COMPRESSOR = True
 SENDGRID_TEMPLATES = {
     "welcome": "2aa283ce-e020-48b1-bc5c-d47ff2bb5014",
     "replace_subscription": "5d3e9ef4-960b-4fb9-906e-75474dca8720",
-    "delete_account": "e5e4fccd-be70-4abf-b6cf-86382926a0f6",
-    "threshold": "4422c280-ac97-4668-aef0-6c1c9faaf9d1",
     "staff_notification": "36dc83a7-dea8-4316-b951-14868af62c5f",
+    "generic": "5b82e3d6-151a-44e0-82ec-a6fdcae746bb",
 }
 
 # If this is set to True, users are only allowed to have one subscription.
