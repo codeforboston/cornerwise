@@ -1,6 +1,9 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.shortcuts import render
+
+
+User = get_user_model()
 
 
 def not_logged_in(request):
@@ -27,3 +30,16 @@ def with_user(view_fn):
 
     return wrapped_fn
 
+
+def user_emails(**kwargs):
+    return User.objects.filter(**kwargs)\
+                        .exclude(email="")\
+                        .values_list("email", flat=True)
+
+
+def group_emails(group_name):
+    return user_emails(groups__name=group_name)
+
+
+def admin_emails():
+    return user_emails(is_superuser=True)

@@ -2,8 +2,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import include, path
 
-from cornerwise.views import index, contact_us
-
+import user
+from cornerwise.views import index
 
 urlpatterns = [
     path("admin/", include("cornerwise.admin_urls")),
@@ -13,7 +13,7 @@ urlpatterns = [
     path("doc/", include("proposal.doc_urls")),
     path("task/", include("task.urls")),
     path("user/", include("user.urls")),
-    path("contact", contact_us, name="contact-us"),
+    path("contact", user.views.contact_us, name="contact-us"),
     path("tinymce/", include("tinymce.urls")),
     path("", index, name="front-page"),
 ]

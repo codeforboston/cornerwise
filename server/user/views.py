@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -16,6 +16,7 @@ import pytz
 from shared.request import make_response, make_redirect_response, ErrorResponse
 from shared.mail import render_email_body
 from user import tasks
+from .contact import ContactForm
 from user.mail import updates_context
 from user.models import Subscription, UserProfile
 from user.utils import not_logged_in, with_user
@@ -185,3 +186,23 @@ def user_logout(request):
     logout(request)
 
     return redirect("/")
+
+
+def contact_us(request):
+    if request.method == "POST":
+        form = ContactForm(request=request)
+        if form.is_valid():
+            form.save()
+            if form.send_email():
+                return JsonResponse({
+                    "title": "Email sent",
+                    "message": "Thanks for your feedback!"
+                })
+            else:
+                return JsonResponse({"title": "Email sent",
+                                     "message": "Your comment has been recorded."})
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    else:
+        return HttpResponse("bad request method", status=405)
+

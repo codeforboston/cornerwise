@@ -292,3 +292,17 @@ class Subscription(models.Model):
                 .format(swlat=sw[1], swlon=sw[0], nelat=ne[1], nelon=ne[0])
         else:
             return None
+
+
+class UserComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                             null=True)
+    subject = models.CharField(max_length=100)
+    send_to = models.CharField(max_length=100)
+    comment = models.CharField(max_length=1000)
+    remote_addr = models.GenericIPAddressField()
+    remote_host = models.CharField(max_length=100)
+    site_name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f"{self.user}: {self.subject}"

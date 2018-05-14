@@ -1,0 +1,21 @@
+<p>
+    {% if user and user.is_authenticated %}
+        User '{{ user.get_username }}'
+    {% else %}
+        An anonymous user
+    {% endif %}
+    (<code>{{ remote_host }}</code>) left a comment on <strong>{{ site_name }}</strong>:
+</p>
+
+<strong>Send to:</strong> {{ send_to }}
+
+{% if subject %}
+<strong>Subject:</strong> {{ subject }}
+{% endif %}
+
+<hr/>
+<div style="white-space: pre-wrap">
+{{ comment }}
+</div>
+<hr/>
+

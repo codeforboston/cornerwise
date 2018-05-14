@@ -20,6 +20,7 @@ from django.utils.formats import date_format
 
 from proposal.models import Event, Importer, Layer, Proposal
 from .models import StaffNotification
+from user.models import UserComment
 
 from utils import geometry_from_url
 
@@ -169,6 +170,7 @@ cornerwise_admin = CornerwiseAdmin(name="admin")
 cornerwise_admin.register(Importer, ImporterAdmin)
 cornerwise_admin.register(Layer, LayerAdmin)
 cornerwise_admin.register(User, UserAdmin)
+cornerwise_admin.register(UserComment, ReadOnlyAdmin)
 cornerwise_admin.register(Group, GroupAdmin)
 cornerwise_admin.register(Event, admin.ModelAdmin)
 cornerwise_admin.register(StaffNotification, ReadOnlyAdmin)

@@ -1,13 +1,10 @@
 import json
 
 from django.conf import settings
-from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from parcel.models import LotQuantiles
-
-from .contact import ContactForm
 
 
 def get_lot_sizes():
@@ -29,23 +26,6 @@ def lot_sizes():
     if not LOT_SIZES:
         LOT_SIZES = get_lot_sizes()
     return LOT_SIZES
-
-
-def contact_us(request):
-    if request.method == "POST":
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            form.send_email()
-            return JsonResponse({
-                "title": "Email Sent",
-                "text": "Thanks for your feedback!"
-            })
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
-    else:
-        return HttpResponse({
-            "bad request method"
-        }, status=405)
 
 
 @ensure_csrf_cookie
