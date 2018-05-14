@@ -3,6 +3,7 @@
 <h2>Contact Us</h2>
 
 <form action="/contact" method="post">
+    <div class="form-error" style="display: none"></div>
     <div class="input-group">
         <label for="contact-send-to" class="select">
             Topic
@@ -10,11 +11,9 @@
         <br/>
         <select id="contact-send-to" name="send_to" required>
             <option value="" disabled hidden selected>Choose topic</option>
-            <option value="planning-board">About a project</option>
-            <option value="cornerwise">
-                About the website/technical issue
-            </option>
-            <option value="webmaster">Other</option>
+            <% _.each(config.contacts || [], function(contact) { %>
+            <option value="<%- contact.name %>"><%- contact.topic %></option>
+            <% }); %>
         </select>
     </div>
 

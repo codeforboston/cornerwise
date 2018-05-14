@@ -9,13 +9,14 @@ class SomervilleConfig(SiteConfig):
     hostnames = ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
     name = "Somerville"
     region_name = "Somerville, MA"
+    town_id = 274
 
     extra_context = {
         "site_description": ("Find and explore current and future zoning "
                              "projects near you - City of Somerville.")
     }
 
-    js_config = {
+    extra_js_config = {
         "includeRegions": ["somerville"],
         "minSubscribeRadius": 300,
         "maxSubscribeRadius": 300,

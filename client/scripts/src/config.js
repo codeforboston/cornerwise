@@ -85,6 +85,7 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             fillOpacity: 0.15
         },
 
+        contacts: [],
 
         layers: [
             {
