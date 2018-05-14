@@ -28,6 +28,7 @@ from user.models import Subscription
 from user.tasks import send_staff_notification
 
 from .admin import cornerwise_admin
+from .models import StaffNotification
 from .widgets import DistanceField
 
 
@@ -45,12 +46,11 @@ def get_subscribers(geocoded=[], proposals=[],
     if not isinstance(notify_radius, D):
         notify_radius = D(ft=notify_radius)
 
-    def coords(x):
-        return x.location if isinstance(x, Proposal) else x[1]
+    def unpack(x):
+        return (x, x.location) if isinstance(x, Proposal) else (x[0], x[1])
 
     sub_near = defaultdict(list)
-    for thing in chain(proposals, geocoded):
-        point = coords(thing)
+    for thing, point in map(unpack, chain(proposals, geocoded)):
         if notify_radius:
             subs = Subscription.objects.filter(
                 center__distance_lte=(point, notify_radius))
@@ -58,7 +58,7 @@ def get_subscribers(geocoded=[], proposals=[],
             subs = Subscription.objects.containing(point)
 
         for sub in subs:
-            sub_near[sub].append((thing, coords))
+            sub_near[sub].append((thing, point))
 
     return sub_near
 
@@ -129,6 +129,7 @@ class UserNotificationForm(forms.Form):
     #                              "add a brief message listing the "
     #                              "address(es) or proposal(s) relevant to "
     #                              "that subscription"))
+    confirm = forms.CharField(initial="0", widget=forms.HiddenInput())
     region = forms.ChoiceField(choices=(("Somerville, MA", "Somerville, MA"),),
                                initial=settings.GEO_REGION)
     notification_id = forms.CharField(required=False,
@@ -141,7 +142,7 @@ class UserNotificationForm(forms.Form):
 
     @property
     def confirmed(self):
-        return self.cleaned_data["confirm"]
+        return self.cleaned_data["confirm"] == "1"
 
     def mark_confirm(self):
         self.data["confirm"] = "1"
@@ -216,11 +217,14 @@ class UserNotificationForm(forms.Form):
                            ttl=3600)
         return notification_id
 
-    def get_subscribers(self):
-        d = self.cleaned_data
+    @staticmethod
+    def _get_subscribers(d):
         return get_subscribers(d["coded_addresses"],
                                d["proposals"], d["region"],
                                d["notification_radius"])
+
+    def get_subscribers(self):
+        return self._get_subscribers(self.cleaned_data)
 
     def example_greeting(self):
         return replace_boilerplate(
@@ -239,6 +243,11 @@ def user_notification_form(request, form_data=None):
         context["title"] = "Review Notification"
         context["form"] = form
         if form.is_valid():
+            if form.confirmed:
+                message = do_send(request.user, form.cleaned_data)
+                messages.success(request, f"Message sent to {message.subscribers} subscribers.")
+                return redirect("admin:index")
+
             subscribers = form.get_subscribers()
             context.update(form.cleaned_data)
             context.update({"subscribers": subscribers,
@@ -261,6 +270,31 @@ def user_notification_form(request, form_data=None):
                   context)
 
 
+def do_send(user, cleaned):
+    title = cleaned["title"]
+    title_markup = ("<h3>" + escape(title) + "</h3>\n") if title else ""
+    message = cleaned["message"]
+
+    subscribers = UserNotificationForm._get_subscribers(cleaned)
+    for sub, related in subscribers.items():
+        boilerplate = replace_boilerplate(cleaned["greeting"], related,
+                                          cleaned["region"])
+        send_staff_notification.delay(
+            sub.pk, title,
+            f"{title_markup}{message}<br/><hr/><br/>{boilerplate}<br/>")
+
+    return StaffNotification.objects.create(title=cleaned["title"],
+                                            sender=user,
+                                            addresses=cleaned["addresses"],
+                                            proposals=",".join(p.pk for p in cleaned["proposals"]),
+                                            radius=cleaned["notification_radius"].m,
+                                            message=cleaned["message"],
+                                            subscribers=len(subscribers),
+                                            region=cleaned["region"])
+
+
+
+@permission_required("shared.send_notifications", login_url="admin:login")
 @require_POST
 def send_user_notification(request):
     notification_id = request.POST["notification_id"]
@@ -283,18 +317,7 @@ def send_user_notification(request):
         return user_notification_form(request, saved["data"])
 
     # Otherwise, send it!
-    title = saved["title"]
-    title_markup = ("<h3>" + escape(title) + "</h3>\n") if title else ""
-    message = saved["message"]
+    message = do_send(request.user, saved["cleaned"])
+    messages.success(request, f"Message sent to {message.subscribers} subscribers.")
 
-    subscribers = saved["subscribers"]
-    for sub, related in subscribers.items():
-        boilerplate = replace_boilerplate(saved["greeting"],
-                                          related,
-                                          saved["region_name"])
-        send_staff_notification.delay(
-            sub.pk, title,
-            f"{title_markup}{boilerplate}<br/>{message}")
-
-    messages.success(request, "Message sent to {len(subscribers)} subscribers.")
     return redirect("admin:index")

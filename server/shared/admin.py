@@ -19,6 +19,7 @@ from django.utils.safestring import mark_safe
 from django.utils.formats import date_format
 
 from proposal.models import Event, Importer, Layer, Proposal
+from .models import StaffNotification
 
 from utils import geometry_from_url
 
@@ -143,6 +144,26 @@ class LayerAdmin(GeoModelAdmin):
     form = LayerForm
 
 
+class ReadOnlyAdmin(admin.ModelAdmin):
+    def __init__(self, *args, exclude=[], **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exclude = exclude
+        self.readonly_fields = [f.name for f in self.model._meta.get_fields()
+                                if f.name not in exclude]
+        # self.readonly_fields += ["message_text"]
+
+    # exclude = ("message",)
+
+    # def message_text(self, notification):
+    #     return mark_safe(notification.message)
+
+    def proposals(self, notification):
+        pks = notification.proposals.split(",")
+        proplist = ", ".join([str(proposal) for proposal in
+                              Proposal.objects.filter(pk__in=pks)])
+        return mark_safe(proplist)
+
+
 cornerwise_admin = CornerwiseAdmin(name="admin")
 
 cornerwise_admin.register(Importer, ImporterAdmin)
@@ -150,3 +171,4 @@ cornerwise_admin.register(Layer, LayerAdmin)
 cornerwise_admin.register(User, UserAdmin)
 cornerwise_admin.register(Group, GroupAdmin)
 cornerwise_admin.register(Event, admin.ModelAdmin)
+cornerwise_admin.register(StaffNotification, ReadOnlyAdmin)

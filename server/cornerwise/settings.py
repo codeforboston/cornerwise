@@ -45,8 +45,8 @@ INSTALLED_APPS = (
     "proposal.ProposalConfig",
     "project.ProjectConfig",
     "user.UserAppConfig",
+    "shared.SharedAppConfig",
     "task",
-    "shared",
 )
 
 MIDDLEWARE = (
