@@ -19,6 +19,8 @@ warnings.filterwarnings(
     'ignore', r"DateTimeField .* received a naive datetime",
     RuntimeWarning, r'django\.db\.models\.fields')
 
+User = get_user_model()
+
 
 LAT_SW = 42.372305415983895
 LNG_SW = -71.14256858825685
@@ -180,6 +182,39 @@ class TestInboundParser(TestCase):
         client = Client()
         response = client.post(reverse(mail_parse_views.mail_inbound))
         self.assertEqual(response.status_code, 403)
+
+
+@tag("comment", "mail")
+class TestUserComments(TestCase):
+    def setUp(self):
+        self.client = Client(REMOTE_HOST="1234-fake-street.globonet.com",
+                             REMOTE_ADDR="123.1.1.1")
+        self.admin = User.objects.create(is_active=True,
+                                         username="admin",
+                                         email="fakeadmin@example.com",
+                                         is_superuser=True)
+
+    @celery_override
+    def test_send_comment(self):
+        data = {
+            "send_to": "cornerwise",
+            "subject": "Hello",
+            "comment": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        }
+        response = self.client.post(reverse("contact-us"), data)
+
+        self.assertEqual(response.status_code, 200)
+
+        comment = models.UserComment.objects.order_by("-created")[0]
+        self.assertEqual(comment.subject, data["subject"])
+        self.assertEqual(comment.comment, data["comment"])
+
+        self.assertEqual(len(mail.outbox), 1)
+        message: mail.EmailMessage = mail.outbox[0]
+
+        recipient = message.recipients()[0]
+        self.assertEqual(recipient, self.admin.email)
+
 
 
 @tag("notifications")
