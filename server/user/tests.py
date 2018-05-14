@@ -216,7 +216,6 @@ class TestUserComments(TestCase):
         self.assertEqual(recipient, self.admin.email)
 
 
-
 @tag("notifications")
 class TestAdminNotifications(TestCase):
     def setUp(self):
