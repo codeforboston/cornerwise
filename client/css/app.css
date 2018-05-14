@@ -1092,6 +1092,11 @@ a.glossary:hover {
     margin-right: 15%;
 }
 
+#modal-contents footer {
+    font-size: smaller;
+    margin-top: 2em;
+}
+
 #modal.showing {
     display: block;
 }
@@ -1480,16 +1485,18 @@ a.thumb-link:hover {
 }
 
 #alert.success {
-    border: 2px solid rgba(57, 127, 52, 0.8);
-    color: white;
+    background-color: #b7d3b6;
+    border: 2px solid #397f34;
 }
 
 #alert.error, #alert.danger {
     border: 2px solid crimson;
+    background-color: #f9d7dd;
 }
 
 #alert.notice {
-    background-color: rgba(190, 131, 0, 0.9);
+    border: 2px solid #be8300;
+    background-color: #e8dab6;
 }
 
 #alert .content-wrapper {
@@ -1501,12 +1508,20 @@ a.thumb-link:hover {
     display: none;
     font-size: x-large;
     margin: 0;
-    margin-bottom: 0.3em;
+}
+
+.title.displayed + .content.displayed {
+    margin-top: 0.3em;
 }
 
 #alert .content {
+    display: none;
     font-size: medium;
     text-align: left;
+}
+
+#alert .title.displayed, #alert .content.displayed {
+    display: block;
 }
 
 #alert.modal .close {

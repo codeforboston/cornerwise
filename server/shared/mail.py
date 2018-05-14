@@ -12,6 +12,8 @@ from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
+generic_id = settings.SENDGRID_TEMPLATES.get("generic")
+
 
 def send(recipients, subject, template_name=None, context=None, content=None,
          template_id=None, logger=logger, use_generic_template=False):
@@ -32,11 +34,17 @@ def send(recipients, subject, template_name=None, context=None, content=None,
         try:
             template_id = settings.SENDGRID_TEMPLATES[template_name]
         except KeyError:
-            generic_id = settings.SENDGRID_TEMPLATES.get("generic")
             if use_generic_template and generic_id:
+                template_id = generic_id
                 html, text = render_email_body(template_name, context)
                 context["message_html"] = html
                 context["message_text"] = text
+
+                context.setdefault("footer_html", """
+                <div class="footer-text">Sent from Cornerwise</div>
+                """)
+                context.setdefault("footer_text", "Sent from Cornerwise")
+
             else:
                 # Fall back to Django templates
                 return send_template(recipients, subject, template_name, context)

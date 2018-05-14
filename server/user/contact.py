@@ -23,6 +23,7 @@ class ContactForm(forms.Form):
     def __init__(self, data=None, request=None, **kwargs):
         super().__init__(data or (request and request.POST), **kwargs)
         self.request = request
+        self.model = None
 
         send_to = self.fields["send_to"]
         send_to.choices = [(c["name"], c["topic"]) for c in request.site_config.contacts]
@@ -32,7 +33,7 @@ class ContactForm(forms.Form):
 
         request = self.request
         cleaned.update({
-            "user": request.user,
+            "user": request.user if request.user.is_authenticated else None,
             "remote_addr": request.META["REMOTE_ADDR"],
             "remote_host": request.META["REMOTE_HOST"],
             "site_name": request.site_config.hostname,
@@ -41,7 +42,9 @@ class ContactForm(forms.Form):
         return cleaned
 
     def save(self):
-        return UserComment.objects.create(**self.cleaned_data)
+        if not self.model:
+            self.model = UserComment.objects.create(**self.cleaned_data)
+        return self.model
 
     def send_email(self):
         cleaned = self.cleaned_data
@@ -52,7 +55,8 @@ class ContactForm(forms.Form):
                 emails = [contact["email"]]
             elif "group" in contact:
                 emails = group_emails[contact["group"]]
-        else:
+
+        if not emails:
             emails = group_emails(self.request.site_config.group_name) or \
                 admin_emails()
 

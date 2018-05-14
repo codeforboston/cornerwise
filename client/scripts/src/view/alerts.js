@@ -49,8 +49,13 @@ define(["backbone", "jquery", "underscore"],
                    .addClass(message.className)
                    .addClass("displayed")
                    .toggleClass("modal", message.type == AlertType.MODAL)
-                   .find(".content").text(message.text).end()
-                   .find(".title").text(message.title).toggle(!!message.title);
+                   .find(".content")
+                        .text(message.text)
+                        .toggleClass("displayed", !!message.text)
+                        .end()
+                   .find(".title")
+                        .text(message.title)
+                        .toggleClass("displayed", !!message.title);
                lastMessage = message;
                if (message.type == AlertType.MODAL) {
                    modalMessage = message;

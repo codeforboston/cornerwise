@@ -4,18 +4,20 @@
     {% else %}
         An anonymous user
     {% endif %}
-    (<code>{{ remote_host }}</code>) left a comment on <strong>{{ site_name }}</strong>:
+    (<code>{{ remote_host|default:remote_addr }}</code>) left a comment on <strong>{{ site_name }}</strong>:
 </p>
 
-<strong>Send to:</strong> {{ send_to }}
+<p>
+    <strong>Send to:</strong> {{ send_to }}
+</p>
 
 {% if subject %}
-<strong>Subject:</strong> {{ subject }}
+    <p>
+        <strong>Subject:</strong> {{ subject }}
+    </p>
 {% endif %}
 
 <hr/>
 <div style="white-space: pre-wrap">
 {{ comment }}
 </div>
-<hr/>
-

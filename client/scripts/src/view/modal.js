@@ -109,7 +109,8 @@ define(["backbone", "view/alerts", "jquery", "utils", "underscore", "appState"],
                    }).done(function(result) {
                        appState.goBack("main");
                        alerts.show({title: result.title,
-                                    message: result.message});
+                                    text: result.message,
+                                    className: "success"});
                    }).fail(function(xhr) {
                        if (xhr.responseJSON) {
                            if (xhr.responseJSON.errors)
