@@ -76,17 +76,23 @@ define(["backbone", "view/alerts", "jquery", "utils", "underscore", "appState"],
                },
 
                showFormErrors: function(errors) {
-                   var $el = this.$el;
                    this.clearFormErrors();
                    this.$(".input-group").each(function(i, el) {
                        var name = $(el).find("[name]").attr("name");
                        if (errors[name]) {
                            $(el).addClass("error");
-                           $("<div class='form-error'></div>")
+                           $("<div class='form-error'/>")
                                .text(errors[name].join(", "))
                                .prependTo(el);
                        }
                    });
+               },
+
+               showFormError: function(message) {
+                   this.clearFormErrors();
+                   $("<div class='form-error .form-field-error'/>")
+                       .text(message)
+                       .prependTo(this.$("form").eq(0));
                },
 
                onSubmit: function(e) {
@@ -100,13 +106,23 @@ define(["backbone", "view/alerts", "jquery", "utils", "underscore", "appState"],
                        url: form.action,
                        method: form.method,
                        data: data
-                   }).done(function(xhr) {
-                       var result = xhr.responseJSON;
+                   }).done(function(result) {
                        appState.goBack("main");
                        alerts.show({title: result.title,
                                     message: result.message});
                    }).fail(function(xhr) {
-                       self.showFormErrors(xhr.responseJSON.errors);
+                       if (xhr.responseJSON) {
+                           if (xhr.responseJSON.errors)
+                               self.showFormErrors(xhr.responseJSON.errors);
+                           else if (xhr.responseJSON.error)
+                               self.showFormError(xhr.responseJSON.error);
+                       } else {
+                           self.showFormError(
+                               "Server responded with status " +
+                                   xhr.status + ": " +
+                                   xhr.statusText
+                           );
+                       }
                    });
 
                    e.preventDefault();

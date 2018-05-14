@@ -336,8 +336,11 @@ h3 {
 
 .form-error {
     color: crimson;
-    float: right;
     font-size: small;
+}
+
+.form-field-error {
+    float: right;
 }
 
 .input-group.error input, 
@@ -1477,12 +1480,12 @@ a.thumb-link:hover {
 }
 
 #alert.success {
-    background-color: rgba(57, 127, 52, 0.8);
+    border: 2px solid rgba(57, 127, 52, 0.8);
     color: white;
 }
 
 #alert.error, #alert.danger {
-    background-color: rgba(255, 182, 193, 0.6);
+    border: 2px solid crimson;
 }
 
 #alert.notice {
