@@ -289,6 +289,10 @@ SITE_CONFIG = {
     "somerville": {
         "module": "site_config.somervillema",
         "hostnames": ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
+    },
+    "cambridge": {
+        "module": "site_config.cambridgema",
+        "hostnames": ["cambridge.cornerwise.org"]
     }
 }
 
@@ -300,11 +304,10 @@ for envvar in [
         "GOOGLE_STREET_VIEW_SECRET", "GEOCODER", "ARCGIS_CLIENT_ID",
         "ARCGIS_CLIENT_SECRET", "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET",
         "SENDGRID_API_KEY", "FOURSQUARE_CLIENT", "FOURSQUARE_SECRET",
-        "SENDGRID_PARSE_KEY", "SERVER_DOMAIN", "USE_SITE_HOSTNAMES"
+        "SENDGRID_PARSE_KEY", "SERVER_DOMAIN", "BASE_URL"
 ]:
-    env_val = os.environ.get(envvar, "")
-    if env_val or envvar not in globals():
-        globals()[envvar] = env_val
+    if envvar in os.environ or envvar not in globals():
+        globals()[envvar] = os.environ.get(envvar, "")
 
 
 def get_admins():

@@ -12,7 +12,7 @@ from django.contrib.gis.geos import GeometryCollection, GEOSGeometry, Point
 from django.contrib.gis.measure import D
 from django.contrib.gis.geos.polygon import Polygon
 
-from site_config import base_url
+import site_config
 
 
 def normalize(s):
@@ -288,21 +288,20 @@ def make_absolute_url(path, site_name=None):
     if re.match(r"^https?://", path):
         return path
 
-    scheme = "https"
     if site_name:
-        if settings.USE_SITE_HOSTNAMES:
-            hostname = base_url(site_name)
-        else:
+        config = site_config.by_hostname(site_name)
+        if settings.BASE_URL:
+            url_base = settings.BASE_URL
             parts = parse.urlsplit(path)
-            hostname = settings.SERVER_DOMAIN
-            site_hostname = base_url(site_name)
-            path = add_params(path, {"_hostname": site_hostname})
+            path = add_params(path, {"_hostname": config.hostname})
+        else:
+            url_base = f"https://{config.hostname}"
     else:
         hostname = settings.SERVER_DOMAIN
+        scheme = "http" if hostname.startswith("localhost") else "https"
+        url_base = f"{scheme}://{hostname}"
 
-    if hostname == "localhost":
-        scheme = "http"
-    return parse.urljoin(f"{scheme}://{hostname}", path)
+    return parse.urljoin(url_base, path)
 
 
 def today():
