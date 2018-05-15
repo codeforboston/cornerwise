@@ -376,6 +376,10 @@ body.geolocating #ref-address-form .status {
     font-family: "Avenir";
 }
 
+.guess {
+    font-style: italic;
+}
+
 .big-input .input-button {
     font-size: x-large;
 }

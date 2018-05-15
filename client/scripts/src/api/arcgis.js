@@ -74,7 +74,7 @@ define(["jquery", "config"], function($, config) {
 
         reverseGeocode: function(lat, long) {
             return this.getAuthToken().then(function(token) {
-                return $.getJSON("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode",
+                return $.getJSON("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode",
                       {
                           location: (long + "," + lat),
                           token: token,

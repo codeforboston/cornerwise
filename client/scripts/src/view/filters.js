@@ -18,7 +18,9 @@ define(
                     .listenTo(refLocation, "change:geolocating",
                               this.toggleGeolocating)
                     .listenTo(refLocation, "change:address",
-                              this.maybeUpdateAddress);
+                              this.maybeUpdateAddress)
+                    .listenTo(refLocation, "change:lat change:lng",
+                              this.locPositionChanged);
 
                 this.buildRegionSelection();
 
@@ -48,8 +50,12 @@ define(
                     placesOptions = {types: ["geocode"]},
                     input = $("#ref-address-form input")[0];
 
+                var onSubmit = _.bind(this.submitAddress, this);
+                $("#ref-address-form").on("submit", onSubmit);
+
                 places.setup(input, placesOptions)
                     .done(function(ac) {
+                        $("#ref-address-form").off("submit", onSubmit);
                         self.placesSetup(ac, input);
                         $(input).keypress(function(e) {
                             if (e.which === 13) {
@@ -113,7 +119,6 @@ define(
             // They are preserve here for possible later use, since most or all
             // generate the correct Proposal query and have backend support.
             events: {
-                //"submit #ref-address-form": "submitAddress",
                 "focus #ref-address-form": "removeGuessClass",
                 "click #geolocate": "geolocate",
                 "click #reset": "clearInputs",
@@ -146,14 +151,15 @@ define(
                 if (refLocation.get("geolocating"))
                     return false;
 
-                $(e.target).removeClass("error");
+                $(e.target).removeClass("error").blur();
 
                 var addr = e.target.elements["address"].value;
 
                 refLocation.setFromAddress(addr).fail(function(err) {
                     $(e.target)
                         .addClass("error")
-                        .find(".error-reason").text("Could not locate that address!");
+                        .focus()
+                        .find(".error-reason").text("Could not locate that address!").end();
                 });
 
                 e.preventDefault();
@@ -233,6 +239,11 @@ define(
 
             maybeUpdateAddress: function(loc, addr) {
                 $("#ref-address-form input:not(:focus)").val(addr);
+            },
+
+            locPositionChanged: function(loc) {
+                if (loc.get("setMethod") == "map")
+                    this.reverseGeocodeAddress([loc.get("lat"), loc.get("lng")]);
             },
 
             filterText: _.debounce(function(e) {
