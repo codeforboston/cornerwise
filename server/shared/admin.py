@@ -167,6 +167,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 cornerwise_admin = CornerwiseAdmin(name="admin")
 
+cornerwise_admin.register(Proposal, ProposalAdmin)
 cornerwise_admin.register(Importer, ImporterAdmin)
 cornerwise_admin.register(Layer, LayerAdmin)
 cornerwise_admin.register(User, UserAdmin)

@@ -290,10 +290,10 @@ SITE_CONFIG = {
         "module": "site_config.somervillema",
         "hostnames": ["somerville.cornerwise.org", "cornerwise.somervillema.gov", "default"]
     },
-    "cambridge": {
-        "module": "site_config.cambridgema",
-        "hostnames": ["cambridge.cornerwise.org"]
-    }
+    # "cambridge": {
+    #     "module": "site_config.cambridgema",
+    #     "hostnames": ["cambridge.cornerwise.org"]
+    # }
 }
 
 USE_SITE_HOSTNAMES = True

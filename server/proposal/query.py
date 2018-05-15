@@ -13,6 +13,7 @@ from parcel.models import LotSize, LotQuantiles
 from utils import bounds_from_box, point_from_str
 
 
+# TODO: Rewrite considering parcels
 def get_lot_size_groups():
     quantiles = LotQuantiles.objects.all()[0]
     return {

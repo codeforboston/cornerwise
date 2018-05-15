@@ -124,11 +124,6 @@ class UserNotificationForm(forms.Form):
     notification_radius = DistanceField(
         min_value=D(ft=100), max_value=D(mi=20), initial=D(ft=300),
         label="Notify subscribers within distance")
-    # include_boilerplate = forms.BooleanField(
-    #     initial=True, help_text=("Before sending the email to each user, "
-    #                              "add a brief message listing the "
-    #                              "address(es) or proposal(s) relevant to "
-    #                              "that subscription"))
     confirm = forms.CharField(initial="0", widget=forms.HiddenInput())
     region = forms.ChoiceField(choices=(("Somerville, MA", "Somerville, MA"),),
                                initial=settings.GEO_REGION)
