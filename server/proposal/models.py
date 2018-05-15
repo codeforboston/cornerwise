@@ -80,7 +80,7 @@ def make_property_map():
         return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
 
 
-    return [("address", lambda d: d["location"].get("formatted", d["all_addresses"][0])),
+    return [("address", lambda d: d["all_addresses"][0]),
             ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["location"]["long"], d["location"]["lat"])),
             ("summary", lambda d: d["summary"][0:1024] if "summary" in d else UNSET),
