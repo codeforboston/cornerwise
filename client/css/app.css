@@ -1,8 +1,11 @@
 :root {
     --active-proposal-bg: radial-gradient( #e2a192, #ff7c55);
     --proposal-bg: radial-gradient( #e2a192, #ff5a29);
-    --completed-proposal-bg: radial-gradient(lime, green);
-    --active-completed-proposal-bg: radial-gradient(lime, green);
+/*     --proposal-bg: radial-gradient(50% 0%, #727272 50%, #868686 100%); */
+    --proposal-approved-bg: radial-gradient(50% -39%, #197409 50%, #239F0E 100%);
+    --active-proposal-approved-bg: radial-gradient(50% -39%, #197409 50%, #239F0E 100%);
+    --proposal-denied-bg: radial-gradient(50% 15%, #991509 50%, #B01A0C 85%);
+    --active-proposal-denied-bg: radial-gradient(50% 15%, #991509 50%, #B01A0C 85%);
 
     --action-color: #3c7c3d;
     --active-action-color: #7fc87a;
@@ -666,10 +669,10 @@ body.main .map-mode-button, body.list .list-mode-button {
 
 div.proposal-marker {
     background-color: #ef6f49;
-    background: var(--proposal-bg);
-    border: 1px solid transparent;
-    border-radius: 17px;
-    background-size: contain;
+    background: center / 70% no-repeat url(/static/images/pending.png),
+                var(--proposal-bg);
+    border: 4px solid white;
+    border-radius: 18px;
     height: 30px;
     width: 30px;
     text-align: center;
@@ -677,31 +680,31 @@ div.proposal-marker {
 
 div.marker-selected, div.marker-hovered {
     background: --active-proposal-bg;
-    border: 1px solid white;
+    border-color: #4fb8f7;
 }
 
-div.proposal-complete {
-    background: center / contain no-repeat url(/static/images/ex-mark.png),
-                var(--completed-proposal-bg);
+div.proposal-complete.proposal-denied {
+    background: center / 60% no-repeat url(/static/images/denied.png),
+                var(--proposal-denied-bg);
 }
 
 div.proposal-complete.proposal-approved {
-    background: center / contain no-repeat url(/static/images/check-mark.png),
-                var(--completed-proposal-bg);
-}
-
-div.proposal-complete.marker-hovered,
-div.proposal-complete.marker-selected
-{
-    background: center / contain no-repeat url(/static/images/ex-mark.png),
-                var(--active-completed-proposal-bg);
+    background: center / 60% no-repeat url(/static/images/approved.png),
+                var(--proposal-approved-bg);
 }
 
 div.proposal-complete.proposal-approved.marker-hovered,
 div.proposal-complete.proposal-approved.marker-selected
 {
-    background: center / contain no-repeat url(/static/images/check-mark.png),
-                var(--active-completed-proposal-bg);
+    background: center / 60% no-repeat url(/static/images/approved.png),
+                var(--active-proposal-approved-bg);
+}
+
+div.proposal-complete.proposal-denied.marker-hovered,
+div.proposal-complete.proposal-denied.marker-selected
+{
+    background: center / 60% no-repeat url(/static/images/denied.png.png),
+                var(--active-proposal-denied-bg);
 }
 
 div.leaflet-marker.zoomed-proposal-marker {
@@ -1389,8 +1392,8 @@ a.thumb-link:hover {
     margin-bottom: 0.5em;
 }
 
-.popup-contents .complete-badge {
-    background: center / contain no-repeat url(/static/images/ex-mark.png);
+.popup-contents .proposal-badge {
+    background: center / 60% no-repeat url(/static/images/pending.png);
 
     height: 30px;
     width: 30px;
@@ -1399,8 +1402,12 @@ a.thumb-link:hover {
     top: 5px;
 }
 
+.complete-badge.proposal-denied {
+    background: center / 60% no-repeat url(/static/images/denied.png);
+}
+
 .complete-badge.proposal-approved {
-    background: center / contain no-repeat url(/static/images/check-mark.png);
+    background: center / 60% no-repeat url(/static/images/approved.png);
 }
 
 .proposal-info-popup .main-thumb-container {

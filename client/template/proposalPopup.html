@@ -4,15 +4,11 @@
 
     <% var complete = proposal.get("complete"), status = proposal.get("status")
 
-    if (complete) {
     %>
-    <a class="complete-badge <%- status.match(/approved/i) ? 'proposal-approved' : '' %>"
+    <a class="proposal-badge <%- status.match(/approved/i) ? 'proposal-approved' : 'proposal-denied' %>"
        title="Proposal <%- status %> on <%- shortDate(complete) %>">
     </a>
-    <%
-    }
-    %>
-
+    
     <div class="applicant">
         <%- proposal.getAttributeValue("applicant_name") %>
     </div>
