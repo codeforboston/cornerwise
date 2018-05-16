@@ -5,6 +5,7 @@ from operator import or_
 
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -73,7 +74,7 @@ def layer_json(layer):
 # Views:
 @make_response("list.djhtml")
 def list_proposals(req):
-    query = reduce(or_, (build_proposal_query(json.loads(q)) for q in req.GET.getlist("query")))
+    query = reduce(or_, (build_proposal_query(json.loads(q)) for q in req.GET.getlist("query")), Q())
     proposals = Proposal.objects.filter(query)
     if "include_projects" in req.GET:
         proposals = proposals.select_related("project")

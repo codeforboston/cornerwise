@@ -12,7 +12,14 @@
                 {% endwith %}
             </div>
             <div class="col-md-8" >
-                <h3>{{ proposal.address }}</h3>
+                <h3>
+                    <a href="{% url 'view-proposal' pk=proposal.id %}">
+                        {{ proposal.address }}
+                    </a>
+                </h3>
+                {% if proposal.other_addresses %}
+                    <h5> {{ proposal.other_addresses }} </h5>
+                {% endif %}
                 <h4>{{ proposal.region_name }}</h4>
                 Last updated {{ proposal.updated|naturalday }}
 
