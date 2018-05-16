@@ -79,13 +79,14 @@ if ! getent hosts celery; then
 fi
 
 start_gunicorn() {
+    pidfile=/var/run/gunicorn.pid
     gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
-             -p /var/run/gunicorn.pid \
+             -p "$pidfile" \
              --daemon \
              cornerwise.wsgi:application
 
-    server_pid="$!"
-    echo $server_pid
+    while [ ! -f "$pidfile" ]; do sleep 1; done
+    server_pid="$(cat /var/run/gunicorn.pid)"
 }
 
 on_sigterm() {
@@ -131,4 +132,4 @@ fi
 
 trap on_usr1 SIGUSR1
 trap on_sigterm SIGTERM
-while : ; do wait $server_pid; done
+while : ; do wait; done
