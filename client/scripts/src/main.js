@@ -3,7 +3,7 @@ require.config({
     paths: {
         // Dependencies:
         "underscore": "lib/underscore-min",
-        "backbone": "lib/backbone-min",
+        "backbone": "lib/backbone-master",
         "jquery": "lib/jquery-3.1.1.min",
         "chartjs": "lib/Chart.min"
     },
