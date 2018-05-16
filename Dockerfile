@@ -4,10 +4,16 @@ WORKDIR "/app"
 EXPOSE 3000
 CMD bash /app/start.sh
 
-ADD ./docker-support /support
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal
 RUN apt-get update && \
-    apt-get install -y libgdal-dev binutils gdal-bin xpdf-utils inotify-tools && \
-    pip3 install -r /support/requirements.txt
+    apt-get install -y \
+    libgdal-dev \
+    binutils \
+    gdal-bin \
+    xpdf-utils \
+    inotify-tools && \
+    rm -rf /var/lib/apt/lists/*
+ADD ./docker-support /support
+RUN pip3 install -r /support/requirements.txt
 
 ADD ./server /app
