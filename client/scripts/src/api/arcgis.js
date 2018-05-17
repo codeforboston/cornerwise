@@ -1,4 +1,4 @@
-define(["jquery", "config"], function($, config) {
+define(["jquery", "config", "collection/regions"], function($, config, regions) {
     // URL endpoint for geocoding
     var ADDRESS_URL = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses";
 
@@ -30,6 +30,8 @@ define(["jquery", "config"], function($, config) {
 
         geocode: function(addr) {
             return this.getAuthToken().then(function(token) {
+                var activeRegions = regions.getSelection(),
+                    region = activeRegions.length && activeRegions[0].attributes;
                 return $.getJSON(ADDRESS_URL,
                                  {
                                      addresses: JSON.stringify({
@@ -38,8 +40,8 @@ define(["jquery", "config"], function($, config) {
                                                  attributes: {
                                                      OBJECTID: 1,
                                                      Address: addr,
-                                                     City: "Somerville",
-                                                     Region: "MA"
+                                                     City: region.city,
+                                                     Region: region.state
                                                  }
                                              }
                                          ]
@@ -47,11 +49,27 @@ define(["jquery", "config"], function($, config) {
                                      token: token,
                                      f: "pjson"
                                  }).then(function(json) {
+                                     var error;
                                      if (!json.locations ||
                                          json.locations.length === 0) {
-                                         return $.Deferred().reject(
-                                             {reason: "No matching locations."});
+                                         error = "No matching locations.";
+                                     } else {
+                                         var attrs = json.locations[0].attributes;
+
+                                         if (!attrs.StAddr || attrs.score < 80) {
+                                             error = "No good matches";
+                                         } else {
+                                             var regionMatches = regions.where({city: attrs.City,
+                                                                                state: attrs.RegionAbbr,
+                                                                                _selected: true});
+                                             if (!regionMatches.length)
+                                                 error = "No matches for this region.";
+                                         }
+
                                      }
+
+                                     if (error)
+                                         return $.Deferred().reject({reason: error});
 
                                      return json;
                                  });
@@ -61,15 +79,15 @@ define(["jquery", "config"], function($, config) {
         /**
          * Given a JSON response from the ArcGIS geocoding API, extract
          * and return the latitude and longitude from the first address
-         * it contains.
+         * it contains, along with a dictionary of attributes.
          *
          * @param {object} response
-         * @return {Array} array of [lat, long]
+         * @return {Array} array of [lat, long, attributes]
          */
         getLatLngForFirstAddress: function(response) {
-            var loc = response.locations[0].location;
+            var loc = response.locations[0].attributes;
 
-            return [loc.y, loc.x];
+            return [loc.Y, loc.X, loc];
         },
 
         reverseGeocode: function(lat, long) {

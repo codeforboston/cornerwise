@@ -66,17 +66,23 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             {
                 id: "somerville",
                 name: "Somerville, MA",
-                source: "/static/layerdata/somerville.geojson"
+                source: "/static/layerdata/somerville.geojson",
+                city: "Somerville",
+                state: "MA"
             },
             {
                 id: "cambridge",
                 name: "Cambridge, MA",
-                source: "/static/layerdata/cambridge.geojson"
+                source: "/static/layerdata/cambridge.geojson",
+                city: "Cambridge",
+                state: "MA"
             }
         ],
 
         // Specify the ids of regions to include
         includeRegions: null,
+        // For geocoding:
+
 
         regionStyle: {
             weight: 3,

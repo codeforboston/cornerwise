@@ -21,7 +21,7 @@ define(["backbone", "jquery", "underscore"],
             * @return {jQuery} The alert container element
             */
            function dismissMessage(id) {
-               if (lastMessage && !id || lastMessage.id == id) {
+               if (lastMessage && (!id || lastMessage.id == id)) {
                    alertElement
                        .removeClass("displayed")
                        .removeClass(lastMessage.className);

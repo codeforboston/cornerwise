@@ -108,6 +108,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                setFromAddress: function(addr) {
                    var self = this;
                    this.set("geolocating", true);
+                   alerts.dismissMessage("geoloc_error");
                    return arcgis.geocode(addr).then(arcgis.getLatLngForFirstAddress).done(function(loc) {
                        if (bounds && !bounds.contains(loc)) {
                            alerts.show("That address is outside " + config.name,
@@ -119,7 +120,8 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                            altitude: null
                        });
                        appState.setHashKey("ref", {
-                           address: addr,
+                           address: loc[2].ShortLabel || addr,
+                           enteredAddress: addr,
                            setMethod: "address",
                            lat: loc[0],
                            lng: loc[1]
@@ -127,7 +129,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                        return loc;
                    }).fail(function() {
-                       alerts.show("I couldn't find that address.");
+                       alerts.show("I couldn't find that address.", "error", null, "geoloc_error");
                    }).always(function() {
                        self.set("geolocating", false);
                    });

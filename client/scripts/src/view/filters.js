@@ -147,19 +147,24 @@ define(
                     $("#filter-status").val(filters.status);
             },
 
+            /**
+               Fallback geocoder, used if Google Places fails to, or is slow to, load
+             */
             submitAddress: function(e) {
                 if (refLocation.get("geolocating"))
                     return false;
 
                 $(e.target).removeClass("error").blur();
+                var field = e.target.elements["address"],
+                    addr = field.value;
 
-                var addr = e.target.elements["address"].value;
-
+                $(field).blur();
                 refLocation.setFromAddress(addr).fail(function(err) {
                     $(e.target)
                         .addClass("error")
-                        .focus()
                         .find(".error-reason").text("Could not locate that address!").end();
+                }).done(function(loc) {
+                    $(field).val(loc[2].ShortLabel || addr);
                 });
 
                 e.preventDefault();
