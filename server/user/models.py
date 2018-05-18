@@ -289,7 +289,9 @@ class Subscription(models.Model):
             sw = bounds[2]
             ne = bounds[0]
             return settings.MINIMAP_SRC\
-                .format(swlat=sw[1], swlon=sw[0], nelat=ne[1], nelon=ne[0])
+                .format(swlat=sw[1], swlon=sw[0],
+                        nelat=ne[1], nelon=ne[0],
+                        circle=int(self.radius or 0))
         else:
             return None
 
