@@ -23,6 +23,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
            function getBadge(proposal) {
                return L.divIcon({
                    className: getBadgeClassName(proposal),
+                   iconAnchor: L.point(18, 18),
                    iconSize: L.point(30, 30)
                });
            }
@@ -64,10 +65,11 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
                },
 
                updateIcon: function(proposal) {
-                   if (_.isNumber(this.zoomed) && !proposal.get("_selected"))
-                       this._renderZoomed(proposal, this.zoomed);
-                   else
-                       this.setIcon(getBadge(proposal));
+                   var icon = (_.isNumber(this.zoomed) && !proposal.get("_selected")) ?
+                       this._makeZoomedIcon(proposal, this.zoomed) :
+                       getBadge(proposal);
+
+                   this.setIcon(icon);
 
                    if (proposal.changed._hovered && !proposal.get("_selected")) {
                        var text = proposal.get("address"),
@@ -76,7 +78,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
                        if (others) {
                            text += "<br/>" + others.split(";").join("<br/>");
                        }
-                       this.bindTooltip(text, {offset: L.point(10, 0),
+                       this.bindTooltip(text, {offset: L.point(icon.options.iconSize.x/2, 0),
                                                permanent: true});
                    } else if (proposal.changed._hovered === false) {
                        this.unbindTooltip();
@@ -125,21 +127,23 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
 
                    if (proposal.get("_selected")) return;
 
-                   this._renderZoomed(proposal, n);
+                   this.setIcon(this._makeZoomedIcon(proposal, n));
                },
 
-               _renderZoomed: function(proposal, n) {
+               _makeZoomedIcon: function(proposal, n) {
                    var factor = Math.pow(2, n),
                        size = L.point(100*factor, 75*factor),
                        html = ["<img class='thumb' src='", proposal.getThumb(),  "'/>",
                                "<div class='", getBadgeClassName(proposal),
-                               "'>", "</div>"].join("");
+                               "'>", "</div>"].join(""),
+                       icon = L.divIcon({
+                           className: "zoomed-proposal-marker",
+                           iconSize: size,
+                           iconAnchor: null,
+                           html: html
+                       });
 
-                   this.setIcon(L.divIcon({
-                       className: "zoomed-proposal-marker",
-                       iconSize: size,
-                       html: html
-                   }));
+                   return icon;
                },
 
                unsetZoomed: function() {
