@@ -60,7 +60,7 @@ def welcome_context(subscription):
 
 def replace_subscription_context(subscription, existing):
     return {
-        "subscription": subscription.readable_description,
+        "subscription": subscription.readable_description(),
         "minimap_src": subscription.minimap_src,
         "old_minimap_src": existing.minimap_src,
         "confirmation_link": make_absolute_url(subscription.confirm_url, subscription.site_name)

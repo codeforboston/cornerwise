@@ -1,6 +1,7 @@
 import urllib
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import F, Q
@@ -22,6 +23,15 @@ def make_token():
     :returns: (str) an authentication token
     """
     return b64encode(os.urandom(32)).decode("utf-8")
+
+
+def prettify_point(pt):
+    return prettify_lat(pt.y) + ", " + prettify_long(pt.x)
+
+
+def poly_bounds(poly):
+    bounds = poly.envelope.tuple[0]
+    return bounds[2], bounds[0]
 
 
 class UserProfile(models.Model):
@@ -144,6 +154,8 @@ class Subscription(models.Model):
                    "radius should be set."),
         db_index=True,
         null=True)
+    address = models.CharField(max_length=64, blank=True,
+                               help_text="Optional address for the center point")
     region_name = models.CharField(
         help_text="Only subscribe to updates in this region",
         db_index=True,
@@ -249,7 +261,8 @@ class Subscription(models.Model):
         return config.validate_subscription_query(self, q)
 
     @staticmethod
-    def readable_query(query):
+    def readable_query(query, unit="ft"):
+        # NOTE Not currently used, but may be useful again in the future
         if "projects" in query:
             if query["project"] == "all":
                 desc = "Public proposals "
@@ -262,18 +275,44 @@ class Subscription(models.Model):
             desc += "matching \"" + query["text"] + "\" "
 
         if "box" in query:
-            coords = [float(s) for s in query["box"].split(",")]
+            box = bounds_from_box(query["box"])
+            sw, ne = poly_bounds(box)
             desc += "".join(["inside the region: ",
-                             prettify_lat(coords[0]), ", ",
-                             prettify_long(coords[1]), " and ",
-                             prettify_lat(coords[2]), ", ",
-                             prettify_long(coords[3])])
+                             prettify_point(sw), " and ", prettify_point(ne)])
+        elif "center" in query:
+            dist = D(m=query["r"])
 
         return desc
 
-    @property
-    def readable_description(self):
-        return self.readable_query(self.query_dict)
+    def readable_description(self, dist_units="ft"):
+        desc = "projects "
+        if self.box:
+            sw, ne = poly_bounds(self.box)
+            desc += f"inside the region: {prettify_point(sw)} and {prettify_point(ne)}"
+        elif self.center:
+            dist = round(getattr(D(m=self.radius), dist_units))
+            desc += "within {dist}{dist_units} of {where}".format(
+                dist=dist,
+                dist_units=dist_units,
+                where=(self.address or prettify_point(self.center))
+            )
+
+        desc += f" ({self.region_name})"
+
+        return desc
+
+    def make_url(self):
+        center = self.center or self.box.centroid
+        params = urllib.parse.urlencode({
+            "view": "main",
+            "lat": center.y,
+            "lng": center.x,
+            "zoom": 17,
+            "ref.lat": center.y,
+            "ref.lng": center.x,
+            "ref.address": self.address,
+        })
+        return reverse("front-page") + "#" + params
 
     @property
     def minimap_src(self):
@@ -285,9 +324,7 @@ class Subscription(models.Model):
             box = center.buffer(self.radius/111000)
 
         if box:
-            bounds = box.envelope.tuple[0]
-            sw = bounds[2]
-            ne = bounds[0]
+            sw, ne = poly_bounds(box)
             return settings.MINIMAP_SRC\
                 .format(swlat=sw[1], swlon=sw[0],
                         nelat=ne[1], nelon=ne[0],

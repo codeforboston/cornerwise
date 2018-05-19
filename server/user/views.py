@@ -62,7 +62,8 @@ def subscribe(request):
         new_user = True
 
     try:
-        subscription = Subscription(site_name=request.site_name)
+        subscription = Subscription(site_name=request.site_name,
+                                    address=request.POST.get("address"))
         subscription.set_validated_query(query_dict)
         subscription.user = user
         subscription.save()
