@@ -4,13 +4,11 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                initialize: function(options) {
                    this.options = options;
                    this.mapView = options.mapView;
-                   this._pointRadiusSubscription = !!(options.maxRadius);
 
                    this.listenTo(options.refLocation, "change", this.onRefChanged);
 
-                   if (this._pointRadiusSubscription) {
+                   if (options.distanceSubscription)
                        $("#subscribe").hide();
-                   }
                },
 
                events: {
@@ -28,12 +26,14 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                },
 
                onRefChanged: function(refLocation) {
-                   if (this._pointRadiusSubscription && refLocation.changed.setMethod &&
+                   if (this.options.distanceSubscription &&
+                       refLocation.changed.setMethod &&
                        refLocation.changed.setMethod !== "auto") {
                        $("#subscribe").show();
                    }
                    if (this._radiusCircle) {
                        this._radiusCircle.setLatLng(refLocation.getPoint());
+                       this._radiusCircle.setRadius(refLocation.getRadiusMeters());
                    }
                },
 
@@ -50,19 +50,17 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                    this.showSubscriptionForm();
                    this.removeCircle();
 
-                   if (this._pointRadiusSubscription) {
-                       if (!opts.minRadius ||
-                           opts.minRadius === opts.maxRadius) {
-                           var radius = opts.minRadius * 0.3048,
-                               c =  L.circle(opts.refLocation.getPoint(),
-                                             _.extend({ radius: radius },
-                                                      opts.circleStyle))
-                               .addTo(this.mapView.getMap());
-                           this._radiusCircle = c;
-                           this._currentRadius = radius;
-                       } else {
+                   if (opts.distanceSubscription) {
+                       var radius = opts.refLocation.getRadiusMeters(),
+                           c =  L.circle(opts.refLocation.getPoint(),
+                                         _.extend({ radius: radius },
+                                                  opts.circleStyle))
+                           .addTo(this.mapView.getMap());
+                       this._radiusCircle = c;
+                       this._currentRadius = radius;
+
+                       if (opts.refLocation.radiusConfigurable())
                            this.showRadiusInput();
-                       }
                        $("body").addClass("subscribe-mode choosing-radius");
                    } else {
                        $("body").addClass("subscribe-mode choosing-bounds");
@@ -124,11 +122,14 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                onSubmit: function(e) {
                    var form = e.target,
                        self = this,
-                       query = _.clone(this.collection.query);
+                       query = _.clone(this.collection.query),
+                       refLoc = this.options.refLocation,
+                       address = "";
 
                    if (this._currentRadius) {
-                       query.center = $u.llToString(this.mapView.getCenter());
+                       query.center = $u.llToString(refLoc.getLatLng());
                        query.r = ""+this._currentRadius;
+                       address = refLoc.get("address");
                    } else {
                        query.box = $u.boundsToBoxString(this.mapView.getBounds());
                    }
@@ -136,6 +137,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                    $.ajax("/user/subscribe",
                           {method: "POST",
                            data: {query: JSON.stringify(query),
+                                  address: address,
                                   csrfmiddlewaretoken: $u.getCsrfToken(),
                                   email: form.email.value,
                                   language: navigator.language},

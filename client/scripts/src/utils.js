@@ -273,7 +273,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return o && o.constructor && o.constructor === Object;
            }
 
-           function setIn(obj, ks, v) {
+           function setIn(obj, ks, v, skipNulls=false) {
                if (ks.length === 0)
                    return v;
 
@@ -285,9 +285,14 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                if (ks.length === 1 && k === undefined) {
                    delete obj[k];
                } else {
-                   obj[k] = setIn(obj[k] || {},
-                                  ks.slice(1),
-                                  v);
+                   if (ks.length === 1) {
+                       if (v !== null || !skipNulls)
+                           obj[k] = v;
+                   } else {
+                       obj[k] = setIn(obj[k] || {},
+                                      ks.slice(1),
+                                      v, skipNulls);
+                   }
                }
                return obj;
            }

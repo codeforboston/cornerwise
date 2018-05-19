@@ -34,7 +34,7 @@ define(["backbone", "underscore", "config", "utils"],
                         * entry in the history.  If the user navigates back, it
                         * will skip over the current state.
                         */
-                       setHashState: function(o, replace, quiet) {
+                       setHashState: function(o, replace) {
                            var query = $u.encodeQuery(o);
 
                            // No change:
@@ -84,35 +84,35 @@ define(["backbone", "underscore", "config", "utils"],
                         *
                         * @returns {Object}
                         */
-                       changeHash: function(f, replace, quiet) {
-                           return this.setHashState(f(this.getHashState()), replace, quiet);
+                       changeHash: function(f, replace) {
+                           return this.setHashState(f(this.getHashState()), replace);
                        },
 
-                       changeHashKey: function(key, f, replace, quiet) {
-                           return this.setHashKey(key, f(this.getKey(key)), replace, quiet);
+                       changeHashKey: function(key, f, replace) {
+                           return this.setHashKey(key, f(this.getKey(key)), replace);
                        },
 
                        /**
                         * @param {Object} o
                         */
-                       extendHash: function(o, replace, quiet) {
-                           return this.setHashState(_.extend(this.getHashState(), o), replace, quiet);
+                       extendHash: function(o, replace) {
+                           return this.setHashState(_.extend(this.getHashState(), o), replace);
                        },
 
-                       setHashKey: function(k, v, replace, quiet) {
+                       setHashKey: function(k, v, replace, skipNulls) {
                            var hashObject = this.getHashState(),
                                ks = _.isArray(k) ? k : k.split(".");
 
-                           $u.setIn(hashObject, ks, v);
-                           return this.setHashState(hashObject, replace, quiet);
+                           $u.setIn(hashObject, ks, v, skipNulls);
+                           return this.setHashState(hashObject, replace);
                        },
 
-                       clearHashKey: function(k, replace, quiet) {
+                       clearHashKey: function(k, replace) {
                            var hashObject = $u.decodeQuery(B.history.getHash()),
                                ks = _.isArray(k) ? k : k.split(".");
 
                            $u.setIn(hashObject, ks, undefined);
-                           return this.setHashState(hashObject, replace, quiet);
+                           return this.setHashState(hashObject, replace);
                        },
 
                        goBack: function(defaultView) {

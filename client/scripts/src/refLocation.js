@@ -11,7 +11,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    lat: config.refPointDefault.lat,
                    lng: config.refPointDefault.lng,
                    // The search radius, centered on the current latitude and longitude:
-                   radius: null,
+                   r: config.minSubscribeRadius,
                    // Typical values:
                    //  - "auto": using the default coords
                    //  - "geolocate": set from the user's browser
@@ -32,13 +32,19 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                checkedAttrs: function(ref, attrs) {
                    var lat = parseFloat(ref.lat),
-                       lng = parseFloat(ref.lng);
+                       lng = parseFloat(ref.lng),
+                       r = parseInt(ref.r),
+                       change = {};
 
                    if (!isNaN(lat) && !isNaN(lng)) {
-                       return _.extend({}, ref, {lat: lat, lng: lng});
+                       change = {lat: lat, lng: lng};
                    }
 
-                   return null;
+                   if (!isNaN(r)) {
+                       change.r = Math.max(config.minSubscribeRadius, Math.min(config.maxSubscribeRadius, r));
+                   }
+
+                   return (!_.isEmpty(change)) ? _.extend({}, ref, change) : null;
                },
 
                checkedSet: function(ref, oldRef) {
@@ -57,8 +63,13 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    return L.latLng(this.get("lat"), this.get("lng"));
                },
 
+               radiusConfigurable: function() {
+                   return config.minSubscribeRadius &&
+                       config.minSubscribeRadius !== config.maxSubscribeRadius;
+               },
+
                getRadiusMeters: function() {
-                   var r = this.get("radius");
+                   var r = this.get("r");
                    return r && $u.feetToM(r);
                },
 
@@ -101,8 +112,9 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                        lat: lat,
                        lng: long,
                        setMethod: address ? "address" : "map",
-                       address: address || ""
-                   });
+                       address: address || "",
+                       r: this.defaults.r !== this.get("r") ? this.get("r") : this.defaults.r
+                   }, null, true);
                },
 
                setFromAddress: function(addr) {

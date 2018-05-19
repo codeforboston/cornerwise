@@ -115,8 +115,7 @@ define(
                     el: "#subscribe",
                     mapView: appViews.mapView,
                     refLocation: refLocation,
-                    minRadius: config.minSubscribeRadius,
-                    maxRadius: config.maxSubscribeRadius,
+                    distanceSubscription: !!(config.minSubscribeRadius || config.maxSubscribeRadius),
                     circleStyle: config.subscribeCircleStyle,
                     instructions: config.subscribeInstructions
                 });
