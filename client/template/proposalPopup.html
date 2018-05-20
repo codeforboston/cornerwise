@@ -2,11 +2,15 @@
     <h4> <%- proposal.get("address") %> </h4>
     <h5> <%- proposal.get("region_name") %> </h5>
 
-    <% var complete = proposal.get("complete"), status = proposal.get("status")
-
+    <% var complete = proposal.get("complete"), status = proposal.get("status");
     %>
     <a class="proposal-badge <%- status.match(/approved/i) ? 'proposal-approved' : 'proposal-denied' %>"
-       title="Proposal <%- status %> on <%- shortDate(complete) %>">
+    <% if (complete) { %>
+       title="Proposal <%- status %> on <%- shortDate(complete) %>"
+    <% } else { %>
+        title="Proposal under review"
+    <% } %>
+        >
     </a>
     
     <div class="applicant">
