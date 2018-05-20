@@ -12,7 +12,7 @@ def not_logged_in(request):
 
 def with_user(view_fn):
     def wrapped_fn(request, *args, **kwargs):
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             return view_fn(request, request.user, *args, **kwargs)
         else:
             try:

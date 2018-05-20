@@ -39,6 +39,9 @@ def make_response(template=None, error_template="error.djhtml",
             should_redirect_back = redirect_back
             try:
                 data = view(req, *args, **kwargs)
+
+                if isinstance(data, HttpResponse):
+                    return data
                 if shared_context:
                     data.update(shared_context)
             except ErrorResponse as err:
@@ -95,41 +98,21 @@ def json_view(view):
 
     return json_handler
 
-def make_redirect_response(redirect_to_url=None, redirect_to=None):
-    """
-    Decorator function that converts the return value of the decorated view
-    function into a message (django.contrib.messsages) then redirects to a
-    specified URL or named url.
-    """
-    def constructor_fn(view):
-        def wrapped_view(req, *args, **kwargs):
-            try:
-                data = view(req, *args, **kwargs)
-                extra_tags = None
-                if isinstance(data, str):
-                    message = data
-                    level = messages.SUCCESS
-                elif isinstance(data, dict):
-                    level = data.get("level", "success")
-                    level = getattr(messages, level.upper())
-                    message = json.dumps(data, cls=DjangoJSONEncoder)
-                    extra_tags = "json"
-                elif isinstance(data, tuple):
-                    (message, level) = data
 
-                if isinstance(level, str):
-                    level = getattr(messages, level.upper())
+def make_message(request, data):
+    extra_tags = None
+    if isinstance(data, str):
+        message = data
+        level = messages.SUCCESS
+    elif isinstance(data, dict):
+        level = data.get("level", "success")
+        level = getattr(messages, level.upper())
+        message = json.dumps(data, cls=DjangoJSONEncoder)
+        extra_tags = "json"
+    elif isinstance(data, tuple):
+        (message, level) = data
 
-                messages.add_message(req, level, message, extra_tags=extra_tags)
-            except ErrorResponse as err:
-                messages.error(req, err.data["error"])
+    if isinstance(level, str):
+        level = getattr(messages, level.upper())
 
-            url = redirect_to_url or \
-                  (redirect_to and reverse(redirect_to)) or \
-                  "/#view=main"
-
-            return redirect(url)
-
-        return wrapped_view
-
-    return constructor_fn
+    messages.add_message(request, level, message, extra_tags=extra_tags)

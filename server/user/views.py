@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
@@ -13,7 +14,7 @@ import logging
 
 import pytz
 
-from shared.request import make_response, make_redirect_response, ErrorResponse
+from shared.request import make_response, make_message, ErrorResponse
 from shared.mail import render_email_body
 from user import tasks
 from .contact import ContactForm
@@ -81,7 +82,7 @@ def subscribe(request):
     }
 
 
-@make_redirect_response()
+@make_response()
 def confirm(request):
     try:
         user = authenticate(pk=request.GET["uid"], token=request.GET["token"])
@@ -94,13 +95,14 @@ def confirm(request):
         else:
             subscription = user.subscriptions.all().order_by("-created")[0]
         subscription.confirm()
-        return {
+        make_message(request, {
             "title": "Subscription confirmed",
             "text": ("Now that we know you are who you say you are, "
                      "we'll send you updates about projects in the "
                      "area you selected."),
             "tags": "success"
-        }
+        })
+        return redirect(subscription.map_url)
     except KeyError as kwerr:
         raise ErrorResponse("Missing required param: " + kwerr.args[0])
     except Subscription.DoesNotExist:
