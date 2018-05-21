@@ -113,6 +113,7 @@ query_params = {
 def build_proposal_query_dict(d):
     subqueries = {}
     ids = run_attributes_query(d) or []
+    defaults = {"status": "active"}
 
     if "id" in d:
         ids = re.split(r"\s*,\s*", d["id"])
@@ -146,7 +147,8 @@ def build_proposal_query_dict(d):
             subqueries["parcel_id__in"] = parcel_ids
 
     if "parcel" in d:
-        subqueries["parcel_pk__in"] = d["parcel"].split(",")
+        subqueries["parcel__pk__in"] = d["parcel"].split(",")
+        defaults["status"] = "all"
 
     if "box" in d:
         subqueries["location__within"] = bounds_from_box(d["box"])
@@ -154,17 +156,17 @@ def build_proposal_query_dict(d):
         subqueries["location__distance_lte"] = (point_from_str(d["center"]),
                                                 float(d["r"]))
 
+    if "event" in d:
+        subqueries["event__in"] = d["event"].split(",")
+        defaults["status"] = "all"
+
     # If status is anything other than 'active' or 'closed', find all
     # proposals.
-    status = d.get("status", "active").lower()
+    status = d.get("status", defaults["status"]).lower()
     if status == "closed":
         subqueries["complete__isnull"] = False
     elif status == "active":
         subqueries["complete__isnull"] = True
-
-    event = d.get("event")
-    if event:
-        subqueries["event"] = int(event)
 
     for k in d:
         if k in query_params:

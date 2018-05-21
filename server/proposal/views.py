@@ -74,7 +74,12 @@ def layer_json(layer):
 # Views:
 @make_response("list.djhtml")
 def list_proposals(req):
-    query = reduce(or_, (build_proposal_query(json.loads(q)) for q in req.GET.getlist("query")), Q())
+    queries = req.GET.getlist("query")
+    if queries:
+        query = reduce(or_, (build_proposal_query(json.loads(q))
+                             for q in queries), Q())
+    else:
+        query = build_proposal_query(req.GET)
     proposals = Proposal.objects.filter(query)
     if "include_projects" in req.GET:
         proposals = proposals.select_related("project")

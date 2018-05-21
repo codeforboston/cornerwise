@@ -8,4 +8,5 @@ urlpatterns = [
     path(r"find", views.find_parcels, name="find"),
     re_path(r"^loc_id/(F_[\d_]+)$", views.parcel_with_loc_id,
             name="lookup-by-loc"),
+    re_path(r"^(?P<pk>\d+)$", views.view_parcel),
 ]
