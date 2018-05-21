@@ -5,14 +5,20 @@
 
 {% block extrahead %}
 <style type="text/css">
-    .log-output {
-        font-family: monospace;
-        font-size: small;
-        max-height: 80vh;
-        overflow: auto;
-        white-space: pre-wrap;
-    }
-    </style>
+ .log-output {
+     font-family: monospace;
+     font-size: small;
+     max-height: 80vh;
+     overflow: auto;
+     white-space: pre-wrap;
+ }
+
+ .empty-log {
+     color: gray;
+     font-size: large;
+     font-style: italic;
+ }
+</style>
 {% endblock %}
 
 {% block coltype %}colMS{% endblock %}
@@ -24,10 +30,16 @@
         {% for task_id, log in logs.items %}
             <div>
                 <h3>{{ task_id }}</h3>
+                {% if log|length %}
                 <div class="log-output">
 {% for line in log %}{{ line }}
 {% endfor %}
                 </div>
+                {% else %}
+                <div class="empty-log">
+                    No log messages
+                </div>
+                {% endif %}
             </div>
         {% endfor %}
     </div>

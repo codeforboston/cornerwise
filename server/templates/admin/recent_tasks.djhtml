@@ -4,6 +4,10 @@
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
 
 {% block extrahead %}
+    <style type="text/css">
+     .success { color: green; }
+     .failure { color: red; }
+    </style>
 {% endblock %}
 
 {% block coltype %}colMS{% endblock %}
@@ -14,7 +18,12 @@
     <ul>
         {% for task_name, task_id, state in tasks %}
             <li>
-                {{ task_name }} ({{ task_id }}) &mdash; {{ state }}
+                {{ task_name }} ({{ task_id }}) &mdash;
+                {% if state == 'SUCCESS' %}
+                    <span class="success">{{ state }}</span>
+                {% else %}
+                    <span class="failure">{{ state }}</span>
+                {% endif %}
                 <br/>
                 <a href="{% url 'task_logs' %}?task_id={{ task_id }}">
                     View Log Output
