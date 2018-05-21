@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.admin.widgets import AutocompleteSelectMultiple
 from django.contrib.auth.decorators import permission_required
+from django.contrib.gis.geos import MultiPoint
 from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
 from django.utils.html import escape
@@ -278,11 +279,16 @@ def do_send(user, cleaned):
             sub.pk, title,
             f"{title_markup}{message}<br/><hr/><br/>{boilerplate}<br/>")
 
+    points = MultiPoint(*chain(
+        (p.location for p in cleaned["proposals"]),
+        (a[1] for a in cleaned["coded_addresses"])
+    ))
     return StaffNotification.objects.create(title=cleaned["title"],
                                             sender=user,
                                             addresses=cleaned["addresses"],
                                             proposals=",".join(p.pk for p in cleaned["proposals"]),
                                             radius=cleaned["notification_radius"].m,
+                                            points=points,
                                             message=cleaned["message"],
                                             subscribers=len(subscribers),
                                             region=cleaned["region"])
@@ -314,5 +320,4 @@ def send_user_notification(request):
     # Otherwise, send it!
     message = do_send(request.user, saved["cleaned"])
     messages.success(request, f"Message sent to {message.subscribers} subscribers.")
-
     return redirect("admin:index")

@@ -1,4 +1,4 @@
-from django.db import models
+from django.contrib.gis.db import models
 
 from django.contrib.auth import get_user_model
 
@@ -18,6 +18,7 @@ class Actions(models.Model):
 class StaffNotification(models.Model):
     title = models.CharField(max_length=100)
     sender = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    points = models.MultiPointField(null=True)
     addresses = models.TextField(blank=True, default="")
     proposals = models.TextField(blank=True, default="")
     radius = models.FloatField()
