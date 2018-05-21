@@ -84,12 +84,7 @@ def mail_inbound(request):
 
 def deactivate_account(request, user):
     user.profile.deactivate()
-    tasks.send_deactivation_email.delay(user)
+    tasks.send_deactivation_email.delay(user.id)
 
 
-def reset_account(request, user):
-    user.profile.generate_token()
-    tasks.send_reset_email.delay(user)
-
-
-email_commands = {"deactivate": deactivate_account, "reset": reset_account}
+email_commands = {"deactivate": deactivate_account}

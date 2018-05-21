@@ -26,6 +26,11 @@ def _make_user_context(subscription, context):
     return context
 
 
+def deactivate_context(user):
+    return {"user": user,
+            "subscriptions": user.subscriptions.filter(active=True)}
+
+
 def updates_context(sub, updates):
     """Constructs the context for the subscription updates email.
     """

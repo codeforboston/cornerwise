@@ -52,7 +52,8 @@ def send_deactivation_email(user_id):
     """Sends the email when a user is unsubscribed.
     """
     user = User.objects.get(pk=user_id)
-    send_mail(user.email, "Cornerwise: Unsubscribed", "account_deactivated")
+    send_mail(user.email, "Cornerwise: Unsubscribed", "account_deactivated",
+              mail.deactivate_context(user), use_generic_template=True)
 
 
 @shared_task(bind=True)
