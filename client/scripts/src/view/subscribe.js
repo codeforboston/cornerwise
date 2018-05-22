@@ -56,6 +56,7 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                                          _.extend({ radius: radius },
                                                   opts.circleStyle))
                            .addTo(this.mapView.getMap());
+                       this.mapView.getMap().fitBounds(c.getBounds());
                        this._radiusCircle = c;
                        this._currentRadius = radius;
 
