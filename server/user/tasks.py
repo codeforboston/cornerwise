@@ -43,7 +43,7 @@ def send_subscription_updates(subscription, since):
 def send_user_welcome(subscription):
     """Send an email requesting confirmation of a subscription.
     """
-    send_mail(subscription.user.email, "Cornerwise: Welcome", "welcome",
+    send_mail(subscription.user.email, "Cornerwise: Please Confirm", "welcome",
               mail.welcome_context(subscription))
 
 
@@ -83,14 +83,11 @@ def send_subscription_confirmation_email(self, sub_id):
         # The user doesn't have any active Subscriptions
         return
 
-    # Prefetch the minimap images. The CDN will cache it, and subsequent loads
-    # will have much lower latency:
-    request.urlopen(subscription.minimap_src).close()
-    request.urlopen(existing.minimap_src).close()
-
-    send_mail(user.email, "Cornerwise: Confirm New Subscription",
-              "replace_subscription", mail.replace_subscription_context(subscription),
-              logger=logger)
+    send_mail(
+        user.email, "Cornerwise: Confirm Subscription Change",
+        "replace_subscription",
+        mail.replace_subscription_context(subscription, existing),
+        logger=logger)
 
 
 @shared_task(bind=True)

@@ -75,9 +75,9 @@ def render_email_body(template_name, context=None):
     with substitutions provided by `context`.
     """
     context = {} if context is None else context
-    html = render_to_string("email/" + template_name + ".djhtml", context)
+    html = render_to_string(f"email/{template_name}.djhtml", context)
     try:
-        text = render_to_string("email/" + template_name + ".djtxt", context)
+        text = render_to_string(f"email/{template_name}.djtxt", context)
     except TemplateDoesNotExist:
         text = strip_tags(html)
 

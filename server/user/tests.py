@@ -133,7 +133,7 @@ class TestSubscribeEndpoint(TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         message: mail.EmailMultiAlternatives = mail.outbox[0]
-        self.assertTrue("welcome" in message.subject.lower())
+        self.assertTrue("confirm" in message.subject.lower())
 
         subs = getattr(message, "substitutions")
         self.assertIsInstance(subs, dict)
