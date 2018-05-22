@@ -331,7 +331,7 @@ class Subscription(models.Model):
             "ref.lng": center.x,
             "ref.r": self.radius,
             "ref.address": self.address,
-        })
+        }, quote_via=urllib.parse.quote)
         return reverse("front-page") + "#" + params
 
     @property
