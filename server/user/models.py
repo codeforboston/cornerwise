@@ -127,7 +127,11 @@ class SubscriptionQuerySet(models.QuerySet):
 
 
 class Subscription(models.Model):
-    # The subscription belong to a registered user:
+    """A Subscription contains a saved query. Cornerwise checks it for updates
+    every few days and sends the user a digest
+
+    """
+    # The subscription belongs to a registered user:
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name="subscriptions",
                              on_delete=models.CASCADE)
@@ -190,10 +194,11 @@ class Subscription(models.Model):
             raise ValidationError("must have either a circle or box set",
                                   params=["center", "radius"])
 
-        # TODO: If there's an associated region, check that the center lies
-        # inside its bounds, if known.
-
     def confirm(self):
+        """Activate this subscription. If multiple subscriptions are disallowed,
+        deactivate the user's currently active subscriptions.
+
+        """
         if settings.LIMIT_SUBSCRIPTIONS:
             # Disable all this user's other subscriptions:
             self.user.subscriptions\
@@ -234,8 +239,8 @@ class Subscription(models.Model):
         return q
 
     def set_validated_query(self, q):
-        """
-        Ensures that the query, a dict, is well-formed and valid.
+        """Ensures that the query, a dict, is well-formed and valid.
+
         """
         if "box" in q:
             self.box = bounds_from_box(q["box"])
@@ -253,6 +258,12 @@ class Subscription(models.Model):
         self.query = pickle.dumps(q)
 
     def validate_site_settings(self, q):
+        """If the Subscription has an associated site name, perform additional
+        validation of the subscription params according to the specific rules
+        for that site. Called after the properties have been successfully
+        deserialized and set.
+
+        """
         if not self.site_name:
             return q
 
@@ -285,6 +296,9 @@ class Subscription(models.Model):
         return desc
 
     def readable_description(self, dist_units="ft"):
+        """Returns a brief textual description of the subscription.
+
+        """
         desc = "projects "
         if self.box:
             sw, ne = poly_bounds(self.box)
@@ -301,7 +315,12 @@ class Subscription(models.Model):
 
         return desc
 
-    def make_url(self):
+    @property
+    def map_url(self):
+        """Creates a link to the main map page with the center of the map set to the
+        center of the subscription.
+
+        """
         center = self.center or self.box.centroid
         params = urllib.parse.urlencode({
             "view": "main",
@@ -310,6 +329,7 @@ class Subscription(models.Model):
             "zoom": 17,
             "ref.lat": center.y,
             "ref.lng": center.x,
+            "ref.r": self.radius,
             "ref.address": self.address,
         })
         return reverse("front-page") + "#" + params

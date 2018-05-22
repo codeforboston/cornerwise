@@ -10,7 +10,7 @@ from dateutil.parser import parse as parse_date
 
 from .models import Attribute, local_now, localize_dt
 from parcel.models import LotSize, LotQuantiles
-from utils import bounds_from_box, point_from_str
+from utils import bounds_from_box, distance_from_str, point_from_str
 
 
 # TODO: Rewrite considering parcels
@@ -111,6 +111,24 @@ query_params = {
 
 
 def build_proposal_query_dict(d):
+    """Constructs the keyword arguments to a Django ORM query from a dict passed in
+    by a user, either directly from a request or from a saved query, such as a
+    Subscription. All keys and values in the dict are expected to be strings.
+
+    Keys considered:
+
+    - id: comma-separated Proposal pks
+    - text
+    - region
+    - month - date string
+    - start[/end] - date strings
+    - box - swlat,swlng,nelat,nelng
+    - center/r - lat,lng / distance string (e.g., 300ft)
+    - parcel: comma-separated Parcel pks
+    - event: comma-separated Event pks
+    - status: "closed"/"active"/"all"
+
+    """
     subqueries = {}
     ids = run_attributes_query(d) or []
     defaults = {"status": "active"}
@@ -154,7 +172,7 @@ def build_proposal_query_dict(d):
         subqueries["location__within"] = bounds_from_box(d["box"])
     elif "center" in d and "r" in d:
         subqueries["location__distance_lte"] = (point_from_str(d["center"]),
-                                                float(d["r"]))
+                                                distance_from_str(d["r"]))
 
     if "event" in d:
         subqueries["event__in"] = d["event"].split(",")
