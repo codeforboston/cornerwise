@@ -65,7 +65,7 @@ def welcome_context(subscription):
 
 
 def replace_subscription_context(subscription, existing):
-    return {
+    return _make_user_context(subscription, {
         "subscription": subscription.readable_description(),
         "minimap_src": subscription.minimap_src,
         "description": subscription.readable_description(),
@@ -74,7 +74,7 @@ def replace_subscription_context(subscription, existing):
         "old_description": existing.readable_description(),
         "old_frequency": "once a week",
         "confirmation_link": make_absolute_url(subscription.confirm_url, subscription.site_name)
-    }
+    })
 
 
 def staff_notification_context(subscription, title, message):
