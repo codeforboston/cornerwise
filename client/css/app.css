@@ -1396,7 +1396,7 @@ a.thumb-link:hover {
     margin-bottom: 0.5em;
 }
 
-.popup-contents .proposal-badge {
+.proposal-badge {
     background: center / 60% no-repeat url(/static/images/pending.png);
 
     height: 30px;
@@ -1406,11 +1406,11 @@ a.thumb-link:hover {
     top: 5px;
 }
 
-.complete-badge.proposal-denied {
+.proposal-badge.proposal-denied {
     background: center / 60% no-repeat url(/static/images/denied.png);
 }
 
-.complete-badge.proposal-approved {
+.proposal-badge.proposal-approved {
     background: center / 60% no-repeat url(/static/images/approved.png);
 }
 
