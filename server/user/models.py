@@ -334,8 +334,7 @@ class Subscription(models.Model):
         }, quote_via=urllib.parse.quote)
         return reverse("front-page") + "#" + params
 
-    @property
-    def minimap_src(self):
+    def minimap_src(self, circle_color=None):
         if self.box:
             box = self.box
         else:
@@ -345,10 +344,14 @@ class Subscription(models.Model):
 
         if box:
             sw, ne = poly_bounds(box)
+
+            circle = f"{int(self.radius)}" if self.radius else ""
+            if circle_color and self.radius:
+                circle += ",{circle_color}"
             return settings.MINIMAP_SRC\
                 .format(swlat=sw[1], swlon=sw[0],
                         nelat=ne[1], nelon=ne[0],
-                        circle=int(self.radius or 0))
+                        circle=circle)
         else:
             return None
 

@@ -237,7 +237,7 @@
                 {"$ref": "#/definitions/link"},
 
                 {"properties": {
-                    "content-type": {
+                    "content_type": {
                         "description": "MIME type of the document",
                         "type": "string"
                     }}

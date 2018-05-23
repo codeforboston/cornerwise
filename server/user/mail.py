@@ -58,7 +58,7 @@ def welcome_context(subscription):
 
     return _make_user_context(subscription, {
         "confirm_url": make_absolute_url(profile.confirm_url, subscription.site_name),
-        "minimap_src": subscription.minimap_src,
+        "minimap_src": subscription.minimap_src(),
         "description": subscription.readable_description(),
         "frequency_description": "once a week",
     })
@@ -67,10 +67,10 @@ def welcome_context(subscription):
 def replace_subscription_context(subscription, existing):
     return _make_user_context(subscription, {
         "subscription": subscription.readable_description(),
-        "minimap_src": subscription.minimap_src,
+        "minimap_src": subscription.minimap_src(),
         "description": subscription.readable_description(),
         "frequency_description": "once a week",
-        "old_minimap_src": existing.minimap_src,
+        "old_minimap_src": existing.minimap_src("red"),
         "old_description": existing.readable_description(),
         "old_frequency": "once a week",
         "confirmation_link": make_absolute_url(subscription.confirm_url, subscription.site_name)
