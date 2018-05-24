@@ -26,7 +26,7 @@
         </script>
         {% if production %}
             <link rel="stylesheet" href="/static/build/{{ css_filename }}" type="text/css" media="screen" />
-            <script src="/static/build/{{ js_filename }}"/>
+            <script src="/static/build/{{ js_filename }}"></script>
         {% else %}
             <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.2/leaflet.css" />
             <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
