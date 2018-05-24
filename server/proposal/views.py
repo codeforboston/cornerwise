@@ -129,10 +129,15 @@ def closed_proposals(req):
 
 @make_response("view.djhtml")
 def view_proposal(req, pk=None):
-    if not pk:
-        pk = req.GET.get("pk")
+    pk = req.GET.get("pk", pk)
+    lookup = req.site_config.query_defaults.copy()
+    if pk:
+        lookup["pk"] = pk
+    else:
+        if "case_number" in req.GET:
+            lookup["case_number"] = req.GET["case_number"]
 
-    proposal = get_object_or_404(Proposal, pk=pk)
+    proposal = get_object_or_404(Proposal, **lookup)
 
     return proposal_json(
         proposal,
