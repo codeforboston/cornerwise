@@ -72,12 +72,11 @@ define(["backbone", "underscore", "appState", "utils"],
                            url: url
                        }).fail(function(err) {
                            self.trigger("fetchingFailed");
-                       }).done(function(result) {
-                           var proposals = self.parse(result),
-                               paginator = result.paginator;
+                       }).done(function(proposals) {
+                           var paginator = proposals.paginator;
                            if (paginator) {
-                               if (!loaded++) self.set(proposals);
-                               else self.add(proposals);
+                               if (!loaded++) self.set(proposals, {parse: true});
+                               else self.add(proposals, {parse: true});
 
                                if (paginator.next_url) {
                                    self.trigger("fetchedPage", paginator.page, proposals);
@@ -85,7 +84,7 @@ define(["backbone", "underscore", "appState", "utils"],
                                    return doGet(paginator.next_url);
                                }
                            } else {
-                               self.set(proposals);
+                               self.set(proposals, {parse: true});
                            }
 
                            self.trigger("fetchingComplete");
