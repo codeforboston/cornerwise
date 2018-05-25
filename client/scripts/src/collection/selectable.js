@@ -59,7 +59,45 @@ define(["backbone", "underscore", "appState", "utils"],
                    }
                },
 
+               fetchPaginated: function(options) {
+                   this.trigger("fetching");
+
+                   var loaded = 0,
+                       self = this;
+
+                   function doGet(url) {
+                       return $.ajax({
+                           dataType: "json",
+                           method: "get",
+                           url: url
+                       }).fail(function(err) {
+                           self.trigger("fetchingFailed");
+                       }).done(function(result) {
+                           var proposals = self.parse(result),
+                               paginator = result.paginator;
+                           if (paginator) {
+                               if (!loaded++) self.set(proposals);
+                               else self.add(proposals);
+
+                               if (paginator.next_url) {
+                                   self.trigger("fetchedPage", paginator.page, proposals);
+
+                                   return doGet(paginator.next_url);
+                               }
+                           } else {
+                               self.set(proposals);
+                           }
+
+                           self.trigger("fetchingComplete");
+                           return proposals;
+                       });
+                   }
+
+                   return doGet(this.url());
+               },
+
                fetch: function() {
+                   return this.fetchPaginated();
                    this.trigger("fetching");
                    var xhr = B.Collection.prototype.fetch.apply(this, arguments);
                    var self = this;
@@ -67,9 +105,15 @@ define(["backbone", "underscore", "appState", "utils"],
                        self.trigger("fetchingFailed");
                    }).always(function() {
                        self.trigger("fetchingComplete");
+                   }).done(function() {
+                       self.fetchComplete();
                    });
 
                    return xhr;
+               },
+
+               fetchComplete: function() {
+
                },
 
                getModelName: function() {

@@ -42,7 +42,7 @@ define(
                 var qp = _.map(queries, function(q) {
                     return "query=" + encodeURIComponent(JSON.stringify(q));
                 }).join("&");
-                return config.backendURL + "/proposal/list?" + qp;
+                return config.backendURL + "/proposal/list?" + qp + "&page=1";
             },
 
             fetch: function() {
