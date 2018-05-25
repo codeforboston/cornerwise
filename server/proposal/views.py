@@ -2,6 +2,7 @@ from celery import shared_task
 from functools import reduce
 import json
 from operator import or_
+from urllib import parse
 
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -9,12 +10,13 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 
 from shared.request import make_response, ErrorResponse
 
 from .models import Proposal, Attribute, Document, Event, Image, Layer
 from .query import build_proposal_query, build_event_query
-from utils import bounds_from_box
+from utils import bounds_from_box, add_params
 
 default_attributes = [
     "applicant_name", "legal_notice", "dates_of_public_hearing"
@@ -71,9 +73,7 @@ def layer_json(layer):
             "region_name": layer.region_name}
 
 
-# Views:
-@make_response("list.djhtml")
-def list_proposals(req):
+def _query(req):
     queries = req.GET.getlist("query")
     if queries:
         query = reduce(or_, (build_proposal_query(json.loads(q))
@@ -83,41 +83,54 @@ def list_proposals(req):
     proposals = Proposal.objects.filter(query)
     if "include_projects" in req.GET:
         proposals = proposals.select_related("project")
-
-    pjson = [
-        proposal_json(
-            proposal, include_images=1) for proposal in proposals
-    ]
-
-    return {"proposals": pjson}
+    return proposals
 
 
-@make_response("list.djhtml")
-def paginated_active_proposals(req):
-    proposal_query = Proposal.objects.filter(build_proposal_query(req.GET))
-    if "include_projects" in req.GET:
-        proposal_query = proposal_query.select_related("project")
-    paginator = Paginator(proposal_query, per_page=100)
-
-    page = req.GET.get("page")
-    try:
-        proposals = paginator.page(page)
-    except PageNotAnInteger:
-        proposals = paginator.page(1)
-    except EmptyPage as err:
-        raise ErrorResponse("No such page", {"page": page}, err=err)
-
-    pjson = [
-        proposal_json(
-            proposal, include_images=1) for proposal in proposals
-    ]
-
+def paginator_context(page, page_url=lambda page: f"?page={page}"):
+    next_page = page.has_next() and page.next_page_number()
+    prev_page = page.has_previous() and page.previous_page_number()
     return {
-        "proposals": pjson,
-        # "count": proposals.paginator.count,
-        "page": proposals.number,
-        "total_pages": proposals.paginator.num_pages
+        "count": page.paginator.count,
+        "total_pages": page.paginator.num_pages,
+        "page": page.number,
+        "next_page": next_page,
+        "next_url": next_page and page_url(next_page),
+        "prev_page": "",
+        "prev_url": prev_page and page_url(prev_page),
     }
+
+
+# Views:
+@make_response("list.djhtml")
+def list_proposals(req):
+    proposals = _query(req)
+
+    page = int(req.GET.get("page"))
+    context = {}
+
+    if page:
+        try:
+            per_page = int(req.GET.get("per_page", 100))
+        except ValueError:
+            per_page = 100
+        paginator = Paginator(proposals, per_page=min(per_page, 100))
+        proposals = paginator.page(page)
+        try:
+            query_params = req.GET.copy()
+            def make_url(page):
+                query_params["page"] = page
+                return req.path + "?" + query_params.urlencode()
+
+            context["paginator"] = paginator_context(proposals, make_url)
+        except (PageNotAnInteger, EmptyPage) as err:
+            raise ErrorResponse("No such page", {"page": page}, err=err)
+
+    context["proposals"] = [
+        proposal_json(
+            proposal, include_images=1) for proposal in proposals
+    ]
+
+    return context
 
 
 @make_response("list.djhtml")

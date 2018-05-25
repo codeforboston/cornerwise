@@ -15,3 +15,7 @@
 .task-failure .task-message.failure-message {
     display: block;
 }
+
+footer {
+    padding: 15px;
+}

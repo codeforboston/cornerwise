@@ -41,4 +41,5 @@
         </div>
     {% endfor %}
         </div>
+        {% include "partial/pagination.djhtml" %}
 {% endblock %}

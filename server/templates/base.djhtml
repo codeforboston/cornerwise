@@ -33,9 +33,9 @@
             {% block footer %}
                 <hr/>
 
-                <p>
-                    <a href="/#view=main" >Go to Cornerwise</a>
-                </p>
+                <footer>
+                    <p><a href="/#view=main" >Go to Cornerwise</a></p>
+                </footer>
             {% endblock %}
         </div>
     </body>

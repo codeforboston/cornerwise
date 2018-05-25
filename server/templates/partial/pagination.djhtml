@@ -1,0 +1,17 @@
+{% if paginator %}
+    <nav aria-label="Page navigator">
+        <ul class="pager">
+            <li class="{% if not paginator.prev_url %}disabled{% endif %}">
+                <a {% if paginator.prev_url %}href="{{ paginator.prev_url }}"{% endif %}>Previous</a>
+            </li>
+            <li>
+                &nbsp;&nbsp;
+                Page {{ paginator.page }} of {{ paginator.total_pages }}
+                &nbsp;&nbsp;
+            </li>
+            <li class="{% if not paginator.next_url %}disabled{% endif %}">
+                <a {% if paginator.next_url  %}href="{{ paginator.next_url }}"{% endif  %}>Next</a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}
