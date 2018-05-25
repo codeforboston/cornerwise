@@ -222,9 +222,6 @@ define(
              */
             geolocate: function(e) {
                 refLocation.setFromBrowser().then(this.reverseGeocodeAddress);
-
-                e.preventDefault();
-                return false;
             },
 
             clearInputs: function(e) {

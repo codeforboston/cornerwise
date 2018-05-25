@@ -20,7 +20,10 @@ class SomervilleConfig(SiteConfig):
         "includeRegions": ["somerville"],
         "minSubscribeRadius": 300,
         "maxSubscribeRadius": 300,
-        "subscribeInstructions": "Double-click on the map or enter an address in the search box above to select your location. Once you've confirmed your email address, we will begin sending you updates about projects within 300 feet of you."
+        "subscribeInstructions": "Double-click on the map or enter an address in the search box above to select your location. Once you've confirmed your email address, we will begin sending you updates about projects within 300 feet of you.",
+        "stateDefaults": {
+            "f": {"status": "all"}
+        }
     }
 
     query_defaults = {"region_name": "Somerville, MA"}

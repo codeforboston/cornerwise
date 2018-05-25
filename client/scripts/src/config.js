@@ -37,6 +37,9 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             dashArray: "5, 5"
         },
 
+        // Default values for application state
+        stateDefaults: null,
+
         // The style that will be applied to the rectangle representing the
         // bounds of the current area filter:
         filterBoundsStyle: {

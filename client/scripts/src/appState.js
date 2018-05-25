@@ -6,7 +6,7 @@ define(["backbone", "underscore", "config", "utils"],
                        _cachedState: null,
 
                        getDefaults: function() {
-                           return {
+                           return $u.deepMerge({
                                // Filters:
                                "f": {
                                    "projects": "",
@@ -20,7 +20,7 @@ define(["backbone", "underscore", "config", "utils"],
                                    "setMethod": "auto"
                                },
                                sort: "-updated"
-                           };
+                           }, config.stateDefaults);
                        },
 
                        getters: {},
