@@ -1,9 +1,37 @@
+.navbar-inverse {
+    background-color: rgba(43, 43, 43, 0.98);
+}
+
 .logo {
     padding: 0.2em;
 }
 
 .logo img {
     max-height: 40px;
+}
+
+#logo {
+    background: url(/static/images/cornerwise-logo.png);
+    display: block;
+    background-position: 50% 0%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: 0.5em;
+    margin-left: 0.75em;
+    margin-top: 0.75em;
+    height: 50px;
+    width: 150px;
+    border: none;
+}
+
+#logo .logo-text {
+    color: #c03233;
+    font-size: small;
+    text-transform: uppercase;
+    position: relative;
+    right: -4.5em;
+    top: 1.5em;
+    text-align: right;
 }
 
 .task-message {
@@ -22,6 +50,30 @@ footer {
 
 .pre {
     white-space: pre-wrap;
+}
+
+.attr-decision .search-link,
+.attr-votes_to_deny .search-link,
+.attr-votes_to_approve .search-link,
+.attr-vote .search-link {
+    display: none;
+}
+
+.search-link {
+    color: #ccc;
+    float: right;
+}
+
+.search-link:hover {
+    text-decoration: none;
+}
+
+a.anchor {
+    color: black;
+}
+
+a.anchor:hover {
+    text-decoration: none;
 }
 
 .grid {

@@ -39,6 +39,10 @@
                 {% endif %}
             </div>
         </div>
+    {% empty %}
+        <div class="row empty">
+            Nothing matched your query
+        </div>
     {% endfor %}
         </div>
         {% include "partial/pagination.djhtml" %}

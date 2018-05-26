@@ -10,7 +10,16 @@
             <table class="table">
                 {% for attribute in attributes %}
                     <tr>
-                        <th>{{ attribute.name }}</th>
+                        <th class="attr-{{ attribute.handle }}">
+                            {{ attribute.name }}
+                            {% if attribute.value|length < 30 %}
+                                <a href="{% url 'list-proposals' %}?attr.{{ attribute.handle }}={{ attribute.value }}"
+                                   class="search-link"
+                                title="Find other proposals with matching attribute value">
+                                    &#9658;
+                                </a>
+                            {% endif %}
+                        </th>
                         <td class="pre">{{ attribute.value }}</td>
                     </tr>
                 {% endfor %}
@@ -38,7 +47,9 @@
         {% endif %}
 
         {% if documents %}
-            <h3>Documents</h3>
+            <h3>
+                <a name="documents" class="anchor">Documents</a>
+            </h3>
             <div class="documents grid">
                 <div class="grid">
                     {% for document in documents %}
@@ -62,7 +73,7 @@
         {% endif %}
 
         {% if images %}
-            <h3>Images</h3>
+            <h3><a name="images" class="anchor">Images</a></h3>
             <div class="images grid" >
                 {% for image in images %}
                     <a href="{{ image.src }}" class="thumbnail">

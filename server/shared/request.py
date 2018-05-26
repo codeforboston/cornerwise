@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render_to_response, render
 
 import logging
 import json
@@ -82,7 +82,7 @@ def make_response(template=None, error_template="error.djhtml",
                     messages.success(req, data["message"])
                     return redirect(back_url or "/")
 
-            return render_to_response(use_template, data, status=status)
+            return render(req, use_template, data, status=status)
 
         return wrapped_view
 

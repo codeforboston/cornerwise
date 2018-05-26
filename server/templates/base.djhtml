@@ -14,8 +14,10 @@
     </head>
     <body>
         <nav class="navbar navbar-inverse">
-            <a href="/" class="logo pull-left">
-                <img src="/static/images/cornerwise-beta-logo.png">
+            <a href="/" id="logo">
+                {% if logo_text %}
+                    <span class="logo-text">{{ logo_text }}</span>
+                {% endif %}
             </a>
 
         </nav>
