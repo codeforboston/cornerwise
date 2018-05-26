@@ -60,7 +60,10 @@ def run_attributes_query(d):
         if not k.startswith("attr."):
             continue
 
-        subqueries.append(Q(handle=k[5:], text_value__contains=val))
+        if k == "attr.*":
+            subqueries.append(Q(text_value__search=val))
+        else:
+            subqueries.append(Q(handle=k[5:], text_value__search=val))
 
     if subqueries:
         query = reduce(Q.__or__, subqueries, Q())
@@ -130,11 +133,17 @@ def build_proposal_query_dict(d):
 
     """
     subqueries = {}
-    ids = run_attributes_query(d) or []
     defaults = {"status": "active"}
 
+    ids = run_attributes_query(d)
+
+    if ids is not None:
+        defaults["status"] = "all"
+
     if "id" in d:
-        ids = re.split(r"\s*,\s*", d["id"])
+        default["status"] = "all"
+        pids = re.split(r"\s*,\s*", d["id"])
+        ids = pids if ids is None else [id for id in pids if id in set(ids)]
 
     if "text" in d:
         subqueries["address__icontains"] = d["text"]
@@ -143,7 +152,7 @@ def build_proposal_query_dict(d):
         regions = re.split(r"\s*;\s*", d["region"])
         subqueries["region_name__in"] = regions
 
-    if ids:
+    if ids is not None:
         subqueries["pk__in"] = ids
 
     time_range = time_query(d)

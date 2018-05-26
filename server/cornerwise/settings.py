@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
+    "django.contrib.postgres",
     "django_celery_results",
     "django_pgviews",
     "tinymce",
