@@ -97,6 +97,7 @@ def paginator_context(page, page_url=lambda page: f"?page={page}"):
         "next_url": next_page and page_url(next_page),
         "prev_page": "",
         "prev_url": prev_page and page_url(prev_page),
+        "per_page": page.paginator.per_page
     }
 
 
@@ -105,7 +106,11 @@ def paginator_context(page, page_url=lambda page: f"?page={page}"):
 def list_proposals(req):
     proposals = _query(req)
 
-    page = int(req.GET.get("page"))
+    try:
+        page = int(req.GET["page"])
+    except (ValueError, KeyError):
+        page = 1
+
     context = {}
 
     if page:

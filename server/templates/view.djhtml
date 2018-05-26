@@ -1,57 +1,72 @@
 {% extends "base.djhtml" %}
 
-{% load humanize %}
+{% load humanize tz %}
 
 {% block body %}
     <div class="view-proposal" >
         <h2>{{ address }}</h2>
 
         {% if attributes %}
-            <table>
+            <table class="table">
                 {% for attribute in attributes %}
                     <tr>
                         <th>{{ attribute.name }}</th>
-                        <td>{{ attribute.value }}</td>
+                        <td class="pre">{{ attribute.value }}</td>
                     </tr>
                 {% endfor %}
             </table>
         {% endif %}
 
+        {% if events %}
+            <h3><a name="events" class="anchor">Related Meetings</a></h3>
+            <div class="list-group">
+                {% for event in events %}
+                    <a class="list-group-item" href="{% url "event" pk=event.id %}">
+                        <h4 class="list-group-item-heading">
+                            {{ event.title }}
+                        </h4>
+                        <p class="list-group-item-text">
+                            {{ event.date }}
+                            <br/>
+                            {{ event.location }}
+                            <br/>
+                            {{ event.region_name }}
+                        </p>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% if documents %}
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="2" >
-                            Documents
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
+            <h3>Documents</h3>
+            <div class="documents grid">
+                <div class="grid">
                     {% for document in documents %}
-                        <tr class="document">
-                            <td class="thumbnail" >
+                        <a class="document" href="{{ document.url }}" target="_blank">
+                            <div class="thumbnail" >
                                 <img src="{{ document.thumb }}"/>
-                            </td>
-                            <td>
-                                <a href="{{document.url}}">
+                            </div>
+                            <div>
+                                <strong>
                                     {{ document.title }}
-                                </a>
+                                </strong>
                                 {% if document.published %}
                                     <br>
                                     Published {{ document.published|naturalday }}
                                 {% endif %}
-                            </td>
-                        </tr>
+                            </div>
+                        </a>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+            </div>
         {% endif %}
 
         {% if images %}
-            <div class="images" >
+            <h3>Images</h3>
+            <div class="images grid" >
                 {% for image in images %}
-                    <a href="{{ image.src }}">
-                        <img src="{{ image.thumb }}"/>
+                    <a href="{{ image.src }}" class="thumbnail">
+                        <img src="{{ image.thumb|default:image.src }}"/>
                     </a>
                 {% endfor %}
             </div>

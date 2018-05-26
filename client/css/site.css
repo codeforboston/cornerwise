@@ -19,3 +19,45 @@
 footer {
     padding: 15px;
 }
+
+.pre {
+    white-space: pre-wrap;
+}
+
+.grid {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    justify-items: flex-start;
+    /* align-items: start; */
+}
+
+.grid .document {
+    display: flex;
+    flex-direction: column;
+    margin: 1em;
+}
+
+.documents.grid .thumbnail img {
+    align-self: center;
+}
+
+.grid .document .thumbnail {
+    background-color: #eee;
+    flex-grow: 1;
+    display: flex;
+}
+
+.images.grid .thumbnail {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+    margin: 1em;
+    overflow: hidden;
+}
+
+.images.grid .thumbnail img {
+    object-fit: cover;
+}

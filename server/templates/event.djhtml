@@ -35,6 +35,21 @@
                         Status
                     </th>
                     <td>
+                        {% if proposal.complete %}
+                            {{ proposal.status }}
+                            <br/>
+                            Decision Date: {{ proposal.complete|date:"SHORT_DATE_FORMAT" }}
+                            {% with decision_doc=proposal.decision_document %}
+                                {% if decision_doc %}
+                                    <br/>
+                                    <a href="{{ decision_doc.document.url|default:decision_doc.url }}">
+                                        Decision Report
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            (Open)
+                        {% endif %}
                     </td>
                 </tr>
                 {% for attribute in proposal.attributes %}
@@ -54,6 +69,8 @@
                         <a href="/#view=main&ps={{ proposal.id }}&zoom=17">
                             Show in Cornerwise
                         </a>
+                        &bull;
+                        <a href="{% url "view-proposal" pk=proposal.id %}">Permalink</a>
                     </td>
                 </tr>
             </tfoot>

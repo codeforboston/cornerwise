@@ -6,7 +6,7 @@
             </li>
             <li>
                 &nbsp;&nbsp;
-                Page {{ paginator.page }} of {{ paginator.total_pages }}
+                Page {{ paginator.page }}{% if paginator.total_pages != 1 %} of {{ paginator.total_pages }}{% endif %}
                 &nbsp;&nbsp;
             </li>
             <li class="{% if not paginator.next_url %}disabled{% endif %}">
