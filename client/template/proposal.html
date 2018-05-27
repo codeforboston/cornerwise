@@ -49,7 +49,7 @@ var documents = proposal.get("documents") || [];
 if (notice) {
 %>
 <div class="legal-notice">
-    <%= gloss(abridge(notice)) %>
+    <%= gloss(abridgeLegalNotice(notice)) %>
 </div>
 <% } else { %>
 <div class="missing">

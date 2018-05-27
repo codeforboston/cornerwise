@@ -2,7 +2,7 @@ define(
     ["jquery", "collection/proposals", "collection/parcels", "view/map",
      "view/proposalInfo", "view/proposal", "glossary", "config", "appState",
      "viewManager", "refLocation", "view/layers", "view/alerts", "view/filters",
-     "view/image", "view/subscribe", "view/parcelInfo", "legalNotice", "leaflet/patch",
+     "view/image", "view/subscribe", "view/parcelInfo", "templateHelpers", "leaflet/patch",
      "view/modal", "view/list", "view/info"],
     function($, Proposals, Parcels, MapView, ProposalInfoView,
              ProposalItemView, glossary, config, appState, ViewManager,
