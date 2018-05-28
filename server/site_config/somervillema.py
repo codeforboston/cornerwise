@@ -1,4 +1,6 @@
 from django.core.exceptions import ValidationError
+
+from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 
 from site_config.site_config import SiteConfig
@@ -10,6 +12,7 @@ class SomervilleConfig(SiteConfig):
     name = "Somerville"
     region_name = "Somerville, MA"
     town_id = 274
+    center = Point(-71.09950304031372, 42.387545768736246)
 
     extra_context = {
         "site_description": ("Find and explore current and future zoning "

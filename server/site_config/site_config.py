@@ -59,7 +59,8 @@ class SiteConfig():
     def js_config(self):
         conf = {
             "sitename": self.name,
-            "contacts": self.contacts_config
+            "contacts": self.contacts_config,
+            "refPointDefault": {"lat": self.center.y, "lng": self.center.x}
         }
         conf.update(self.extra_js_config)
         return conf

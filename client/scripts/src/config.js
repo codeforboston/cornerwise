@@ -23,7 +23,6 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         // Default reference location:
         refPointDefault: {lat: 42.387545768736246,
                           lng: -71.09950304031372},
-        refMarkerColor: "red",
         refPointName: "City Hall",
 
         // Configuration for subscriptions:
