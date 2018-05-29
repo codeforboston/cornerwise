@@ -141,7 +141,7 @@ def build_proposal_query_dict(d):
         defaults["status"] = "all"
 
     if "id" in d:
-        default["status"] = "all"
+        defaults["status"] = "all"
         pids = re.split(r"\s*,\s*", d["id"])
         ids = pids if ids is None else [id for id in pids if id in set(ids)]
 
