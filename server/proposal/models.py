@@ -29,8 +29,12 @@ RegionTimeZones = {
 }
 
 
+def region_tzname(region_name):
+    return RegionTimeZones.get(region_name.lower(), "US/Eastern")
+
+
 def region_tz(region_name):
-    return pytz.timezone(RegionTimeZones.get(region_name.lower()), "US/Eastern")
+    return pytz.timezone(region_tzname(region_name))
 
 
 def localize_dt(dt: datetime, region_name=None):
@@ -169,6 +173,10 @@ class Proposal(models.Model):
     @property
     def attribute_dict(self):
         return dict(self.attributes.values_list("name", "text_value"))
+
+    @property
+    def decision_document(self):
+        return self.documents.with_tag("decision").order_by("-created")[0]
 
     def get_absolute_url(self):
         return reverse("view-proposal", kwargs={"pk": self.pk})
@@ -371,6 +379,10 @@ class Event(models.Model):
         return f"{self.title}, {datestr}, {self.region_name}"
 
     @property
+    def tzname(self):
+        return region_tzname(self.region_name)
+
+    @property
     def local_start(self):
         return localize_dt(self.date, self.region_name)
 
@@ -381,6 +393,7 @@ class Event(models.Model):
 
     def to_json_dict(self):
         d = model_to_dict(self, exclude=["created", "proposals"])
+        d["timezone"] = self.tzname
         return d
 
     @classmethod

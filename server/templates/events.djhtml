@@ -1,6 +1,6 @@
 {% extends "base.djhtml" %}
 
-{% load humanize %}
+{% load humanize tz %}
 
 {% block body %}
     <h2>{{ title }}</h2>
@@ -9,10 +9,11 @@
             <h3>{{ event.title }}</h3>
             <h4>
                 <a href="{% url 'event' pk=event.id %}">
+                    {% timezone event.timezone %}
                     {{ event.date|naturalday }}
+                    {% endtimezone %}
                 </a>
                 <br/>
-
             </h4>
 
             {% if event.description %}

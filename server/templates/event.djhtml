@@ -1,13 +1,16 @@
 {% extends "base.djhtml" %}
 
-{% load humanize %}
+{% load humanize tz %}
 
 {% block body %}
     <h2>{{ event.title }}</h2>
     <h4>
         {{ event.location }}
         <br/>
+
+        {% timezone event.timezone %}
         {{ event.date|naturalday }} at {{ event.date|time }}
+        {% endtimezone %}
     </h4>
 
     {% if event.description %}
