@@ -3,8 +3,11 @@ import re
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
+import requests
+
 
 ADDRESS_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/geocodeAddresses"
+REVERSE_URL = "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode"
 
 
 def camel_to_under(s):
@@ -29,6 +32,11 @@ def simplify(result):
             "score": result["score"]
         }
     }
+
+def reverse_geocode(token, lat, lng):
+    response = requests.get(REVERSE_URL, {"token": token,
+                                          "location": f"{lng},{lat}"})
+    return response.json()
 
 
 class ArcGISCoder(object):
@@ -79,3 +87,7 @@ class ArcGISCoder(object):
         result = json.loads(f.read().decode("utf-8"))
 
         return [simplify(l) for l in result["locations"]]
+
+    def reverse_geocode(self, lat, lng):
+        result = reverse_geocode(self.get_access_token(), lat, lng)
+        return result["address"]["Address"]

@@ -7,21 +7,20 @@ import logging
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
+import requests
+
 logger = logging.getLogger(__name__)
 
+URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
 def geocode(api_key, address, bounds=None):
-    data = [
-        ("key", api_key),
-        ("address", address),
-        ("bounds", bounds or "")
-    ]
+    json_response = requests.get(
+        URL,
+        {"key": api_key,
+         "address": address,
+         "bounds": bounds or ""}
+    ).json()
 
-    query = urlencode(data)
-    url = "https://maps.googleapis.com/maps/api/geocode/json?" + query
-
-    f = urlopen(url)
-    body = f.read().decode("utf-8")
     json_response = json.loads(body)
 
     if json_response["status"] == "OK":
@@ -45,6 +44,21 @@ returns a flattened dict conforming to the generic geocoder expectations.
                 "types": result["types"]
             }
         }
+
+
+def _reverse_geocode(api_key, lat, lng):
+    data = requests.get(
+        "https://maps.googleapis.com/maps/api/geocode/json",
+        {"key": api_key, "latlng": f"{lat},{lng}"}
+    ).json()
+
+    if data["status"] == "OK":
+        return data["results"]
+
+def reverse_geocode(api_key, lat, lng):
+    data = _reverse_geocode(api_key, lat, lng)
+    if data:
+        return data[0]["address_components"]
 
 
 class GeocoderThread(threading.Thread):
@@ -116,3 +130,9 @@ class GoogleGeocoder(object):
                 addr += " " + region
             results.append(simplify(geocode(self.api_key, addr, self.bounds)))
         return results
+
+    def reverse_geocode(self, lat, lng):
+        results = _reverse_geocode(self.api_key, lat, lng)
+        if results:
+            addr = results[0]["formatted_address"]
+            return addr
