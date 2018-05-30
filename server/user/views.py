@@ -170,11 +170,7 @@ def change_log(request):
         sub = Subscription(created=since, site_name=request.site_name)
         sub.set_validated_query(params)
 
-    html, _text = render_email_body(
-        "updates",
-        updates_context(request.user,
-                        sub.summarize_updates(since)),
-        inline=False)
+    html, _text = render_email_body("updates", updates_context(sub, sub.summarize_updates(since)))
     return HttpResponse(html)
 
 

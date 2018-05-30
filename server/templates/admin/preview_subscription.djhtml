@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+
+    <style>
+     .address {
+         display: block;
+         font-size: large;
+         margin-top: 0.5em;
+     }
+
+     .change-type {
+         color: red;
+     }
+
+     .timestamp {
+         color: #aaa;
+         font-style: italic;
+     }
+    </style>
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ form.media }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content %}
+    <p>
+        Showing updates for <strong>{{ description }}</strong>:
+    </p>
+    <p>
+        <a href="{% url 'preview-subscription' %}">New Search</a>
+    </p>
+    <hr/>
+    <br/>
+    <div class="summary">
+        {{ update_summary }} {{ date_range }}
+    </div>
+
+    {{ updates }}
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

@@ -3,7 +3,9 @@
 {% for change in changes.values %}
     {% with proposal=change.proposal props=changes.properties attrs=changes.attributes %}
         <div class="change">
-            <div class="address">{{ proposal.address }}</div>
+            <a class="address" href="{% absolute_url 'view-proposal' pk=proposal.id %}">
+                {{ proposal.address }}
+            </a>
             <div class="thumb">
                 {% with image=proposal.images.0 %}
                     {% if image and image.thumb %}

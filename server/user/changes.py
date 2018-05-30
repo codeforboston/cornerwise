@@ -7,10 +7,15 @@ from proposal.views import proposal_json
 from proposal.query import build_proposal_query_dict
 
 
-def summarize_query_updates(query, since, until=None):
-    query_dict = build_proposal_query_dict(query)
+def summarize_query_updates(query_dict, since=None, until=None):
+    """Takes a proposal query dict and a range of dates. Constructs a dictionary
+    summarizing the changes that are relevant to that query.
+
+    """
+    if since:
+        query_dict["created__gt"] = since
     # Find proposals that are NEW since the given date:
-    proposals = Proposal.objects.filter(created__gt=since, **query_dict)
+    proposals = Proposal.objects.filter(**query_dict)
     new_ids = {proposal.pk for proposal in proposals}
 
     # Find proposals that have *changed*, but which are not new:
@@ -153,6 +158,7 @@ def summary_line(updates):
     new_count = updates["new"]
     updated_count = updates["updated"]
     return "".join([
-        "{} new {}".format(new_count, "and " if updated_count else ""),
-        "{} updated ".format(updated_count),
+        f"{new_count} new " if new_count else "",
+        "and " if updated_count and new_count else "",
+        f"{updated_count} updated " if updated_count else "",
         "proposal{}".format("s" if total_count > 1 else "")])

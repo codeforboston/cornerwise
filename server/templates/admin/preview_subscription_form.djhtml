@@ -1,0 +1,46 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+
+    <style>
+     .helptext {
+         clear: left;
+         display: block;
+         font-size: 11px;
+         color: #999;
+     }
+    </style>
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ form.media }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content %}
+    <p>
+        Set a subscription area and other filters, then set a time period. Then press <strong>Preview</strong> to
+        see a summary of the relevant changes over that time period.
+    </p>
+    <div id="content-main">
+        <form method="post" action="">
+            {% csrf_token %}
+            <fieldset class="module aligned">
+                {{ form.as_p }}
+                <input type="submit" value="Preview" />
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

@@ -12,14 +12,14 @@ User = get_user_model()
 
 
 def _make_user_context(subscription, context):
-    user = subscription.user
     # context = context.copy() if context else {}
-
+    context["hostname"] = subscription.site_name
     try:
+        user = subscription.user
         context["user"] = user.profile.addressal or user.email
         context["unsubscribe_url"] = make_absolute_url(user.profile.unsubscribe_url,
                                                        subscription.site_name)
-    except models.UserProfile.DoesNotExist:
+    except (models.UserProfile.DoesNotExist, models.Subscription.user.RelatedObjectDoesNotExist):
         context["user"] = "Unknown"
         context["unsubscribe_url"] = make_absolute_url("/", subscription.site_name)
     context["site_root"] = make_absolute_url("/", subscription.site_name)
@@ -35,7 +35,8 @@ def updates_context(sub, updates):
     """Constructs the context for the subscription updates email.
     """
     updates_html = render_to_string("changes.djhtml",
-                                    {"changes": updates["changes"]})
+                                    {"changes": updates["changes"],
+                                     "hostname": sub.site_name})
 
     datefmt = lambda dt: datetime.fromtimestamp(dt).strftime("%A, %B %-d") if dt else ""
     fmt = "from {start} to {end}" if updates["end"] else "since {start}"
@@ -43,6 +44,7 @@ def updates_context(sub, updates):
         start=datefmt(updates["start"]), end=datefmt(updates["end"]))
 
     return _make_user_context(sub, {
+        "description": sub.readable_description(),
         "updates": updates_html,
         "update_summary": changes.summary_line(updates),
         "date_range": date_range

@@ -80,16 +80,22 @@
     </div>
 
     <div class="module" id="admin-actions-module">
-        {% if perms.shared.send_notifications %}
         <h2>Additional Actions</h2>
         <ul>
+            {% if perms.shared.send_notifications %}
             <li>
                 <a href="{% url 'notification_form' %}">
                     Send User Notifications
                 </a>
             </li>
+            {% endif %}
+            <li>
+                <a href="{% url 'preview-subscription' %}"
+                   title="View a changelog for a subscription area over a specified time period">
+                    Preview Subscription Changes
+                </a>
+            </li>
         </ul>
-        {% endif %}
 
         {% if perms.shared.view_debug_logs %}
         <h2>Debugging/Monitoring</h2>
