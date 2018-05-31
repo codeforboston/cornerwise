@@ -172,8 +172,9 @@ body.main #info-menu {
 }
 
 #info-menu a {
-    padding-right: 0.25em;
-    padding-left: 0.25em;
+    font-size: larger;
+    padding-right: 0.5em;
+    padding-left: 0.5em;
     color: #2A749B;
     margin: 0;
 }
@@ -1675,6 +1676,10 @@ ul.model-list li {
     font-style: italic;
     line-height: 100px;
     padding: 1.5em;
+}
+
+#list-view a.event + a.event:before {
+    content: "• ";
 }
 
 #list-view .documents {

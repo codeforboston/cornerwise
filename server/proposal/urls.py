@@ -9,7 +9,6 @@ doc_urlpatterns = [
 
 urlpatterns = [
     path("list", views.list_proposals, name="list-proposals"),
-    path("closed", views.closed_proposals),
     path("view", views.view_proposal),
     path("view/<int:pk>", views.view_proposal, name="view-proposal"),
     path("events", views.list_events, name="list-events"),

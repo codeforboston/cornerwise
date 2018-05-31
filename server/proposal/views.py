@@ -19,7 +19,7 @@ from .query import build_proposal_query, build_event_query
 from utils import bounds_from_box, add_params
 
 default_attributes = [
-    "applicant_name", "legal_notice", "dates_of_public_hearing"
+    "applicant_name", "legal_notice"
 ]
 
 
@@ -132,17 +132,10 @@ def list_proposals(req):
 
     context["proposals"] = [
         proposal_json(
-            proposal, include_images=1) for proposal in proposals
+            proposal, include_images=1, include_events=True) for proposal in proposals
     ]
 
     return context
-
-
-@make_response("list.djhtml")
-def closed_proposals(req):
-    proposals = Proposal.objects.filter(complete=True)
-
-    return {"proposals": list(map(proposal_json, proposals))}
 
 
 @make_response("view.djhtml")

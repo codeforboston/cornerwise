@@ -43,7 +43,7 @@
 <%
 var notice = proposal.getAttributeValue("legal_notice");
 var applicant = proposal.getAttributeValue("applicant_name");
-var hearing = proposal.getAttributeValue("dates_of_public_hearing");
+var events = proposal.get("events") || [];
 var documents = proposal.get("documents") || [];
 
 if (notice) {
@@ -70,10 +70,14 @@ if (notice) {
     </tr>
     <% } %>
 
-    <% if (hearing) { %>
+    <% if (events.length) { %>
     <tr class="attribute">
         <th scope="row">Public Hearings</th>
-        <td><%- proposal.getAttributeValue("dates_of_public_hearing") %></td>
+        <td>
+            <% _.each(events, function(event) { %>
+            <a class="event" href="event"><%- mediumDate(event.date) %></a>
+            <% }); %>
+        </td>
     </tr>
     <% } %>
 </table>
