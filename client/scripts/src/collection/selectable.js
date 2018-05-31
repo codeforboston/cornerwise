@@ -89,6 +89,8 @@ define(["backbone", "underscore", "appState", "utils"],
 
                            self.trigger("fetchingComplete");
                            return proposals;
+                       }).always(function() {
+                           self._xhr = null;
                        });
                    }
 
@@ -96,19 +98,10 @@ define(["backbone", "underscore", "appState", "utils"],
                },
 
                fetch: function() {
-                   return this.fetchPaginated();
-                   this.trigger("fetching");
-                   var xhr = B.Collection.prototype.fetch.apply(this, arguments);
-                   var self = this;
-                   xhr.fail(function(err) {
-                       self.trigger("fetchingFailed");
-                   }).always(function() {
-                       self.trigger("fetchingComplete");
-                   }).done(function() {
-                       self.fetchComplete();
-                   });
+                   if (this._xhr)
+                       this._xhr.abort();
 
-                   return xhr;
+                   return (this._xhr = this.fetchPaginated());
                },
 
                fetchComplete: function() {
