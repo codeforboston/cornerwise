@@ -1366,7 +1366,10 @@ a.thumb-link:hover {
 }
 
 .proposal-info-popup .leaflet-popup-tip,
-.proposal-info-popup .leaflet-popup-content-wrapper {
+.proposal-info-popup .leaflet-popup-content-wrapper,
+.subscribe-popup .leaflet-popup-tip,
+.subscribe-popup .leaflet-popup-content-wrapper
+{
     background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -1975,6 +1978,22 @@ body.subscribe-mode .parcel-polygon {
 
 body.choosing-radius .ref-marker {
     display: none;
+}
+
+.subscribe-popup .leaflet-popup-content {
+    width: 130px;
+}
+
+.subscribe-popup .subscribe-link {
+    background-color: var(--action-color);
+    color: white;
+    padding: 8px;
+    white-space: nowrap;
+}
+
+.subscribe-popup .subscribe-link:hover {
+    background-color: var(--active-action-color);
+    text-decoration: none;
 }
 
 #subscribe a:hover {

@@ -1,19 +1,31 @@
-// This file is probably no longer necessary
-define(["lib/leaflet", "config", "underscore"],
-       function(L, config, _) {
+define(["lib/leaflet", "config", "underscore", "utils", "appState"],
+       function(L, config, _, $u, appState) {
+           var template = $u.templateWithUrl("/static/template/refMarkerPopup.html");
+
            return L.FeatureGroup.extend({
                initialize: function(refLoc) {
                    var fg = L.FeatureGroup.prototype.initialize.call(this, []);
                    var icon = L.icon({iconUrl: "/static/images/cornerwise-owl.png",
                                       iconRetinaUrl: "/static/images/cornerwise-owl.png",
                                       iconSize: [51, 68],
+                                      iconAnchor: [25.5, 68],
+                                      popupAnchor: [0, -70],
                                       className: "ref-marker"});
-                   this.marker = L.marker(refLoc.getPoint(),
+                   var marker = this.marker = L.marker(refLoc.getPoint(),
                                           {icon: icon}).addTo(this);
-                   this.marker.bindPopup("")
-                       .on("popupopen", _.bind(this.onPopup, this, refLoc));
+
+                   var popup = L.popup({className: "subscribe-popup",
+                                        closeButton: false});
+                   marker.bindPopup(popup);
 
                    refLoc.on("change", this.locationChange, this);
+                   appState.on("subscribeStart", this.subscribeStarted, this);
+                   this.on("add", function() {
+                       template(null, function(html) {
+                           popup.setContent(html);
+                           marker.openPopup();
+                       });
+                   });
 
                    return fg;
                },
@@ -22,17 +34,12 @@ define(["lib/leaflet", "config", "underscore"],
                    this.marker.setLatLng(refLoc.getPoint());
                },
 
-               onPopup: function(refLoc, e) {
-                   // Show the current address:
-                   var html = ["Centered on:<br/>"],
-                       address = refLoc.get("address");
+               subscribeStarted: function() {
+                   this.marker.closePopup();
+               },
 
-                   if (address)
-                       html.push(_.escape(address));
-                   else
-                       html.push(refLoc.get("lat"), ", ", refLoc.get("lng"));
-
-                   e.popup.setContent(html.join(""));
+               _add: function() {
+                   console.log(arguments);
                }
            });
        });

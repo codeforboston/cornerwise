@@ -9,10 +9,12 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
 
                    if (options.distanceSubscription)
                        $("#subscribe").hide();
+
+                   $(document).on("click", "a.subscribe-link",
+                                  _.bind(this.onClickSubscribe, this));
                },
 
                events: {
-                   "click a.subscribe-link": "onClickSubscribe",
                    "click .cancel": "onCancel",
                    "keyup input[name=email]": "onKeyUp",
                    "submit form": "onSubmit"
