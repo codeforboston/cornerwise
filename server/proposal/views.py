@@ -47,7 +47,7 @@ def proposal_json(proposal,
         pdict["images"] = [img.to_dict() for img in images]
 
     if include_attributes:
-        attributes = Attribute.objects.filter(proposal=proposal)
+        attributes = proposal.attributes.filter(hidden=False)
         if include_attributes is not True:
             attributes = attributes.filter(handle__in=include_attributes)
         pdict["attributes"] = [a.to_dict() for a in attributes]

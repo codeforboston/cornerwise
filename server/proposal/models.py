@@ -243,6 +243,8 @@ class Proposal(models.Model):
             try:
                 handle = utils.normalize(attr_name)
                 attr = self.attributes.get(handle=handle)
+                if attr.ignore_updates:
+                    continue
                 old_val = attr.text_value
                 attr.date_value = date_value
                 attr.text_value = attr_val
@@ -308,14 +310,33 @@ class Attribute(models.Model):
     name = models.CharField(max_length=128)
     handle = models.CharField(max_length=128, db_index=True)
 
+    hidden = models.BooleanField(
+        default=False,
+        help_text=("Admin setting: prevents an attribute from appearing "
+                   "in proposal detail views"))
+    ignore_updates = models.BooleanField(
+        default=False,
+        help_text=("Admin setting: only allow manual updates to this "
+                   "attribute. Values scraped from documents or from "
+                   "importers will be ignored."))
+
     # Either the date when the source document was published or the date
     # when the attribute was observed:
     published = models.DateTimeField()
     text_value = models.TextField(null=True)
     date_value = models.DateTimeField(null=True)
 
+    def __str__(self):
+        return f"{self.name}"
+
     # class Meta:
     #     unique_together = ("proposal", "handle")
+
+    def save(self, *args, **kwargs):
+        if not self.handle:
+            self.handle = utils.normalize(self.name)
+        super().save(*args, **kwargs)
+
 
     def to_dict(self):
         d = {"name": self.name, "handle": self.handle}

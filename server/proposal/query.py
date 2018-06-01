@@ -67,7 +67,8 @@ def run_attributes_query(d):
 
     if subqueries:
         query = reduce(Q.__or__, subqueries, Q())
-        attrs = Attribute.objects.filter(query)\
+        attrs = Attribute.objects.filter(hidden=False)\
+                                 .filter(query)\
                                  .values("proposal_id", "handle",
                                          "text_value")
         attr_maps = defaultdict(int)
