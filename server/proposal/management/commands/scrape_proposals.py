@@ -35,7 +35,7 @@ class Command(BaseCommand):
         parser.add_argument("since", nargs=1, type=datetype("%m/%d/%Y"),
                             help="specify start date for proposals to fetch",
                             default=(datetime.now() - timedelta(days=14)))
-        parser.add_argument("-i", "--importer", default=None,
+        parser.add_argument("-i", "--importer", default={},
                             help="Filter importers by region name")
 
     def handle(self, *args, **options):

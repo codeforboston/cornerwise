@@ -457,6 +457,8 @@ def pull_updates(self, since: datetime=None, importers_filter={}):
     """
     if isinstance(importers_filter, str):
         importers_filter = {"region_name__icontains": importers_filter}
+    elif importers_filter is None:
+        importers_filter = {}
 
     return fetch_proposals(since,
                            importers=Importer.objects.filter(**importers_filter),
