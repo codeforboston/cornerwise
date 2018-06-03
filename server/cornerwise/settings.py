@@ -159,7 +159,9 @@ MEDIA_ROOT = "/media/"
 STATICFILES_DIRS = [
     ("images", "/static/images"),
     ("errors", "/static/errors"),
-    ("layerdata", "/static/scripts/src/layerdata")
+    ("layerdata", "/static/scripts/src/layerdata"),
+    ("css", "/static/css"),
+    ("scripts", "/static/scripts"),
 ]
 
 
@@ -184,8 +186,6 @@ if IS_PRODUCTION:
 else:
     JS_FILENAME = CSS_FILENAME = ""
     STATICFILES_DIRS.extend([
-        ("css", "/static/css"),
-        ("scripts", "/static/scripts"),
         ("template", "/static/template"),
     ])
 
