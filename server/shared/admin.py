@@ -6,19 +6,19 @@ Allow administrators to configure proposal, case, and project importers.
 from datetime import datetime, timedelta
 from functools import reduce
 
-from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.autocomplete import AutocompleteJsonView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group
 from django.contrib.gis.admin import GeoModelAdmin
+from django.contrib.gis import forms
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.formats import date_format
 
-from proposal.models import Event, Importer, Layer, Proposal
+from proposal.models import Attribute, Changeset, Event, Importer, Layer, Proposal
 from .models import StaffNotification
 from user.models import UserComment
 
@@ -30,12 +30,67 @@ import jsonschema
 User = get_user_model()
 
 
+class AttributeInline(admin.StackedInline):
+    extra = 1
+    fields = ["name", "hidden", "ignore_updates", "text_value", "date_value", "record_change"]
+    model = Attribute
+
+    class form(forms.ModelForm):
+        record_change = forms.BooleanField(initial=True)
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields["text_value"].widget.attrs["rows"] = 2
+            self.fields["text_value"].required = False
+            self.fields["date_value"].required = False
+            if getattr(self, "instance", None) and self.instance.pk:
+                self.fields["name"].disabled = True
+            else:
+                self.fields["record_change"].widget = forms.HiddenInput()
+
+        def is_valid(self):
+            print(self.instance, self.instance.text_value)
+            result = super().is_valid()
+            print(self.instance, self.instance.text_value)
+            return result
+
+
 class ProposalAdmin(admin.ModelAdmin):
     fields = ["case_number", "address", "updated"]
     search_fields = ["case_number", "address"]
 
+    inlines = [AttributeInline]
+
     class Meta:
         model = Proposal
+
+    class form(forms.ModelForm):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            if getattr(self, "instance"):
+                self.fields["case_number"].disabled = False
+
+    def save_related(self, request, form, formsets, change):
+        if change:
+            changed_attrs = [attr_form.instance for attr_form in formsets[0]
+                            if attr_form.changed_data]
+            pks = [attr.pk for attr in changed_attrs if attr.pk]
+            old_attrs = {at.handle: at for at in Attribute.objects.filter(pk__in=pks)}
+
+        super().save_related(request, form, formsets, change)
+        if not change:
+            return
+
+        changed = [a[0] for a in formsets[0].changed_objects]
+        changes = [{"name": attr.name,
+                    "new": attr.text_value or attr.date_value,
+                    "old": old and (old.text_value or old.date_value)}
+                   for attr, old in zip(changed, (old_attrs.get(a.handle) for a in changed))]
+
+        Changeset.from_changes(form.instance, {
+            "attributes": [ch for ch in changes if ch["old"] != ch["new"]],
+            "properties": []
+        }).save()
 
 
 class CornerwiseAdmin(admin.AdminSite):
