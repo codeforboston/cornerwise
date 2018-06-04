@@ -3,7 +3,7 @@ from django.utils import timezone
 import calendar
 from collections import defaultdict
 from datetime import datetime, timedelta
-from functools import reduce
+from functools import reduce, partial
 import re
 
 from dateutil.parser import parse as parse_date
@@ -106,28 +106,32 @@ def time_query(d):
         region = d["region"].split(";", 1)[0].strip()
     else:
         region = None
+    now = local_now(region)
+    parse = partial(parse_date,
+                    default=now.replace(month=1, day=1, hour=0, minute=0,
+                                        second=0, microsecond=0, tzinfo=None))
 
     if "month" in d:
-        dt = parse_date(d["month"])
+        dt = parse(d["month"])
         start, end = month_range(dt)
     elif "start" in d:
-        start = parse_date(d["start"])
-        end = "end" in d and parse_date(d["end"])
+        start = parse(d["start"])
+        end = "end" in d and parse(d["end"])
     elif "timerange" in d:
         if "-" in d["timerange"]:
             start_spec, end_spec = re.split(r"\s*-\s*", d["timerange"])
-            start = parse_date(start_spec) if start_spec else None
-            end = parse_date(end_spec) if end_spec else None
+            start = parse(start_spec) if start_spec else None
+            end = parse(end_spec) if end_spec else None
         else:
             m = re.match(r"([><])((-?\d+[dmy])+|.*)", d["timerange"])
             if m:
-                offset_dt = offset(local_now(region), m.group(2))
+                offset_dt = offset(now, m.group(2))
                 if m.group(1) == ">":
                     return (offset_dt, None)
                 else:
                     return (None, offset_dt)
     else:
-        return None
+        return None, None
 
     start = start and localize_dt(start, region)
     end = end and localize_dt(end, region)
@@ -186,13 +190,11 @@ def build_proposal_query_dict(d):
     if ids is not None:
         subqueries["pk__in"] = ids
 
-    time_range = time_query(d)
-    if time_range:
-        (start_date, end_date) = time_range
-        if start_date:
-            subqueries["created__gte"] = start_date
-        if end_date:
-            subqueries["created__lt"] = end_date
+    (start_date, end_date) = time_query(d)
+    if start_date:
+        subqueries["created__gte"] = start_date
+    if end_date:
+        subqueries["created__lt"] = end_date
 
     if "projects" in d:
         if d["projects"] == "null":
