@@ -84,23 +84,53 @@ def month_range(dt):
     return (start, start+timedelta(days=days))
 
 
+def offset(dt, s, op=lambda x, y: x-y):
+    days = months = years = 0
+    for m in re.finditer(r"(-?\d+)([dmy])", s):
+        n = int(m.group(1))
+        t = m.group(2)
+        if t == "d":
+            days += n
+        elif t == "m":
+            months += n
+        elif t == "y":
+            years += n
+
+    newmonth = op(dt.month, months)
+    return dt.replace(year=op(dt.year, years) + (newmonth//12 if newmonth else -1),
+                      month=newmonth%12 or 12) - timedelta(days=days)
+
+
 def time_query(d):
+    if "region" in d:
+        region = d["region"].split(";", 1)[0].strip()
+    else:
+        region = None
+
     if "month" in d:
         dt = parse_date(d["month"])
         start, end = month_range(dt)
     elif "start" in d:
         start = parse_date(d["start"])
         end = "end" in d and parse_date(d["end"])
+    elif "timerange" in d:
+        if "-" in d["timerange"]:
+            start_spec, end_spec = re.split(r"\s*-\s*", d["timerange"])
+            start = parse_date(start_spec) if start_spec else None
+            end = parse_date(end_spec) if end_spec else None
+        else:
+            m = re.match(r"([><])((-?\d+[dmy])+|.*)", d["timerange"])
+            if m:
+                offset_dt = offset(local_now(region), m.group(2))
+                if m.group(1) == ">":
+                    return (offset_dt, None)
+                else:
+                    return (None, offset_dt)
     else:
         return None
 
-    if "region" in d:
-        region = d["regions"].split(";", 1)[0].strip()
-    else:
-        region = None
-
-    start = localize_dt(start, region)
-    end = localize_dt(end, region) if end else local_now(region)
+    start = start and localize_dt(start, region)
+    end = end and localize_dt(end, region)
 
     return start, end
 
@@ -159,8 +189,10 @@ def build_proposal_query_dict(d):
     time_range = time_query(d)
     if time_range:
         (start_date, end_date) = time_range
-        subqueries["created__gte"] = start_date
-        subqueries["created__lt"] = end_date
+        if start_date:
+            subqueries["created__gte"] = start_date
+        if end_date:
+            subqueries["created__lt"] = end_date
 
     if "projects" in d:
         if d["projects"] == "null":
