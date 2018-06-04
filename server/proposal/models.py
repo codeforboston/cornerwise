@@ -30,7 +30,7 @@ RegionTimeZones = {
 
 
 def region_tzname(region_name):
-    return RegionTimeZones.get(region_name.lower(), "US/Eastern")
+    return RegionTimeZones.get(region_name and region_name.lower(), "US/Eastern")
 
 
 def region_tz(region_name):
