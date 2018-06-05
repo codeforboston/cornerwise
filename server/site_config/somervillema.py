@@ -25,8 +25,21 @@ class SomervilleConfig(SiteConfig):
         "maxSubscribeRadius": 300,
         "subscribeInstructions": "Double-click on the map or enter an address in the search box above to select your location. Once you've confirmed your email address, we will begin sending you updates about projects within 300 feet of you.",
         "stateDefaults": {
-            "f": {"status": "all"}
-        }
+            "f": {"status": "all", "timerange": ">2y"}
+        },
+        "extra_filters": [
+            {
+                "name": "Time Range",
+                "key": "timerange",
+                "type": "select",
+                "options": [
+                    {"name": "All Time", "value": ""},
+                    {"name": "Last Two Years", "value": ">2y"},
+                    {"name": "This Year", "value": "1/1-"},
+                    {"name": "Past 7 days", "value": ">7d"},
+                ]
+            }
+        ]
     }
 
     query_defaults = {"region_name": "Somerville, MA"}
