@@ -80,7 +80,6 @@ define(
             ],
 
             queryFilters: {
-                projects: "typeFilter",
                 text: "textFilter",
                 box: "boxFilter",
                 region: "regionFilter",
@@ -119,6 +118,11 @@ define(
                 if (newQuery.text && oldQuery.text &&
                     !$u.startsWith(newQuery.text, oldQuery.text))
                     return false;
+
+                if (newQuery.start !== oldQuery.start ||
+                    newQuery.end !== oldQuery.end) {
+                    return false;
+                }
 
                 // Time queries:
                 if (newQuery.range !== oldQuery.range) {
@@ -220,6 +224,8 @@ define(
                     if (this.queryFilters[key]) {
                         var filter = this[this.queryFilters[key]];
                         filter.call(this, query, val, key, filters);
+                    } else if (_.isString(val)) {
+                        query[key] = val;
                     }
                     return query;
                 }, {}, this);
@@ -256,6 +262,13 @@ define(
                 }
             },
 
+            filterByKey: function(key, val) {
+                if (val)
+                    appState.setHashKey("f." + key, val);
+                else
+                    appState.clearHashKey("f." + key);
+            },
+
             filterByProjectType: function(includePrivate, includePublic) {
                 // No way for both to be false
                 var val = includePrivate ? (includePublic ? null : "null") : "all";
@@ -286,13 +299,6 @@ define(
                     delete query.text;
                 else
                     query.text = s;
-            },
-
-            typeFilter: function(query, val) {
-                if (/^(all|null)$/.exec(val))
-                    query.projects = val.toLowerCase();
-                else
-                    delete query.projects;
             },
 
             boxFilter: function(query, val) {

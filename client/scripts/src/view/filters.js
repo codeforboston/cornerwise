@@ -22,6 +22,7 @@ define(
                     .listenTo(refLocation, "change:lat change:lng",
                               this.locPositionChanged);
 
+                this.buildConfigFilters(config.filters);
                 this.buildRegionSelection();
 
                 /**
@@ -125,6 +126,7 @@ define(
                 "click #reset-filter-bounds": "clearFilterBounds",
                 // Should this be preserved for other methods of input?
                 // "change #filter-text": "filterText",
+                "change .filter-selector": "updateFilter",
                 "keyup #filter-text": "filterText",
                 "search #filter-text": "filterText",
                 "change #filter-private": "updateProjectTypeFilter",
@@ -138,13 +140,10 @@ define(
             onFiltersChange: function(filters) {
                 // Only show the 'Reset' button when there is a bounding box set.
                 $("#reset-filter-bounds").toggle(!!filters.box);
-                $("#filter-private").prop("checked", filters.projects != "all");
-                $("#filter-public").prop("checked", filters.projects != "null");
-                $("#filter-region").val(filters.region);
-                if (filters.lotsize)
-                    $("#filter-lotsize").val(filters.lotsize);
-                if (filters.status)
-                    $("#filter-status").val(filters.status);
+
+                _.each(filters, function(v, key) {
+                    $("#filter-" + key).val(v || "");
+                });
             },
 
             /**
@@ -277,6 +276,34 @@ define(
                 });
             },
 
+            buildConfigFilters: function(filters) {
+                var after = $("#filters .group-header");
+
+                _.each(filters, function(filter) {
+                    var group = $("<div/>").addClass("filter-group")
+                        .attr("id", filter.key + "-filter-group")
+                        .data("key", filter.key);
+                    group.append($("<label/>")
+                                 .addClass("select")
+                                 .attr("for", "filter-" + filter.key)
+                                 .text(filter.name));
+
+                    switch(filter.type) {
+                    case "select":
+                        var select = $("<select/>");
+                        select.attr({id: "filter-" + filter.key})
+                            .addClass("filter-selector");
+                        _.each(filter.options, function(option) {
+                            select.append($("<option/>").val(option.value).text(option.name));
+                        });
+                        group.append(select);
+                        break;
+                    }
+
+                    group.insertAfter(after);
+                });
+            },
+
             buildRegionSelection: function() {
                 var html = regions.map(function(region) {
                     return ("<option value='" + region.id +
@@ -289,12 +316,14 @@ define(
                 $("#region-filter-group").toggle(regions.length !== 1);
             },
 
-            updateLotSize: function(e) {
-                this.collection.filterByLotSize(e.target.value);
-            },
+            updateFilter: function(e) {
+                var select = $(e.target),
+                    group = select.closest(".filter-group"),
+                    key = group.data("key");
 
-            updateApplicationStatus: function(e) {
-                this.collection.filterByApplicationStatus(e.target.value);
+                if (!key) return;
+
+                this.collection.filterByKey(key, select.val());
             },
 
             updateRegion: function(e) {

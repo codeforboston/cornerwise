@@ -39,6 +39,19 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         // Default values for application state
         stateDefaults: null,
 
+        filters: [
+            {
+                "name": "Application Status",
+                "key": "status",
+                "type": "select",
+                "options": [
+                    {"value": "active", "name": "Pending"},
+                    {"value": "closed", "name": "Complete"},
+                    {"value": "all", "name": "All"},
+                ]
+            }
+        ],
+
         // The style that will be applied to the rectangle representing the
         // bounds of the current area filter:
         filterBoundsStyle: {
@@ -189,8 +202,12 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         _.extend(config, localConfig);
     }
 
-    if (window["SITE_CONFIG"])
+
+    if (window["SITE_CONFIG"]) {
+        Array.prototype.push.apply(config.filters, SITE_CONFIG.extra_filters);
+        delete SITE_CONFIG["extra_filters"];
         _.extend(config, window["SITE_CONFIG"]);
+    }
 
     return config;
 });
