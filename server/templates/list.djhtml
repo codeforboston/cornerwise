@@ -3,47 +3,51 @@
 {% load humanize %}
 
 {% block body %}
-    {% for proposal in proposals %}
-        <div class="row" >
-            <div class="col-md-4">
-                {% with image=proposal.images.0 %}
-                    <img src="{% firstof image.thumb image.src %}"
-                         class="img-thumbnail"/>
-                {% endwith %}
-            </div>
-            <div class="col-md-8" >
-                <h3>
-                    <a href="{% url 'view-proposal' pk=proposal.id %}">
-                        {{ proposal.address }}
-                    </a>
-                </h3>
-                {% if proposal.other_addresses %}
-                    <h5> {{ proposal.other_addresses }} </h5>
-                {% endif %}
-                <h4>{{ proposal.region_name }}</h4>
-                Last updated {{ proposal.updated|naturalday }}
-
-                {% if proposal.project %}
-
-                {% else %}
-                    <table class="table table-striped">
-                        <tbody>
-                            {% for attribute in proposal.attributes %}
-                                <tr>
-                                    <th>{{ attribute.name }}</th>
-                                    <td>{{ attribute.value }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% endif %}
-            </div>
+    {% if proposals %}
+        <div class="alert alert-info" role="alert">
+            Found {{ proposals|length }} match{{ proposal|length|pluralize:"es" }}
         </div>
-    {% empty %}
-        <div class="row empty">
+        {% for proposal in proposals %}
+            <div class="row" >
+                <div class="col-md-4">
+                    {% with image=proposal.images.0 %}
+                        <img src="{% firstof image.thumb image.src %}"
+                            class="img-thumbnail"/>
+                    {% endwith %}
+                </div>
+                <div class="col-md-8" >
+                    <h3>
+                        <a href="{% url 'view-proposal' pk=proposal.id %}">
+                            {{ proposal.address }}
+                        </a>
+                    </h3>
+                    {% if proposal.other_addresses %}
+                        <h5> {{ proposal.other_addresses }} </h5>
+                    {% endif %}
+                    <h4>{{ proposal.region_name }}</h4>
+                    Last updated {{ proposal.updated|naturalday }}
+
+                    {% if proposal.project %}
+
+                    {% else %}
+                        <table class="table table-striped">
+                            <tbody>
+                                {% for attribute in proposal.attributes %}
+                                    <tr>
+                                        <th>{{ attribute.name }}</th>
+                                        <td>{{ attribute.value }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
             Nothing matched your query
         </div>
-    {% endfor %}
-        </div>
-        {% include "partial/pagination.djhtml" %}
+    {% endif %}
+    {% include "partial/pagination.djhtml" %}
 {% endblock %}
