@@ -111,6 +111,7 @@ def time_query(d):
                     default=now.replace(month=1, day=1, hour=0, minute=0,
                                         second=0, microsecond=0, tzinfo=None))
 
+    start = end = None
     if "month" in d:
         dt = parse(d["month"])
         start, end = month_range(dt)
@@ -130,8 +131,6 @@ def time_query(d):
                     return (offset_dt, None)
                 else:
                     return (None, offset_dt)
-    else:
-        return None, None
 
     start = start and localize_dt(start, region)
     end = end and localize_dt(end, region)
