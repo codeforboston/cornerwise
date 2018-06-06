@@ -21,8 +21,6 @@ def geocode(api_key, address, bounds=None):
          "bounds": bounds or ""}
     ).json()
 
-    json_response = json.loads(body)
-
     if json_response["status"] == "OK":
         return json_response["results"][0]
     else:
