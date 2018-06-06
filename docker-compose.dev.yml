@@ -26,6 +26,7 @@ services:
       - nginx_certs:/etc/nginx/certs
       - ./docker-support/cornerwise.org_location.conf:/etc/nginx/vhost.d/default_location
       - static_resources:/static
+      - media:/media
   nginx-gen:
     image: jwilder/docker-gen
     container_name: nginx-gen
