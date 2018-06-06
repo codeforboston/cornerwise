@@ -21,6 +21,7 @@ define(["backbone", "appState", "jquery", "utils"],
                onClick: function(e) {
                    if (!$(e.target).closest("img").length) {
                        appState.clearHashKey("image");
+                       e.preventDefault();
                    }
                },
 
@@ -70,7 +71,7 @@ define(["backbone", "appState", "jquery", "utils"],
                render: function(image) {
                    this.showing = true;
                    this.$el.html(
-                       "<a class='close _back'>&times</a>" +
+                       "<a href='#' class='close'>&times</a>" +
                        "<img class='image-zoom' src='" + image.src + "'/>")
                        .addClass("displayed");
 

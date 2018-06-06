@@ -23,7 +23,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                    this.pointSelection = !options.pointSelectionDisabled;
                    this.autopan = false;
-                   this.autozoom = true;
+                   this.autozoom = false;
 
                    if (_.isFinite(lat) && _.isFinite(lng)) {
                        mapOptions.center = L.latLng(lat, lng);
@@ -420,6 +420,7 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
 
                autoPanOn: function() {
                    this.autopan = true;
+                   this.autozoom = true;
                },
 
                onSubscribeEnd: function() {

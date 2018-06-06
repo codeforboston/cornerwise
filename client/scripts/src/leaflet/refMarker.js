@@ -14,7 +14,8 @@ define(["lib/leaflet", "config", "underscore", "utils", "appState"],
                    var marker = this.marker = L.marker(refLoc.getPoint(),
                                           {icon: icon}).addTo(this);
 
-                   var popup = L.popup({className: "subscribe-popup",
+                   var popup = L.popup({autoPan: false,
+                                        className: "subscribe-popup",
                                         closeButton: false});
                    marker.bindPopup(popup);
 
