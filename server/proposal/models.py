@@ -471,6 +471,11 @@ def upload_document_to(doc, filename):
     return "doc/%s/%s" % (doc.pk, filename)
 
 
+class DocumentQuerySet(models.QuerySet):
+    def with_tag(self, tag):
+        return self.filter(tags__iregex=r"(?:,|^)" + tag + r"(?:,$)")
+
+
 class Document(models.Model):
     """
     A document associated with a proposal.
@@ -503,6 +508,8 @@ class Document(models.Model):
     encoding = models.CharField(max_length=20, default="")
     # File containing a thumbnail of the document:
     thumbnail = models.FileField(null=True, upload_to=upload_document_to)
+
+    objects = DocumentQuerySet.as_manager()
 
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
