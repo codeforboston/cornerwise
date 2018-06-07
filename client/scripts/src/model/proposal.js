@@ -238,7 +238,7 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
             return this._handlerCmp;
         },
 
-        getAttributesForDisplay() {
+        getAttributesForDisplay: function() {
             // TODO Show recommendation conditionally,
             var attrs = this.get("attributes"),
                 order = ["applicant", "owner",

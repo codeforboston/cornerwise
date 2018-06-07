@@ -2,17 +2,17 @@
     --active-proposal-bg: radial-gradient( #e2a192, #ff7c55);
     --proposal-bg: radial-gradient( #e2a192, #ff5a29);
 /*     --proposal-bg: radial-gradient(50% 0%, #727272 50%, #868686 100%); */
-    --proposal-approved-bg: radial-gradient(50% -39%, #197409 50%, #239F0E 100%);
-    --active-proposal-approved-bg: radial-gradient(50% -39%, #197409 50%, #239F0E 100%);
-    --proposal-denied-bg: radial-gradient(50% 15%, #991509 50%, #B01A0C 85%);
-    --active-proposal-denied-bg: radial-gradient(50% 15%, #991509 50%, #B01A0C 85%);
+    --proposal-approved-bg: radial-gradient(50% 39%, #197409 50%, #239F0E 100%);
+    --active-proposal-approved-bg: radial-gradient(50% 39%, #197409 50%, #239F0E 100%);
+    --proposal-denied-bg: radial-gradient(50% 39%, #991509 50%, #B01A0C 85%);
+    --active-proposal-denied-bg: radial-gradient(50% 39%, #991509 50%, #B01A0C 85%);
 
     --action-color: #3c7c3d;
     --active-action-color: #7fc87a;
 }
 
 body {
-    font-family: proxima-nova, "Avenir", sans-serif;
+    font-family: proxima-nova, "Avenir", Arial, sans-serif;
     height: 100%;
     width: 100%;
     overflow:  hidden;
@@ -20,7 +20,6 @@ body {
 
 #wrapper {
     display: none;
-    position: fixed;
     top: 0;
     bottom: 0;
     right: 0;
@@ -374,7 +373,7 @@ body.geolocating #ref-address-form .status {
 
 .overlay .input {
     color: white;
-    font-family: "Avenir";
+    font-family: proxima-nova, "Avenir", Arial, sans-serif;
 }
 
 .guess {
@@ -689,11 +688,13 @@ div.marker-selected, div.marker-hovered {
 }
 
 div.proposal-complete.proposal-denied {
+    background-color: #991509;
     background: center / 60% no-repeat url(/static/images/denied.png),
                 var(--proposal-denied-bg);
 }
 
 div.proposal-complete.proposal-approved {
+    background-color: #197409;
     background: center / 60% no-repeat url(/static/images/approved.png),
                 var(--proposal-approved-bg);
 }
@@ -1351,7 +1352,7 @@ a.thumb-link:hover {
 
 /* Leaflet info popup */
 .leaflet-container {
-    font-family: Avenir;
+    font-family: proxima-nova, "Avenir", Arial, sans-serif;
 }
 
 .proposal-info-popup .leaflet-popup {

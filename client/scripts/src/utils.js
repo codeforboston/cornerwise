@@ -273,7 +273,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return o && o.constructor && o.constructor === Object;
            }
 
-           function setIn(obj, ks, v, skipNulls=false) {
+           function setIn(obj, ks, v, skipNulls) {
                if (ks.length === 0)
                    return v;
 
