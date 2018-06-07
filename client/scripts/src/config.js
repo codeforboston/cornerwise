@@ -52,6 +52,13 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             }
         ],
 
+        proposalAttributes: [
+            "applicant",
+            "owner",
+            "recommendation",
+            "decision"
+        ],
+
         showProposalImages: true,
 
         // The style that will be applied to the rectangle representing the

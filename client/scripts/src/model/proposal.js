@@ -6,9 +6,10 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
            When sorting attributes, display these attributes first, in this
            order:
         */
-        promoteAttributes: ["applicant_name", "date", "alderman",
-                            "applicant_address", "owner_address",
-                            "recommendation"],
+        promoteAttributes: config.promoteAttributes ||
+            ["applicant_name", "date", "alderman",
+             "applicant_address", "owner_address",
+             "recommendation"],
 
         specialAttributes: {
             agent: {attr: "Agent", type: "person"},
@@ -239,19 +240,15 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
         },
 
         getAttributesForDisplay: function() {
-            // TODO Show recommendation conditionally,
-            var attrs = this.get("attributes"),
-                order = ["applicant", "owner",
-                         attrs.decision ? "decision" : "recommendation",
-                         "subject_property",
-                         "proposal",
-                         "green_building_practices"];
+            var order = this.collection.options.displayAttributes;
 
             return this.getAttributes(order);
         },
 
         getAttributes: function(handles) {
             if (!handles) {
+                // If there are no handles, show all available attributes, but
+                // promote certain ones to the top.
                 handles = _.keys(this.get("attributes")).sort(this.getHandlerCmp());
             }
 
