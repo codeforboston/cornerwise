@@ -82,23 +82,8 @@ var address = proposal.get("address"); %>
             </tr>
             <% } %>
         </table>
-        <% }  %>
-
-        <%
+        <% }
         var documents = proposal.get("documents");
-        if (documents && documents.length) { %>
-        <div class="documents">
-            <% _.each(documents.slice(0, 10), function(doc) { %>
-            <a class="document" href="<%= doc.url %>"
-               target="_blank" title="<%- doc.title %>">
-                <%- doc.title %>
-            </a>
-            <% }); %>
-        </div>
-        <!-- end documents -->
-        <% } %>
-
-        <%
         var events = proposal.get("events");
 
         if (events.length) {
@@ -158,7 +143,7 @@ var address = proposal.get("address"); %>
             <% if (attr.type === "person") { %>
                 <%- value.name %>
                 <% if (value.address) { %>
-                    (<%- value.address %>)
+                    <span class="address">(<%- value.address %>)</span>
                 <% } %>
             <% } else if (attr.type === "decision") {%>
                 <%= value.decision %>
@@ -170,6 +155,29 @@ var address = proposal.get("address"); %>
         <% } %>
         <% }); %>
     </div>
+
+    <% if (!options.hideDocuments) { %>
+    <div class="documents">
+        <%
+        _.each(proposal.getDocumentsForDisplay(),
+                function(group) {
+        if (group.documents.length) {
+        %>
+        <h5><%- group.name %></h5>
+        <div class="document-group">
+            <% _.each(group.documents, function(doc) { %>
+            <a class="document" href="<%= doc.url %>" target="_blank" title="<%- doc.title %>">
+
+                <%- doc.title %>
+            </a>
+            <% }); %>
+        </div>
+        <%
+        }
+        });
+        %>
+    </div>
+    <% } %>
 
     <% if (!options.hideImages) { %>
     <% var images = proposal.get("images");

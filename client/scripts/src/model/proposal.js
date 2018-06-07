@@ -54,6 +54,12 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
 
             if (!attrs.documents)
                 attrs.documents = [];
+            _.each(attrs.documents, function(doc) {
+                if (_.isString(doc.tags))
+                    doc.tags = doc.tags.split("\s*,\s*");
+                else if (!doc.tags)
+                    doc.tags = [];
+            });
 
             attrs.events = _.map(attrs.events, function(event, _i) {
                 event.date = new Date(event.date);
@@ -300,6 +306,40 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
             }
 
             return deferred;
+        },
+
+        getGroupedDocuments: function() {
+            return _.reduce(this.get("documents") || [],
+                            function(grouped, doc) {
+                                _.each(doc.tags, function(tag) {
+                                    if (!grouped[tag])
+                                        grouped[tag] = [];
+                                    grouped[tag].push(doc);
+                                });
+                                return grouped;
+                            }, {});
+        },
+
+        getDocumentsForDisplay: function() {
+            var groups = this.collection.options.documentGroups;
+
+            if (!groups || !groups.length) {
+                return [
+                    {documents: this.get("documents") || [] }
+                ];
+            } else {
+                var grouped = this.getGroupedDocuments(),
+                    seen = {};
+
+                return _.map(groups, function(group) {
+                    return _.extend(
+                        {documents: _.reduce(group.tags, function(docs, tag) {
+                            Array.prototype.push.apply(docs, grouped[tag]);
+                            return docs;
+                        }, [])},
+                        group);
+                });
+            }
         },
 
         getDistance: function(fromLoc, toLoc) {

@@ -59,6 +59,13 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             "decision"
         ],
 
+        proposalDocumentGroups: null,
+        // Example:
+        // proposalDocumentGroups: [
+        //     {name: "Staff Documents", tags: ["reports", "decisions"]},
+        //     {name: "Application Documents", tags: ["other"]}
+        // ],
+
         showProposalImages: true,
 
         // The style that will be applied to the rectangle representing the

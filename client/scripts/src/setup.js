@@ -14,6 +14,7 @@ define(
                     proposals = new Proposals({
                         parcels: parcels,
                         displayAttributes: config.proposalAttributes,
+                        documentGroups: config.proposalDocumentGroups
                     }),
                     appViews = {
                         alerts: alerts,

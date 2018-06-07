@@ -40,6 +40,10 @@ class SomervilleConfig(SiteConfig):
                 ]
             }
         ],
+        "proposalDocumentGroups": [
+            {"name": "Staff Documents", "tags": ["reports", "decisions"]},
+            {"name": "Application Documents", "tags": ["other"]}
+        ],
         "showProposalImages": False,
     }
 
