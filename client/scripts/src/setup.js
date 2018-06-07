@@ -86,7 +86,10 @@ define(
                              {collection: proposals,
                               subview: ProposalItemView}],
                     "info": ["view/info", {collection: proposals,
-                                           subview: new ProposalInfoView()}]
+                                           subview: new ProposalInfoView({
+                                               templateOptions: {
+                                                   hideImages: !config.showProposalImages
+                                               }})}]
                 });
 
                 appViews.layers = new LayersView({

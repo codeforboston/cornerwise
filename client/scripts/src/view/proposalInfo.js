@@ -5,9 +5,13 @@ define(["jquery", "backbone", "appState", "underscore", "config", "utils",
         "view/budget"],
        function($, B, appState, _, config, $u, budget) {
            return B.View.extend({
-               template: $u.templateWithUrl(
-                   "/static/template/proposalDetail.html",
-                   {variable: "proposal"}),
+               initialize: function(options) {
+                   B.View.prototype.initialize.call(this, options);
+                   var settings = options ? options.templateOptions : {};
+                   this.template = $u.templateWithUrl(
+                       "/static/template/proposalDetail.html",
+                       _.extend({variable: "proposal"}, settings));
+               },
 
                show: function(proposal) {
                    proposal.fetch();

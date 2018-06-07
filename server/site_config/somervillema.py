@@ -39,7 +39,8 @@ class SomervilleConfig(SiteConfig):
                     {"name": "Past 7 days", "value": ">7d"},
                 ]
             }
-        ]
+        ],
+        "showProposalImages": False,
     }
 
     query_defaults = {"region_name": "Somerville, MA"}

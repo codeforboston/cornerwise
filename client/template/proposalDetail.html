@@ -171,6 +171,7 @@ var address = proposal.get("address"); %>
         <% }); %>
     </div>
 
+    <% if (!options.hideImages) { %>
     <% var images = proposal.get("images");
     if (images && images.length) { %>
     <div class="images">
@@ -181,6 +182,7 @@ var address = proposal.get("address"); %>
         <% }); %>
         <br style="clear:both" />
     </div>
+    <% } %>
     <% } %>
 
     <div class="footnotes">

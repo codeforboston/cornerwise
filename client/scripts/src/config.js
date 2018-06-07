@@ -52,6 +52,8 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             }
         ],
 
+        showProposalImages: true,
+
         // The style that will be applied to the rectangle representing the
         // bounds of the current area filter:
         filterBoundsStyle: {
