@@ -6,7 +6,7 @@
 
         <title>Cornerwise</title>
 
-        <script type="text/javascript">
+        <script>
          function _placesInit() {
              if (window._onPlacesReady) onPlacesReady();
          }
@@ -32,7 +32,7 @@
             <link rel="stylesheet" href="/static/css/app.css" type="text/css" media="screen" />
             <script data-main="/static/scripts/src/main" src="/static/scripts/src/lib/require.js"></script>
         {% endif %}
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=places" async defer></script>
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -52,7 +52,7 @@
             </noscript>
             <div id="wrapper">
                 <div id="loading-indicator" class="control">
-                    <img src="/static/images/loading.gif">
+                    <img src="/static/images/loading.gif" alt="Loading data">
                 </div>
                 <div id="map-container">
                     <div id="map"></div>
@@ -129,7 +129,7 @@
                         <div id="alert">
                             <a href="#" class="close">&times;</a>
                             <div class="content-wrapper">
-                                <h2 class="title"></h2>
+                                <h2 class="title">Alert Title</h2>
                                 <span class="content"></span>
                             </div>
                         </div>
@@ -141,10 +141,10 @@
                     <div class="section">
                         <div class="logos">
                             <a href="https://github.com/cityofsomerville/cornerwise">
-                                <img src="/static/images/logo/github-light.png">
+                                <img src="/static/images/logo/github-light.png" alt="GitHub logo" />
                             </a>
                             <a href="http://codeforboston.org" title="Code for Boston">
-                                <img src="/static/images/code_for_boston_logo.png" alt="Code for Boston" />
+                                <img src="/static/images/code_for_boston_logo.png" alt="Code for Boston logo" />
                             </a>
                         </div>
                     </div>
@@ -287,7 +287,7 @@
 
             </div>
             <script src="https://use.typekit.net/wpe7mmw.js"></script>
-            <script type="text/javascript">
+            <script>
              try{Typekit.load({ async: true });}catch(e){}
              document.getElementById("wrapper").className += " js-enabled";
             </script>
