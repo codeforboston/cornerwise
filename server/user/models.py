@@ -347,7 +347,7 @@ class Subscription(models.Model):
 
             circle = f"{int(self.radius)}" if self.radius else ""
             if circle_color and self.radius:
-                circle += ",{circle_color}"
+                circle += f",{circle_color}"
             return settings.MINIMAP_SRC\
                 .format(swlat=sw[1], swlon=sw[0],
                         nelat=ne[1], nelon=ne[0],
