@@ -375,7 +375,10 @@ class Event(models.Model):
     """
     Meeting or hearing associated with a proposal.
     """
-    title = models.CharField(max_length=256, db_index=True)
+    title = models.CharField(max_length=256)
+    dept = models.CharField(max_length=20,
+                            null=True,
+                            help_text="Department code, used to ensure event uniqueness")
     created = models.DateTimeField(default=timezone.now)
     date = models.DateTimeField(db_index=True)
     duration = models.DurationField(null=True)
@@ -393,7 +396,8 @@ class Event(models.Model):
     objects = EventManager()
 
     class Meta:
-        unique_together = (("date", "title", "region_name"))
+        unique_together = (("date", "title", "region_name"),
+                           ("date", "dept", "region_name"))
 
     def __str__(self):
         datestr = self.date.strftime("%b %d, %Y")
@@ -432,12 +436,16 @@ class Event(models.Model):
         - importer (Importer )
         """
         start = dateparse.parse_datetime(event_dict["start"])
-        kwargs = {"title": event_dict["title"],
-                  "date": start,
+        kwargs = {"date": start,
                   "region_name": event_dict["region_name"]}
         try:
+            if "department_code" in event_dict:
+                kwargs["dept"] = event_dict["department_code"]
+            else:
+                kwargs["title"] = event_dict["title"]
             event = cls.objects.get(**kwargs)
         except cls.DoesNotExist:
+            kwargs["title"] = event_dict["title"]
             event = cls(**kwargs)
 
         # TODO Perform actual processing on Event documents
