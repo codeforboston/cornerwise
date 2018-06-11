@@ -45,11 +45,12 @@ var notice = proposal.getAttributeValue("legal_notice");
 var applicant = proposal.getAttributeValue("applicant_name");
 var events = proposal.get("events") || [];
 var documents = proposal.get("documents") || [];
+var region_name = proposal.get("region_name");
 
 if (notice) {
 %>
 <div class="legal-notice">
-    <%= gloss(abridgeLegalNotice(notice)) %>
+    <%= gloss(abridgeLegalNotice(notice), false, region_name) %>
 </div>
 <% } else { %>
 <div class="missing">

@@ -79,20 +79,6 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
 
         defaultProposalThumb: "/static/images/marker-normal@2x.png",
 
-        // Map of { "permit abbreviation": "human readable permit name" }
-        permitTypes: {
-            "SP": "Special Permit",
-            "Ext.": "Extension",
-            "SP/V": "Special Permit with Variance",
-            "AA": "Administrative Appeal",
-            "SPSR": "Special Permit with Site Plan Review",
-            "SPD": "Special Permit with Design Review",
-            "V": "Variance",
-            "R": "Revision",
-            "Sub/SP": "Subdivision",
-            "SPSR/V": "Special Permit with Site Plan Review"
-        },
-
         regions: [
             {
                 id: "somerville",
@@ -123,6 +109,13 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         },
 
         contacts: [],
+        codeReference: {
+            "Somerville, MA": {
+                url: "https://twt5po1qy6.execute-api.us-east-1.amazonaws.com/production/somervillema?ordinance_section={section}",
+                pattern: "§(\\d+(?:\\.\\d+)+)"
+            },
+            "Cambridge, MA": null
+        },
 
         layers: [
             {

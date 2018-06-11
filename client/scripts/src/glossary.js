@@ -1,5 +1,5 @@
 "use strict";
-define(["jquery", "underscore", "utils"], function($, _, $u) {
+define(["jquery", "underscore", "utils", "config"], function($, _, $u, config) {
     var definitions = {
         "CBD": "Central Business District zone",
         "CCD": "Central Commercial District zone (??)",
@@ -15,10 +15,28 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
         "Stretch Code": "The Board of Building Regulations and Standards Stretch Code requires new construction to meet a 20% higher energy efficiency standard."
     };
 
-    var reStr = _.map(definitions,
-                      function(_, key) {
-                          return $u.escapeRegex(''+key);
-                      }).join("|");
+    window.$u = $u;
+    var reStr = "\\b(" + $u.wordsRegexString(_.keys(definitions)) + ")\\b";
+
+    function makeRegionRegex(region) {
+        var codeConfig = config.codeReference[region];
+
+        if (codeConfig) {
+            return new RegExp(reStr + "|" + codeConfig.pattern + "", "gi");
+        } else {
+            return new RegExp(reStr, "gi");
+        }
+    }
+
+    function makeCodeLinkFn(region) {
+        var codeConfig = config.codeReference[region];
+
+        if (!codeConfig) return null;
+
+        return function(section) {
+            return codeConfig.url.replace("{section}", section);
+        };
+    }
 
     return {
         definitions: definitions,
@@ -33,21 +51,28 @@ define(["jquery", "underscore", "utils"], function($, _, $u) {
          * @param {boolean|Function} escape When a function is
          * specified, use that as the escape function. If a truthy
          * non-function, escape HTML tags. Otherwise, do not escape.
+         * @param {String} region_name
+         *
          */
-        addMarkup: function(html, escape) {
-            var re = new RegExp(reStr, "g"), m,
-                pieces = [], lastPosition = 0,
+        addMarkup: function(html, escape, region_name) {
+            var re = makeRegionRegex(region_name),
+                codeLink = makeCodeLinkFn(region_name),
+                pieces = [], lastPosition = 0, replacement,
                 seen = {},
-                escapeFn =
-                    escape ? (_.isFunction(escape) ? escape : _.escape) : _.identity;
+                escapeFn = escape ? (_.isFunction(escape) ? escape : _.escape) : _.identity,
+                m;
 
             while ((m = re.exec(html))) {
-                if (seen[m[0]]) continue;
-
-                seen[m[0]] = 1;
+                if (m[1]) {
+                    if (seen[m[0]]) continue;
+                    seen[m[0]] = 1;
+                    replacement = "<a class='glossary'>" + m[0] + "</a>";
+                } else if (m[2]) {
+                    replacement = "<a href='" + codeLink(m[2]) + "' target='_blank'>" + m[0] + "</a>";
+                }
 
                 pieces.push(escapeFn(html.substring(lastPosition, m.index)),
-                            "<a class='glossary'>", m[0], "</a>");
+                            replacement);
                 lastPosition = m.index + m[0].length;
             }
 

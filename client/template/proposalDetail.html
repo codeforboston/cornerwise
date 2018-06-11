@@ -1,6 +1,8 @@
 <%
 var project = proposal.getProject();
-var address = proposal.get("address"); %>
+var address = proposal.get("address");
+var region = proposal.get("region_name");
+%>
 
 <div class="details">
     <% if (project) { %>
@@ -36,7 +38,7 @@ var address = proposal.get("address"); %>
 
     if (notice) {
     %>
-    <div class="legal-notice"><%- notice %></div>
+    <div class="legal-notice"><%= gloss(notice, false, region) %></div>
     <% }
 
     var complete = proposal.get("complete"), status = proposal.get("status");
