@@ -46,8 +46,7 @@ var address = proposal.get("address"); %>
     <div class="decision">
         <span class="<%- (proposal.isApproved())? 'approved' : 'denied' %>">
             <%- status %>
-        </span> on
-        <%- mediumDate(complete) %>
+        </span> on <%- mediumDate(complete) %>
     </div>
     <% } %>
     <div class="sidebar">
@@ -143,7 +142,7 @@ var address = proposal.get("address"); %>
             <% if (attr.type === "person") { %>
                 <%- value.name %>
                 <% if (value.address) { %>
-                    <span class="address">(<%- value.address %>)</span>
+                    <span class="address">&nbsp;(<%- value.address %>)</span>
                 <% } %>
             <% } else if (attr.type === "decision") {%>
                 <%= value.decision %>

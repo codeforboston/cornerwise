@@ -1043,7 +1043,6 @@ a.glossary:hover {
 }
 
 .legal-notice {
-    font-size: small;
     margin-bottom: 1em;
 }
 
@@ -1312,7 +1311,8 @@ a.brief-model:hover {
     text-overflow: ellipsis;
 }
 
-#info .attribute {
+#info .attribute,
+.document-group-name {
     color: #ccc;
     font-size: small;
     font-weight: 500;
@@ -1322,8 +1322,6 @@ a.brief-model:hover {
     vertical-align: top;
 }
 
-#info .attribute-value {
-    font-size: smaller;
 }
 
 a.thumb-link {
@@ -2310,6 +2308,10 @@ body.choosing-radius .ref-marker {
 
     body #mode-controls {
         display: none !important;
+    }
+
+    #parcel-info {
+        display: none;
     }
 
     #side-menu {
