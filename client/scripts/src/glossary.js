@@ -16,16 +16,39 @@ define(["jquery", "underscore", "utils", "config"], function($, _, $u, config) {
     };
 
     window.$u = $u;
-    var reStr = "\\b(" + $u.wordsRegexString(_.keys(definitions)) + ")\\b";
+    var reStr = "[\\b\(](" + $u.wordsRegexString(_.keys(definitions)) + ")[\\b\)]";
 
     function makeRegionRegex(region) {
-        var codeConfig = config.codeReference[region];
+        var codeConfig = config.codeReference[region] || config.defaultCodeReference,
+            caseLink = config.caseLink[region] || config.defaultCaseLink,
+            regex = reStr,
+            handler = {},
+            mgroup = 2;
 
         if (codeConfig) {
-            return new RegExp(reStr + "|" + codeConfig.pattern + "", "gi");
-        } else {
-            return new RegExp(reStr, "gi");
+            regex += "|" + codeConfig.pattern;
+            handler[mgroup++] = makeCodeLinkFn(region);
         }
+
+        if (caseLink) {
+            regex += "|" + caseLink.pattern;
+            handler[mgroup++] = makeCaseLinkFn(region);
+        }
+        console.log(regex);
+        console.log(handler);
+
+        return {pattern: new RegExp(regex, "gi"), handlers: handler};
+    }
+
+    function makeLink(link, text) {
+        return "<a href='" + link + "' target='_blank'>" + text + "</a>";
+    }
+
+    function makeCaseLinkFn(region, match) {
+        return function(caseNumber) {
+            return makeLink("/proposal/view?case_number=" + encodeURIComponent(caseNumber),
+                            caseNumber);
+        };
     }
 
     function makeCodeLinkFn(region) {
@@ -33,8 +56,8 @@ define(["jquery", "underscore", "utils", "config"], function($, _, $u, config) {
 
         if (!codeConfig) return null;
 
-        return function(section) {
-            return codeConfig.url.replace("{section}", section);
+        return function(section, match) {
+            return makeLink(codeConfig.url.replace("{section}", section), match);
         };
     }
 
@@ -55,8 +78,9 @@ define(["jquery", "underscore", "utils", "config"], function($, _, $u, config) {
          *
          */
         addMarkup: function(html, escape, region_name) {
-            var re = makeRegionRegex(region_name),
-                codeLink = makeCodeLinkFn(region_name),
+            var matcher = makeRegionRegex(region_name),
+                re = matcher.pattern,
+                handler = matcher.handlers,
                 pieces = [], lastPosition = 0, replacement,
                 seen = {},
                 escapeFn = escape ? (_.isFunction(escape) ? escape : _.escape) : _.identity,
@@ -67,8 +91,14 @@ define(["jquery", "underscore", "utils", "config"], function($, _, $u, config) {
                     if (seen[m[0]]) continue;
                     seen[m[0]] = 1;
                     replacement = "<a class='glossary'>" + m[0] + "</a>";
-                } else if (m[2]) {
-                    replacement = "<a href='" + codeLink(m[2]) + "' target='_blank'>" + m[0] + "</a>";
+                } else {
+                    var i = 1;
+                    while(handler[++i]) {
+                        if (m[i]) {
+                            replacement = handler[i](m[i], m[0]);
+                            break;
+                        }
+                    }
                 }
 
                 pieces.push(escapeFn(html.substring(lastPosition, m.index)),

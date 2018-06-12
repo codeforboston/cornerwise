@@ -117,6 +117,12 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
             "Cambridge, MA": null
         },
 
+        caseLink: {
+            "Somerville, MA": {
+                pattern: "((?:ZBA|PB)\\s?(?:(?:[\\dA-Z]+-)+(?:[\\dA-Z]+)))"
+            }
+        },
+
         layers: [
             {
                 source: "/static/scripts/src/layerdata/glx.geojson",
