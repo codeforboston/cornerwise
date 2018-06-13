@@ -16,7 +16,8 @@ class SomervilleConfig(SiteConfig):
 
     extra_context = {
         "site_description": ("Find and explore current and future zoning "
-                             "projects near you - City of Somerville.")
+                             "projects near you - City of Somerville."),
+        "site_message": "Visit <a href=\"https://somervillema.gov/planning\" target=\"_blank\">somervillema.gov/planning</a> for the most up-to-date reports and decisions"
     }
 
     extra_js_config = {

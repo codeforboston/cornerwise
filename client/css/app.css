@@ -120,6 +120,18 @@ body.loading-proposals #loading-indicator {
     display: block;
 }
 
+#site-message {
+    color: black;
+    font-size: smaller;
+    position: absolute;
+    left: 1em;
+    bottom: 1em;
+}
+
+.site-message .last-updated {
+    font-style: italic;
+}
+
 .control a:hover {
     background-color: #2A749B;
     color: white !important;
@@ -145,7 +157,7 @@ body:not(.nointro) #map-controls {
 #parcel-info {
     font-size: small;
     left: 1em;
-    bottom: 1em;
+    bottom: 4.5em;
     opacity: 0;
     padding: 0.5em;
 
@@ -1322,8 +1334,6 @@ a.brief-model:hover {
     vertical-align: top;
 }
 
-}
-
 a.thumb-link {
     border: 1px solid #777;
     border-radius: 5px;
@@ -1881,14 +1891,9 @@ body.nointro #side-menu.expanded {
     color: var(--action-color);
 }
 
-.menu-group {
-
-}
-
 .group-header {
     font-weight: bold;
 }
-
 
 input.big, select {
     font-size: 1em;
@@ -2327,6 +2332,14 @@ body.choosing-radius .ref-marker {
     #side-menu.collapsed {
         display: block;
         right: -26em;
+    }
+
+    #mobile-site-message {
+        font-size: smaller;
+        position: absolute;
+        bottom: 1em;
+        left: 1.5em;
+        right: 1.5em;
     }
 
     #modal-contents {

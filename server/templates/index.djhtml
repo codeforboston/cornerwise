@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -23,6 +24,7 @@
          {% endfor %}
          _CornerwisePreload = {{ preload_data|safe }};
          SITE_CONFIG = {% if site_config %}{{ site_config|safe }}{% else %}{}{% endif %};
+         LAST_UPDATED = new Date({{ last_updated.timestamp }});
         </script>
         {% if production %}
             <link rel="stylesheet" href="/static/build/{{ css_filename }}" type="text/css" media="screen" />
@@ -257,6 +259,17 @@
                             <br/>
                             <a href="#view=contact&showmenu=0">Contact</a>
                         </div>
+                        <div id="mobile-site-message" class="site-message">
+                            <span class="last-updated">
+                                Last updated {{ last_updated|naturaltime }}.
+                                <br/>
+                            </span>
+                            {% if site_message %}
+                                <span class="message">
+                                    {{ site_message|safe }}
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
@@ -278,6 +291,17 @@
                             </form>
                         </div>
                     </div>
+                </div>
+
+                <div id="site-message" class="control site-message _desktop-only">
+                    <div class="last-updated">
+                        Last updated {{ last_updated|naturaltime }}.
+                    </div>
+                    {% if site_message %}
+                        <span class="message">
+                            {{ site_message|safe }}
+                        </span>
+                    {% endif %}
                 </div>
 
                 <div id="info-menu" class="_desktop-only">
