@@ -43,7 +43,7 @@
         <meta name="og:type" content="website" />
         <meta name="og:image" content="/static/images/cornerwise-logo.png" />
 
-        <body>
+        <body class="intro">
             <noscript>
                 <div>
                     The main site requires JavaScript to run.

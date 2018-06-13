@@ -59,7 +59,8 @@ define(
 
                     var showIntro = !view || view === "intro";
 
-                    $(document.body).toggleClass("nointro", !showIntro);
+                    $(document.body).toggleClass("nointro", !showIntro)
+                        .toggleClass("intro", showIntro);
                 });
 
                 refLocation.on("change:setMethod", function(_, method) {
