@@ -32,6 +32,10 @@ class SiteConfig():
         return {}
 
     @property
+    def importer_query(self):
+        return {"region_name": self.region_name}
+
+    @property
     def hostname(self):
         return self.hostnames[0]
 

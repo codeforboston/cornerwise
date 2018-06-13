@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from parcel.models import LotQuantiles
+from proposal.models import Importer
 
 
 def get_lot_sizes():
@@ -31,12 +32,19 @@ def lot_sizes(town_id):
         return { "small": 5000, "medium": 10000 }
 
 
+def last_updated(site_config=None):
+    q = site_config.importer_query if site_config else {}
+    return max(Importer.objects.filter(**q)
+                               .values_list("last_run", flat=True))
+
+
 @ensure_csrf_cookie
 def index(request):
     return render(request, "index.djhtml", {
         "google_key": settings.GOOGLE_BROWSER_API_KEY,
         "production": settings.IS_PRODUCTION,
         "lot_sizes": lot_sizes(request.site_config.town_id),
+        "last_updated": last_updated(request.site_config),
         "preload_data": json.dumps({}),
         "js_filename": settings.JS_FILENAME,
         "css_filename": settings.CSS_FILENAME
