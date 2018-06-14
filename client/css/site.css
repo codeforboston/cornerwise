@@ -113,3 +113,10 @@ a.anchor:hover {
 .images.grid .thumbnail img {
     object-fit: cover;
 }
+
+.action-button {
+    background-color: #3c7c3d;
+    color: white;
+    padding: 0.5em;
+    text-transform: uppercase;
+}

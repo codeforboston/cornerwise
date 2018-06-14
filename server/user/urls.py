@@ -17,9 +17,11 @@ urlpatterns = [
     path("mail_inbound", mail_inbound),
 
 
-    # url(r"^manage$", views.manage, name="manage-user"),
-    # url(r"^delete_subscriptions", views.delete_subscriptions),
-    # url(r"^delete_subscription$", views.delete_subscription, name="delete-subscription"),
-    # url(r"^activate$", views.activate_account, name="activate-account"),
-    # url(r"^changes/$", views.change_summary, name="view-subscription-changes"),
+    path("manage", views.manage, name="manage-user"),
+    # path("delete_subscriptions", views.delete_subscriptions),
+    path("delete_subscription", views.delete_subscription, name="delete-subscription"),
+    path("activate_subscription", views.activate_subscription, name="activate-subscription"),
+    path("deactivate_subscription", views.deactivate_subscription, name="deactivate-subscription"),
+    # path("activate", views.activate_account, name="activate-account"),
+    path("changes/", views.change_summary, name="view-subscription-changes"),
 ]

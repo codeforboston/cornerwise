@@ -7,8 +7,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from django.contrib.auth import login, logout
+from django.utils import timezone
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import logging
 
@@ -18,9 +19,10 @@ from shared.request import make_response, make_message, ErrorResponse
 from shared.mail import render_email_body
 from user import tasks
 from .contact import ContactForm
+from . import changes
 from user.mail import updates_context
 from user.models import Subscription, UserProfile
-from user.utils import not_logged_in, with_user
+from user.utils import not_logged_in, with_user, with_user_subscription
 
 logger = logging.getLogger(__file__)
 
@@ -56,7 +58,7 @@ def subscribe(request):
         user = User.objects.create(
             is_active=False,
             username=email,
-            email=email, )
+            email=email)
         profile = UserProfile.objects.create(user=user, language=lang,
                                              site_name=request.site_name)
         profile.save()
@@ -67,6 +69,7 @@ def subscribe(request):
                                     address=request.POST.get("address"))
         subscription.set_validated_query(query_dict)
         subscription.user = user
+
         subscription.save()
     except (ValidationError, ValueError) as exc:
         raise ErrorResponse("Invalid subscription", {"exception": exc.args})
@@ -139,15 +142,6 @@ def resend_email(request):
     return do_resend_email(request)
 
 
-def user_login(request, token, pk):
-    user = authenticate(pk=pk, token=token)
-    if not user:
-        return render(request, "token_error.djhtml", status=403)
-
-    login(request, user)
-    return redirect(reverse("manage-user"))
-
-
 def change_log(request):
     """
     Show a summary of changes based on criteria in the query string. Intended
@@ -172,6 +166,97 @@ def change_log(request):
 
     html, _text = render_email_body("updates", updates_context(sub, sub.summarize_updates(since)))
     return HttpResponse(html)
+
+
+def user_login(request, token, pk):
+    user = authenticate(pk=pk, token=token)
+    if not user:
+        return render(request, "token_error.djhtml", status=403)
+
+    login(request, user)
+    return redirect(reverse("manage-user"))
+
+
+@with_user
+def manage(request, user):
+    if not user.is_active:
+        user.is_active = True
+        user.save()
+
+    return render(request, "user/manager.djhtml",
+                  {"user": user,
+                   "subscriptions": user.subscriptions})
+
+
+@with_user_subscription
+def delete_subscription(request, user, sub):
+    sub.delete()
+    messages.success(request, "Subscription deleted")
+    return redirect(reverse(manage))
+
+
+@with_user_subscription
+def deactivate_subscription(request, user, sub):
+    sub.active = False
+    messages.success(request, "Subscription deactivated. You will no longer receive updates about this subscription.")
+    return redirect(reverse(manage))
+
+
+@with_user_subscription
+def activate_subscription(request, user, sub):
+    sub.active = True
+    messages.success(request, "Subscription activated.")
+    return redirect(reverse(manage))
+
+
+@make_response("user/subscription.djhtml")
+def show_change_summary(request, sub_id, since, until=None):
+    """
+    Displays a summary of the changes recorded for a given subscription within
+    a time period specified by `since` and `until`.
+    """
+    try:
+        sub = Subscription.objects.get(pk=sub_id)
+        summary = changes.summarize_subscription_updates(sub, since, until)
+        return {
+            "since": since,
+            "until": until,
+            "subscription": sub,
+            "changes": summary
+        }
+    except Subscription.DoesNotExist:
+        raise ErrorResponse(
+            "Invalid subscription ID", status=404, redirect_back=True)
+    except KeyError:
+        raise ErrorResponse("Missing subscription id", redirect_back=True)
+
+
+def change_summary(request):
+    sub_id = request.GET["subscription_id"]
+    since = None
+    until = None
+    days = None
+
+    if "since" in request.GET:
+        try:
+            since = datetime.fromtimestamp(float(request.GET["since"]))
+        except ValueError:
+            since = None
+    else:
+        try:
+            days = abs(int(request.GET["days"]))
+        except (KeyError, ValueError):
+            days = 7
+
+    if days:
+        since = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days)
+    elif "until" in request.GET:
+        try:
+            until = datetime.fromtimestamp(float(request.GET["until"]))
+        except (TypeError, ValueError):
+            pass
+
+    return show_change_summary(request, sub_id, since, until)
 
 
 @with_user
