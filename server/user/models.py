@@ -125,6 +125,21 @@ class SubscriptionQuerySet(models.QuerySet):
         """
         return self.update(last_notified=timezone.now())
 
+    def find_similar(self, subscription):
+        for sub in self:
+            if sub.pk == subscription.pk:
+                continue
+            yield (self.similarity(sub), sub)
+
+    def most_similar(self, subscription):
+        max_similarity = 0
+        match = None
+        for (sim, sub) in self.find_similar(subscription):
+            if sub.pk != subscription.pk and sim >= max_similarity:
+                match = sub
+                max_similarity = sim
+        return (max_similarity, match)
+
 
 class Subscription(models.Model):
     """A Subscription contains a saved query. Cornerwise checks it for updates
@@ -305,7 +320,7 @@ class Subscription(models.Model):
             desc += f"inside the region: {prettify_point(sw)} and {prettify_point(ne)}"
         elif self.center:
             dist = round(getattr(D(m=self.radius), dist_units))
-            desc += "within {dist}{dist_units} of {where}".format(
+            desc += "within {dist} {dist_units} of {where}".format(
                 dist=dist,
                 dist_units=dist_units,
                 where=(self.address or prettify_point(self.center))
@@ -314,6 +329,36 @@ class Subscription(models.Model):
         desc += f" ({self.region_name})"
 
         return desc
+
+    def overlap(self, subscription):
+        """Returns the overlap of the subscription area of this Subscription with
+        another Subscription as a percentage of the total area of the two
+        subscriptions. If only one of the subscriptions has a shape, returns 0.
+        If neither has a shape, returns None.
+
+        """
+        my_shape = self.shape
+        other_shape = subscription.shape
+
+        if my_shape and other_shape:
+            return 2*my_shape.intersection(other_shape).area/(my_shape.area + other_shape.area)
+        elif my_shape or other_shape:
+            return 0
+
+        return None
+
+    def similarity(self, subscription):
+        if self.region_name != subscription.region_name:
+            return 0
+
+        # Be sure to add other fields as necessary
+
+        overlap = self.overlap(subscription)
+        if overlap is not None:
+            return overlap
+
+        if self.address == subscription.address:
+            return 1
 
     @property
     def map_url(self):
@@ -334,13 +379,17 @@ class Subscription(models.Model):
         }, quote_via=urllib.parse.quote)
         return reverse("front-page") + "#" + params
 
-    def minimap_src(self, circle_color=None):
+    @property
+    def shape(self):
         if self.box:
-            box = self.box
+            return self.box
         else:
             center = self.center
             # This is good enough for our purposes here:
-            box = center.buffer(self.radius/111000)
+            return center.buffer(self.radius/111000)
+
+    def minimap_src(self, circle_color=None):
+        box = self.shape
 
         if box:
             sw, ne = poly_bounds(box)
