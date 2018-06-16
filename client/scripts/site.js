@@ -13,7 +13,7 @@ function wait(ms, fn) {
     return deferred.then(fn);
 }
 
-function monitorTasks(task_ids, checks, fn) {
+function monitorTasks(task_ids, checks, fn, delay) {
     if (checks <= 0 || !task_ids.length)
         return null;
 
@@ -21,7 +21,7 @@ function monitorTasks(task_ids, checks, fn) {
         .then(function(results) {
             var complete = {};
             $.each(results.results, function(task_id, status) {
-                if (status.status != "pending") {
+                if (status.status !== "pending") {
                     fn(task_id, status);
                     complete[task_id] = true;
                 }
@@ -29,8 +29,8 @@ function monitorTasks(task_ids, checks, fn) {
 
             var next_ids = $.grep(task_ids, function(task_id) { return !complete[task_id]; });
 
-            return wait(10000, function() {
-                return monitorTasks(next_ids, checks-1, fn);
+            return wait(delay, function() {
+                return monitorTasks(next_ids, checks-1, fn, delay*1.5);
             });
         });
 }
@@ -51,11 +51,10 @@ $(function() {
             var elt = task_alerts[task_id];
 
             $(elt)
-                .addClass(result.status == "failure" ?
-                          "failure-message alert-danger" :
-                          "success-message alert-success")
-                .removeClass("pending-message alert-info");
+                .addClass(result.status === "failure" ?
+                          "task-failure" : "task-success")
+                .removeClass("task-pending");
             delete task_alerts[task_id];
-        });
+        }, 2000);
     })();
 });

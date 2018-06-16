@@ -1,14 +1,14 @@
 {% extends "base.djhtml" %}
 
 {% block body %}
-    <div class="alert alert-info task-pending" data-taskid="{{ task_id }}">
-        <p class="task-message pending-message" >
+    <div class="task-pending" data-taskid="{{ task_id }}">
+        <p class="task-message pending-message alert alert-info" >
             {% firstof pending_message "One moment..." %}
         </p>
-        <p class="task-message success-message" >
+        <p class="task-message success-message alert alert-success" >
             {% firstof success_message "Success!" %}
         </p>
-        <p class="task-message failure-message" >
+        <p class="task-message failure-message alert alert-warning" >
             {% firstof failure_message "Something went wrong.  Please try again later." %}
         </p>
     </div>
