@@ -1,7 +1,7 @@
 {% load cornerwise_extras %}
 
 {% for change in changes.values %}
-    {% with proposal=change.proposal props=changes.properties attrs=changes.attributes %}
+    {% with proposal=change.proposal props=change.properties attrs=change.attributes %}
         <div class="change">
             <a class="address" href="{% absolute_url 'view-proposal' pk=proposal.id %}">
                 {{ proposal.address }}

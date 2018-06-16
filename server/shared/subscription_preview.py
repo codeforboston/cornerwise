@@ -89,13 +89,15 @@ def subscription_preview(request):
 
 def render_changelog(request, data):
     context = cornerwise_admin.each_context(request)
-    context["title"] = "Preview Subscription Changes"
     sub = Subscription(created=data["start"],
                        updated=data["start"],
                        center=data["center"],
                        radius=data["radius"].m,
                        address=data["address"],
-                       region_name=data["region_name"])
+                       region_name=data["region_name"],
+                       user=request.user)
 
+    context["title"] = "Preview Subscription Changes"
+    context["subscription"] = sub
     context.update(updates_context(sub, sub.summarize_updates(data["start"])))
     return render(request, "admin/preview_subscription.djhtml", context)
