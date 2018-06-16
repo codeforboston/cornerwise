@@ -6,22 +6,17 @@ from django.contrib.auth import get_user_model
 
 from utils import make_absolute_url
 
+from shared.mail import send as send_mail
 from . import changes, models
 
 User = get_user_model()
 
 
-def _make_user_context(subscription, context):
-    # context = context.copy() if context else {}
+def _make_user_context(subscription, context=None, user=None):
+    context = {} if context is None else context
     context["hostname"] = subscription.site_name
-    try:
-        user = subscription.user
-        context["user"] = user.profile.addressal or user.email
-        context["unsubscribe_url"] = make_absolute_url(user.profile.unsubscribe_url,
-                                                       subscription.site_name)
-    except (models.UserProfile.DoesNotExist, models.Subscription.user.RelatedObjectDoesNotExist):
-        context["user"] = "Unknown"
-        context["unsubscribe_url"] = make_absolute_url("/", subscription.site_name)
+    context["user"] = user or subscription.user
+    context["subscription"] = subscription
     context["site_root"] = make_absolute_url("/", subscription.site_name)
     return context
 
@@ -44,7 +39,6 @@ def updates_context(sub, updates):
         start=datefmt(updates["start"]), end=datefmt(updates["end"]))
 
     return _make_user_context(sub, {
-        "description": sub.readable_description(),
         "updates": updates_html,
         "update_summary": changes.summary_line(updates),
         "date_range": date_range
@@ -52,30 +46,22 @@ def updates_context(sub, updates):
 
 
 def welcome_context(subscription):
-    """Constructs the context for rendering the welcome email.
-    """
-    profile = subscription.user.profile
-    if not profile.token:
-        profile.generate_token()
-
     return _make_user_context(subscription, {
-        "confirm_url": make_absolute_url(profile.confirm_url, subscription.site_name),
-        "minimap_src": subscription.minimap_src(),
-        "description": subscription.readable_description(),
-        "frequency_description": "once a week",
+        "salutation": "Welcome to Cornerwise! Please confirm your subscription"
+    })
+
+
+def confirm_context(subscription):
+    """Works like welcome, but the user is already registered.
+    """
+    return _make_user_context(subscription, {
+        "salutation": "Please confirm your new subscription"
     })
 
 
 def replace_subscription_context(subscription, existing):
     return _make_user_context(subscription, {
-        "subscription": subscription.readable_description(),
-        "minimap_src": subscription.minimap_src(),
-        "description": subscription.readable_description(),
-        "frequency_description": "once a week",
-        "old_minimap_src": existing.minimap_src("red"),
-        "old_description": existing.readable_description(),
-        "old_frequency": "once a week",
-        "confirmation_link": make_absolute_url(subscription.confirm_url, subscription.site_name)
+        "existing": existing,
     })
 
 
@@ -87,3 +73,27 @@ def staff_notification_context(subscription, title, message):
         "message": message,
         "title": title
     })
+
+
+def send_welcome_email(subscription, logger=None):
+    send_mail(subscription.user.email, "Cornerwise: Please Confirm", "welcome",
+              welcome_context(subscription), logger=logger)
+
+
+def send_replace_subscription_email(subscription, existing, logger=None):
+    send_mail(
+        subscription.user.email, "Cornerwise: Confirm Subscription Change",
+        "replace_subscription",
+        replace_subscription_context(subscription, existing),
+        logger=logger)
+
+
+def send_confirm_subscription_email(subscription, logger=None):
+    send_mail(subscription.user.email, "Cornerwise: Confirm Subscription",
+              "welcome", confirm_context(subscription), logger=logger)
+
+
+def send_staff_notification_email(subscription, title, message, logger=None):
+    send_mail(subscription.user.email, f"Cornerwise: {title}", "staff_notification",
+              staff_notification_context(subscription, title, message),
+              logger=logger)

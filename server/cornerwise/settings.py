@@ -260,9 +260,6 @@ TINYMCE_COMPRESSOR = True
 
 # Local settings will override this:
 SENDGRID_TEMPLATES = {
-    "welcome": "ea06cf27-7565-443a-8c09-cbf036ae3e8f",
-    "replace_subscription": "5d3e9ef4-960b-4fb9-906e-75474dca8720",
-    "staff_notification": "36dc83a7-dea8-4316-b951-14868af62c5f",
     "generic": "5b82e3d6-151a-44e0-82ec-a6fdcae746bb",
 }
 

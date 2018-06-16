@@ -1,0 +1,6 @@
+{% load cornerwise_extras %}{% if user %}Don't want to hear from us again?
+
+Unsubscribe: {% absolutize user.profile.unsubscribe_url %}
+Manage your account: {% absolutize user.profile.manage_url %}
+{% else %}Sent from Cornerwise
+{% endif %}

@@ -1,0 +1,4 @@
+<p>Here are the updates you requested:</p>
+
+<p>{{ update_summary }}</p>
+{{ updates }}

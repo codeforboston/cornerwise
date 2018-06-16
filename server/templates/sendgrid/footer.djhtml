@@ -1,0 +1,9 @@
+{% if user %}
+    <p class="footer-text">Don&#39;t want to hear from us again?</p>
+    <p class="footer-text">
+        <a href="{{ user.profile.unsubscribe_url }}">Unsubscribe</a> or <a href="{{ user.profile.manage_url }}">Manage Your Account</a>
+    </p>
+    <p>&nbsp;</p>
+{% else %}
+    <div class="footer-text">Sent from Cornerwise</div>
+{% endif %}

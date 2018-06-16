@@ -63,5 +63,5 @@ class ContactForm(forms.Form):
         if emails:
             for email in emails:
                 mail.send(email, "Cornerwise: User Feedback", "user_feedback",
-                          cleaned, use_generic_template=True)
+                          cleaned)
             return True

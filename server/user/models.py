@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from utils import bounds_from_box, distance_from_str, point_from_str, prettify_lat, prettify_long
+import utils
 from .changes import summarize_subscription_updates
 from site_config import site_config
 
@@ -89,23 +90,19 @@ class UserProfile(models.Model):
 
         return self.token
 
-    def url(self, url):
-        return "{base}?token={token}&uid={uid}".format(
+    def url(self, url, absolute=False):
+        relative = "{base}?token={token}&uid={uid}".format(
             base=url,
             token=urllib.parse.quote_plus(self.token),
             uid=self.user_id)
+        return utils.make_absolute_url(relative, self.site_name) if absolute \
+            else relative
 
-    @property
-    def unsubscribe_url(self):
-        return self.url(reverse("deactivate-account"))
+    def unsubscribe_url(self, absolute=True):
+        return self.url(reverse("deactivate-account"), absolute)
 
-    @property
-    def manage_url(self):
-        return self.url(reverse("manage-user"))
-
-    @property
-    def confirm_url(self):
-        return self.url(reverse("confirm"))
+    def manage_url(self, absolute=True):
+        return self.url(reverse("manage-user"), absolute)
 
 
 class SubscriptionQuerySet(models.QuerySet):
@@ -233,13 +230,14 @@ class Subscription(models.Model):
         """
         return summarize_subscription_updates(self, since or self.last_notified)
 
-    @property
-    def confirm_url(self):
-        return "{base}?token={token}&uid={uid}&sub={sub_id}".format(
+    def confirm_url(self, absolute=True):
+        relative = "{base}?token={token}&uid={uid}&sub={sub_id}".format(
             base=reverse("confirm"),
-            token=self.user.profile.token,
+            token=self.user.profile.get_or_make_token(),
             uid=self.user.pk,
             sub_id=self.pk)
+        return utils.make_absolute_url(relative, self.site_name) if absolute \
+            else relative
 
     @property
     def query_dict(self):
@@ -309,6 +307,10 @@ class Subscription(models.Model):
             dist = D(m=query["r"])
 
         return desc
+
+    @property
+    def frequency_description(self):
+        return "once a week"
 
     def readable_description(self, dist_units="ft"):
         """Returns a brief textual description of the subscription.
@@ -403,6 +405,9 @@ class Subscription(models.Model):
                         circle=circle)
         else:
             return None
+
+    def minimap_src_red(self):
+        return self.minimap_src("red")
 
 
 class UserComment(models.Model):

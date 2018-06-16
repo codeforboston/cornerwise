@@ -1,0 +1,36 @@
+<h3 align="left">Please confirm your subscription change.</h3>
+
+<p>
+		You made a change to your subscription preferences. Until you confirm it,
+		you will continue to receive updates about the previously selected region.
+</p>
+
+
+<h3 align="left" style="color: green">New Subscription Area:</h3>
+
+<p>&nbsp;</p>
+
+<div align="center">
+    <img class="img-subscription" height="256" width="256"
+         src="{{ subscription.minimap_src }}"
+         style="width: 256px; height: 256px;" />
+</div>
+
+<p>{{ subscription.readable_description }}</p>
+
+<p>&nbsp;</p>
+
+<h3 align="left" style="text-decoration: line-through">Old Subscription Area:</h3>
+
+<p>&nbsp;</p>
+
+<div align="center">
+    <img class="img-subscription" height="256" width="256"
+         src="{{ existing.minimap_src_red }}" style="width: 256px; height: 256px;" />
+</div>
+
+<p>{{ existing.readable_description }}</p>
+
+<div align="center">
+    <a class="btn" href="{{ subscription.confirm_url }}">CONFIRM CHANGE</a>
+</div>

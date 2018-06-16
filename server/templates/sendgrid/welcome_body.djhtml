@@ -1,0 +1,16 @@
+<h3 align="left">{{ salutation }}</h3>
+<p>You have signed up to be notified of new zoning proposals near you. All you need to do now is confirm your subscription!</p>
+<h3 align="left">Subscription Area:</h3>
+<p>&nbsp;</p>
+<div align="center">
+    <img class="img-subscription" height="256" width="256"
+         src="{{ subscription.minimap_src }}" style="width: 256px; height: 256px;" />
+</div>
+<p>
+    Once you confirm, we will send updates to your inbox
+    {{ frequency_description }}. In the meantime, you can
+    <a href="{{ site_root }}">visit Cornerwise</a> to explore other areas.
+</p>
+<div align="center">
+    <a class="btn" href="{{ subscription.confirm_url }}">CONFIRM MY SUBSCRIPTION </a>
+</div>
