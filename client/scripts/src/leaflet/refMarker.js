@@ -15,6 +15,7 @@ define(["lib/leaflet", "config", "underscore", "utils", "appState"],
                                           {icon: icon}).addTo(this);
 
                    var popup = L.popup({autoPan: false,
+                                        autoClose: false,
                                         className: "subscribe-popup",
                                         closeButton: false});
                    marker.bindPopup(popup);
@@ -33,6 +34,9 @@ define(["lib/leaflet", "config", "underscore", "utils", "appState"],
 
                locationChange: function(refLoc) {
                    this.marker.setLatLng(refLoc.getPoint());
+                   if (refLoc.get("setMethod") !== "auto") {
+                       this.marker.openPopup();
+                   }
                },
 
                subscribeStarted: function() {
