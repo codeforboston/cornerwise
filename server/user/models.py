@@ -211,24 +211,24 @@ class Subscription(models.Model):
         deactivate the user's currently active subscriptions.
 
         """
-        if settings.LIMIT_SUBSCRIPTIONS:
-            # Disable all this user's other subscriptions:
+        if self.site_name and not site_config(self.site_name).allow_multiple_subscriptions:
+            # Disable this user's other subscriptions on the site:
             self.user.subscriptions\
-                     .filter(active=True)\
+                     .filter(active=True, site_name=self.site_name)\
                      .exclude(pk=self.pk)\
                      .update(active=False)
         self.user.profile.activate()
         self.active = True
         self.save()
 
-    def summarize_updates(self, since=None):
+    def summarize_updates(self, since=None, until=None):
         """
         since: a datetime
 
         :returns: a dictionary describing the changes to the query since the
         given datetime
         """
-        return summarize_subscription_updates(self, since or self.last_notified)
+        return summarize_subscription_updates(self, since or self.last_notified, until)
 
     def confirm_url(self, absolute=True):
         relative = "{base}?token={token}&uid={uid}&sub={sub_id}".format(

@@ -21,7 +21,9 @@ class SiteConfig():
         {"topic": "Other", "name": "webmaster"}
     ]
 
-    module_name = __module__.rsplit(".", 1)[-1]
+    allow_multiple_subscriptions = False
+
+    sendgrid_template = "5b82e3d6-151a-44e0-82ec-a6fdcae746bb"
 
     @property
     def proposal_query_defaults(self):

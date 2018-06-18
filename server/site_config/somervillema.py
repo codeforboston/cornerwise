@@ -52,6 +52,8 @@ class SomervilleConfig(SiteConfig):
 
     max_subscription_radius = D(ft=300).m
 
+    allow_multiple_subscriptions = True
+
     def validate_subscription_query(self, sub, query):
         if sub.region_name:
             if sub.region_name != "Somerville, MA":

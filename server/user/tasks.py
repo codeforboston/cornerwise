@@ -10,6 +10,8 @@ from django.dispatch import receiver
 from shared.logger import get_logger
 from shared.mail import send as send_mail
 
+import site_config
+
 from .models import Subscription
 from . import mail
 
@@ -58,36 +60,35 @@ def send_deactivation_email(user_id):
 
 @shared_task(bind=True)
 def send_subscription_confirmation_email(self, sub_id):
-    """When a new Subscription is created, check if the User has existing
-    Subscription(s). If s/he does and if LIMIT_SUBSCRIPTIONS is set to True,
-    send an email asking the user to confirm the new subscription and replace
-    the old one.
+    """
     """
     logger = get_logger(self)
     subscription = Subscription.objects.select_related("user").get(pk=sub_id)
     user = subscription.user
 
     if not user.is_active:
-        send_user_welcome(subscription)
+        send_welcome_email(subscription)
         return
 
-    # Revisit this if we turn off subscription limiting. We'd still want the
-    # user to confirm the new subscription, since we don't have logins.
-    if not settings.LIMIT_SUBSCRIPTIONS or \
-       subscription.active:
+    if subscription.active:
         return
 
-    try:
-        existing = user.subscriptions.filter(active=True)[0]
-    except IndexError:
-        # The user doesn't have any active Subscriptions
-        return
+    existing = None
+    if subscription.site_name:
+        config = site_config.by_hostname(subscription.site_name)
+        if not config.allow_multiple_subscriptions:
+            try:
+                existing = user.subscriptions.filter(active=True,
+                                                    site_name=subscription.site_name)\
+                                                .exclude(pk=sub_id)[0]
+            except IndexError:
+                pass
 
-    send_mail(
-        user.email, "Cornerwise: Confirm Subscription Change",
-        "replace_subscription",
-        mail.replace_subscription_context(subscription, existing),
-        logger=logger)
+    # Send an email to confirm the subscription change
+    if existing:
+        mail.send_replace_subscription_email(subscription, existing)
+    else:
+        mail.send_confirm_subscription_email(subscription)
 
 
 @shared_task(bind=True)

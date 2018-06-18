@@ -263,9 +263,6 @@ SENDGRID_TEMPLATES = {
     "generic": "5b82e3d6-151a-44e0-82ec-a6fdcae746bb",
 }
 
-# If this is set to True, users are only allowed to have one subscription.
-LIMIT_SUBSCRIPTIONS = True
-
 MIN_ALERT_RADIUS = 50
 MAX_ALERT_RADIUS = 10000
 
