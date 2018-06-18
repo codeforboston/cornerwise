@@ -1,5 +1,5 @@
-define(["backbone", "jquery", "underscore"],
-       function(B, $, _) {
+define(["backbone", "jquery", "underscore", "config"],
+       function(B, $, _, config) {
            var alertElement = $("#alert"),
                alertCount = 0,
                modalMessage,
@@ -85,7 +85,7 @@ define(["backbone", "jquery", "underscore"],
                e.preventDefault();
            });
 
-           return {
+           var alerts = {
                AlertType: AlertType,
 
                remove: dismissMessage,
@@ -106,11 +106,20 @@ define(["backbone", "jquery", "underscore"],
                                                         className: className || "",
                                                         type: type || AlertType.DEFAULT};
 
-                   if (!msg.id) msg.id = alertCount++;
+                   if (id) msg.id = id;
+                   else if (!msg.id) msg.id = alertCount++;
+
                    if (_.isString(msg.type)) msg.type = AlertType[msg.type.toUpperCase()];
 
                    showMessage(msg);
                    return id;
+               },
+
+               showNamed: function(namedMessage, id) {
+                   var message = config.messages[namedMessage];
+
+                   if (message)
+                       alerts.show(_.extend({id: id}, message));
                },
 
                /**
@@ -129,4 +138,6 @@ define(["backbone", "jquery", "underscore"],
                    }
                }
            };
+
+           return alerts;
        });

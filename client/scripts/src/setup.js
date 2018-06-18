@@ -125,7 +125,7 @@ define(
                     refLocation: refLocation,
                     distanceSubscription: !!(config.minSubscribeRadius || config.maxSubscribeRadius),
                     circleStyle: config.subscribeCircleStyle,
-                    instructions: config.subscribeInstructions
+                    instructions: config.messages.subscribeInstructions
                 });
 
                 appViews.imageView = new ImageView({

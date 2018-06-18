@@ -1,5 +1,5 @@
-define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appState", "utils"],
-       function($, B, _, L, alerts, appState, $u) {
+define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appState", "utils", "config"],
+       function($, B, _, L, alerts, appState, $u, config) {
            return B.View.extend({
                initialize: function(options) {
                    this.options = options;
@@ -147,39 +147,31 @@ define(["jquery", "backbone", "underscore", "lib/leaflet", "view/alerts", "appSt
                            dataType: "json"})
                        .done(function(resp) {
                            form.email.value = "";
+                           var messageOptions = {};
                            if (resp.has_subscriptions) {
-                               alerts.show(
-                                   {title: "Overwrite existing subscription?",
-                                    id: "subscription-alert",
-                                    text: ("Looks like you have a subscription " +
-                                           "already. We've emailed a link to " +
-                                           resp.email + " that will confirm the new " +
-                                           "subscription. If you do nothing, your " +
-                                           "old subscription will remain intact."),
-                                    className: "notice",
-                                    type: "default"});
+                               if (resp.allows_multiple) {
+                                   messageOptions = config.messages.confirmNewSubscription;
+                               } else {
+                                   messageOptions = config.messages.overwriteExistingSubscription;
+                                   messageOptions.className = "notice";
+                               }
                            } else if (resp.active) {
-                               alerts.show(
-                                   {title: "You're Subscribed!",
-                                    id: "subscription-alert",
-                                    text: ("You will now receive updates when the " +
-                                           "proposals are updated."),
-                                    className: "success"});
+                               messageOptions = config.messages.subscriptionCreated;
+                               messageOptions.className = "success";
                            } else {
-                               var text = resp.new_user ?
-                                   ("Thanks for registering! We've sent an email to " + resp.email +
-                                    ". Please use the link provided to confirm your email " +
-                                    "before we can send updates.") :
-                                   ("Looks like you've tried to register more than once! " +
-                                    "We've sent you another email. Please use the link there " +
-                                    "to confirm your account.");
-                               alerts.show(
-                                   {title: "Please confirm your email",
-                                    id: "subscription-alert",
-                                    text: text,
-                                    className: "info",
-                                    type: "default"});
+                               messageOptions = resp.new_user ?
+                                   config.messages.confirmSubscription :
+                                   config.messages.confirmSubscriptionRepeat;
+                               messageOptions.className = "info";
                            }
+
+                           messageOptions.id = "subscription-alert";
+                           messageOptions.type = "default";
+                           messageOptions.title = $u.substitute(
+                               messageOptions.title, { response: resp });
+                           messageOptions.text = $u.substitute(
+                               messageOptions.text, { response: resp });
+                           alerts.show(messageOptions);
                        })
                        .fail(function(err) {
                            if (err.responseJSON)

@@ -4,7 +4,7 @@
  * Application configuration options
  */
 
-define(["optional!localConfig", "underscore"], function(localConfig, _) {
+define(["optional!localConfig", "underscore", "messages"], function(localConfig, _, messages) {
     var config = {
         // String template or function used by Leaflet to generate the
         // image URLs for map files.
@@ -26,7 +26,6 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
         refPointName: "City Hall",
 
         // Configuration for subscriptions:
-        subscribeInstructions: "Double-click the map or enter an address in the search box above to set the area you want to receive updates about. We will send updates about projects in the circle to the email address you provide.",
         // See: http://leafletjs.com/reference-1.3.0.html#circle-option
         subscribeCircleStyle: {
             stroke: true,
@@ -122,6 +121,8 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
                 pattern: "((?:ZBA|PB)\\s?(?:(?:[\\dA-Z]+-)+(?:[\\dA-Z]+)))"
             }
         },
+
+        messages: messages,
 
         layers: [
             {
@@ -221,6 +222,8 @@ define(["optional!localConfig", "underscore"], function(localConfig, _) {
     if (window["SITE_CONFIG"]) {
         Array.prototype.push.apply(config.filters, SITE_CONFIG.extra_filters);
         delete SITE_CONFIG["extra_filters"];
+        _.extend(config.messages, SITE_CONFIG.messages);
+        delete SITE_CONFIG["messages"];
         _.extend(config, window["SITE_CONFIG"]);
     }
 

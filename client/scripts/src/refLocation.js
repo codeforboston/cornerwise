@@ -141,7 +141,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                        return loc;
                    }).fail(function() {
-                       alerts.show("I couldn't find that address.", "error", null, "geoloc_error");
+                       alerts.show(config.messages.addressNotFound, "error", null, "geoloc_error");
                    }).always(function() {
                        self.set("geolocating", false);
                    });

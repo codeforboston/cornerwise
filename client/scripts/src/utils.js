@@ -186,6 +186,16 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return formatDate(format, d);
            }
 
+           function substitute(template, variables) {
+               var re = /\{(\w+(?:\.\w+)*)\}/g;
+
+               return template.replace(re, function(_m, name) {
+                   return _.reduce(name.split("."), function(ctx, k) {
+                       return ctx ? ctx[k] : "";
+                   }, variables);
+               });
+           }
+
            /**
             * @param {string} s
             *
@@ -380,6 +390,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                parseInt10: function(n) {
                    return parseInt(n, 10);
                },
+
+               substitute: substitute,
 
                capitalize: capitalize,
 
