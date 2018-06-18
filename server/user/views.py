@@ -49,7 +49,9 @@ def subscribe(request):
     try:
         email = request.POST["email"]
         user = User.objects.get(email=email)
-        has_subscriptions = user.subscriptions.filter(active=True).exists()
+        has_subscriptions = user.subscriptions\
+                                .filter(active=True, site_name=request.site_name)\
+                                .exists()
     except KeyError as kerr:
         raise ErrorResponse("Missing required key:" + kerr.args[0], {})
     except User.DoesNotExist:
@@ -81,7 +83,8 @@ def subscribe(request):
         "new_user": new_user,
         "active": user.is_active,
         "email": user.email,
-        "has_subscriptions": has_subscriptions
+        "has_subscriptions": has_subscriptions,
+        "allows_multiple": request.site_config.allow_multiple_subscriptions
     }
 
 
