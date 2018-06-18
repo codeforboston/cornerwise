@@ -130,8 +130,8 @@ def do_resend_email(request):
     return {
         "status": "OK",
         "task_id": task_id,
-        "pending_message": "We're sending an email to " + email,
-        "success_message": "We've sent a new login link to " + email,
+        "pending_message": "We're sending you a link to manage your account.",
+        "success_message": f"We've sent a new login link to {email}.",
     }
 
 
@@ -198,6 +198,7 @@ def delete_subscription(request, user, sub):
 @with_user_subscription
 def deactivate_subscription(request, user, sub):
     sub.active = False
+    sub.save()
     messages.success(request, "Subscription deactivated. You will no longer receive updates about this subscription.")
     return redirect(reverse(manage))
 
@@ -205,7 +206,9 @@ def deactivate_subscription(request, user, sub):
 @with_user_subscription
 def activate_subscription(request, user, sub):
     sub.active = True
+    sub.save()
     messages.success(request, "Subscription activated.")
+
     return redirect(reverse(manage))
 
 
@@ -217,13 +220,9 @@ def show_change_summary(request, sub_id, since, until=None):
     """
     try:
         sub = Subscription.objects.get(pk=sub_id)
-        summary = changes.summarize_subscription_updates(sub, since, until)
-        return {
-            "since": since,
-            "until": until,
-            "subscription": sub,
-            "changes": summary
-        }
+        context = updates_context(sub, sub.summarize_updates(since, until))
+        context["subscription"] = sub
+        return context
     except Subscription.DoesNotExist:
         raise ErrorResponse(
             "Invalid subscription ID", status=404, redirect_back=True)

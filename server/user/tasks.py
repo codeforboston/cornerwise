@@ -42,13 +42,6 @@ def send_subscription_updates(subscription, since):
         return True
 
 
-def send_user_welcome(subscription):
-    """Send an email requesting confirmation of a subscription.
-    """
-    send_mail(subscription.user.email, "Cornerwise: Please Confirm", "welcome",
-              mail.welcome_context(subscription))
-
-
 @shared_task
 def send_deactivation_email(user_id):
     """Sends the email when a user is unsubscribed.
@@ -56,6 +49,11 @@ def send_deactivation_email(user_id):
     user = User.objects.get(pk=user_id)
     send_mail(user.email, "Cornerwise: Unsubscribed", "account_deactivated",
               mail.deactivate_context(user))
+
+
+@shared_task(bind=True)
+def resend_user_key(self, user_id):
+    mail.send_login_link(User.objects.get(pk=user_id), get_logger(self))
 
 
 @shared_task(bind=True)
@@ -119,11 +117,9 @@ def send_notifications(self, subscription_ids=None, since=None):
 
 @shared_task(bind=True)
 def send_staff_notification(self, sub_id, title, message):
-    sub = Subscription.objects.get(pk=sub_id)
-    title = title or "New Message"
-    send_mail(sub.user.email, f"Cornerwise: {title}", "staff_notification",
-              mail.staff_notification_context(sub, title, message),
-              logger=get_logger(self))
+    mail.send_staff_notification_email(Subscription.objects.get(pk=sub_id),
+                                       title or "New Message", message,
+                                       get_logger(self))
 
 
 # Database hook:

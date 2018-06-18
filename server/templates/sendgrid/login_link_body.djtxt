@@ -1,0 +1,5 @@
+Hello from Cornerwise,
+
+Here is the login link you requested:
+
+{{ user.profile.manage_url }}

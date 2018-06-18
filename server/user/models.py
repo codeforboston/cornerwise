@@ -8,7 +8,7 @@ from django.db.models import F, Q
 from django.urls import reverse
 from django.utils import timezone
 
-from utils import bounds_from_box, distance_from_str, point_from_str, prettify_lat, prettify_long
+from utils import bounds_from_box
 import utils
 from .changes import summarize_subscription_updates
 from site_config import site_config
@@ -27,7 +27,7 @@ def make_token():
 
 
 def prettify_point(pt):
-    return prettify_lat(pt.y) + ", " + prettify_long(pt.x)
+    return utils.prettify_lat(pt.y) + ", " + utils.prettify_long(pt.x)
 
 
 def poly_bounds(poly):
@@ -82,6 +82,9 @@ class UserProfile(models.Model):
 
     def deactivate_subscriptions(self):
         self.user.subscriptions.update(active=False)
+
+    def get_or_make_token(self):
+        return self.token or self.generate_token()
 
     def generate_token(self):
         "Creates a new verification token for the user and saves it."
@@ -259,8 +262,8 @@ class Subscription(models.Model):
             self.box = bounds_from_box(q["box"])
         elif "center" in q:
             if "r" in q:
-                self.center = point_from_str(q["center"])
-                self.radius = distance_from_str(q["r"]).m
+                self.center = utils.point_from_str(q["center"])
+                self.radius = utils.distance_from_str(q["r"]).m
             else:
                 raise ValidationError(f"Missing query parameter: r")
         if "region_name" in q:

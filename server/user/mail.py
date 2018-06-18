@@ -14,10 +14,11 @@ User = get_user_model()
 
 def _make_user_context(subscription, context=None, user=None):
     context = {} if context is None else context
-    context["hostname"] = subscription.site_name
+    site_name = (subscription and subscription.site_name) or (user and user.profile.site_name)
+    context["hostname"] = site_name
     context["user"] = user or subscription.user
     context["subscription"] = subscription
-    context["site_root"] = make_absolute_url("/", subscription.site_name)
+    context["site_root"] = make_absolute_url("/", site_name)
     return context
 
 
@@ -97,3 +98,14 @@ def send_staff_notification_email(subscription, title, message, logger=None):
     send_mail(subscription.user.email, f"Cornerwise: {title}", "staff_notification",
               staff_notification_context(subscription, title, message),
               logger=logger)
+
+
+def send_updates_email(subscription, since, updates, logger=None):
+    send_mail(subscription.user.email, "Cornerwise: New Updates", "updates",
+              updates_context(subscription, updates),
+              logger=logger)
+
+
+def send_login_link(user, logger=None):
+    send_mail(user.email, "Cornerwise: Manage Your Account", "login_link",
+              _make_user_context(None, user=user))

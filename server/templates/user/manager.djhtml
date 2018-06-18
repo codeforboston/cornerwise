@@ -1,5 +1,15 @@
 {% extends "base.djhtml" %}
 
+{% block head %}
+    {{ block.super }}
+    <style>
+     .button-panel .btn {
+         margin-bottom: 0.5em;
+         width: 100%;
+     }
+    </style>
+{% endblock %}
+
 {% block body %}
     <h1>
         Manage Subscription Settings
@@ -19,29 +29,50 @@
 
     <div class="panel panel-primary">
         <div class="panel-heading">
-            Current Notifications:
+            Current Subscriptions:
         </div>
         <table id="subscriptions" class="table">
             <tr>
-                <th>Keep me informed about:</th>
-                <th></th>
+                <th colspan="2">Keep me informed about:</th>
             </tr>
             {% for sub in user.subscriptions.all %}
                 <tr>
-                    <td>
+                    <td style="vertical-align: top">
+                        <img alt="Subscription preview area"
+                             src="{{ sub.minimap_src }}"
+                             style="float: left; margin-right: 1em"
+                             width="125"
+                             height="125" />
                         {{ sub.readable_description }}
+                        <br/>
+                        <strong>{{ sub.site_name }}</strong>
                     </td>
-                    <td>
+                    <td class="button-panel">
+                        <a class="btn btn-default"
+                           href="{% url "view-subscription-changes" %}?subscription_id={{ sub.pk }}">
+                            Recent Updates
+                        </a>
+                        <form action="{% if sub.active %}{% url "deactivate-subscription" %}{% else %}{% url "activate-subscription" %}{% endif %}"
+                              method="POST">
+                            <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
+                            {% csrf_token %}
+
+                            {% if sub.active %}
+                                <button type="submit" class="btn btn-warning">
+                                    Deactivate
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn btn-success">
+                                    Activate
+                                </button>
+                            {% endif %}
+                            </button>
+                        </form>
                         <form class="delete-button-form"
                               action="{% url "delete-subscription" %}"
                               method="POST" >
                             <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
                             {% csrf_token %}
-
-                            <a class="btn btn-primary"
-                               href="{% url "view-subscription-changes" %}?subscription_id={{ sub.pk }}">
-                                View Recent Updates
-                            </a>
 
                             <button type="submit" class="btn btn-danger">
                                 Delete
@@ -58,7 +89,8 @@
     </div>
 
     <div class="alert alert-info">
-        To create additional subscriptions, (( insert explanation about how to use filters, etc.))
+        To create additional subscriptions, go to <a href="{% url "front-page" %}">Cornerwise</a>,
+        select your address and filters, and click the <span class="action-button">Subscribe</span> button.
     </div>
 
     {% if user.is_active %}

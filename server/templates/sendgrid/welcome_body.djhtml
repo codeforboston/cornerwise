@@ -8,7 +8,7 @@
 </div>
 <p>
     Once you confirm, we will send updates to your inbox
-    {{ frequency_description }}. In the meantime, you can
+    {{ subscription.frequency_description }}. In the meantime, you can
     <a href="{{ site_root }}">visit Cornerwise</a> to explore other areas.
 </p>
 <div align="center">

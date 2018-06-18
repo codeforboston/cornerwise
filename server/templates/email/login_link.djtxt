@@ -1,7 +1,0 @@
-{% load cornerwise_extras %}
-
-Hello from Cornerwise,
-
-Here is the login link you requested:
-
-{% absolutize user.profile.manage_url %}
