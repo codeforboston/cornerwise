@@ -9,7 +9,7 @@
             {% firstof success_message "Success!" %}
         </p>
         <p class="task-message failure-message alert alert-warning" >
-            {% firstof failure_message "Something went wrong.  Please try again later." %}
+            {% firstof failure_message "<span class='error-message'>Something went wrong.  Please try again later.</span>"|safe %}
         </p>
     </div>
 {% endblock %}

@@ -54,6 +54,10 @@ $(function() {
                 .addClass(result.status === "failure" ?
                           "task-failure" : "task-success")
                 .removeClass("task-pending");
+
+            if (result.error) {
+                $(elt).find(".error-message").text(elt.error);
+            }
             delete task_alerts[task_id];
         }, 2000);
     })();
