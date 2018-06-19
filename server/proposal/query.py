@@ -246,11 +246,12 @@ def build_event_query(d):
     if "region" in d:
         subqueries["region_name__in"] = re.split(r"\s*;\s*", d["region"])
 
-    time_range = time_query(d)
-    if time_range:
-        start, end = time_range
-        subqueries["date__gte"] = start
-        subqueries["date__lt"] = end
+    (start, end) = time_query(d)
+    if start or end:
+        if start:
+            subqueries["date__gte"] = start
+        if end:
+            subqueries["date__lt"] = end
     else:
         subqueries["date__gte"] = timezone.now()
 
