@@ -221,8 +221,11 @@ class Proposal(models.Model):
 
         self.save()
 
+        importer = p_dict.get("importer")
         # Add related events:
         for event in self.create_events(p_dict.get("events", [])):
+            if not event.importer:
+                event.importer = importer
             event.proposals.add(self)
 
         # Create associated documents:
