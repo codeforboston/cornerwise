@@ -2,6 +2,8 @@
 
 {% load humanize tz %}
 
+{% block title %}Cornerwise - {{ event.title }}, {{ event.date }}{% endblock %}
+
 {% block body %}
     <h2>{{ event.title }}</h2>
     <h4>

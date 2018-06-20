@@ -2,9 +2,12 @@
 
 {% load humanize tz %}
 
+{% block title %}Cornerwise - {{ address }}{% endblock %}
+
 {% block body %}
     <div class="view-proposal" >
         <h2>{{ address }}</h2>
+        <h4>{{ case_number }}</h4>
 
         {% if attributes %}
             <table class="table">

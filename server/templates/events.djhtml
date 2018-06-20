@@ -2,6 +2,8 @@
 
 {% load humanize tz %}
 
+{% block title %}Cornerwise - Meetings{% endblock %}
+
 {% block body %}
     <h2>{{ title }}</h2>
     {% for event in events %}
@@ -10,7 +12,7 @@
             <h4>
                 <a href="{% url 'event' pk=event.id %}">
                     {% timezone event.timezone %}
-                    {{ event.date|naturalday }}
+                    {{ event.date|naturalday }} at {{ event.date|time }}
                     {% endtimezone %}
                 </a>
                 <br/>

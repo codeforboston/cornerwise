@@ -2,6 +2,8 @@
 
 {% load humanize %}
 
+{% block %}Cornerwise - Proposals{% endblock %}
+
 {% block body %}
     {% if proposals %}
         <div class="alert alert-info" role="alert">
