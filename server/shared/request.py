@@ -74,13 +74,12 @@ def make_response(template=None, error_template="error.djhtml",
                 return response
 
             if should_redirect_back:
-                back_url = req.META["HTTP_REFERER"]
                 if "error" in data:
                     messages.error(req, data["error"])
-                    return redirect(back_url or "/")
+                    return do_redirect_back(req)
                 elif "message" in data:
                     messages.success(req, data["message"])
-                    return redirect(back_url or "/")
+                    return do_redirect_back(req)
 
             return render(req, use_template, data, status=status)
 
@@ -116,3 +115,10 @@ def make_message(request, data):
         level = getattr(messages, level.upper())
 
     messages.add_message(request, level, message, extra_tags=extra_tags)
+
+
+def redirect_back(request, default="/"):
+    back_url = request.META.get("HTTP_REFERER", default)
+    return redirect(back_url)
+
+do_redirect_back = redirect_back
