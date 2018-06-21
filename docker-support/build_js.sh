@@ -41,7 +41,7 @@ EOF
 echo "Assembling templates."
 $python_bin $script_dir/build_templates.py || exit 1
 
-echo "Minifying JS."
+echo "Combining and minifying JS."
 r.js -o $client_dir/app.build.js || exit 1
 
 mkdir -p "$js_output_dir"
@@ -52,7 +52,7 @@ js_hash=$(file_hash "$app_js")
 app_js_hash="$js_output_dir/app.${js_hash}.js"
 cp "$app_js" "$app_js_hash"
 
-rm -r $client_dir/dist/
+[ -d "$client_dir/dist" ] && rm -r "$client_dir/dist/"
 
 echo "Minifying CSS"
 app_css="$css_output_dir/app.build.css"
