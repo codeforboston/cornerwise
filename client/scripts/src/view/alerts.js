@@ -1,5 +1,5 @@
-define(["backbone", "jquery", "underscore", "config"],
-       function(B, $, _, config) {
+define(["backbone", "jquery", "underscore", "utils", "config"],
+       function(B, $, _, $u, config) {
            var alertElement = $("#alert"),
                alertCount = 0,
                modalMessage,
@@ -115,11 +115,15 @@ define(["backbone", "jquery", "underscore", "config"],
                    return id;
                },
 
-               showNamed: function(namedMessage, id) {
+               showNamed: function(namedMessage, id, context) {
                    var message = config.messages[namedMessage];
 
-                   if (message)
+                   if (message) {
+                       message = _.extend({id: id}, message);
+                       if (context)
+                           $u.substitute(message, context, ["text", "title"]);
                        alerts.show(_.extend({id: id}, message));
+                   }
                },
 
                /**

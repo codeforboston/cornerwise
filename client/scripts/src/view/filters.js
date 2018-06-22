@@ -2,10 +2,12 @@
  * View responsible for exposing the permit filters to the user.
  */
 define(
-    ["backbone", "underscore", "jquery", "refLocation", "collection/regions",
-     "utils", "api/arcgis", "api/places", "appState", "config"],
+    ["backbone", "underscore", "jquery", "refLocation", "view/alerts",
+     "collection/regions", "utils", "api/arcgis", "api/places", "appState",
+     "config"],
 
-    function(B, _, $, refLocation, regions, $u, arcgis, places, appState, config) {
+    function(B, _, $, refLocation, alerts, regions, $u, arcgis, places, appState,
+             config) {
         "use strict";
 
         return B.View.extend({
@@ -187,9 +189,7 @@ define(
                                               loc.lng(),
                                               addr);
                 } else {
-                    $(input)
-                        .addClass("error")
-                        .find(".error-reason").text("Could not locate that address!");
+                    alerts.showNamed("addressNotFound");
 
                 }
                 return false;

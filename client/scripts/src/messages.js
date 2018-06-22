@@ -24,6 +24,9 @@ define([], function() {
 
         subscribeInstructions: "Double-click the map or enter an address in the search box above to set the area you want to receive updates about. We will send updates about projects in the circle to the email address you provide.",
 
-        addressNotFound: "I couldn't find that address."
+        addressNotFound: {
+            text: "I couldn't find that address.",
+            className: "error"
+        }
     };
 });

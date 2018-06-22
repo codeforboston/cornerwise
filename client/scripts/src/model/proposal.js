@@ -325,7 +325,7 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
 
             if (!groups || !groups.length) {
                 return [
-                    {documents: this.get("documents") || [] }
+                    {documents: this.get("documents") || []}
                 ];
             } else {
                 var grouped = this.getGroupedDocuments(),
