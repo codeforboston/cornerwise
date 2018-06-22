@@ -76,7 +76,9 @@ if (notice) {
         <th scope="row">Public Hearings</th>
         <td>
             <% _.each(events, function(event) { %>
-            <a class="event" href="event"><%- mediumDate(event.date) %></a>
+            <a class="event" href="/proposal/event/<%- event.id %>" target="_blank">
+                <%- mediumDate(event.date) %>
+            </a>
             <% }); %>
         </td>
     </tr>
