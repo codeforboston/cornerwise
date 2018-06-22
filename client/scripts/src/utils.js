@@ -186,7 +186,28 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return formatDate(format, d);
            }
 
-           function substitute(template, variables) {
+
+           /**
+            *  Replace occurrences of {variable} in `template` with the
+            *  corresponding key in the `variables` object. If `template` is
+            *  also an object, perform the substitution on each value in the
+            *  object, or on the values corresponding to `keys`.
+            *
+            *  @param {string|object} template
+            *  @param {object?} variables
+            *  @param {string[]} keys
+            *
+            *  @return {string|object} the same type as `template`
+            */
+           function substitute(template, variables, keys) {
+               if (_.isObject(template)) {
+                   _.forEach(keys || _.keys(template), function(k) {
+                       if (_.isString(template[k]))
+                           template[k] = substitute(template[k], variables);
+                   });
+                   return template;
+               }
+
                var re = /\{(\w+(?:\.\w+)*)\}/g;
 
                return template.replace(re, function(_m, name) {
