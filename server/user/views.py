@@ -50,7 +50,8 @@ def subscribe(request):
         email = request.POST["email"]
         user = User.objects.get(email=email)
         has_subscriptions = user.subscriptions\
-                                .filter(active=True, site_name=request.site_name)\
+                                .active()\
+                                .filter(site_name=request.site_name)\
                                 .exists()
     except KeyError as kerr:
         raise ErrorResponse("Missing required key:" + kerr.args[0], {})
@@ -185,10 +186,9 @@ def manage(request, user):
     if not user.is_active:
         user.is_active = True
         user.save()
-
     return render(request, "user/manager.djhtml",
                   {"user": user,
-                   "subscriptions": user.subscriptions})
+                   "subscriptions": user.subscriptions.order_by("-active")})
 
 
 @with_user_subscription
@@ -200,7 +200,7 @@ def delete_subscription(request, user, sub):
 
 @with_user_subscription
 def deactivate_subscription(request, user, sub):
-    sub.active = False
+    sub.deactivate()
     sub.save()
     messages.success(request, "Subscription deactivated. You will no longer receive updates about this subscription.")
     return redirect(reverse(manage))
@@ -208,7 +208,7 @@ def deactivate_subscription(request, user, sub):
 
 @with_user_subscription
 def activate_subscription(request, user, sub):
-    sub.active = True
+    sub.activate()
     sub.save()
     messages.success(request, "Subscription activated.")
 

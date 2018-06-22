@@ -76,9 +76,9 @@ def send_subscription_confirmation_email(self, sub_id):
         config = site_config.by_hostname(subscription.site_name)
         if not config.allow_multiple_subscriptions:
             try:
-                existing = user.subscriptions.filter(active=True,
-                                                    site_name=subscription.site_name)\
-                                                .exclude(pk=sub_id)[0]
+                existing = user.subscriptions.active()\
+                                             .filter(site_name=subscription.site_name)\
+                                             .exclude(pk=sub_id)[0]
             except IndexError:
                 pass
 
@@ -100,8 +100,8 @@ def send_notifications(self, subscription_ids=None, since=None):
         subscriptions = Subscription.objects.filter(pk__in=subscription_ids)
     else:
         before = datetime.utcnow() - timedelta(days=7)
-        subscriptions = Subscription.objects.filter(active=True,
-                                                    last_notified__lte=before)
+        subscriptions = Subscription.objects.active()\
+                                            .filter(last_notified__lte=before)
 
     sent = []
     for subscription in subscriptions:

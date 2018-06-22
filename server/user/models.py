@@ -109,6 +109,9 @@ class UserProfile(models.Model):
 
 
 class SubscriptionQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(active__isnull=False)
+
     def containing(self, point):
         """
         Find Subscriptions whose notification area includes the point
@@ -150,9 +153,10 @@ class Subscription(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name="subscriptions",
                              on_delete=models.CASCADE)
-    active = models.BooleanField(
-        default=False,
-        help_text="Users only receive updates for active subscriptions")
+    active = models.DateTimeField(default=timezone.now, null=True,
+                                  help_text=("If the subscription is active, "
+                                             "the datetime when it was last "
+                                             "activated"))
     created = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(default=timezone.now)
     # Stores the pickle serialization of a dictionary describing the query
@@ -217,12 +221,18 @@ class Subscription(models.Model):
         if self.site_name and not site_config(self.site_name).allow_multiple_subscriptions:
             # Disable this user's other subscriptions on the site:
             self.user.subscriptions\
-                     .filter(active=True, site_name=self.site_name)\
+                     .filter(active__isnull=False, site_name=self.site_name)\
                      .exclude(pk=self.pk)\
-                     .update(active=False)
+                     .update(active=None)
         self.user.profile.activate()
-        self.active = True
+        self.active = timezone.now()
         self.save()
+
+    def activate(self):
+        self.active = timezone.now()
+
+    def deactivate(self):
+        self.active = None
 
     def summarize_updates(self, since=None, until=None):
         """
@@ -231,7 +241,8 @@ class Subscription(models.Model):
         :returns: a dictionary describing the changes to the query since the
         given datetime
         """
-        return summarize_subscription_updates(self, since or self.last_notified, until)
+        since = since or max(self.last_notified, self.active)
+        return summarize_subscription_updates(self, since, until)
 
     def confirm_url(self, absolute=True):
         relative = "{base}?token={token}&uid={uid}&sub={sub_id}".format(
