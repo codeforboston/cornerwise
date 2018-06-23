@@ -110,7 +110,7 @@ define(["optional!localConfig", "underscore", "messages"], function(localConfig,
         contacts: [],
         codeReference: {
             "Somerville, MA": {
-                url: "https://twt5po1qy6.execute-api.us-east-1.amazonaws.com/production/somervillema?ordinance_section={section}",
+                url: "https://xref.cornerwise.org/somervillema?ordinance_section={section}",
                 pattern: "§(\\d+(?:\\.\\d+)+)"
             },
             "Cambridge, MA": null
