@@ -15,7 +15,7 @@ import logging
 
 import pytz
 
-from shared.request import make_response, make_message, ErrorResponse
+from shared.request import make_response, make_message, ErrorResponse, redirect_back
 from shared.mail import render_email_body
 from user import tasks
 from .contact import ContactForm
@@ -262,16 +262,29 @@ def change_summary(request):
 
 
 @with_user
-def deactivate_account(_request, user):
+def deactivate_account(req, user):
     user.profile.deactivate()
 
-    return redirect("/")
+    return redirect_back(req, reverse("manage-user"))
 
 
-def user_logout(request):
-    logout(request)
+@with_user
+def activate_account(req, user):
+    try:
+        if user.profile.activate():
+            messages.success(req, "Account activated")
+    except UserProfile.DoesNotExist:
+        profile = UserProfile.objects.create(user=user, site_name=req.site_name)
+        profile.activate()
+        messages.success(req, "User profile created")
 
-    return redirect("/")
+    return redirect_back(req)
+
+
+def user_logout(req):
+    logout(req)
+
+    return redirect_back(req)
 
 
 def contact_us(request):

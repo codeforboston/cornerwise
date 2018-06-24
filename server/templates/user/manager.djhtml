@@ -1,4 +1,6 @@
 {% extends "base.djhtml" %}
+{% load humanize %}
+
 {% block title %}Cornerwise - Manage Your Account{% endblock %}
 
 {% block head %}
@@ -7,6 +9,23 @@
      .button-panel .btn {
          margin-bottom: 0.5em;
          width: 100%;
+     }
+
+     .inactive-subscription {
+         background-color: #f9f9f9;
+     }
+
+     .inactive-subscription .status {
+         color: darkgray;
+     }
+
+     .active-subscription .status {
+         color: green;
+     }
+
+     .last-notified {
+         font-size: smaller;
+         color: #555;
      }
     </style>
 {% endblock %}
@@ -20,92 +39,117 @@
         User: {{ user.email }}
     </h5>
 
-    {% if not user.is_active %}
-        <div class="alert alert-info">
-            <div class="glyphicon glyphicon-exclamation-sign" />
-            This email is currently deactivated and will not receive emails until
-            you reactivate it.
-        </div>
-    {% endif %}
+    {% if user.profile %}
 
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            Current Subscriptions:
-        </div>
-        <table id="subscriptions" class="table">
-            <tr>
-                <th colspan="2">Keep me informed about:</th>
-            </tr>
-            {% for sub in user.subscriptions.all %}
+        {% if not user.is_active %}
+            <div class="alert alert-info">
+                <div class="glyphicon glyphicon-exclamation-sign" />
+                This email is currently deactivated and will not receive emails until
+                you reactivate it.
+            </div>
+        {% endif %}
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Current Subscriptions:
+            </div>
+            <table id="subscriptions" class="table">
                 <tr>
-                    <td style="vertical-align: top">
-                        <img alt="Subscription preview area"
-                             src="{{ sub.minimap_src }}"
-                             style="float: left; margin-right: 1em"
-                             width="125"
-                             height="125" />
-                        {{ sub.readable_description }}
-                        <br/>
-                        <strong>{{ sub.site_name }}</strong>
-                    </td>
-                    <td class="button-panel">
-                        <a class="btn btn-default"
-                           href="{% url "view-subscription-changes" %}?subscription_id={{ sub.pk }}">
-                            Recent Updates
-                        </a>
-                        <form action="{% if sub.active %}{% url "deactivate-subscription" %}{% else %}{% url "activate-subscription" %}{% endif %}"
-                              method="POST">
-                            <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
-                            {% csrf_token %}
-
-                            {% if sub.active %}
-                                <button type="submit" class="btn btn-warning">
-                                    Deactivate
-                                </button>
-                            {% else %}
-                                <button type="submit" class="btn btn-success">
-                                    Activate
-                                </button>
-                            {% endif %}
-                            </button>
-                        </form>
-                        <form class="delete-button-form"
-                              action="{% url "delete-subscription" %}"
-                              method="POST" >
-                            <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
-                            {% csrf_token %}
-
-                            <button type="submit" class="btn btn-danger">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
+                    <th colspan="2">Keep me informed about:</th>
                 </tr>
-            {% empty %}
-                <tr class=" empty">
-                    <td>No subscriptions.</td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
+                {% for sub in subscriptions %}
+                    <tr class="{% if sub.active %}active{% else %}inactive{% endif %}-subscription">
+                        <td style="vertical-align: top">
+                            <img alt="Subscription preview area"
+                                class="map-preview"
+                                src="{{ sub.minimap_src }}"
+                                style="float: left; margin-right: 1em"
+                                width="125"
+                                height="125" />
+                            {{ sub.readable_description }}
+                            <br/>
+                            <strong>{{ sub.site_name }}</strong> &bull;
+                            <strong class="status">
+                                {% if sub.active %}active{% else %}inactive{% endif %}
+                            </strong> &bull;
+                            <em class="last-notified" >
+                                Last notified {{ sub.last_notified|naturaltime }}
+                            </em>
+                        </td>
+                        <td class="button-panel">
+                            <a class="btn btn-default"
+                            href="{% url "view-subscription-changes" %}?subscription_id={{ sub.pk }}">
+                                Recent Updates
+                            </a>
+                            <form action="{% if sub.active %}{% url "deactivate-subscription" %}{% else %}{% url "activate-subscription" %}{% endif %}"
+                                method="POST">
+                                <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
+                                {% csrf_token %}
 
-    <div class="alert alert-info">
-        To create additional subscriptions, go to <a href="{% url "front-page" %}">Cornerwise</a>,
-        select your address and filters, and click the <span class="action-button">Subscribe</span> button.
-    </div>
+                                {% if sub.active %}
+                                    <button type="submit" class="btn btn-warning">
+                                        Deactivate
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-success">
+                                        Activate
+                                    </button>
+                                {% endif %}
+                                </button>
+                            </form>
+                            <form class="delete-button-form"
+                                action="{% url "delete-subscription" %}"
+                                method="POST" >
+                                <input name="subscription_id" type="hidden" value="{{ sub.pk }}"/>
+                                {% csrf_token %}
 
-    {% if user.is_active %}
-        <form action="{% url "deactivate-account" %}" method="post" id="deactivate-form">
-            <button class="btn btn-danger">
-                Deactivate Account
-            </button>
-        </form>
+                                <button type="submit" class="btn btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr class=" empty">
+                        <td>No subscriptions.</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="alert alert-info">
+            To create additional subscriptions, go to <a href="{% url "front-page" %}">Cornerwise</a>,
+            select your address and filters, and click the <span class="action-button">Subscribe</span> button.
+        </div>
+
+        {% if user.is_active %}
+            <form action="{% url "deactivate-account" %}" method="post" id="deactivate-form">
+                {% csrf_token %}
+                <button class="btn btn-danger">
+                    Deactivate Account
+                </button>
+            </form>
+        {% else %}
+            <form action="{% url "activate-account" %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-success">
+                    Reactivate Account
+                </button>
+            </form>
+        {% endif %}
     {% else %}
-        <form action="{% url "activate-account" %}" method="post">
-            <button class=" btn">
-                Reactivate Account
-            </button>
-        </form>
+        <div class="alert alert-warning">
+            <div class="glyphicon glyphicon-exclamation-sign"></div>
+
+            This account has no associated profile.
+            <br/>
+            <form action="{% url 'activate-account' %}">
+                {% csrf_token %}
+                <button class="btn btn-success">
+                    Create Profile
+                </button>
+            </form>
+        </div>
     {% endif %}
 
     <script type="text/javascript">
