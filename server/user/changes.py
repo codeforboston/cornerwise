@@ -11,6 +11,19 @@ def summarize_query_updates(query_dict, since=None, until=None):
     """Takes a proposal query dict and a range of dates. Constructs a dictionary
     summarizing the changes that are relevant to that query.
 
+    Returns a dictionary with the following structure:
+
+    - "changes": an ordered dict mapping proposal ids to dicts describing the
+      new or changed properties of the proposal
+
+    - "new": count of new proposals
+
+    - "updated": count of updated proposals
+
+    - "total": new + updated count
+
+    - "start"/"end": numeric timestamps indicating start and end
+
     """
     if since:
         query_dict["created__gt"] = since
