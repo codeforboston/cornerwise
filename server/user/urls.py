@@ -12,6 +12,7 @@ urlpatterns = [
     path("resend", views.resend_email, name="resend-confirmation"),
     path("changelog/", views.change_log, name="view-change-log"),
     path("deactivate", views.deactivate_account, name="deactivate-account"),
+    path("activate", views.activate_account, name="activate-account"),
 
     # Parse incoming mail:
     path("mail_inbound", mail_inbound),
@@ -22,6 +23,5 @@ urlpatterns = [
     path("delete_subscription", views.delete_subscription, name="delete-subscription"),
     path("activate_subscription", views.activate_subscription, name="activate-subscription"),
     path("deactivate_subscription", views.deactivate_subscription, name="deactivate-subscription"),
-    # path("activate", views.activate_account, name="activate-account"),
     path("changes/", views.change_summary, name="view-subscription-changes"),
 ]

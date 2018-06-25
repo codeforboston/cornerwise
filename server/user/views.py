@@ -212,6 +212,9 @@ def activate_subscription(request, user, sub):
     sub.save()
     messages.success(request, "Subscription activated.")
 
+    if not user.email:
+        messages.warning(request, "There is no email address associated with this account")
+
     return redirect(reverse(manage))
 
 
