@@ -69,7 +69,7 @@ def subscribe(request):
 
     try:
         subscription = Subscription(site_name=request.site_name,
-                                    address=request.POST.get("address"))
+                                    address=request.POST.get("address", ""))
         subscription.set_validated_query(query_dict)
         subscription.user = user
 
