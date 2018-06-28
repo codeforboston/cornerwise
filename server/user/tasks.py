@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
-from urllib import request
 
 from celery import shared_task
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -10,6 +8,7 @@ from django.dispatch import receiver
 from shared.logger import get_logger
 from shared.mail import send as send_mail
 
+from cornerwise.adapt import adapt
 import site_config
 
 from .models import Subscription
@@ -19,12 +18,13 @@ User = get_user_model()
 
 
 @shared_task(bind=True)
-def send_user_updates(self, sub_id, updates):
+@adapt
+def send_user_updates(self, sub: Subscription, updates):
     """Sends an email to a user containing a summary of recent updates to a
     Subscription.
 
     """
-    sub = Subscription.objects.get(pk=user_id)
+    user = sub.user
     send_mail(user.email, "Cornerwise: New Updates", "updates",
               mail.updates_context(sub, updates),
               logger=get_logger(self))
@@ -43,50 +43,50 @@ def send_subscription_updates(subscription, since):
 
 
 @shared_task
-def send_deactivation_email(user_id):
+@adapt
+def send_deactivation_email(user: User):
     """Sends the email when a user is unsubscribed.
     """
-    user = User.objects.get(pk=user_id)
-    send_mail(user.email, "Cornerwise: Unsubscribed", "account_deactivated",
-              mail.deactivate_context(user))
+    mail.send_deactivation_email(user)
 
 
 @shared_task(bind=True)
-def resend_user_key(self, user_id):
-    mail.send_login_link(User.objects.get(pk=user_id), get_logger(self))
+@adapt
+def resend_user_key(self, user: User):
+    mail.send_login_link(user, get_logger(self))
 
 
 @shared_task(bind=True)
-def send_subscription_confirmation_email(self, sub_id):
+@adapt
+def send_subscription_confirmation_email(self, sub: Subscription):
     """
     """
     logger = get_logger(self)
-    subscription = Subscription.objects.select_related("user").get(pk=sub_id)
-    user = subscription.user
+    user = sub.user
 
     if not user.is_active:
-        send_welcome_email(subscription)
+        mail.send_welcome_email(sub)
         return
 
-    if subscription.active:
+    if sub.active:
         return
 
     existing = None
-    if subscription.site_name:
-        config = site_config.by_hostname(subscription.site_name)
+    if sub.site_name:
+        config = site_config.by_hostname(sub.site_name)
         if not config.allow_multiple_subscriptions:
             try:
                 existing = user.subscriptions.active()\
-                                             .filter(site_name=subscription.site_name)\
-                                             .exclude(pk=sub_id)[0]
+                                             .filter(site_name=sub.site_name)\
+                                             .exclude(pk=sub.id)[0]
             except IndexError:
                 pass
 
     # Send an email to confirm the subscription change
     if existing:
-        mail.send_replace_subscription_email(subscription, existing)
+        mail.send_replace_subscription_email(sub, existing, logger)
     else:
-        mail.send_confirm_subscription_email(subscription)
+        mail.send_confirm_subscription_email(sub, logger)
 
 
 @shared_task(bind=True)
@@ -116,8 +116,9 @@ def send_notifications(self, subscription_ids=None, since=None):
 
 
 @shared_task(bind=True)
-def send_staff_notification(self, sub_id, title, message):
-    mail.send_staff_notification_email(Subscription.objects.get(pk=sub_id),
+@adapt
+def send_staff_notification(self, sub: Subscription, title, message):
+    mail.send_staff_notification_email(sub,
                                        title or "New Message", message,
                                        get_logger(self))
 
