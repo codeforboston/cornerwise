@@ -54,9 +54,9 @@ def document_processing_failed(task, exc, task_id, args, kwargs, einfo, ):
             doc.pk, doc.url)
 
 
-@shared_task
+@shared_task(bind=True)
 @adapt
-def fetch_document(doc: Document, logger=task_logger):
+def fetch_document(self, doc: Document, logger=None):
     """Copy the given document (proposal.models.Document) to a local
     directory.
 
@@ -64,6 +64,7 @@ def fetch_document(doc: Document, logger=task_logger):
     :returns: if the document was downloaded successfully and is new or
     updated, returns the primary key. Otherwise, returns None.
     """
+    logger = logger or get_logger(self)
     url = doc.url
 
     logger.info("Fetching Document #%i", doc.pk)
@@ -91,9 +92,9 @@ def fetch_document(doc: Document, logger=task_logger):
             raise DocumentDownloadException()
 
 
-@shared_task
+@shared_task(bind=True)
 @adapt
-def extract_text(doc: Document, logger=task_logger):
+def extract_text(self, doc: Document, logger=None):
     """If a document is a PDF that has been copied to the filesystem, extract its
     text contents to a file and save the path of the text document.
 
@@ -102,6 +103,7 @@ def extract_text(doc: Document, logger=task_logger):
     :returns: The same document
 
     """
+    logger = logger or get_logger(self)
     if doc_utils.extract_text(doc):
         logger.info("Extracted text from Document #%i to %s.", doc.pk,
                     doc.fulltext)
