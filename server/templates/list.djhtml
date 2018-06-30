@@ -7,7 +7,7 @@
 {% block body %}
     {% if proposals %}
         <div class="alert alert-info" role="alert">
-            Found {{ proposals|length }} match{{ proposal|length|pluralize:"es" }}
+            Found {{ paginator.count }} match{{ paginator.count|pluralize:"es" }}
         </div>
         {% for proposal in proposals %}
             <div class="row" >
