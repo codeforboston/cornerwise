@@ -53,7 +53,7 @@ define(
                     placesOptions = {types: ["geocode"]},
                     input = $("#ref-address-form input")[0];
 
-                var onSubmit = _.bind(this.submitAddress, this);
+                var onSubmit = _.bind(this.onSubmit, this);
                 $("#ref-address-form").on("submit", onSubmit);
 
                 places.setup(input, placesOptions)
@@ -151,19 +151,21 @@ define(
             /**
                Fallback geocoder, used if Google Places fails to, or is slow to, load
              */
-            submitAddress: function(e) {
-                if (refLocation.get("geolocating"))
-                    return false;
+            onSubmit: function(e) {
+                if (!refLocation.get("geolocating")) {
+                    $(e.target).removeClass("error").blur();
+                    this.submitAddress(e.target.elements["address"]);
+                }
 
-                $(e.target).removeClass("error").blur();
-                var field = e.target.elements["address"],
-                    addr = field.value;
+                return false;
+            },
+
+            submitAddress: function(field) {
+                var addr = field.value;
 
                 $(field).blur();
                 refLocation.setFromAddress(addr).fail(function(err) {
-                    $(e.target)
-                        .addClass("error")
-                        .find(".error-reason").text("Could not locate that address!").end();
+                    alerts.showNamed("addressNotFound");
                 }).done(function(loc) {
                     $(field).val(loc[2].ShortLabel || addr);
                 });
@@ -189,8 +191,8 @@ define(
                                               loc.lng(),
                                               addr);
                 } else {
-                    alerts.showNamed("addressNotFound");
-
+                    this.submitAddress(input);
+                    this.onSubmit();
                 }
                 return false;
             },
