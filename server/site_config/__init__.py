@@ -1,6 +1,6 @@
 import json
-import os
-import pkgutil
+
+from django.shortcuts import redirect
 
 from site_config.site_config import SiteConfig
 
@@ -11,8 +11,16 @@ class SiteMiddleware:
 
     def __call__(self, request):
         host = request.GET.get("_hostname", request.META.get("HTTP_HOST"))
-        if host: host = host.casefold()
-        host_config = HOSTNAMES.get(host, DEFAULT_CONFIG)
+        if host:
+            host = host.casefold()
+        host_config = HOSTNAMES.get(host)
+
+        if not host_config or host_config.redirect:
+            return redirect("{scheme}://{host}{path}".format(
+                scheme=request.scheme,
+                host=DEFAULT_CONFIG.hostname,
+                path=request.get_full_path()
+            ))
         request.site_config = host_config
         request.site_hostname = host
         request.site_name = host_config.hostname
@@ -47,7 +55,6 @@ def base_url(site_name):
     return site_config(site_name).hostname
 
 
-
 # Maps module hostnames to their configuration.
 DEFAULT_CONFIG = None
 HOSTNAMES = {}
@@ -72,7 +79,8 @@ def find_site_configurations():
 def add_configuration(config: SiteConfig, module, name):
     hostnames = config.hostnames
     if not hostnames:
-        raise Exception(f"Site configuration '{name}' must have at least one hostname")
+        raise Exception(
+            f"Site configuration '{name}' must have at least one hostname")
 
     NAMES[config.name.lower()] = config
 
