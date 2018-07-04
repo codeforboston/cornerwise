@@ -9,7 +9,7 @@ import re
 # from shared.text_utils import 
 
 EMPTY_LINE = re.compile(r"\s*\n$")
-PROPERTY_PATTERN = re.compile(r"^([a-z]+(\s+[a-z&/]+)*): (.*)(\n|$)", re.I)
+PROPERTY_PATTERN = re.compile(r"^([a-z&/()]+(\s+[a-z&/()]+)*): (.*)(\n|$)", re.I)
 
 
 def properties(lines):
