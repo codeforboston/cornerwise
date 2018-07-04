@@ -68,10 +68,12 @@ class UserProfile(models.Model):
             self.token = make_token()
             self.user.save()
             self.save()
+            return True
+        return False
 
     def deactivate(self):
         if not self.user.is_active:
-            return
+            return False
 
         self.user.is_active = False
         self.token = make_token()
@@ -79,6 +81,7 @@ class UserProfile(models.Model):
         self.save()
 
         self.deactivate_subscriptions()
+        return True
 
     def deactivate_subscriptions(self):
         self.user.subscriptions.update(active=False)
