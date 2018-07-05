@@ -328,8 +328,8 @@ def process_document(self, doc: Document):
     logger = get_logger(self)
     updated, _ = fetch_document(doc, logger)
 
-    if updated or not doc.fulltext:
-        extracted = bool(extract_text(doc, logger))
+    extracted = (not updated and doc.fulltext) or \
+        extract_text(doc, logger)
 
     if extracted:
         add_doc_attributes(doc, logger)
