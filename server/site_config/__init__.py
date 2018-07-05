@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.shortcuts import redirect
 
 from site_config.site_config import SiteConfig
@@ -15,12 +16,14 @@ class SiteMiddleware:
             host = host.casefold()
         host_config = HOSTNAMES.get(host)
 
-        if not host_config or host_config.redirect:
+        if not host_config and settings.SITE_REDIRECT:
             return redirect("{scheme}://{host}{path}".format(
                 scheme=request.scheme,
                 host=DEFAULT_CONFIG.hostname,
                 path=request.get_full_path()
             ))
+        else:
+            host_config = DEFAULT_CONFIG
         request.site_config = host_config
         request.site_hostname = host
         request.site_name = host_config.hostname
@@ -62,8 +65,6 @@ NAMES = {}
 
 
 def find_site_configurations():
-    from django.conf import settings
-
     from importlib import import_module
 
     configs = getattr(settings, "SITE_CONFIG", {})

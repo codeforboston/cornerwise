@@ -299,11 +299,16 @@ for envvar in [
         "GOOGLE_STREET_VIEW_SECRET", "GEOCODER", "ARCGIS_CLIENT_ID",
         "ARCGIS_CLIENT_SECRET", "SOCRATA_APP_TOKEN", "SOCRATA_APP_SECRET",
         "SENDGRID_API_KEY", "FOURSQUARE_CLIENT", "FOURSQUARE_SECRET",
-        "SENDGRID_PARSE_KEY", "SERVER_DOMAIN", "BASE_URL"
+        "SENDGRID_PARSE_KEY", "SERVER_DOMAIN", "BASE_URL", "SITE_REDIRECT"
 ]:
     if envvar in os.environ or envvar not in globals():
         globals()[envvar] = os.environ.get(envvar, "")
 
+
+# If the user accesses the site via a domain that does not match any of the
+# configured domains and SITE_REDIRECT is set to 1, redirect requests to the
+# default hostname.
+SITE_REDIRECT = SITE_REDIRECT == "1"
 
 def get_admins():
     admins_from_env = []
