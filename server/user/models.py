@@ -118,7 +118,7 @@ class SubscriptionQuerySet(models.QuerySet):
     def stale(self):
         """Finds old Subscriptions that have never been used.
         """
-        stale = timezone.now() - timedelta(days=14),
+        stale = timezone.now() - timedelta(days=14)
         return self.filter(active=None,
                            created__lt=stale,
                            last_notified=None)

@@ -213,6 +213,11 @@ CELERYBEAT_SCHEDULE = {
     "send-notifications": {
         "task": "user.tasks.send_notifications",
         "schedule": crontab(minute=0, hour=1)
+    },
+
+    "cleanup-subscriptions": {
+        "task": "user.tasks.cleanup_subscriptions",
+        "schedule": crontab(minute=0, hour=0)
     }
 }
 

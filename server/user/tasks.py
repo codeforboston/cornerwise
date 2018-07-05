@@ -121,6 +121,15 @@ def send_staff_notification(self, sub: Subscription, title, message):
                                        get_logger(self))
 
 
+@shared_task(bind=True)
+def cleanup_subscriptions(self):
+    logger = get_logger(self)
+    deleted_count, counts = Subscription.objects.stale().delete()
+    subs_count = counts["user.Subscription"]
+    if subs_count:
+        logger.info("Deleted %s unconfirmed subscriptions", subs_count)
+
+
 # Database hook:
 @receiver(
     post_save,
