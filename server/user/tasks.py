@@ -99,9 +99,7 @@ def send_notifications(self, subscription_ids=None, since=None):
     if subscription_ids:
         subscriptions = Subscription.objects.filter(pk__in=subscription_ids)
     else:
-        before = datetime.utcnow() - timedelta(days=7)
-        subscriptions = Subscription.objects.active()\
-                                            .filter(last_notified__lte=before)
+        subscriptions = Subscription.objects.due(since)
 
     sent = []
     for subscription in subscriptions:

@@ -14,7 +14,7 @@ from .changes import summarize_subscription_updates
 from site_config import site_config
 
 from base64 import b64encode
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import pickle
 
@@ -115,6 +115,22 @@ class SubscriptionQuerySet(models.QuerySet):
     def active(self):
         return self.filter(active__isnull=False)
 
+    def stale(self):
+        """Finds old Subscriptions that have never been used.
+        """
+        stale = timezone.now() - timedelta(days=14),
+        return self.filter(active=None,
+                           created__lt=stale,
+                           last_notified=None)
+
+    def due(self, since=None):
+        """Find Subscriptions that are due for an update
+        """
+        since = since or (timezone.now() - timedelta(days=7))
+        return self.active()\
+                   .filter(Q(last_notified=None, created__lte=since) |
+                           Q(last_notified__lt=since))
+
     def containing(self, point):
         """
         Find Subscriptions whose notification area includes the point
@@ -200,9 +216,18 @@ class Subscription(models.Model):
     include_events = models.CharField(
         max_length=256, default="", blank=True,
         help_text="Include events for a specified region")
-    last_notified = models.DateTimeField(default=timezone.now)
+    last_notified = models.DateTimeField(null=True)
 
     objects = SubscriptionQuerySet.as_manager()
+
+    @property
+    def updates_start_date(self):
+        """Returns the datetime for the start of the query time range.
+
+        """
+        now = timezone.now()
+        return max(self.last_notified or self.created or now,
+                   self.active or now)
 
     def save(self, *args, **kwargs):
         self.updated = datetime.now()
@@ -244,8 +269,9 @@ class Subscription(models.Model):
         :returns: a dictionary describing the changes to the query since the
         given datetime
         """
-        since = since or max(self.last_notified, self.active)
-        return summarize_subscription_updates(self, since, until)
+        return summarize_subscription_updates(self,
+                                              since or self.updates_start_date,
+                                              until)
 
     def confirm_url(self, absolute=True):
         relative = "{base}?token={token}&uid={uid}&sub={sub_id}".format(

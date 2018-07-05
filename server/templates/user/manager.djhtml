@@ -72,9 +72,15 @@
                             <strong class="status">
                                 {% if sub.active %}active{% else %}inactive{% endif %}
                             </strong> &bull;
-                            <em class="last-notified" >
-                                Last notified {{ sub.last_notified|naturaltime }}
-                            </em>
+                            {% if sub.last_notified %}
+                                <em class="last-notified" >
+                                    Last notified {{ sub.last_notified|naturaltime }}
+                                </em>
+                            {% else %}
+                                <em class="last-notified never-notified">
+                                    Never notified
+                                </em>
+                            {% endif %}
                         </td>
                         <td class="button-panel">
                             <a class="btn btn-default"
