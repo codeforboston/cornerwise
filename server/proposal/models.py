@@ -442,10 +442,9 @@ class Event(models.Model):
         kwargs = {"date": start,
                   "region_name": event_dict["region_name"]}
         try:
+            q = Q(title=event_dict["title"])
             if "department_code" in event_dict:
-                kwargs["dept"] = event_dict["department_code"]
-            else:
-                kwargs["title"] = event_dict["title"]
+                q = q | Q(dept=event_dict["department_code"])
             event = cls.objects.get(**kwargs)
         except cls.DoesNotExist:
             kwargs["title"] = event_dict["title"]

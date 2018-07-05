@@ -48,10 +48,6 @@ class Migration(migrations.Migration):
             name='title',
             field=models.CharField(max_length=256),
         ),
-        migrations.AlterUniqueTogether(
-            name='event',
-            unique_together={('date', 'dept', 'region_name')},
-        ),
 
         migrations.RunPython(set_dept_code, do_nothing)
     ]
