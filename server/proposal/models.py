@@ -83,7 +83,6 @@ def make_property_map():
     def get_other_addresses(d):
         return ";".join(d["all_addresses"][1:]) if "all_addresses" in d else ""
 
-
     return [("address", lambda d: d["all_addresses"][0]),
             ("other_addresses", get_other_addresses),
             ("location", lambda d: Point(d["location"]["long"], d["location"]["lat"])),
@@ -122,6 +121,10 @@ class Proposal(models.Model):
     # The last time that the source was changed:
     updated = models.DateTimeField(db_index=True)
     created = models.DateTimeField(default=timezone.now)
+    started = models.DateTimeField(
+        db_index=True,
+        help_text=("When the proposal was first seen, or the date of the "
+                   "first public hearing; whichever is first"))
     summary = models.CharField(max_length=1024, default="")
     description = models.TextField(default="")
     source = models.URLField(
@@ -169,7 +172,6 @@ class Proposal(models.Model):
 
         return (created, proposal)
 
-
     @property
     def attribute_dict(self):
         return dict(self.attributes.values_list("name", "text_value"))
@@ -191,6 +193,11 @@ class Proposal(models.Model):
         """
         if changed:
             prop_changes = []
+
+        started = min(p_dict.get("first_hearing_date", timezone.now()),
+                      p_dict["updated_date"])
+        if self.started or started < self.started:
+            self.started = started
 
         for prop, fn, *choose in property_map:
             old_val = changed and getattr(self, prop)
@@ -298,7 +305,6 @@ class Proposal(models.Model):
                                             tags=taglist,
                                             published=self.updated)
                 yield (True, doc)
-
 
     def create_events(self, event_dicts):
         return list(map(Event.make_event, event_dicts)) if event_dicts else []
@@ -704,7 +710,6 @@ class Importer(models.Model):
         """Validates data against the JSON schema for Cornerwise importers.
         """
         return jsonschema.validate(data, schema or get_importer_schema())
-
 
     def __str__(self):
         return self.name

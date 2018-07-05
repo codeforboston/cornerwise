@@ -191,9 +191,9 @@ def build_proposal_query_dict(d):
 
     (start_date, end_date) = time_query(d)
     if start_date:
-        subqueries["created__gte"] = start_date
+        subqueries["started__gte"] = start_date
     if end_date:
-        subqueries["created__lt"] = end_date
+        subqueries["started__lt"] = end_date
 
     if "projects" in d:
         if d["projects"] == "null":
