@@ -1,4 +1,5 @@
 from django.db import migrations, models, utils
+Q = models.Q
 
 import re
 
@@ -13,14 +14,17 @@ def set_dept_code(apps, schema_editor):
         else:
             continue
 
-        if Event.objects.filter(date=event.date,
-                                dept=event.dept,
-                                region_name=event.region_name).exists():
-            for p in event.proposals:
-                existing.proposals.add(p)
-            existing.agenda_url = existing.agenda_url or event.agenda_url
-            existing.minutes = existing.minutes or event.minutes
-            event.delete()
+        others = Event.objects.filter(Q(pk__gt=event.pk, date=event.date,
+                                        region_name=event.region_name) &
+                                      (Q(dept=event.dept) |
+                                       Q(title=event.title)))
+        if others.exists():
+            for other in others:
+                for p in event.proposals:
+                    other.proposals.add(p)
+                event.agenda_url = event.agenda_url or other.agenda_url
+                event.minutes = event.minutes or other.minutes
+            others.delete()
 
 
 def do_nothing(_, __):
