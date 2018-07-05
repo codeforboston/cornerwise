@@ -258,6 +258,10 @@ class Subscription(models.Model):
 
     @property
     def query_dict(self):
+        """Returns a dictionary representing a JSON serializable query for this
+        Subscription.
+
+        """
         q = {}
         if self.box:
             q["box"] = self.box
@@ -329,25 +333,27 @@ class Subscription(models.Model):
     def frequency_description(self):
         return "once a week"
 
-    def readable_description(self, dist_units="ft"):
-        """Returns a brief textual description of the subscription.
-
-        """
-        desc = "projects "
+    def area_description(self, dist_units="ft"):
         if self.box:
             sw, ne = poly_bounds(self.box)
-            desc += f"inside the region: {prettify_point(sw)} and {prettify_point(ne)}"
-        elif self.center:
+            return ("inside the region bounded by "
+                    f"{prettify_point(sw)} and {prettify_point(ne)}")
+
+        if self.center:
             dist = round(getattr(D(m=self.radius), dist_units))
-            desc += "within {dist} {dist_units} of {where}".format(
+            return "within {dist} {dist_units} of {where}".format(
                 dist=dist,
                 dist_units=dist_units,
                 where=(self.address or prettify_point(self.center))
             )
 
-        desc += f" ({self.region_name})"
+    def readable_description(self, dist_units="ft"):
+        """Returns a brief textual description of the subscription.
 
-        return desc
+        """
+        return "projects {area} {region}".format(
+            area=self.area_description(dist_units),
+            region_name=self.region_name)
 
     def overlap(self, subscription):
         """Returns the overlap of the subscription area of this Subscription with
