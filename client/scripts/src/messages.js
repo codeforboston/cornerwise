@@ -14,13 +14,12 @@ define([], function() {
         },
         confirmSubscription: {
             title: "Please confirm your email",
-            text: "Thanks for registering! We've sent an email to {response.email}. Please use the link provided to confirm your email, then we can start sending your updates."
+            text: "Thanks for registering! We've sent a message to {response.email} containing a link to confirm your email address. Once you confirm, then we can start sending you updates."
         },
         confirmSubscriptionRepeat: {
             title: "Please confirm your email",
             text: "Looks like you've tried to register more than once! We've sent you another email. Please use the link there to confirm your account."
         },
-
 
         subscribeInstructions: "Double-click the map or enter an address in the search box above to set the area you want to receive updates about. We will send updates about projects in the circle to the email address you provide.",
 
