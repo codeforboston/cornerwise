@@ -120,3 +120,8 @@ a.anchor:hover {
     padding: 0.5em;
     text-transform: uppercase;
 }
+
+.empty {
+    color: #777;
+    font-style: italic;
+}

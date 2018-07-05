@@ -90,9 +90,8 @@ def task_stats(request):
     context.update({"nodes": {node: {"tasks": nodestats["total"],
                                      "active": active[node],
                                      "scheduled": scheduled[node],
-                                     "up_since": uptime_to_date(int(nodestats["clock"]))
-    }
-                             for node, nodestats in stats.items()},
+                                     "up_since": uptime_to_date(int(nodestats["clock"]))}
+                              for node, nodestats in (stats.items() if stats else [])},
                     "title": "Celery Stats"})
 
     return render(request, "admin/task_stats.djhtml", context)
