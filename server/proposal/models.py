@@ -714,8 +714,8 @@ class Importer(models.Model):
     def tz(self):
         return pytz.timezone(self.timezone)
 
-    def url_for(self, when=None):
-        params = when and {"when": when.strftime("%Y%m%d")}
+    def url_for(self, since=None):
+        params = since and {"since": since.strftime("%Y%m%d")}
         return utils.add_params(self.url, params)
 
     def updated_since(self, when=None):
