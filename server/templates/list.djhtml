@@ -2,7 +2,7 @@
 
 {% load humanize %}
 
-{% block %}Cornerwise - Proposals{% endblock %}
+{% block title %}Cornerwise - Proposals{% endblock %}
 
 {% block body %}
     {% if proposals %}
