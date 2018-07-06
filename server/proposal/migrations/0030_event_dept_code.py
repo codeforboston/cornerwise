@@ -1,8 +1,5 @@
-from django.db import migrations, models, utils
+from django.db import migrations, models
 Q = models.Q
-
-import re
-
 
 def set_dept_code(apps, schema_editor):
     Event = apps.get_model("proposal", "Event")

@@ -21,7 +21,7 @@ def load_fixture(apps, schema_editor):
         importer.save()
 
 
-def unload_fixture():
+def unload_fixture(apps):
     Importer = apps.get_model("proposal", "Importer")
     with open(fixture_path) as fixt:
         importers_json = json.load(fixt)
