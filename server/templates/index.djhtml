@@ -261,7 +261,11 @@
                         </div>
                         <div id="mobile-site-message" class="site-message">
                             <span class="last-updated">
-                                Last updated {{ last_updated|naturaltime }}.
+                                {% if last_updated %}
+                                    Last updated {{ last_updated|naturaltime }}.
+                                {% else %}
+                                    Never updated
+                                {% endif %}
                                 <br/>
                             </span>
                             {% if site_message %}

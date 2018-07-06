@@ -29,13 +29,14 @@ def lot_sizes(town_id):
     try:
         return LOT_SIZES[town_id]
     except KeyError:
-        return { "small": 5000, "medium": 10000 }
+        return {"small": 5000, "medium": 10000}
 
 
 def last_updated(site_config=None):
     q = site_config.importer_query if site_config else {}
-    return max(Importer.objects.filter(**q)
-                               .values_list("last_run", flat=True))
+    last_run = Importer.objects.filter(last_run__isnull=False, **q)\
+                               .values_list("last_run", flat=True)
+    return max(last_run) if last_run else None
 
 
 @ensure_csrf_cookie
