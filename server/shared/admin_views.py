@@ -36,11 +36,13 @@ def get_task_logs(task_ids):
 def celery_logs(request):
     nlines = int(request.GET.get("n", "100"))
     with open("logs/celery_tasks.log", "rb") as log:
-        log_lines = read_n_from_end(log, nlines)
+        log_lines = map(bytes.decode, read_n_from_end(log, nlines))
 
     context = cornerwise_admin.each_context(request)
     context.update({"log_name": "Celery Tasks Log",
                     "lines": log_lines,
+                    "options": [100, 500, 1000],
+                    "selected": nlines,
                     "title": "Celery Logs"})
     return render(request, "admin/log_view.djhtml", context)
 

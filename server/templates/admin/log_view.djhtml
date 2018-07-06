@@ -14,7 +14,15 @@
 {% endblock %}
 
 {% block content %}
-    <p>{{ lines | length }} line{{ lines | length | pluralize }}</p>
+    <form method="get">
+        Showing <select name="n" onchange="this.form.submit()">
+        {% for option in options %}
+            <option value="{{ option }}" {% ifequal option selected %}selected{% endifequal %}>
+                {{ option }}
+            </option>
+        {% endfor %}
+        </select> lines per page
+    </form>
     <div id="log-output">
 {% for line in lines %} {{ line }}
 {% endfor %}
