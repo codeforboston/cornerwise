@@ -143,7 +143,7 @@ define(["backbone", "underscore", "config", "utils"],
                                _.each(watchers, function(watcher) {
                                    var callback = watcher[0],
                                        key = watcher[1],
-                                       context = watcher[2] || this;
+                                       context = watcher[2] || self;
 
                                    if (key) {
                                        var defval = $u.getIn(defaults, key),
