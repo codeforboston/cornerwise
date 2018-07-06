@@ -83,9 +83,10 @@ services:
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
-      VIRTUAL_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov"
-      LETSENCRYPT_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
+      VIRTUAL_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov,cornerwise.org,www.cornerwise.org"
+      LETSENCRYPT_HOST: "cornerwise.org,www.cornerwise.org,dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
       LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
+      SITE_REDIRECT: 1
       CELERY_WORKER_COUNT: 1
     expose:
       - "3000"

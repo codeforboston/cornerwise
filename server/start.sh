@@ -125,7 +125,7 @@ if [ "$APP_MODE" = "production" ]; then
 
     trap on_sighup SIGHUP
 else
-    $manage runserver 0.0.0.0:$APP_PORT &
+    $manage runserver 0.0.0.0:${APP_PORT:-3000} &
 
     server_pid="$!"
 fi
