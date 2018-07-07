@@ -111,20 +111,27 @@ def prettify_long(lng):
         format(d=d, m=m, s=s, h="E" if lng > 0 else "W")
 
 
-def add_params(url, extra_params):
+def add_params(url, extra=None, remove=None):
     """Given a URL, add new query parameters by merging in the contents of the
-    `extra_params` dictionary.
+    `extra` dictionary.
 
     :param url: (str)
-    :param extra_params: (dict)
+    :param extra: (dict)
+    :param remove: (list or set)
 
     :returns: (str) URL including new parameters
     """
-    if not extra_params:
+    if not (extra or remove):
         return url
 
     parsed = parse.urlparse(url)._asdict()
-    params = parse.parse_qsl(parsed["query"]) + list(extra_params.items())
+    params = parse.parse_qsl(parsed["query"])
+
+    if extra:
+        params += list(extra.items())
+    if remove:
+        params = [pair for pair in params if pair[0] not in remove]
+
     parsed["query"] = parse.urlencode(params, doseq=True)
 
     return parse.urlunparse(parse.ParseResult(**parsed))
@@ -292,7 +299,6 @@ def make_absolute_url(path, site_name=None):
         config = site_config.by_hostname(site_name)
         if settings.BASE_URL:
             url_base = settings.BASE_URL
-            parts = parse.urlsplit(path)
             path = add_params(path, {"_hostname": config.hostname})
         else:
             url_base = f"https://{config.hostname}"

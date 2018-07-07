@@ -5,6 +5,8 @@ from django.urls import reverse
 
 from .models import Subscription
 
+import utils
+
 User = get_user_model()
 
 
@@ -13,22 +15,26 @@ def not_logged_in(request):
 
 
 def with_user(view_fn):
+    """View decorator that attempts to log the user in using parameters passed 
+    """
     def wrapped_fn(request, *args, **kwargs):
-        if not request.user.is_anonymous:
-            return view_fn(request, request.user, *args, **kwargs)
-        else:
-            try:
-                user = authenticate(pk=request.GET["uid"],
-                                    token=request.GET["token"])
-                if user:
-                    messages.success(request, "Welcome back!")
-                    login(request, user)
-                    return view_fn(request, user, *args, **kwargs)
-            except KeyError:
+        try:
+            user = authenticate(pk=request.GET["uid"],
+                                token=request.GET["token"])
+            if user:
+                messages.success(request, "Welcome back!")
+                login(request, user)
+                return redirect(utils.add_params(request.get_full_path(),
+                                                 remove={"uid", "token"}))
+                return view_fn(request, user, *args, **kwargs)
+        except KeyError:
+            if not request.user.is_anonymous:
+                return view_fn(request, request.user, *args, **kwargs)
+            else:
                 messages.error(request,
                                "You must be logged in to view that page.")
 
-            return not_logged_in(request)
+        return not_logged_in(request)
 
     return wrapped_fn
 
