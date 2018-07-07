@@ -9,9 +9,11 @@ from django.contrib.gis.measure import D
 
 import json
 import random
+import re
 from urllib.parse import parse_qs, urlsplit
 
 from . import models, views, mail_parse_views
+from .models import Subscription, UserComment, UserProfile
 import site_config
 
 import warnings
@@ -60,11 +62,19 @@ def rand_query():
     return query
 
 
+def get_links(html):
+    for m in re.finditer(r"href=\"([^\"]+)\"", html, re.I):
+        parts = urlsplit(m.group(1))
+        yield f"{parts.path}?{parts.query}"
+
+
+
 # Decorator to override celery settings during tests
 celery_override = override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                                     CELERY_ALWAYS_EAGER=True,
                                     BROKER_URL="memory://",
-                                    BROKER_BACKEND="memory")
+                                    BROKER_BACKEND="memory",
+                                    SITE_REDIRECT=False)
 
 # TODO More granular tests
 
@@ -112,12 +122,12 @@ class TestSubscribeEndpoint(TestCase):
 
         self.assertFalse(response_data2["new_user"])
 
-
-    @tag("site_config")
+    @tag("site_config", "mail")
     @celery_override
     def test_creation(self):
         """When a new user is created, verify that the server responds correctly and
-        that an email is sent. Check that the email contains a valid link.
+        that an email is sent. Check that the email contains a valid
+        confirmation link.
 
         """
         data = {"email": "newuser@example.com",
@@ -135,21 +145,35 @@ class TestSubscribeEndpoint(TestCase):
         message: mail.EmailMultiAlternatives = mail.outbox[0]
         self.assertTrue("confirm" in message.subject.lower())
 
-        subs = getattr(message, "substitutions")
-        self.assertIsInstance(subs, dict)
-        print(subs)
-        confirm_url = message.substitutions["-confirm_url-"]
+        subs = getattr(message, "substitutions", None)
+        if subs and isinstance(subs, dict):
+            body = subs["-message_html-"]
+        else:
+            body = message.message()
+            raise Exception("")
+
+        for url in get_links(body):
+            if "confirm" in url:
+                confirm_url = url
+                break
+        else:
+            self.fail("Did not find a confirmation URL")
+
         parts = urlsplit(confirm_url)
-        self.assertEqual(parts.hostname, self.site_config.hostname)
-
         params = parse_qs(parts.query)
-        uid = params["uid"][0]
-        user = authenticate(pk=uid, token=params["token"][0])
-        self.assertIsNotNone(user)
-        self.assertFalse(user.is_active)
 
-        # Check that confirmation works
-        response = self.client.get(f"{parts.path}?{parts.query}")
+        try:
+            sub = Subscription.objects.get(pk=params["sub"][0])
+        except Subscription.DoesNotExist:
+            self.fail("Subscription was not created")
+
+        self.assertIsNone(sub.active)
+        self.assertFalse(sub.user.is_active)
+
+        response = self.client.get(confirm_url)
+        sub = Subscription.objects.get(pk=params["sub"][0])
+        self.assertIsNotNone(sub.active)
+        self.assertTrue(sub.user.is_active)
 
 
 @tag("subscription", "site_config")
@@ -184,6 +208,48 @@ class TestInboundParser(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+
+@tag("user", "authentication", "mail")
+class TestUserAuthentication(TestCase):
+    @celery_override
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create(
+            is_active=True,
+            username="auth_test_user",
+            email="auth_test_user@example.com")
+        self.site_config = site_config.site_config("somerville.cornerwise.org")
+        self.profile = UserProfile.objects.create(
+            user=self.user,
+            site_name=self.site_config.hostname)
+
+    @celery_override
+    def test_manager_link(self):
+        self.client.post(reverse("resend-confirmation"),
+                         {"email": self.user.email})
+        message = mail.outbox[0]
+        body = message.substitutions["-message_html-"]
+        for url in get_links(body):
+            if "manage" in url:
+                manage_url = url
+                break
+        else:
+            self.fail("Did not find a manager link")
+
+        response = self.client.get(manage_url)
+        self.assertEqual(response.status_code, 302)
+
+        manage_url = response["Location"]
+        print("redirected to", manage_url)
+        response = self.client.get(manage_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_token_invalidation(self):
+        """Test that a user authentication token can only be used once.
+        """
+        pass
+
+
 @tag("comment", "mail")
 class TestUserComments(TestCase):
     def setUp(self):
@@ -212,8 +278,25 @@ class TestUserComments(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         message: mail.EmailMessage = mail.outbox[0]
 
-        recipient = message.recipients()[0]
-        self.assertEqual(recipient, self.admin.email)
+        self.assertIn(self.admin.email, message.recipients())
+
+        html = message.substitutions["-message_html-"]
+        self.assertIn("Hello", html)
+
+    @celery_override
+    def test_invalid_comment(self):
+        data = {
+            "send_to": "123123ASDA!!",
+            "subject": "",
+            "comment": ""
+        }
+        response = self.client.post(reverse("contact-us"), data)
+        self.assertEqual(response.status_code, 400)
+
+        json = response.json()
+        self.assertIn("errors", json)
+        self.assertIn("send_to", json["errors"])
+        self.assertIn("comment", json["errors"])
 
 
 @tag("notifications")
@@ -225,6 +308,21 @@ class TestAdminNotifications(TestCase):
     def test_notifications_sent(self):
         """
         """
+        pass
+
+
+
+@tag("changesets")
+class TestChangeSetCreation(TestCase):
+    def setUp(self):
+        pass
+
+    def test_combine_changesets(self):
+        changeset_1 = {
+            "changes": {
+                1: {}
+            }
+        }
         pass
 
 ## Create from valid queries
@@ -240,3 +338,4 @@ class TestAdminNotifications(TestCase):
 ### For center/radius subscriptions
 
 ## Test that changes are correctly calculated
+## Test combining changesets
