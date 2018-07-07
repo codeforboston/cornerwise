@@ -172,7 +172,7 @@ class Subscription(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name="subscriptions",
                              on_delete=models.CASCADE)
-    active = models.DateTimeField(default=timezone.now, null=True,
+    active = models.DateTimeField(null=True,
                                   help_text=("If the subscription is active, "
                                              "the datetime when it was last "
                                              "activated"))
@@ -379,7 +379,7 @@ class Subscription(models.Model):
         """
         return "projects {area} {region}".format(
             area=self.area_description(dist_units),
-            region_name=self.region_name)
+            region=self.region_name)
 
     def overlap(self, subscription):
         """Returns the overlap of the subscription area of this Subscription with
