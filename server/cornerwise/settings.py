@@ -218,7 +218,12 @@ CELERYBEAT_SCHEDULE = {
     "cleanup-subscriptions": {
         "task": "user.tasks.cleanup_subscriptions",
         "schedule": crontab(minute=0, hour=0)
-    }
+    },
+
+    "collect-sendgrid-stats": {
+        "task": "user.tasks.collect_sendgrid_stats",
+        "schedule": crontab(minute=0, hour=2, day_of_week=0)
+    },
 }
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 60

@@ -28,9 +28,28 @@ def lget_key(k, limit=1000):
     return [pickle.loads(x) for x in Redis.lrange(k, 0, 1000)]
 
 
+def set_key(k, v):
+    Redis.get(k, pickle.dumps(v))
+
+
 def get_key(k):
     v = Redis.get(k)
     return v and pickle.loads(v)
+
+
+def set_many(kvs):
+    with Redis.pipeline() as p:
+        for k, v in kvs.items() if hasattr(kvs, "items") else kvs:
+            p.set(k, pickle.dumps(v))
+        p.execute()
+
+
+def get_many(ks):
+    with Redis.pipeline() as p:
+        for k in ks:
+            p.get(k)
+
+        return [v and pickle.loads(v) for v in p.execute()]
 
 
 def get_and_delete_key(k):

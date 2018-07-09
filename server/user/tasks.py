@@ -1,9 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+import json
 
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+
+import sendgrid
 
 from shared.logger import get_logger
 from shared.mail import send as send_mail
@@ -11,10 +15,13 @@ from shared.mail import send as send_mail
 from cornerwise.adapt import adapt
 import site_config
 
+import redis_utils as red
+
 from .models import Subscription
 from . import mail
 
 User = get_user_model()
+SG = sendgrid.SendGridAPIClient()
 
 
 @shared_task(bind=True)
@@ -128,6 +135,32 @@ def cleanup_subscriptions(self):
     subs_count = counts["user.Subscription"]
     if subs_count:
         logger.info("Deleted %s unconfirmed subscriptions", subs_count)
+
+
+@shared_task(bind=True)
+def collect_sendgrid_stats(self):
+    if not (SG and SG.api_key):
+        return
+
+    logger = get_logger(self)
+
+    since = red.get_key(f"cornerwise:collected_sg_stats")
+    now = timezone.now()
+    week = now - timedelta(days=7)
+    since = max(since, week) if since else week
+
+    date_str = since.strftime("%Y-%m-%d")
+    resp = SG.client.stats.get(query_params={"start_date": date_str})
+
+    if resp.status_code == 200:
+        stats = json.loads(resp.body)
+        red.set_many(
+            (f"cornerwise:sg_daily:{s['date']}", s) for s in stats)
+        red.set_key(f"cornerwise:collected_sg_stats", now)
+    else:
+        logger.warning("Failed to fetch SendGrid stats.\n"
+                       f"Response code: {stats.status_code}\n"
+                       f"Message: {stats}")
 
 
 # Database hook:
