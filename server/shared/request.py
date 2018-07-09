@@ -64,7 +64,7 @@ def make_response(template=None, error_template="error.djhtml",
                 response["Content-type"] = "application/javascript"
                 return response
 
-            accepts = req.META["HTTP_ACCEPT"]
+            accepts = req.META.get("HTTP_ACCEPT", "text/html")
 
             if not use_template \
                or re.search(r"application/json", accepts) \
