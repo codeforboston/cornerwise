@@ -115,10 +115,10 @@ def list_proposals(req):
 
     if page:
         try:
-            per_page = int(req.GET.get("per_page", 100))
+            per_page = int(req.GET.get("per_page", 50))
         except ValueError:
-            per_page = 100
-        paginator = Paginator(proposals, per_page=min(per_page, 100))
+            per_page = 50
+        paginator = Paginator(proposals, per_page=min(per_page, 50))
         proposals = paginator.page(page)
         try:
             query_params = req.GET.copy()
