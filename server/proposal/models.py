@@ -90,12 +90,19 @@ def make_property_map():
             ("description", _g("description")),
             ("source", _g("source")),
             ("region_name", _g("region_name")),
-            ("updated", utils.make_fn_chain(_G("updated_date"), dateparse.parse_datetime), max),
             ("complete", _g("complete")),
             ("status", _g("status"))]
 
 
 property_map = make_property_map()
+
+
+def forgiving_dateparse(dt):
+    if isinstance(dt, str):
+        return dateparse.parse_datetime(dt)
+    if isinstance(dt, datetime):
+        return dt
+    return None
 
 
 class Proposal(models.Model):
@@ -112,7 +119,8 @@ class Proposal(models.Model):
         blank=True,
         help_text="Other addresses covered by this proposal")
     location = models.PointField(help_text="The latitude and longitude",
-                                 geography=True)
+                                 geography=True,
+                                 null=True)
     region_name = models.CharField(
         max_length=128, default="Somerville, MA", null=True, help_text="",
         db_index=True)
@@ -194,9 +202,16 @@ class Proposal(models.Model):
         if changed:
             prop_changes = []
 
-        started = min(p_dict.get("first_hearing_date", timezone.now()),
-                      p_dict["updated_date"])
-        if self.started or started < self.started:
+        first_hearing_date = forgiving_dateparse(p_dict.get("first_hearing_date"))
+
+        updated = forgiving_dateparse(p_dict["updated_date"])
+        if self.updated:
+            updated = min(updated, self.updated)
+        self.updated = updated
+
+        started = min(first_hearing_date or timezone.now(), updated)
+
+        if not self.started or started < self.started:
             self.started = started
 
         for prop, fn, *choose in property_map:
@@ -238,7 +253,6 @@ class Proposal(models.Model):
         # Create associated documents:
         self.create_documents(p_dict.get("documents", []))
 
-        updated = p_dict.get("updated_date", self.updated)
         if changed:
             attr_changes = []
 
@@ -345,7 +359,6 @@ class Attribute(models.Model):
         if not self.handle:
             self.handle = utils.normalize(self.name)
         super().save(*args, **kwargs)
-
 
     def to_dict(self):
         d = {"name": self.name, "handle": self.handle}
