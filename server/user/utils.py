@@ -15,7 +15,11 @@ def not_logged_in(request):
 
 
 def with_user(view_fn):
-    """View decorator that attempts to log the user in using parameters passed 
+    """View decorator that attempts to log the user in using parameters passed in
+    the URL query, if provided. If authentication succeeds, redirects to the
+    same URL that got the user to this view, but with the query parameters
+    removed.
+
     """
     def wrapped_fn(request, *args, **kwargs):
         try:
@@ -24,9 +28,9 @@ def with_user(view_fn):
             if user:
                 messages.success(request, "Welcome back!")
                 login(request, user)
+            if user or not request.user.is_anonymous:
                 return redirect(utils.add_params(request.get_full_path(),
                                                  remove={"uid", "token"}))
-                return view_fn(request, user, *args, **kwargs)
         except KeyError:
             if not request.user.is_anonymous:
                 return view_fn(request, request.user, *args, **kwargs)
