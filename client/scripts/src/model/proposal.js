@@ -135,7 +135,7 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
         getThumb: function() {
             var images = this.get("images");
 
-            if (images.length)
+            if (images && images.length)
                 return images[0].thumb || images[0].src;
 
             return config.defaultProposalThumb;
@@ -169,7 +169,7 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
         },
 
         getAttribute: function(handle) {
-            var attrs = this.get("attributes");
+            var attrs = this.get("attributes") || {};
             if (this.specialAttributes[handle]) {
                 var spec = this.specialAttributes[handle],
                     type = spec.type,

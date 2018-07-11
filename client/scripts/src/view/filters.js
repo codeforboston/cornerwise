@@ -155,6 +155,7 @@ define(
                 if (!refLocation.get("geolocating")) {
                     $(e.target).removeClass("error").blur();
                     this.submitAddress(e.target.elements["address"]);
+                    e.preventDefault();
                 }
 
                 return false;
@@ -170,7 +171,6 @@ define(
                     $(field).val(loc[2].ShortLabel || addr);
                 });
 
-                e.preventDefault();
                 return false;
             },
 

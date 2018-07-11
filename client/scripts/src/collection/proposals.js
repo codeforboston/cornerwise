@@ -11,7 +11,7 @@ define(
 
             initialize: function(options) {
                 Selectable.prototype.initialize.apply(this, arguments);
-                this.options = options;
+                this.options = options || {};
 
                 // Contains the query parameters corresponding to the active filters:
                 this.query = {};
