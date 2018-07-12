@@ -22,17 +22,24 @@ def send_fowarded_message(users, from_email, text, to_username="admin"):
                             "to_username": to_username})
 
 
-def forward_mail(username, from_email, text):
+def forward_mail(username, hostname, from_email, text):
+    """Forwards messages sent to @cornerwise.org (or other) addresses. If the
+    username is 'admin', the message is forwarded to all admin users with an
+    email address configured. If the username matches a site configuration, all
+    members of the corresponding django.auth.models.Group will get the message.
+    """
     try:
+        users = User.objects.exclude(email="")
         if username == "admin":
-            users = User.objects.filter(is_staff=True)
+            users = users.filter(is_staff=True)
         else:
             config = site_config.by_name(username)
             if config and config.group_name:
-                users = User.objects.filter(groups__name=config.group_name)\
-                                    .exclude(email="")
+                users = users.filter(groups__name=config.group_name)
             else:
-                users = [User.objects.get(username=username, is_staff=True)]
+                users = users.filter(groups__name=username)
+                if not users:
+                    users = [users.get(username=username, is_staff=True)]
         send_fowarded_message(users, from_email, text, username)
         return HttpResponse(f"OK: Forwarded email to {len(users)} user(s)", status=200)
     except User.DoesNotExist:
@@ -41,14 +48,23 @@ def forward_mail(username, from_email, text):
 
 
 # When email is sent to @cornerwise.org, SendGrid parses it and posts the
-# reults to this view:
+# results to this view:
 @csrf_exempt
 def mail_inbound(request):
-    """
+    """Handles email sent to addresses under the MX domain configured with
+    SendGrid, e.g., admin@cornerwise.org. If the username is 'noreply' or
+    'cornerwise', the body of the message is interpreted as actions. For
+    example, a user can reply to an updates notification with 'unsubscribe' to
+    turn off notifications. For all other usernames, attempt to forward email
+    to the appropriate admins.
+
     See https://sendgrid.com/docs/API_Reference/Webhooks/parse.html for
     documentation of the POST fields.
+
     """
     try:
+        # The SendGrid webhook URL may contain a 'key' parameter that must
+        # match the key in settings. This provides some assurance that 
         parse_key = settings.SENDGRID_PARSE_KEY
         if parse_key and request.GET.get("key", "") != parse_key:
             logger.warning("Received mail_inbound request with a bad key")
@@ -59,7 +75,7 @@ def mail_inbound(request):
 
         (username, hostname) = request.POST["to"].casefold().split("@", 1)
         if username not in {"cornerwise", "noreply"}:
-            return forward_mail(username, from_email, body)
+            return forward_mail(username, hostname, from_email, body)
 
         user = User.objects.get(email=from_email)
         lines = request.POST["text"].split("\n")
