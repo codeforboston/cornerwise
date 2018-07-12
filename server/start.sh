@@ -80,9 +80,14 @@ fi
 
 start_gunicorn() {
     pidfile=/var/run/gunicorn.pid
+    GUNICORN_OPTS=""
+    if [ "$AUTO_RELOAD" = "1" ]; then
+        GUNICORN_OPTS="$GUNICORN_OPTS --reload"
+    fi
     gunicorn --bind "0.0.0.0:${APP_PORT:=3000}" \
              -p "$pidfile" \
              --daemon \
+             $GUNICORN_OPTS \
              cornerwise.wsgi:application
 
     while [ ! -f "$pidfile" ]; do sleep 1; done
@@ -110,8 +115,14 @@ on_usr1() {
 }
 
 on_sighup() {
-    # Gunicorn reloads the configuration and restarts the workers:
-    kill -s SIGHUP $server_pid
+    if [ "$APP_MODE" = "production" ]; then
+        # Gunicorn reloads the configuration and restarts the workers:
+        kill -s SIGHUP $server_pid
+    elif ! ps -p "$server_pid" > /dev/null ; then
+        $manage runserver 0.0.0.0:${APP_PORT:-3000}
+    else
+        echo "Nothing to do for SIGHUP"
+    fi
 }
 
 on_usr2() {
@@ -123,7 +134,7 @@ on_usr2() {
 if [ "$APP_MODE" = "production" ]; then
     start_gunicorn
 
-    trap on_sighup SIGHUP
+    trap on_usr2 SIGUSR2
 else
     $manage runserver 0.0.0.0:${APP_PORT:-3000} &
 
@@ -131,5 +142,6 @@ else
 fi
 
 trap on_usr1 SIGUSR1
+trap on_sighup SIGHUP
 trap on_sigterm SIGTERM
 while : ; do wait; done
