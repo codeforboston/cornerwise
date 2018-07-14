@@ -17,7 +17,7 @@ def set_dept_code(apps, schema_editor):
                                        Q(title=event.title)))
         if others.exists():
             for other in others:
-                for p in event.proposals:
+                for p in event.proposals.all():
                     other.proposals.add(p)
                 event.agenda_url = event.agenda_url or other.agenda_url
                 event.minutes = event.minutes or other.minutes
