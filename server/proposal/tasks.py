@@ -371,9 +371,8 @@ def create_proposals(dicts, logger=task_logger):
             from io import StringIO
             buff = StringIO()
             pprint.pprint(case_dict, buff)
-            logger.error("Could not create proposal from dictionary: %s",
-                         case_dict)
-            logger.error("%s", exc)
+            logger.exception("Could not create proposal from dictionary: %s",
+                             case_dict)
 
 
 def create_events(dicts, logger=task_logger):
