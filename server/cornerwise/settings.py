@@ -21,8 +21,15 @@ REDIS_HOST = "redis://" + os.environ.get("REDIS_HOST", "")
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET", "98yd3te&#$59^w!j(@b!@f8%fv49&p)vu+8)b4e5jcvfx_yeqs")
 
+
+def dev_default(var_name, default=True):
+    return os.environ[var_name] == "1" if var_name in os.environ else IS_PRODUCTION != default
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not IS_PRODUCTION
+DEBUG = not IS_PRODUCTION or os.environ.get("DJANGO_DEBUG_MODE") == "1"
+
+SERVE_STATIC = dev_default("DJANGO_SERVE_STATIC")
+SERVE_MEDIA = dev_default("DJANGO_SERVE_MEDIA")
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "0") == "1"
@@ -71,7 +78,7 @@ def templates_config():
         "django.contrib.messages.context_processors.messages",
         "site_config.context_processor",
     ]
-    if not IS_PRODUCTION:
+    if DEBUG:
         context_processors.insert(0, "django.template.context_processors.debug")
 
     return [{
@@ -79,7 +86,7 @@ def templates_config():
         "DIRS": ["templates"],
         "APP_DIRS": True,
         "OPTIONS": {
-            "debug": not IS_PRODUCTION,
+            "debug": IS_PRODUCTION,
             "context_processors": context_processors,
         },
     }]
@@ -171,7 +178,8 @@ def get_built_resources():
         info = json.load(built)
         return info["js_filename"], info["css_filename"]
 
-if IS_PRODUCTION:
+
+if not SERVE_STATIC:
     STATICFILES_DIRS.extend([
         ("build", "/static/build"),
     ])
@@ -181,16 +189,13 @@ if IS_PRODUCTION:
     try:
         JS_FILENAME, CSS_FILENAME = get_built_resources()
     except:
-        JS_FILENAME ="app.build.js"
+        JS_FILENAME = "app.build.js"
         CSS_FILENAME = "app.build.css"
 else:
     JS_FILENAME = CSS_FILENAME = ""
     STATICFILES_DIRS.extend([
         ("template", "/static/template"),
     ])
-
-SERVE_STATIC = os.environ.get("DJANGO_SERVE_STATIC", "1") == "1"
-SERVE_MEDIA = os.environ.get("DJANGO_SERVE_MEDIA", "1") == "1"
 
 #######################
 # Celery configuration
@@ -333,6 +338,9 @@ def get_admins():
 
 
 ADMINS = get_admins()
+
+if IS_PRODUCTION and not ADMINS:
+    print("No ADMINS configured.")
 
 
 if not IS_PRODUCTION:
