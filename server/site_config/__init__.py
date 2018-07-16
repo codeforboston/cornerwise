@@ -16,14 +16,16 @@ class SiteMiddleware:
             host = host.casefold()
         host_config = HOSTNAMES.get(host)
 
-        if not host_config and settings.SITE_REDIRECT:
-            return redirect("{scheme}://{host}{path}".format(
-                scheme=request.scheme,
-                host=DEFAULT_CONFIG.hostname,
-                path=request.get_full_path()
-            ))
-        else:
-            host_config = DEFAULT_CONFIG
+        if not host_config:
+            if settings.SITE_REDIRECT:
+                return redirect("{scheme}://{host}{path}".format(
+                    scheme=request.scheme,
+                    host=DEFAULT_CONFIG.hostname,
+                    path=request.get_full_path()
+                ))
+            else:
+                host_config = DEFAULT_CONFIG
+        request.urlconf = host_config.urlconf
         request.site_config = host_config
         request.site_hostname = host
         request.site_name = host_config.hostname

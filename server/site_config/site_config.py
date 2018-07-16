@@ -4,6 +4,7 @@ class SiteConfig():
     # A list of virtual hostnames to which this configuration applies:
     hostnames = []
     redirect = False
+    urlconf = None
     # Extra template context for all views:
     extra_context = {}
     # Merged with the output of `js_config` below
