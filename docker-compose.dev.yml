@@ -79,13 +79,14 @@ services:
       - ./docker-support/nginx.env
     environment:
       APP_MODE: "production"
-      ALLOWED_HOSTS: ".cornerwise.org,.somervillema.gov"
+      ALLOWED_HOSTS: ".cornerwise.org"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
-      VIRTUAL_HOST: "dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov,cornerwise.org,www.cornerwise.org"
-      LETSENCRYPT_HOST: "cornerwise.org,www.cornerwise.org,dev.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
+      VIRTUAL_HOST: "dev.cornerwise.org,somerville.dev.cornerwise.org,cambridge.dev.cornerwise.org"
+      LETSENCRYPT_HOST: "dev.cornerwise.org,somerville.dev.cornerwise.org,cambridge.dev.cornerwise.org"
       LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
+      ADMINS: "bdougsand+cornerwise@gmail.com"
       SITE_REDIRECT: 1
       CELERY_WORKER_COUNT: 1
     expose:
@@ -102,8 +103,8 @@ services:
       - static_resources:/static_build
       - ./server:/app
       - ./client:/static
-      - ./server/cornerwise/google_credentials.json:/google_credentials.json
-
+      - ./server/cornerwise/google_dev_credentials.json:/google_credentials.json
+      - ./server/cornerwise/dev_local_settings.py:/app/cornerwise/local_settings.py
 volumes:
   redis_data:
     driver: local

@@ -8,6 +8,7 @@
 celerybeat-schedule.*
 localConfig.js
 local_settings.py
+dev_local_settings.py
 client/doc
 GPATH
 GRTAGS
@@ -19,6 +20,7 @@ TAGS
 local/
 .tern-port
 google_credentials.json
+google_dev_credentials.json
 /logs/
 /docker-support/prod.env
 client/css/font

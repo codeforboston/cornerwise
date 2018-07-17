@@ -1,7 +1,7 @@
 version: "3"
 
 ######
-# Configuration for https://cornerwise.org
+# Configuration for https://www.cornerwise.org
 # In addition to the standard application/db/cache containers, this includes an
 # nginx # container (nginx), a container that dynamically generates the nginx
 # configuration (nginx-gen), and a container that automatically requests and
@@ -26,6 +26,7 @@ services:
       - nginx_certs:/etc/nginx/certs
       - ./docker-support/cornerwise.org_location.conf:/etc/nginx/vhost.d/default_location
       - static_resources:/static
+      - media:/media
   nginx-gen:
     image: jwilder/docker-gen
     container_name: nginx-gen
@@ -62,6 +63,10 @@ services:
     environment:
       CLIENT_DIR: "/client"
       OUTPUT_DIR: "/static"
+  postgres:
+    image: mdillon/postgis:9.4-alpine
+    volumes:
+      - data:/var/lib/postgresql/data
   redis:
     image: redis:latest
     volumes:
@@ -73,18 +78,22 @@ services:
       - ./docker-support/common.env
       - ./docker-support/nginx.env
     environment:
+      ADMINS: "bdougsand+cornerwise@gmail.com"
       APP_MODE: "production"
-      ALLOWED_HOSTS: ".cornerwise.org,.somervillema.gov"
+      ALLOWED_HOSTS: "*"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
-      VIRTUAL_HOST: "cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov"
-      LETSENCRYPT_HOST: "cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
+      VIRTUAL_HOST: "somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov,cornerwise.org,www.cornerwise.org"
+      LETSENCRYPT_HOST: "cornerwise.org,www.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
       LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
+      ADMINS: "bdougsand+cornerwise@gmail.com"
+      SITE_REDIRECT: 1
       CELERY_WORKER_COUNT: 1
     expose:
       - "3000"
     links:
+      - postgres
       - redis
     restart: unless-stopped
     working_dir: /app/
@@ -99,6 +108,8 @@ services:
 
 volumes:
   redis_data:
+    driver: local
+  data:
     driver: local
   media:
     driver: local
