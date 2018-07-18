@@ -80,11 +80,11 @@ services:
     environment:
       ADMINS: "bdougsand+cornerwise@gmail.com"
       APP_MODE: "production"
-      ALLOWED_HOSTS: "*"
+      ALLOWED_HOSTS: "cornerwise.org"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
-      VIRTUAL_HOST: "somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov,cornerwise.org,www.cornerwise.org"
+      VIRTUAL_HOST: "cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org,cornerwise.somervillema.gov,www.cornerwise.org"
       LETSENCRYPT_HOST: "cornerwise.org,www.cornerwise.org,somerville.cornerwise.org,cambridge.cornerwise.org"
       LETSENCRYPT_EMAIL: "bdougsand+letsencrypt@gmail.com"
       ADMINS: "bdougsand+cornerwise@gmail.com"

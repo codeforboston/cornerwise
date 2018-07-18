@@ -79,7 +79,7 @@ services:
       - ./docker-support/nginx.env
     environment:
       APP_MODE: "production"
-      ALLOWED_HOSTS: ".cornerwise.org"
+      ALLOWED_HOSTS: "dev.cornerwise.org"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
@@ -89,6 +89,7 @@ services:
       ADMINS: "bdougsand+cornerwise@gmail.com"
       SITE_REDIRECT: 1
       CELERY_WORKER_COUNT: 1
+      SECURE_COOKIES: 1
     expose:
       - "3000"
     links:

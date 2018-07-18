@@ -23,6 +23,11 @@ SECRET_KEY = os.environ.get(
 
 
 def dev_default(var_name, default=True):
+    """If the environment variable `var_name` is set, use it to determine whether a
+    feature is turned on. Otherwise, fall back on `default` in development mode
+    and `not default` in production mode.
+
+    """
     return os.environ[var_name] == "1" if var_name in os.environ else IS_PRODUCTION != default
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -31,9 +36,16 @@ DEBUG = not IS_PRODUCTION or os.environ.get("DJANGO_DEBUG_MODE") == "1"
 SERVE_STATIC = dev_default("DJANGO_SERVE_STATIC")
 SERVE_MEDIA = dev_default("DJANGO_SERVE_MEDIA")
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
-CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "0") == "1"
-SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+ALLOWED_HOSTS_RAW = os.environ.get("ALLOWED_HOSTS", "*")
+ALLOWED_HOSTS = ALLOWED_HOSTS_RAW.split(",")
+
+VIRTUAL_HOST = os.environ.get("VIRTUAL_HOST")
+
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE = dev_default("SECURE_COOKIES", False)
+SESSION_COOKIE_DOMAIN = CSRF_COOKIE_DOMAIN = \
+    os.environ.get("COOKIE_DOMAIN") \
+    or (VIRTUAL_HOST and VIRTUAL_HOST.split(",")[0]) \
+    or (ALLOWED_HOSTS[0] if ALLOWED_HOSTS_RAW != "*" else None)
 
 # Application definition
 INSTALLED_APPS = (
@@ -86,7 +98,7 @@ def templates_config():
         "DIRS": ["templates"],
         "APP_DIRS": True,
         "OPTIONS": {
-            "debug": IS_PRODUCTION,
+            "debug": not IS_PRODUCTION,
             "context_processors": context_processors,
         },
     }]
