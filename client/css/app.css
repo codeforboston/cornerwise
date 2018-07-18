@@ -1538,6 +1538,10 @@ a.thumb-link:hover {
     align-self: center;
 }
 
+#alert .buttons {
+    display: none;
+}
+
 #alert .title {
     display: none;
     font-size: x-large;
@@ -1554,7 +1558,7 @@ a.thumb-link:hover {
     text-align: left;
 }
 
-#alert .title.displayed, #alert .content.displayed {
+#alert .title.displayed, #alert .content.displayed, #alert .buttons.displayed {
     display: block;
 }
 

@@ -44,6 +44,16 @@ define(["backbone", "jquery", "underscore", "utils", "config"],
                return alertElement;
            }
 
+           function _makeButtons(config) {
+               return $.map(config, function(button, name) {
+                   return [
+                       "<button name='", name, "' class='button'>",
+                       button.label || $u.fromUnder(name),
+                       "</button>"
+                   ].join("");
+               }).join("\n");
+           }
+
            function _doShow(message) {
                alertElement
                    .addClass(message.className)
@@ -55,7 +65,11 @@ define(["backbone", "jquery", "underscore", "utils", "config"],
                         .end()
                    .find(".title")
                         .text(message.title)
-                        .toggleClass("displayed", !!message.title);
+                        .toggleClass("displayed", !!message.title)
+                        .end()
+                   .find(".buttons")
+                        .html(_makeButtons(message.buttons))
+                        .toggleClass("displayed", !!message.buttons);
                lastMessage = message;
                if (message.type == AlertType.MODAL) {
                    modalMessage = message;
@@ -77,6 +91,18 @@ define(["backbone", "jquery", "underscore", "utils", "config"],
            }
 
            alertElement.click(function(e) {
+               var button = $(e.target).closest(".buttons button");
+               if (button.length) {
+                   var buttonName = button.attr("name"),
+                       buttonConfig = lastMessage.buttons && lastMessage.buttons[buttonName];
+
+                   if (buttonConfig) {
+                       e.preventDefault();
+                       if (!buttonConfig.handler(e, lastMessage, dismissMessage))
+                           return;
+                   }
+               }
+
                if (lastMessage.type !== AlertType.MODAL) {
                    dismissMessage();
                } else if (lastMessage.onClick) {

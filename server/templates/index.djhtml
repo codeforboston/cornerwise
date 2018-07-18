@@ -133,6 +133,7 @@
                             <div class="content-wrapper">
                                 <h2 class="title">Alert Title</h2>
                                 <span class="content"></span>
+                                <span class="buttons"></span>
                             </div>
                         </div>
                     </div>
