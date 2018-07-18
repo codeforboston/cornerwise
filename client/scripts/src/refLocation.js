@@ -89,9 +89,6 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                                return loc;
                            }
 
-                           self.set({
-                               altitude: loc[2]
-                           });
                            appState.setHashKey("ref", {
                                lat: loc[0],
                                lng: loc[1],
@@ -128,9 +125,6 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                            return loc;
                        }
 
-                       self.set({
-                           altitude: null
-                       });
                        appState.setHashKey("ref", {
                            address: loc[2].ShortLabel || addr,
                            enteredAddress: addr,
