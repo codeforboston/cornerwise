@@ -5,7 +5,12 @@
         n = models.length,
         sort = collection.sortField,
         desc = collection.desc,
-        sortClass = function(n) { return n == sort ? 'sorted ' + (desc ? 'desc' : '') : ''; };
+        sortClass = function(n) { return n === sort ? 'sorted ' + (desc ? 'desc' : '') : ''; },
+        sortTitle = function(n, name) {
+            return n === sort ?
+                ('Switch sort order to ' + (desc ? 'ascending' : 'descending')) :
+                'Sort by ' + name;
+        }
         %>
 
         Sort By:
@@ -13,6 +18,7 @@
         <% _.each(collection.sortFields, function(field) { %>
         <a href="#"
            class="button sort-button <%= sortClass(field.field) %>"
+           title="<%- sortTitle(field.field, field.name) %>"
            data-sort="<%- field.field %>">
             <%- field.name %>
         </a>
