@@ -86,7 +86,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                            if (bounds && !bounds.contains(loc)) {
                                alerts.show("You are outside " + config.name,
                                            "error");
-                               return loc;
+                               return $.Deferred().reject([loc]);
                            }
 
                            appState.setHashKey("ref", {
@@ -145,8 +145,11 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
            var refLocation = new LocationModel();
 
            // TODO: Update whenever the active regions change:
-           refLocation.listenTo(regions, "regionLoaded",
-                                function(shape) {})
+           refLocation
+               .listenTo(regions, "regionBounds",
+                         function(newBounds) {
+                             bounds = newBounds;
+                         })
                .listenTo(regions, "selectionRemoved",
                          function(regions, ids) {});
 
