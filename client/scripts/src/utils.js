@@ -37,6 +37,20 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                return pieces.join(",") + (after ? ("." + after) : "");
            }
 
+           function commaList(l, conjunction) {
+               if (conjunction === undefined)
+                   conjunction = "and";
+
+               if (l.length === 2) {
+                   return l.join(" " + conjunction + " ");
+               }
+
+               var front = l.slice(0, -1), end = l.slice(-1);
+               return front.join(", ") +
+                   (front.length ? ", " + conjunction + " " : "") +
+                   (end[0] || "");
+           }
+
            function ordinal(n) {
                n = "" + n;
                var ends = {"1": "st", "2": "nd", "3": "rd"},
@@ -386,6 +400,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
 
                commas: commas,
 
+               commaList: commaList,
+
                pluralize: pluralize,
 
                prettyAmount: prettyAmount,
@@ -587,6 +603,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
 
                // Formatting
                commas: commas,
+
+               commaList: commaList,
 
                /**
                 * @param {number} amount

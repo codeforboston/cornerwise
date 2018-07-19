@@ -267,6 +267,14 @@ define(["backbone", "underscore", "appState", "utils"],
                    return this.selection.length;
                },
 
+               getSelectionDescription: function() {
+                   return $u.commaList(
+                       _.map(this.getSelection(),
+                             function(obj) {
+                                 return obj.getName ? obj.getName() : obj.get("name");
+                             }));
+               },
+
                // Sorting
 
                /**

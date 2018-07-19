@@ -84,7 +84,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    return $u.promiseLocation()
                        .then(function(loc) {
                            if (bounds && !bounds.contains(loc)) {
-                               alerts.show("You are outside " + config.name,
+                               alerts.show("You are outside " + regions.getSelectionDescription(),
                                            "error");
                                return $.Deferred().reject([loc]);
                            }
