@@ -79,8 +79,8 @@ define(["backbone", "view/alerts", "jquery", "utils", "underscore", "appState"],
                    this.clearFormErrors();
                    this.$(".input-group").each(function(i, el) {
                        var name = $(el).find("[name]").attr("name");
+                       $(el).toggleClass("error", !!errors[name]);
                        if (errors[name]) {
-                           $(el).addClass("error");
                            $("<div class='form-error'/>")
                                .text(errors[name].join(", "))
                                .prependTo(el);

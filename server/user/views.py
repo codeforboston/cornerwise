@@ -19,7 +19,6 @@ from shared.request import make_response, make_message, ErrorResponse, redirect_
 from shared.mail import render_email_body
 from user import tasks
 from .contact import ContactForm
-from . import changes
 from user.mail import updates_context
 from user.models import Subscription, UserProfile
 from user.utils import not_logged_in, with_user, with_user_subscription
@@ -297,7 +296,7 @@ def contact_us(request):
             form.save()
             if form.send_email():
                 return JsonResponse({
-                    "title": "Email sent",
+                    "title": "Comment sent",
                     "message": "Thanks for your feedback!"
                 })
             else:

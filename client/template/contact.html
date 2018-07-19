@@ -23,20 +23,31 @@
         </label>
         <br/>
         <input name="subject"
+               id="contact-subject"
                type="text"
                class="big"
                value="<%- modal.subject %>"/>
     </div>
 
     <div class="input-group">
-        <label for="contact-text" class="select">
+        <label for="contact-email" class="select">Email (optional)</label>
+        <input class="big"
+               name="email"
+               id="contact-email"
+               type="text"
+               value="<%- modal.email %>"
+               placeholder="Enter your email address here if you'd like to receive a response" />
+    </div>
+
+    <div class="input-group">
+        <label for="contact-text">
             Comments
         </label>
         <br/>
         <textarea id="contact-text" name="comment" rows="10"></textarea>
     </div>
 
-    <button  type="submit" class="big big-submit">
+    <button type="submit" class="big big-submit">
         Send
     </button>
 

@@ -465,6 +465,7 @@ class UserComment(models.Model):
     created = models.DateTimeField(default=timezone.now)
     subject = models.CharField(max_length=100)
     send_to = models.CharField(max_length=100)
+    email = models.EmailField(null=True)
     comment = models.CharField(max_length=1000)
     remote_addr = models.GenericIPAddressField()
     remote_host = models.CharField(max_length=100)

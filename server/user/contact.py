@@ -14,6 +14,9 @@ User = get_user_model()
 class ContactForm(forms.Form):
     send_to = forms.ChoiceField(label="Contact")
     subject = forms.CharField(label="Subject", max_length=100, required=False, initial="")
+    email = forms.EmailField(label="Your email address",
+                             required=False,
+                             help_text="Please leave your email address if you wish to receive a response")
     comment = forms.CharField(
         label="Comments",
         max_length=1000,
