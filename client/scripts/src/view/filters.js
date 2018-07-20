@@ -60,16 +60,25 @@ define(
                     .done(function(ac) {
                         $("#ref-address-form").off("submit", onSubmit);
                         self.placesSetup(ac, input);
-                        $(input).keypress(function(e) {
-                            if (e.which === 13) {
+
+                        var cleared = false;
+                        $(input).keyup(function(e) {
+                            if (e.key === "Escape") {
+                                if (cleared) {
+                                    input.blur();
+                                } else {
+                                    self.resetPlaces();
+                                    cleared = true;
+                                }
+                                e.preventDefault();
+                            } else if (e.key === "Enter") {
                                 e.preventDefault();
                                 input.blur();
+                            } else {
+                                cleared = false;
                             }
-                        }).keyup(function(e) {
-                            if (e.which === 27) {
-                                e.preventDefault();
-                                input.blur();
-                            }
+                        }).focusin(function() {
+                            cleared = false;
                         });
                     });
             },
@@ -79,11 +88,8 @@ define(
                has fully loaded.
              */
             placesSetup: function(ac, input) {
-                var self = this;
-
-                google.maps.event.addListener(ac, "place_changed", function() {
-                    self.onPlaceChanged(ac, input);
-                });
+                this.placesAutocomplete = ac;
+                this.resetPlaces();
 
                 // Restrict the Places query to the bounds of the currently
                 // active region(s).
@@ -93,6 +99,23 @@ define(
                         var gbounds = $u.gBounds(bounds);
                         ac.setBounds(gbounds);
                     });
+            },
+
+            resetPlaces: function(disable) {
+                if (this.placesAutocomplete) {
+                    if (this._placesListener) {
+                        google.maps.event.removeListener(this._placesListener);
+                        google.maps.event.clearInstanceListeners(this.placesAutocomplete);
+                    }
+
+                    if (!disable) {
+                        this._placesListener = google.maps.event.addListener(
+                            this.placesAutocomplete, "place_changed",
+                            _.bind(this.onPlaceChanged, this, this.placesAutocomplete,
+                                $("#ref-address-form input")[0]));
+                    }
+                }
+
             },
 
             toggleFiltersMenu: function(show) {
