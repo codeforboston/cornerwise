@@ -84,9 +84,11 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    return $u.promiseLocation()
                        .then(function(loc) {
                            if (bounds && !bounds.contains(loc)) {
-                               alerts.show("You are outside " + regions.getSelectionDescription(),
-                                           "error");
+                               alerts.showNamed("geolocNotInBounds", "geolocError",
+                                                {region:  regions.getSelectionDescription()});
                                return $.Deferred().reject([loc]);
+                           } else {
+                               alerts.dismissMessage("geolocError");
                            }
 
                            appState.setHashKey("ref", {
@@ -105,6 +107,10 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                },
 
                setFromLatLng: function(lat, long, address) {
+                   if (bounds && !bounds.contains([lat, long])) {
+                       return false;
+                   }
+
                    appState.setHashKey("ref", {
                        lat: lat,
                        lng: long,
@@ -112,6 +118,8 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                        address: address || "",
                        r: this.defaults.r !== this.get("r") ? this.get("r") : this.defaults.r
                    }, null, true);
+
+                   return true;
                },
 
                setFromAddress: function(addr) {
@@ -120,9 +128,11 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                    alerts.dismissMessage("geoloc_error");
                    return arcgis.geocode(addr).then(arcgis.getLatLngForFirstAddress).done(function(loc) {
                        if (bounds && !bounds.contains(loc)) {
-                           alerts.show("That address is outside " + config.name,
-                                       "error");
+                           alerts.showNamed("addressNotInBounds", "geolocError",
+                                            {region: regions.getSelectionDescription()});
                            return loc;
+                       } else {
+                           alerts.dismissMessage("geolocError");
                        }
 
                        appState.setHashKey("ref", {
@@ -135,7 +145,7 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                        return loc;
                    }).fail(function() {
-                       alerts.show(config.messages.addressNotFound, "error", null, "geoloc_error");
+                       alerts.showNamed("addressNotFound", "geolocError");
                    }).always(function() {
                        self.set("geolocating", false);
                    });

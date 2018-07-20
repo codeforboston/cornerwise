@@ -58,7 +58,12 @@ define(
 
                 places.setup(input, placesOptions)
                     .done(function(ac) {
-                        $("#ref-address-form").off("submit", onSubmit);
+                        $("#ref-address-form")
+                            .off("submit", onSubmit)
+                            .submit(function(e) {
+                                e.preventDefault();
+                            });
+
                         self.placesSetup(ac, input);
 
                         var cleared = false;
@@ -189,8 +194,9 @@ define(
 
                 $(field).blur();
                 refLocation.setFromAddress(addr).fail(function(err) {
-                    alerts.showNamed("addressNotFound");
+                    alerts.showNamed("addressNotFound", "geolocError", {address: addr});
                 }).done(function(loc) {
+                    alerts.dismissMessage("geolocError");
                     $(field).val(loc[2].ShortLabel || addr);
                 });
 
@@ -210,9 +216,11 @@ define(
                     $(input).removeClass("error");
                     var loc = geo.location,
                         addr = places.shortAddress(place);
-                    refLocation.setFromLatLng(loc.lat(),
-                                              loc.lng(),
-                                              addr);
+                    if (!refLocation.setFromLatLng(loc.lat(), loc.lng(), addr)) {
+                        alerts.showNamed("notInBounds", "geolocError", {region: regions.getSelectionDescription()});
+                    } else {
+                        alerts.dismissMessage("geolocError");
+                    }
                 } else {
                     this.submitAddress(input);
                     this.onSubmit();

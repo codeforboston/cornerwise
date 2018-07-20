@@ -145,7 +145,12 @@ define(["backbone", "jquery", "underscore", "utils", "config"],
                    var message = config.messages[namedMessage];
 
                    if (message) {
-                       message = _.extend({id: id}, message);
+                       if (!context && _.isObject(id)) {
+                           context = id;
+                           id = null;
+                       }
+
+                       message = _.extend({id: id}, _.isString(message) ? {text: message} : message);
                        if (context)
                            $u.substitute(message, context, ["text", "title"]);
                        alerts.show(_.extend({id: id}, message));
