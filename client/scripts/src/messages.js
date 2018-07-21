@@ -28,6 +28,11 @@ define([], function() {
             className: "error"
         },
 
+        geolocSlow: {
+            text: "It's taking a while to find your current location.",
+            className: "notice"
+        },
+
         addressNotFound: {
             text: "I couldn't find that address.",
             className: "error"

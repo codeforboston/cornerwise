@@ -47,7 +47,8 @@ define(["backbone", "jquery", "underscore", "utils", "config"],
            function _makeButtons(config) {
                return $.map(config, function(button, name) {
                    return [
-                       "<button name='", name, "' class='button'>",
+                       "<button name='", name, "' class='button ",
+                       button.classes || '', "'>",
                        button.label || $u.fromUnder(name),
                        "</button>"
                    ].join("");
@@ -141,16 +142,17 @@ define(["backbone", "jquery", "underscore", "utils", "config"],
                    return id;
                },
 
-               showNamed: function(namedMessage, id, context) {
+               showNamed: function(namedMessage, id, context, options) {
                    var message = config.messages[namedMessage];
 
                    if (message) {
-                       if (!context && _.isObject(id)) {
+                       if (_.isObject(id)) {
+                           options = context;
                            context = id;
                            id = null;
                        }
 
-                       message = _.extend({id: id}, _.isString(message) ? {text: message} : message);
+                       message = _.extend({id: id}, _.isString(message) ? {text: message} : message, options);
                        if (context)
                            $u.substitute(message, context, ["text", "title"]);
                        alerts.show(_.extend({id: id}, message));

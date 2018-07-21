@@ -80,9 +80,22 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
                setFromBrowser: function() {
                    this.set("geolocating", true);
 
-                   var self = this;
-                   return $u.promiseLocation()
-                       .then(function(loc) {
+                   var self = this,
+                       promise = $u.promiseLocation(),
+                       timeout = setTimeout(function() {
+                           alerts.showNamed("geolocSlow", "geolocError", {},
+                                            {buttons: {
+                                                cancel: {
+                                                    label: "Cancel Geolocation",
+                                                    handler: function() {
+                                                        promise.reject();
+                                                        return true;
+                                                    }
+                                                }
+                                            }});
+                       }, 6000);
+
+                   return promise.then(function(loc) {
                            if (bounds && !bounds.contains(loc)) {
                                alerts.showNamed("geolocNotInBounds", "geolocError",
                                                 {region:  regions.getSelectionDescription()});
@@ -99,9 +112,14 @@ define(["backbone", "lib/leaflet", "view/alerts", "config", "api/arcgis",
 
                            return loc;
                        }, function(err) {
-                           alerts.show(err.reason, "error");
+                           if (err && err.reason) {
+                               alerts.show(err.reason, "error", null, "geolocError");
+                           } else {
+                               alerts.dismissMessage("geolocError");
+                           }
                        })
                        .always(function() {
+                           clearTimeout(timeout);
                            self.set("geolocating", false);
                        });
                },

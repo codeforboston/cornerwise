@@ -562,8 +562,7 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                                            "unavailable"
                                    ];
                                promise.reject({reason: message, error: err});
-                           },
-                           {timeout: 10000});
+                           });
                    } else {
                        promise.reject({reason: errors.geolocation.unavailable});
                    }
