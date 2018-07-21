@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from shared import mail
 from .models import UserComment
 from .utils import admin_emails, group_emails
-
+from utils import request_ip
 
 User = get_user_model()
 
@@ -37,7 +37,7 @@ class ContactForm(forms.Form):
         request = self.request
         cleaned.update({
             "user": request.user if request.user.is_authenticated else None,
-            "remote_addr": request.META["REMOTE_ADDR"],
+            "remote_addr": request_ip(request),
             "remote_host": request.META["REMOTE_HOST"],
             "site_name": request.site_config.hostname,
         })

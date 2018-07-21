@@ -312,3 +312,11 @@ def make_absolute_url(path, site_name=None):
 
 def today():
     return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+def request_ip(req):
+    # TODO Make this function more robust
+
+    # if "HTTP_X_FORWARDED_FOR" in req.META:
+    #     ips = req.META["HTTP_X_FORWARDED_FOR"].split(",")
+    #     stop_at_ip = os.environ.get("CLUSTER_SUBNET_MASK", )
+    return req.META.get("HTTP_X_REAL_IP", req.META["REMOTE_ADDR"])
