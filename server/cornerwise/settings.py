@@ -48,7 +48,7 @@ SESSION_COOKIE_DOMAIN = CSRF_COOKIE_DOMAIN = \
     or (ALLOWED_HOSTS[0] if ALLOWED_HOSTS_RAW != "*" else None)
 
 # Application definition
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -67,9 +67,9 @@ INSTALLED_APPS = (
     "user.UserAppConfig",
     "shared.SharedAppConfig",
     "task",
-)
+]
 
-MIDDLEWARE = (
+MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -78,7 +78,23 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "site_config.SiteMiddleware",
-)
+]
+
+def get_bridge_ip():
+    if "CONTAINER_CIDR" in os.environ:
+        import ipaddress
+        net = ipaddress.IPv4Network(os.environ["CONTAINER_CIDR"], strict=False)
+        return str(next(net.hosts()))
+    else:
+        return "127.0.0.1"
+
+INTERNAL_IPS = [get_bridge_ip()]
+
+ENABLE_DEBUG_TOOLBAR = os.environ.get("ENABLE_DEBUG_TOOLBAR") == "1"
+if ENABLE_DEBUG_TOOLBAR:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
 
 ROOT_URLCONF = "cornerwise.urls"
 
