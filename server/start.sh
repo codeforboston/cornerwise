@@ -3,6 +3,10 @@
 # In case the requirements have changed.
 pip install -q -r /support/requirements.txt
 
+# Get the subnet mask and IP address of the container
+export CONTAINER_CIDR=$(ip -4 addr show eth0 | grep -Po 'inet \K[\d.]+/[\d]+')
+export CONTAINER_IP=$(echo $CONTAINER_CIDR | cut -f 1 -d /)
+
 if [ -f "/support/$APP_MODE-requirements.txt" ]; then
     pip install -q -r /support/$APP_MODE-requirements.txt
 fi
