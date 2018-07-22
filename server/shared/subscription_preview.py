@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import render
+from django.utils import timezone
 
 from django.contrib.admin import widgets as admin_widgets
 from django.contrib.auth.decorators import user_passes_test
@@ -8,6 +9,10 @@ from django.contrib.gis import forms
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.contrib.gis.forms.widgets import OSMWidget
+
+from datetime import timedelta
+
+import pytz
 
 from user.models import Subscription
 from user.mail import updates_context
@@ -46,6 +51,15 @@ class SubscriptionPreviewForm(forms.Form):
 
     class Media:
         js = js_files()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        now = pytz.timezone(settings.TIME_ZONE).normalize(timezone.now())
+        self.fields["end"].initial = now
+        if now.day == 1:
+            now -= timedelta(days=1)
+        self.fields["start"].initial = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
     def clean(self):
         cleaned = super().clean()
