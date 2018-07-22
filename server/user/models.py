@@ -373,10 +373,11 @@ class Subscription(models.Model):
                 where=(self.address or prettify_point(self.center))
             )
 
-    def readable_description(self, dist_units="ft"):
+    def readable_description(self, dist_units=None):
         """Returns a brief textual description of the subscription.
 
         """
+        dist_units = dist_units or getattr(self, "_dist_units", "ft")
         return "projects {area} {region}".format(
             area=self.area_description(dist_units),
             region=self.region_name)

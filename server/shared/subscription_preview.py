@@ -96,6 +96,10 @@ def render_changelog(request, data):
                        address=data["address"],
                        region_name=data["region_name"],
                        user=request.user)
+    try:
+        sub._dist_units = data["radius"]._default_unit
+    except:
+        pass
 
     context["title"] = "Preview Subscription Changes"
     context["subscription"] = sub
