@@ -544,6 +544,9 @@ class Document(models.Model):
         # Ensure at the DB level that documents are not duplicated:
         unique_together = (("proposal", "url"))
 
+    def __str__(self):
+        return f"{self.title} ({self.proposal.case_number})"
+
     def get_absolute_url(self):
         return reverse("view-document", kwargs={"pk": self.pk})
 
