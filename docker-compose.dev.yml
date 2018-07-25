@@ -79,7 +79,7 @@ services:
       - ./docker-support/nginx.env
     environment:
       APP_MODE: "production"
-      ALLOWED_HOSTS: "dev.cornerwise.org"
+      ALLOWED_HOSTS: ".dev.cornerwise.org"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"
