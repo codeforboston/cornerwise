@@ -12,11 +12,15 @@ def fix_updated(apps, _):
             proposal.save()
 
 
+def do_nothing(apps, _):
+    pass
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ('proposal', '0033_non_null_started'),
     ]
 
     operations = [
-        migrations.RunPython(fix_updated),
+        migrations.RunPython(fix_updated, do_nothing),
     ]
