@@ -133,7 +133,7 @@ class Proposal(models.Model):
         db_index=True,
         help_text=("When the proposal was first seen, or the date of the "
                    "first public hearing; whichever is first"))
-    summary = models.CharField(max_length=1024, default="")
+    summary = models.TextField(blank=True, default="")
     description = models.TextField(default="")
     source = models.URLField(
         null=True, help_text="The data source for the proposal.")
