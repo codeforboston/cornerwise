@@ -97,12 +97,18 @@ def make_property_map():
 property_map = make_property_map()
 
 
-def forgiving_dateparse(dt):
+def forgiving_dateparse(dt, tz=pytz.utc):
     if isinstance(dt, str):
-        return dateparse.parse_datetime(dt)
-    if isinstance(dt, datetime):
-        return dt
-    return None
+         dt = dateparse.parse_datetime(dt)
+    elif not isinstance(dt, datetime):
+        return None
+
+    if dt.tzinfo:
+        try:
+            return tz.normalize(dt)
+        except AttributeError:
+            return tz.localize(dt.replace(tzinfo=None))
+    return tz.localize(dt)
 
 
 class Proposal(models.Model):
@@ -160,7 +166,7 @@ class Proposal(models.Model):
         return f"{self.address} [{self.case_number}]"
 
     @classmethod
-    def create_or_update_from_dict(cls, p_dict: dict, tz: tzinfo=pytz.utc):
+    def create_or_update_from_dict(cls, p_dict: dict, tz: tzinfo=None):
         """
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict.
@@ -202,12 +208,14 @@ class Proposal(models.Model):
         if changed:
             prop_changes = []
 
-        first_hearing_date = forgiving_dateparse(p_dict.get("first_hearing_date"))
+        tz = tz or region_tz(p_dict.get("region_name"))
+        first_hearing_date = forgiving_dateparse(p_dict.get("first_hearing_date"), tz)
 
-        updated = forgiving_dateparse(p_dict["updated_date"])
-        if self.updated:
-            updated = min(updated, self.updated)
-        self.updated = updated
+        updated = forgiving_dateparse(p_dict["updated_date"], tz)
+        if updated:
+            if self.updated:
+                updated = min(updated, self.updated)
+            self.updated = updated
 
         started = min(first_hearing_date or timezone.now(), updated)
 
