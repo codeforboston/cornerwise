@@ -281,14 +281,19 @@ def staff_report_properties(doc):
     Planning Staff Report.
     """
     sections = staff_report_sections(filter_lines(doc.line_iterator, STRIP_LINES))
+    attrs = {}
     props = {}
 
-    props.update(somerville_properties(sections["header"]))
+    attrs.update(somerville_properties(sections["header"]))
     for section in sections:
         if "staff report" in section:
-            props.update(somerville_properties(sections[section]))
+            attrs.update(somerville_properties(sections[section]))
 
-    # TODO: Consider using the legal notice as summary
+    try:
+        if not doc.proposal.summary and "Legal Notice" in attrs:
+            props["summary"] = attrs["Legal Notice"]
+    except AttributeError:
+        pass
 
     desc_section = sections.get("project description")
     if desc_section:
@@ -301,9 +306,9 @@ def staff_report_properties(doc):
         ]:
             v = subsections.get(pname)
             if v:
-                props[pname] = "\n".join(paragraphize(v))
+                attrs[pname] = "\n".join(paragraphize(v))
 
-    return props
+    return props, attrs
 
 
 @extractor(SomervilleMA, title_matches("(?i)decision"))
@@ -328,6 +333,15 @@ def decision_properties(doc):
         del attrs["Date"]
     if "Site" in attrs:
         del attrs["Site"]
+
+    try:
+        if "Legal Notice" in header_props and \
+           not doc.proposal.attributes.filter(handle="legal_notice").exists():
+            attrs["Legal Notice"] = header_props["Legal Notice"]
+            if not doc.proposal.summary.strip():
+                props["summary"] = header_props["Legal Notice"]
+    except AttributeError:
+        pass
 
     vote, decision = find_vote(" ".join(sections["decision"]))
     if vote:
