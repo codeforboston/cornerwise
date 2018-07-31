@@ -63,8 +63,7 @@ def summarize_query_updates(query_dict, since=None, until=None):
 
         for p in proposals_changed:
             summary[p.id] = {
-                "proposal": proposal_json(
-                    p, include_images=1, include_documents=False),
+                "proposal": p,
                 "new": False,
                 "properties": prop_changes[p.id],
                 "attributes": attr_changes[p.id],
