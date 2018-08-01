@@ -38,6 +38,7 @@ SERVE_MEDIA = dev_default("DJANGO_SERVE_MEDIA")
 
 ALLOWED_HOSTS_RAW = os.environ.get("ALLOWED_HOSTS", "*")
 ALLOWED_HOSTS = ALLOWED_HOSTS_RAW.split(",")
+USE_X_FORWARDED_HOST = dev_default("USE_X_FORWARDED_HOST", False)
 
 VIRTUAL_HOST = os.environ.get("VIRTUAL_HOST")
 
@@ -371,12 +372,11 @@ if IS_PRODUCTION and not ADMINS:
     print("No ADMINS configured.")
 
 
-if not IS_PRODUCTION:
-    try:
-        # Allow user's local settings to shadow shared settings:
-        from .local_settings import *
-    except ImportError as err:
-        print("Could not find local_settings.py -- ", err)
+try:
+    # Allow user's local settings to shadow shared settings:
+    from .local_settings import *
+except ImportError as err:
+    print("Could not find local_settings.py -- ", err)
 
 
 if SENDGRID_API_KEY:
