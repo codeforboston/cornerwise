@@ -11,7 +11,7 @@ import re
 path = os.path
 
 def file_contents(f):
-    return "".join(line.strip() for line in f)
+    return " ".join(line.strip() for line in f)
 
 
 def collect_files(template_dir, url_base):
