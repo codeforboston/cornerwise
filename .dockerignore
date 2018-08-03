@@ -1,8 +1,10 @@
 **/.DS_Store
 **/google_credentials.json
+**/google_dev_credentials.json
 **/*.pyc
 **/*.swp
 **/__pycache__
 **/celerybeat-schedule
 **/celerybeat-schedule.db
 server/cornerwise/local_settings.py
+server/dev_local_settings.py
