@@ -167,7 +167,7 @@
                 },
                 "url": {
                     "type": "string",
-                    "pattern": "uri",
+                    "format": "uri",
                     "description": "Link to a webpage containing additional information about this event."
                 },
                 "description": {
