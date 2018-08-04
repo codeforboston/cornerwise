@@ -2,7 +2,9 @@
 and their related models (Documents, Images).
 """
 from datetime import datetime, timedelta
+from io import StringIO
 import os
+import pprint
 import re
 from typing import Iterable
 
@@ -367,12 +369,11 @@ def create_proposals(dicts, logger=task_logger):
             p.save()  # Needed?
             yield p
         except Exception as exc:
-            import pprint
-            from io import StringIO
             buff = StringIO()
             pprint.pprint(case_dict, buff)
+            buff.seek(0)
             logger.exception("Could not create proposal from dictionary: %s",
-                             case_dict)
+                             buff.read())
 
 
 def create_events(dicts, logger=task_logger):
