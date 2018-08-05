@@ -1335,7 +1335,7 @@ a.brief-model:hover {
 }
 
 #info .attribute,
-.document-group-name {
+.documents > h5 {
     color: #ccc;
     font-size: small;
     font-weight: 500;
