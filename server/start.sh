@@ -111,11 +111,8 @@ on_usr1() {
     # the server.
     # Note: Only one container should receive the signal.
     echo "Received SIGUSR1"
-    if [ "$APP_MODE" = "production" ]; then
-        $manage collectstatic --no-input
-    else
-        echo "Do not need to collectstatic outside production mode."
-    fi
+    $manage collectstatic --no-input 2>/dev/null ||
+        echo "collectstatic failed; it may not be configured"
 }
 
 on_sighup() {
