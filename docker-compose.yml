@@ -27,6 +27,7 @@ services:
       - ./client:/static
       - ./data:/data
       - ./docker-support:/support
+      - ./docs/scraper-schema.json:/app/scraper-schema.json
     stdin_open: true
     tty: true
   postgres:

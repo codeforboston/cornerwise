@@ -694,9 +694,10 @@ class Changeset(models.Model):
 
 
 @utils.lazy
-def get_importer_schema():
-    with request.urlopen(settings.IMPORTER_SCHEMA) as u_in:
-        return json.loads(u_in.read())
+def get_importer_schema(where=settings.IMPORTER_SCHEMA):
+    opener = request.urlopen if re.match(r"^https?://", where) else open
+    with opener(where) as u_in:
+        return json.load(u_in)
 
 
 class Importer(models.Model):

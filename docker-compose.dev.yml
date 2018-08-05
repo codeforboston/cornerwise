@@ -106,6 +106,7 @@ services:
       - ./client:/static
       - ./server/cornerwise/google_dev_credentials.json:/google_credentials.json
       - ./server/cornerwise/dev_local_settings.py:/app/cornerwise/local_settings.py
+      - ./docs/scraper-schema.json:/app/scraper-schema.json
 volumes:
   redis_data:
     driver: local

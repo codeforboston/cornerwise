@@ -14,6 +14,7 @@ RUN apt-get update && \
     inotify-tools && \
     rm -rf /var/lib/apt/lists/*
 ADD ./docker-support /support
+ADD ./docs/scraper-schema.json /app/scraper-schema.json
 RUN pip3 install -r /support/requirements.txt
 
 ADD ./server /app

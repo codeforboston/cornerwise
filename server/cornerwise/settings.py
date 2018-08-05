@@ -321,7 +321,7 @@ GEO_REGION = "Somerville, MA"
 AUTHENTICATION_BACKENDS = ["user.auth.TokenBackend",
                            "django.contrib.auth.backends.ModelBackend"]
 
-IMPORTER_SCHEMA = "https://raw.githubusercontent.com/codeforboston/cornerwise/master/docs/scraper-schema.json"
+IMPORTER_SCHEMA = "/app/scraper-schema.json"
 
 # Site config
 SITE_CONFIG = {
