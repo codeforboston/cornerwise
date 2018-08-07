@@ -156,10 +156,23 @@ def validate_importers(_, request, importers):
             messages.info(request, f"{importer} successfully validated!")
 
 
+def view_import_errors(_, request, importers):
+    return redirect("{}?{}".format(reverse("importer_errors"),
+                                   "&".join(f"importer={imp.pk}" for imp in importers)))
+
+
+def clear_import_errors(_, request, importers):
+    red.Redis.delete([
+        f"cornerwise:importer:{importer.pk}:import_errors"
+        for importer in importers
+    ])
+
+
 class ImporterAdmin(admin.ModelAdmin):
     model = Importer
     form = ImporterForm
-    actions = [run_importers, validate_importers]
+    actions = [run_importers, validate_importers, view_import_errors,
+               clear_import_errors]
     readonly_fields = ["last_run_date"]
 
     def last_run_date(self, importer):

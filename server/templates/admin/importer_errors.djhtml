@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+{% load humanize i18n cornerwise_extras %}
+
+{% block extrastyle %} {% endblock %}
+
+{% block content %}
+    {% for importer in importers %}
+        <h2>{{ importer.importer }}</h2>
+        <ul class="task-log log-entries">
+            {% for error in importer.errors %}
+                <li class="entry">
+                    <strong>Time:</strong> {{ error.when }}
+                    <br/>
+                    <strong>Exception:</strong> {{ error.message }}
+                    <br/>
+                    <pre>{{ error.dict|pretty_print }}</pre>
+                </li>
+            {% empty %}
+                <li>No recent errors</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}

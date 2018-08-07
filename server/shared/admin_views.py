@@ -12,7 +12,7 @@ from celery.task import control
 import redis_utils as red
 from utils import read_n_from_end
 
-from proposal.models import Proposal
+from proposal.models import Importer, Proposal
 from proposal.tasks import add_parcel
 
 from .admin import cornerwise_admin
@@ -107,3 +107,15 @@ def refresh_parcels(request):
     messages.success(request,
                      f"Found matching parcel(s) for {count} proposal(s)")
     return redirect("admin:index")
+
+
+@is_superuser
+def importer_errors(request):
+    context = cornerwise_admin.each_context(request)
+    context.update({"importers": [
+        {"importer": importer,
+         "errors": red.lget_key(f"cornerwise:importer:{importer.pk}:import_errors")}
+        for importer in Importer.objects.filter(pk__in=request.GET.getlist("importer"))
+    ],
+                    "title": "Importer Errors"})
+    return render(request, "admin/importer_errors.djhtml", context)
