@@ -1,6 +1,7 @@
 """Celery tasks for import and processing of Proposals, Events, and Projects
 and their related models (Documents, Images).
 """
+from collections import defaultdict
 from datetime import datetime, timedelta
 from io import StringIO
 import os
@@ -20,7 +21,8 @@ from django.db.models.signals import post_save
 from django.db.utils import DataError, IntegrityError
 
 from cornerwise.adapt import adapt
-from utils import add_locations
+from redis_utils import append_to_key
+from utils import add_locations, today, utc_now
 from scripts import foursquare, images, street_view, vision
 from shared.geocoder import Geocoder
 from shared.logger import get_logger, task_logger
@@ -358,30 +360,47 @@ def stringify_address_dict(address):
     return f"{address.street_address}, {address.city}, {address.state}"
 
 
-def create_proposals(dicts, logger=task_logger):
+def add_new_locations(cases):
+    Proposal.objects.filter(case)
+    pass
+
+
+def create_proposal(case_dict, imp, logger=task_logger):
     """Helper function to create new Proposal objects.
     """
-
-    for case_dict in dicts:
-        try:
-            (_, p) = Proposal.create_or_update_from_dict(case_dict)
-            p.importer = case_dict.get("importer")
-            p.save()  # Needed?
-            yield p
-        except Exception as exc:
-            buff = StringIO()
-            pprint.pprint(case_dict, buff)
-            buff.seek(0)
-            logger.exception("Could not create proposal from dictionary: %s",
-                             buff.read())
-
-
-def create_events(dicts, logger=task_logger):
-    for event_dict in dicts:
-        yield Event.make_event(event_dict)
+    try:
+        (_, p) = Proposal.create_or_update_from_dict(case_dict, importer=imp)
+        return p
+    except Exception as exc:
+        buff = StringIO()
+        pprint.pprint(case_dict, buff)
+        buff.seek(0)
+        logger.exception("Could not create proposal from dictionary: %s",
+                         buff.read())
+        append_to_key(
+            f"cornerwise:importer:{imp.pk}:import_errors",
+            {"when": utc_now(), "dict": case_dict, "message": str(exc)},
+            limit=100)
+        return None
 
 
-def create_projects(dicts):
+def create_event(event_dict, imp, logger=task_logger):
+    return Event.make_event(event_dict, imp)
+
+
+def create_models(fn, tuples, logger=task_logger):
+    error_counts = defaultdict(int)
+    pks = []
+    for imp, d in tuples:
+        instance = fn(d, imp, logger)
+        if instance:
+            pks.append(instance.id)
+        else:
+            error_counts[imp] += 1
+    return (pks, error_counts)
+
+
+def create_project(project_dict, imp, logger=task_logger):
     pass
 
 
@@ -392,8 +411,7 @@ def fetch_proposals(since: datetime=None,
     """Task runs each of the importers given.
 
     """
-    now = pytz.utc.localize(datetime.utcnow().replace(hour=0, minute=8,
-                                                      second=0, microsecond=0))
+    now = today()
 
     latest_proposal = Proposal.objects.latest()
     if latest_proposal:
@@ -417,7 +435,7 @@ def fetch_proposals(since: datetime=None,
 
         importer_since = \
             importer.tz.normalize(importer_since) if importer_since.tzinfo \
-            else importer_since
+            else importer.tz.localize(importer_since)
 
         try:
             found = importer.updated_since(importer_since)
@@ -437,18 +455,24 @@ def fetch_proposals(since: datetime=None,
         for k in found:
             for item in found[k]:
                 item.setdefault("region_name", importer.region_name)
-                item["importer"] = importer
-                all_found[k].append(item)
+                all_found[k].append((importer, item))
 
         importer.last_run = now
         importer.save()
 
-    add_locations(all_found["cases"], Geocoder)
+    add_locations([case for _, case in all_found["cases"]],
+                  Geocoder)
+    result = {}
+    for type_name, maker_fn, k in [("cases", create_proposal, "proposal_ids"),
+                                   ("events", create_event, "event_ids")]:
 
-    return {
-        "proposal_ids": [p.id for p in create_proposals(all_found["cases"], logger)],
-        "event_ids": [event.id for event in create_events(all_found["events"], logger)]
-    }
+        ids, errors = create_models(maker_fn, all_found[type_name], logger)
+        if errors:
+            for imp, count in errors.items():
+                logger.warn(f"Importer {imp} was unable to import {count} {type_name}")
+        result[k] = ids
+
+    return result
 
 
 @shared_task(bind=True)

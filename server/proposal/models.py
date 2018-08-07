@@ -166,7 +166,7 @@ class Proposal(models.Model):
         return f"{self.address} [{self.case_number}]"
 
     @classmethod
-    def create_or_update_from_dict(cls, p_dict: dict, tz: tzinfo=None):
+    def create_or_update_from_dict(cls, p_dict: dict, tz: tzinfo=None, importer=None):
         """
         Constructs a Proposal from a dictionary.  If an existing proposal has a
         matching case number, update it from p_dict.
@@ -182,7 +182,7 @@ class Proposal(models.Model):
             created = True
 
         proposal.case_numbers = p_dict.get("case_numbers", [])
-        proposal.update_from_dict(p_dict, not created, tz)
+        proposal.update_from_dict(p_dict, not created, tz, importer)
 
         return (created, proposal)
 
@@ -200,7 +200,7 @@ class Proposal(models.Model):
     def document_for_field(self, field):
         return self.documents.filter(field=field)
 
-    def update_from_dict(self, p_dict, changed=True, tz: tzinfo=pytz.utc):
+    def update_from_dict(self, p_dict, changed=True, tz: tzinfo=pytz.utc, importer=None):
         """Updates the Proposal from the contents of a dictionary. When changed
         is True, the update will generate a new Changeset describing the state
         of the proposal before and after the changes from p_dict were applied.
@@ -212,12 +212,12 @@ class Proposal(models.Model):
         first_hearing_date = forgiving_dateparse(p_dict.get("first_hearing_date"), tz)
 
         updated = forgiving_dateparse(p_dict["updated_date"], tz)
+        started = first_hearing_date or timezone.now()
         if updated:
             if self.updated:
                 updated = min(updated, self.updated)
             self.updated = updated
-
-        started = min(first_hearing_date or timezone.now(), updated)
+            started = min(started, updated)
 
         if not self.started or started < self.started:
             self.started = started
@@ -249,13 +249,11 @@ class Proposal(models.Model):
                 raise Exception("Missing required property: %s\n Reason: %s" %
                                 (prop, exc))
 
+        self.importer = importer
         self.save()
 
-        importer = p_dict.get("importer")
         # Add related events:
-        for event in self.create_events(p_dict.get("events", [])):
-            if not event.importer:
-                event.importer = importer
+        for event in self.create_events(p_dict.get("events", []), importer):
             event.proposals.add(self)
 
         # Create associated documents:
@@ -328,8 +326,9 @@ class Proposal(models.Model):
                                             published=self.updated)
                 yield (True, doc)
 
-    def create_events(self, event_dicts):
-        return list(map(Event.make_event, event_dicts)) if event_dicts else []
+    def create_events(self, event_dicts, importer=None):
+        return [Event.make_event(e_dict, importer or self.importer)
+                for e_dict in (event_dicts or [])]
 
 
 class Attribute(models.Model):
@@ -452,7 +451,7 @@ class Event(models.Model):
         return d
 
     @classmethod
-    def make_event(cls, event_dict):
+    def make_event(cls, event_dict, importer=None):
         """
         event_dict should have the following fields:
         - title (str) - Name of the event
@@ -462,8 +461,6 @@ class Event(models.Model):
         - cases - A list of case numbers
         - region_name
         - documents (string, optional)
-
-        - importer (Importer )
         """
         start = dateparse.parse_datetime(event_dict["start"])
         kwargs = {"date": start,
@@ -485,7 +482,7 @@ class Event(models.Model):
                 event.minutes = doc["url"]
 
         event.date = start
-        event.importer = event_dict.get("importer")
+        event.importer = importer
 
         duration = utils.fn_chain(event_dict, "duration", utils.parse_duration)
         if duration:
@@ -550,7 +547,7 @@ class Document(models.Model):
 
     class Meta:
         # Ensure at the DB level that documents are not duplicated:
-        unique_together = (("proposal", "url"))
+        unique_together = (("proposal", "url"),)
 
     def __str__(self):
         return f"{self.title} ({self.proposal.case_number})"
