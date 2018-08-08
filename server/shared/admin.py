@@ -22,6 +22,7 @@ from proposal.models import Attribute, Changeset, Event, Importer, Layer, Propos
 from .models import StaffNotification
 from user.models import UserComment
 
+import redis_utils as red
 from utils import geometry_from_url
 
 import jsonschema
