@@ -39,31 +39,6 @@ $manage migrate
 echo "Creating views"
 $manage sync_pgviews
 
-start_celery() {
-    mkdir -p /var/log/celery /var/run/celery
-
-    celery -A $APP_NAME beat \
-           --pidfile=/var/run/celery/celerybeat.pid \
-           --detach \
-           --logfile=/var/log/celery/beat.log
-    mkdir -p /var/run/celery /var/log/celery
-    celery multi start ${CELERY_WORKER_COUNT:-2} -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
-           --pidfile=/var/run/celery/%n.pid \
-           --logfile=/var/log/celery/%n.log
-}
-
-autoreload_celery() {
-    while : ; do
-        inotifywait -e modify $APP_ROOT/*/tasks.py
-        pids=$(cat /var/run/celery/*.pid)
-        kill $pids
-        while ps $pids > /dev/null; do
-            sleep 1
-        done
-        start_celery $1
-    done
-}
-
 # Start celery in the background of this container if there is not a linked
 # container running with the name 'celery'.
 if ! getent hosts celery; then
@@ -73,12 +48,43 @@ if ! getent hosts celery; then
         celery_opts="-E"
     fi
 
+    start_celery() {
+        mkdir -p /var/log/celery /var/run/celery
+
+        celery -A $APP_NAME beat \
+               --pidfile=/var/run/celery/celerybeat.pid \
+               --detach \
+               --logfile=/var/log/celery/beat.log \
+               $@
+        mkdir -p /var/run/celery /var/log/celery
+        celery multi start ${CELERY_WORKER_COUNT:-2} -A $APP_NAME -l "${CELERY_LOGLEVEL:-info}" $1 \
+               --pidfile=/var/run/celery/%n.pid \
+               --logfile=/var/log/celery/%n.log
+    }
+
+    restart_celery() {
+        pids=$(cat /var/run/celery/*.pid)
+        echo "Killing $(echo $pids | wc -w) celery worker(s)"
+        kill $pids
+        while ps $pids > /dev/null; do
+            sleep 1
+        done
+        start_celery $celery_opts
+    }
+
+    autoreload_celery() {
+        while : ; do
+            inotifywait -e modify $APP_ROOT/*/tasks.py
+            restart_celery
+        done
+    }
+
     rm /var/run/celery/*.pid
-    start_celery "$celery_opts"
+    start_celery $celery_opts
     celery_started=1
 
     if [ "$APP_MODE" != "production" ]; then
-        which inotifywait && autoreload_celery "$celery_opts" &
+        which inotifywait && autoreload_celery &
     fi
 fi
 
@@ -121,8 +127,10 @@ on_sighup() {
         kill -s SIGHUP $server_pid
     elif ! ps -p "$server_pid" > /dev/null ; then
         $manage runserver 0.0.0.0:${APP_PORT:-3000}
-    else
-        echo "Nothing to do for SIGHUP"
+    fi
+
+    if [ -n "$celery_started" ]; then
+        restart_celery
     fi
 }
 
