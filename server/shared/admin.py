@@ -57,7 +57,7 @@ class AttributeInline(admin.StackedInline):
 
 
 class ProposalAdmin(admin.ModelAdmin):
-    fields = ["case_number", "address", "updated"]
+    fields = ["case_number", "address", "summary", "updated"]
     search_fields = ["case_number", "address"]
 
     inlines = [AttributeInline]
@@ -70,6 +70,7 @@ class ProposalAdmin(admin.ModelAdmin):
             super().__init__(*args, **kwargs)
             if getattr(self, "instance"):
                 self.fields["case_number"].disabled = False
+            self.fields["summary"].widget = forms.Textarea()
 
     def save_related(self, request, form, formsets, change):
         if change:
