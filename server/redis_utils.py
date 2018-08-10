@@ -29,7 +29,7 @@ def lget_key(k, limit=1000):
 
 
 def set_key(k, v):
-    Redis.get(k, pickle.dumps(v))
+    Redis.set(k, pickle.dumps(v))
 
 
 def get_key(k):
