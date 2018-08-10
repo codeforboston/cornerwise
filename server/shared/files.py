@@ -4,6 +4,8 @@ import re
 import subprocess
 import utils
 
+from dateutil.parser import parse as date_parse
+
 
 class multimethod(object):
     class DispatchValueError(ValueError):
@@ -67,7 +69,8 @@ def published_date(path):
 
     if m:
         datestr = m.group(1)
-        return datetime.strptime(datestr, "%c")
+
+        return date_parse(datestr)
 
     return datetime.fromtimestamp(os.path.getmtime(path))
 
