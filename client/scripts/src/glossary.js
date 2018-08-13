@@ -34,8 +34,6 @@ define(["jquery", "underscore", "utils", "config"], function($, _, $u, config) {
             regex += "|" + caseLink.pattern;
             handler[mgroup++] = makeCaseLinkFn(region);
         }
-        console.log(regex);
-        console.log(handler);
 
         return {pattern: new RegExp(regex, "gi"), handlers: handler};
     }
