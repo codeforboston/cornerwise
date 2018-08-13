@@ -123,7 +123,7 @@ def list_proposals(req):
         try:
             query_params = req.GET.copy()
             def make_url(page):
-                query_params["page"] = page
+                query_params["page"] = str(page)
                 return req.path + "?" + query_params.urlencode()
 
             context["paginator"] = paginator_context(proposals, make_url)

@@ -4,7 +4,7 @@ git+https://github.com/celery/celery.git@be55de6#egg=celery
 cssselect==1.0.1
 cssutils==1.0.2
 dbfread==2.0.7
-Django==2.0.4
+Django==2.1
 django-celery-beat==1.1.1
 django-celery-results==1.0.1
 django-debug-toolbar>=1.9,<=2.0
@@ -16,7 +16,7 @@ django-tinymce==2.7.0
 google-api-python-client==1.6.4
 gunicorn==19.7.1
 httplib2==0.10.3
-hypothesis==3.6.1
+hypothesis==3.66.32
 jsonschema==2.6.0
 kombu==4.1.0
 lxml==3.8.0
@@ -32,7 +32,7 @@ PyPDF2==1.26.0
 pytest==2.7.2
 python-dateutil==2.6.0
 python-http-client==3.0.0
-pytz==2018.3
+pytz==2018.5
 redis==2.10.6
 requests==2.18.4
 rsa==3.4.2
