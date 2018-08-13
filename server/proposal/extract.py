@@ -295,6 +295,12 @@ def staff_report_properties(doc):
     except AttributeError:
         pass
 
+    if "Recommendation" in attrs and not doc.proposal.status:
+        if re.match(r"^(?i)(conditional )?approval", attrs["Recommendation"]):
+            props["status"] = "Recommend Approval"
+        elif re.match(r"^(?i)denial", attrs["Recommendation"]):
+            props["status"] = "Recommend Denial"
+
     desc_section = sections.get("project description")
     if desc_section:
         subsections = make_sections(
