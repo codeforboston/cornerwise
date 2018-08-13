@@ -9,7 +9,7 @@ define(["lib/leaflet", "view/proposalPopup", "underscore", "utils"],
 
            function getBadgeClassName(proposal) {
                var attrs = proposal.attributes,
-                   approved = (attrs.status||"").match(/^approved$/i);
+                   approved = proposal.isApproved();
 
                return $u.classNames({
                    "marker-hovered": attrs._hovered,

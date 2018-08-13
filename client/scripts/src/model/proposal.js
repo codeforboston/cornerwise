@@ -363,7 +363,7 @@ define(["jquery", "backbone", "lib/leaflet", "utils", "refLocation", "config"], 
         },
 
         isApproved: function() {
-            return (this.get("status") || "").match(/approved?/i);
+            return (this.get("status") || "").match(/(approved?|recommend approval)/i);
         },
 
         projectYearRange: function() {

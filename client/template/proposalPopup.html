@@ -4,13 +4,14 @@
 
     <% var complete = proposal.get("complete"), status = proposal.get("status");
     %>
-    <a class="proposal-badge <%- complete ? (status.match(/approved/i) ? 'proposal-approved' : 'proposal-denied') : "" %>"
+    <a class="proposal-badge <%- proposal.isApproved() ? 'proposal-approved' : 'proposal-denied' %> <%- complete ? 'proposal-complete' : '' %>"
     <% if (complete) { %>
        title="Proposal <%- status %> on <%- shortDate(complete) %>"
     <% } else { %>
-        title="Proposal under review"
+        title="<%- status || 'Proposal under review' %>"
     <% } %>
         >
+        <div class="tint"/>
     </a>
     
     <div class="applicant">

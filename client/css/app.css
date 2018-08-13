@@ -1,16 +1,23 @@
 :root {
-    --active-proposal-bg: radial-gradient( #e2a192, #ff7c55);
-    --proposal-bg: radial-gradient( #e2a192, #ff5a29);
-/*     --proposal-bg: radial-gradient(50% 0%, #727272 50%, #868686 100%); */
-    --proposal-approved-bg: radial-gradient(50% 39%, #197409 50%, #239F0E 100%);
-    --active-proposal-approved-bg: radial-gradient(50% 39%, #197409 50%, #239F0E 100%);
-    --proposal-denied-bg: radial-gradient(50% 39%, #991509 50%, #B01A0C 85%);
-    --active-proposal-denied-bg: radial-gradient(50% 39%, #991509 50%, #B01A0C 85%);
-
+    --pending-color: #FF5A29;
+    --approval-color: #197409;
+    --denial-color: #991509;
+    --recommend-denial-color: #BB2C14;
+    --recommend-approval-color: #666B14;
     --action-color: #3c7c3d;
     --active-action-color: #7fc87a;
     --secondary-action: #265E9D;
     --secondary-action-active: rgb(157, 198, 243);
+
+    --active-proposal-bg: radial-gradient( #e2a192, #ff7c55);
+    --proposal-bg: radial-gradient( #e2a192, var(--pending-color));
+/*     --proposal-bg: radial-gradient(50% 0%, #727272 50%, #868686 100%); */
+    --proposal-approved-bg: radial-gradient(50% 39%, #197409 50%, #239F0E 100%);
+    --active-proposal-approved-bg: radial-gradient(50% 39%, var(--approval-color) 50%, #239F0E 100%);
+    --proposal-denied-bg: radial-gradient(50% 39%, var(--denial-color) 50%, #B01A0C 85%);
+    --active-proposal-denied-bg: radial-gradient(50% 39%, var(--denial-color) 50%, #B01A0C 85%);
+    --proposal-recommend-approval-bg: radial-gradient(var(--recommend-approval-color) 50%, var(--pending-color) 85%);
+    --proposal-recommend-denial-bg: radial-gradient(var(--recommend-denial-color)  50%, var(--pending-color) 85%);
 }
 
 body {
@@ -710,18 +717,30 @@ div.proposal-marker {
 }
 
 div.marker-selected, div.marker-hovered {
-    background: --active-proposal-bg;
+    background: var(--active-proposal-bg);
     border-color: #4fb8f7;
 }
 
 div.proposal-complete.proposal-denied {
-    background-color: #991509;
+    background-color: var(--denial-color);
     background: center / 60% no-repeat url(/static/images/denied.png),
                 var(--proposal-denied-bg);
 }
 
+div.proposal-approved {
+    background-color: var(--recommend-approval-color);
+    background: center / 60% no-repeat url(/static/images/approved.png),
+                var(--proposal-recommend-approval-bg);
+}
+
+div.proposal-denied {
+    background-color: var(--recommend-denial-color);
+    background: center / 60% no-repeat url(/static/images/denied.png),
+                var(--proposal-recommend-denial-bg);
+}
+
 div.proposal-complete.proposal-approved {
-    background-color: #197409;
+    background-color: var(--approval-color);
     background: center / 60% no-repeat url(/static/images/approved.png),
                 var(--proposal-approved-bg);
 }
@@ -1255,7 +1274,7 @@ a.brief-model:hover {
 }
 
 .approved {
-    color: var(--action-color);
+    color: var(--approval-color);
     font-weight: bold;
 }
 
@@ -1422,11 +1441,10 @@ a.thumb-link:hover {
 
 .proposal-badge {
     background: center / 60% no-repeat url(/static/images/pending.png);
-
     height: 30px;
     width: 30px;
     position: absolute;
-    right: 35px;;
+    right: 35px;
     top: 5px;
 }
 

@@ -39,18 +39,23 @@ var region = proposal.get("region_name");
     if (notice) {
     %>
     <div class="legal-notice"><%= gloss(notice, false, region) %></div>
-    <% }
-
-    var complete = proposal.get("complete"), status = proposal.get("status");
-
-    if (complete) {
-    %>
-    <div class="decision">
-        <span class="<%- (proposal.isApproved())? 'approved' : 'denied' %>">
-            <%- status %>
-        </span> on <%- mediumDate(complete) %>
-    </div>
     <% } %>
+
+    <div class="decision">
+        <%
+        var complete = proposal.get("complete"), status = proposal.get("status");
+
+        if (complete) {
+        %>
+            <span class="<%- (proposal.isApproved())? 'approved' : 'denied' %>">
+                <%- status %>
+            </span> on <%- mediumDate(complete) %>
+        <% } else if (status) { %>
+            <span class="staff-recommendation">
+                <%- status %>
+            </span>
+        <% } %>
+    </div>
     <div class="sidebar">
         <div class="main-thumb-container">
             <img class="main-thumb" src="<%= proposal.getImage() %>"/>
