@@ -56,6 +56,12 @@ def document_processing_failed(task, exc, task_id, args, kwargs, einfo, ):
         logger.warning(
             "Processing for Document #%i (%s) failed repeatedly",
             doc.pk, doc.url)
+        doc.processing_state = "failed"
+        doc.save()
+
+
+def document_processing_succeeded(task, retval, task_id, args, kwargs):
+    Document.objects.filter(pk=args[0]).update(processing_state="processed")
 
 
 @shared_task(bind=True)
@@ -326,6 +332,7 @@ def post_process_images(doc: Document, image_ids, logger=task_logger):
              default_retry_delay=60*60,
              max_retries=3,
              on_failure=document_processing_failed,
+             on_success=document_processing_succeeded,
              bind=True)
 @adapt
 def process_document(self, doc: Document):
@@ -537,4 +544,6 @@ def proposal_hook(**kwargs):
 @receiver(post_save, sender=Document, dispatch_uid="process_new_document")
 def document_hook(**kwargs):
     if kwargs["created"]:
-        process_document.delay(kwargs["instance"].pk)
+        doc = kwargs["instance"]
+        if doc.needs_processing():
+            process_document.delay(kwargs["instance"].pk)

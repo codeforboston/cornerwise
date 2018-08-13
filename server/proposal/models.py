@@ -505,9 +505,26 @@ def upload_document_to(doc, filename):
     return "doc/%s/%s" % (doc.pk, filename)
 
 
+DocumentProcessingStates = {
+    "not_processed": 0,
+    "failed": 1,
+    "skip": 9,
+    "processed": 10
+}
+
+
+class ProcessingStateField(models.IntegerField):
+    def get_prep_value(self, value):
+        return super().get_prep_value(
+            DocumentProcessingStates.get(value, value))
+
+
 class DocumentQuerySet(models.QuerySet):
     def with_tag(self, tag):
         return self.filter(tags__iregex=r"(?:,|^)" + tag + r"(?:,$)")
+
+    def unprocessed(self):
+        return self.filter(processed__lt=DocumentProcessingStates["skip"])
 
 
 class Document(models.Model):
@@ -528,6 +545,8 @@ class Document(models.Model):
     tags = models.CharField(max_length=256,
                             help_text="comma-separated list of tags",
                             blank=True)
+    processing_state = ProcessingStateField(choices=DocumentProcessingStates.items(),
+                                            default=0, db_index=True)
     # Record when the document was first observed:
     created = models.DateTimeField(default=timezone.now)
 
@@ -551,6 +570,9 @@ class Document(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.proposal.case_number})"
+
+    def needs_processing(self):
+        return self.processing_state < DocumentProcessingStates["skip"]
 
     def get_absolute_url(self):
         return reverse("view-document", kwargs={"pk": self.pk})

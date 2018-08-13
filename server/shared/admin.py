@@ -18,7 +18,8 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.formats import date_format
 
-from proposal.models import Attribute, Changeset, Event, Importer, Layer, Proposal
+from proposal.models import (Attribute, Changeset, Document, Event, Importer,
+                             Layer, Proposal, DocumentProcessingStates)
 from .models import StaffNotification
 from user.models import UserComment
 
@@ -93,6 +94,26 @@ class ProposalAdmin(admin.ModelAdmin):
             "attributes": [ch for ch in changes if ch["old"] != ch["new"]],
             "properties": []
         }).save()
+
+
+class ProcessingStateFilter(admin.SimpleListFilter):
+    title = "processing state"
+    parameter_name = "processing_state"
+
+    def lookups(self, _req, _model_admin):
+        return [(v, " ".join(p.title() for p in k.split("_"))) for k, v in
+                DocumentProcessingStates.items()]
+
+    def queryset(self, _req, queryset):
+        if self.value():
+            return queryset.filter(processing_state=self.value())
+
+
+class DocumentAdmin(admin.ModelAdmin):
+    list_filter = (ProcessingStateFilter,)
+
+    class Meta:
+        model = Document
 
 
 class CornerwiseAdmin(admin.AdminSite):
@@ -238,6 +259,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 cornerwise_admin = CornerwiseAdmin(name="admin")
 
 cornerwise_admin.register(Proposal, ProposalAdmin)
+cornerwise_admin.register(Document, DocumentAdmin)
 cornerwise_admin.register(Importer, ImporterAdmin)
 cornerwise_admin.register(Layer, LayerAdmin)
 cornerwise_admin.register(User, UserAdmin)
