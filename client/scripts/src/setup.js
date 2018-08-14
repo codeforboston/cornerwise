@@ -46,9 +46,12 @@ define(
                                 .removeClass("loading-proposals");
                         })
                     .on("fetchingFailed",
-                        function() {
+                        function(error) {
                             markLoaded("proposals");
-                            $(document.body).addClass("loading-failed");
+                            $(document.body)
+                                .addClass("loading-failed")
+                                .removeClass("loading-proposals");
+                            alerts.showNamed("loadingError", "loadingError", {error: error});
                         });
 
 

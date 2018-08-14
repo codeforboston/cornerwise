@@ -819,6 +819,8 @@ define(["underscore", "jquery", "locale", "config", "lib/leaflet", "optional!bui
                    var template = null, self = this;
                    options = options || {};
 
+                   options._url = url;
+
                    return function(arg, cb) {
                        if (template) {
                            cb(template(arg));

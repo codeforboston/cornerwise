@@ -46,6 +46,11 @@ define([], function() {
         notInBounds: {
             text: "That location is outside {region}.",
             className: "error"
+        },
+
+        loadingError: {
+            text: "Proposals failed to load: {error}",
+            className: "error"
         }
     };
 });

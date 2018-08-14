@@ -70,8 +70,8 @@ define(["backbone", "underscore", "appState", "utils"],
                            dataType: "json",
                            method: "get",
                            url: url
-                       }).fail(function(err) {
-                           self.trigger("fetchingFailed");
+                       }).fail(function(xhr) {
+                           self.trigger("fetchingFailed", xhr.statusText, xhr.response);
                        }).done(function(proposals) {
                            var paginator = proposals.paginator;
                            if (paginator) {
