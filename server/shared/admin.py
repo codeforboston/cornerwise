@@ -139,6 +139,7 @@ class ImporterForm(forms.ModelForm):
                                           ("US/Central", "Central"),
                                           ("US/Mountain", "Mountain"),
                                           ("US/Pacific", "Pacific")])
+
     class Meta:
         exclude = ["last_run"]
         model = Importer
@@ -185,7 +186,7 @@ def view_import_errors(_, request, importers):
 
 
 def clear_import_errors(_, request, importers):
-    red.Redis.delete([
+    red.Redis.delete(*[
         f"cornerwise:importer:{importer.pk}:import_errors"
         for importer in importers
     ])
