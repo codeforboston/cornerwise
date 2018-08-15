@@ -76,11 +76,11 @@ services:
     image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
-      - ./docker-support/nginx.env
+      - ./docker-support/prod.env
     environment:
       ADMINS: "bdougsand+cornerwise@gmail.com"
       APP_MODE: "production"
-      ALLOWED_HOSTS: "cornerwise.org"
+      ALLOWED_HOSTS: ".cornerwise.org"
       DJANGO_SERVE_STATIC: "0"
       DJANGO_SERVE_MEDIA: "0"
       GOOGLE_APPLICATION_CREDENTIALS: "/google_credentials.json"

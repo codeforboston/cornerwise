@@ -76,7 +76,7 @@ services:
     image: bdsand/cornerwise:latest
     env_file:
       - ./docker-support/common.env
-      - ./docker-support/nginx.env
+      - ./docker-support/dev.env
     environment:
       APP_MODE: "production"
       ALLOWED_HOSTS: ".dev.cornerwise.org"

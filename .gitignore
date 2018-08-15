@@ -33,3 +33,4 @@ client/css/font
 /client/css/app.build.css
 build/
 /docker-support/nginx.env
+/docker-support/dev.env
