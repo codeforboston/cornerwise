@@ -6,7 +6,8 @@ from collections import OrderedDict
 from utils import pushback_iter
 import re
 
-# from shared.text_utils import 
+from dateutil.parser import parse as dt_parse
+import pytz
 
 EMPTY_LINE = re.compile(r"\s*\n$")
 PROPERTY_PATTERN = re.compile(r"^([a-z&/()]+(\s+[a-z&/()]+)*): (.*)(\n|$)", re.I)
@@ -359,8 +360,13 @@ def decision_properties(doc):
 
         if "Decision" not in attrs:
             attrs["Decision"] = decision.title()
-        props["complete"] = doc.published.isoformat()
         props["status"] = "Approved" if approved else "Denied"
+
+    try:
+        props["complete"] = pytz.timezone("US/Eastern").localize(
+            dt_parse(attrs["Date of Decision"])).isoformat()
+    except (ValueError, KeyError):
+        props["complete"] = doc.published.isoformat()
 
     return props, attrs
 
