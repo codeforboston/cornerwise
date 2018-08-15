@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from celery.task import control
 
 import redis_utils as red
+from shared.request import redirect_back
 from utils import read_n_from_end
 
 from proposal.models import Importer, Proposal
@@ -109,13 +110,31 @@ def refresh_parcels(request):
     return redirect("admin:index")
 
 
+# TODO Make the permissions more granular; allow region administrators to view
+# errors related to the regions they control.
 @is_superuser
 def importer_errors(request):
     context = cornerwise_admin.each_context(request)
+    importers = Importer.objects.all()
+    if "importer" in request.GET:
+        importers = importers.filter(pk__in=request.GET.getlist("importer"))
     context.update({"importers": [
         {"importer": importer,
          "errors": red.lget_key(f"cornerwise:importer:{importer.pk}:import_errors")}
-        for importer in Importer.objects.filter(pk__in=request.GET.getlist("importer"))
+        for importer in importers
     ],
                     "title": "Importer Errors"})
     return render(request, "admin/importer_errors.djhtml", context)
+
+
+@is_superuser
+def clear_importer_errors(request):
+    ndeleted = red.Redis.delete(*[f"cornerwise:importer:{pk}:import_errors" for
+                                  pk in request.GET.getlist("importer")])
+    messages.info(f"{ndeleted} importer(s) cleared")
+    return redirect_back(request)
+
+
+@is_superuser
+def retry_import(request):
+    pass
