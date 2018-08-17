@@ -99,7 +99,7 @@ property_map = make_property_map()
 
 def forgiving_dateparse(dt, tz=pytz.utc):
     if isinstance(dt, str):
-         dt = dateparse.parse_datetime(dt)
+        dt = dateparse.parse_datetime(dt)
     elif not isinstance(dt, datetime):
         return None
 
