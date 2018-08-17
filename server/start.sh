@@ -63,12 +63,14 @@ if ! getent hosts celery; then
     }
 
     restart_celery() {
-        pids=$(cat /var/run/celery/*.pid)
-        echo "Killing $(echo $pids | wc -w) celery worker(s)"
-        kill $pids
-        while ps $pids > /dev/null; do
-            sleep 1
-        done
+        if compgen -G /var/run/celery/*.pid > /dev/null; then
+            pids=$(cat /var/run/celery/*.pid)
+            echo "Killing $(echo $pids | wc -w) celery worker(s)"
+            kill $pids
+            while ps $pids > /dev/null; do
+                sleep 1
+            done
+        fi
         start_celery $celery_opts
     }
 
