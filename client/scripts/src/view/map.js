@@ -74,7 +74,6 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                    // ... and subscribe to updates:
                    this.listenTo(this.collection, "add", this.proposalAdded)
                        .listenTo(this.collection, "remove", this.proposalRemoved)
-                       .listenTo(this.collection, "change", this.changed)
                    // Parcels:
                        .listenTo(options.parcels, "selectionLoaded", this.parcelsSelected)
                        .listenTo(options.parcels, "selectionRemoved", this.parcelsDeselected)
@@ -90,6 +89,10 @@ define(["backbone", "config", "lib/leaflet", "jquery", "underscore", "refLocatio
                        .listenTo(appState, "shouldFocus", this.onFocused)
                        .listenTo(appState, "subscribeStart", this.onSubscribeStart)
                        .listenTo(appState, "subscribeEnd", this.onSubscribeEnd);
+
+                   this.collection.once("fetchedPage", function() {
+                       map.invalidateSize();
+                   });
 
                    appState.onStateKeyChange("f.box", this.onBoxFilterChanged,
                                              this);
