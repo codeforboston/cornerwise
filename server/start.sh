@@ -155,4 +155,4 @@ fi
 trap on_usr1 SIGUSR1
 trap on_sighup SIGHUP
 trap on_sigterm SIGTERM
-while : ; do wait; done
+while : ; do sleep 5; done
