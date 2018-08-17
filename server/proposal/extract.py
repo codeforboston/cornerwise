@@ -276,7 +276,7 @@ def somerville_properties(lines):
 
 
 @extractor(SomervilleMA, field_matches(r"^reports$"),
-           title_matches(r"(?i)staff report"))
+           title_matches(r"(?i)staff[ _]?report"))
 def staff_report_properties(doc):
     """Extract a dictionary of properties from the plaintext contents of a
     Planning Staff Report.
@@ -318,7 +318,7 @@ def staff_report_properties(doc):
     return props, attrs
 
 
-@extractor(SomervilleMA, title_matches("(?i)decision"))
+@extractor(SomervilleMA, field_matches("(?i)decision"))
 def decision_properties(doc):
     """
     Extract a dictionary of properties from the contents of a Decision
