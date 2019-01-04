@@ -311,7 +311,7 @@ MIN_ALERT_RADIUS = 50
 MAX_ALERT_RADIUS = 10000
 
 # URL to use for generating minimap raster images for emails, etc.
-MINIMAP_SRC = ("https://minimap.azureedge.net/bounds?"
+MINIMAP_SRC = ("https://minimap.cornerwise.org/bounds?"
                "tile-provider=cartodb-light&"
                "sw-lat={swlat}&sw-lng={swlon}&"
                "ne-lat={nelat}&ne-lng={nelon}&circle={circle}")
